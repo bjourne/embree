@@ -49,57 +49,88 @@ struct vdouble
     }
 };
 
-  template<int N>
-  struct vint
-  {
+template<int N>
+struct vint
+{
     int i[N];
-    __forceinline const int& operator [](size_t index) const { assert(index < N); return i[index]; }
-    __forceinline       int& operator [](size_t index)       { assert(index < N); return i[index]; }
-  };
+    __forceinline const int& operator [](size_t index) const
+    {
+        assert(index < N);
+        return i[index];
+    }
+    __forceinline int& operator [](size_t index)
+    {
+        assert(index < N); return i[index];
+    }
+};
 
-  template<int N>
-  struct vuint
-  {
+template<int N>
+struct vuint
+{
     unsigned int i[N];
-    __forceinline const unsigned int& operator [](size_t index) const { assert(index < N); return i[index]; }
-    __forceinline       unsigned int& operator [](size_t index)       { assert(index < N); return i[index]; }
-  };
+    __forceinline const unsigned int&
+    operator [](size_t index) const
+    {
+        assert(index < N); return i[index];
+    }
+    __forceinline unsigned int&
+    operator [](size_t index)
+    {
+        assert(index < N); return i[index];
+    }
+};
 
-  template<int N>
-  struct vllong
-  {
+template<int N>
+struct vllong
+{
     long long i[N];
-    __forceinline const long long& operator [](size_t index) const { assert(index < N); return i[index]; }
-    __forceinline       long long& operator [](size_t index)       { assert(index < N); return i[index]; }
-  };
+    __forceinline const long long&
+    operator [](size_t index) const
+    {
+        assert(index < N);
+        return i[index];
+    }
+    __forceinline long long&
+    operator [](size_t index)
+    {
+        assert(index < N);
+        return i[index];
+    }
+};
 
-  /* Varying bool types */
-  template<int N> struct vboolf { int       i[N]; }; // for float/int
-  template<int N> struct vboold { long long i[N]; }; // for double/long long
+/* Varying bool types */
+template<int N> struct vboolf
+{
+    int i[N];
+}; // for float/int
+template<int N> struct vboold
+{
+    long long i[N];
+}; // for double/long long
 
-  /* Aliases to default types */
-  template<int N> using vreal = vfloat<N>;
-  template<int N> using vbool = vboolf<N>;
+/* Aliases to default types */
+template<int N> using vreal = vfloat<N>;
+template<int N> using vbool = vboolf<N>;
 
-  /* Varying size constants */
+/* Varying size constants */
 #if defined(__AVX512VL__) // SKX
-  const int VSIZEX = 8;  // default size
-  const int VSIZEL = 16; // large size
+const int VSIZEX = 8;  // default size
+const int VSIZEL = 16; // large size
 #elif defined(__AVX512F__) // KNL
-  const int VSIZEX = 16;
-  const int VSIZEL = 16;
+const int VSIZEX = 16;
+const int VSIZEL = 16;
 #elif defined(__AVX__)
-  const int VSIZEX = 8;
-  const int VSIZEL = 8;
+const int VSIZEX = 8;
+const int VSIZEL = 8;
 #else
-  const int VSIZEX = 4;
-  const int VSIZEL = 4;
+const int VSIZEX = 4;
+const int VSIZEL = 4;
 #endif
 
-  /* Extends varying size N to optimal or up to max(N, N2) */
-  template<int N, int N2 = VSIZEX>
-  struct vextend
-  {
+/* Extends varying size N to optimal or up to max(N, N2) */
+template<int N, int N2 = VSIZEX>
+struct vextend
+{
 #if defined(__AVX512F__) && !defined(__AVX512VL__) // KNL
     /* use 16-wide SIMD calculations on KNL even for 4 and 8 wide SIMD */
     static const int size = (N2 == VSIZEX) ? VSIZEX : N;

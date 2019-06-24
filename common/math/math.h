@@ -221,9 +221,27 @@ __forceinline double ceil ( const double x ) { return ::ceil (x); }
   template<typename T> __forceinline T  cos2sin ( const T& x )  { return sin2cos(x); }
 
 #if defined(__AVX2__)
-  __forceinline float madd  ( const float a, const float b, const float c) { return _mm_cvtss_f32(_mm_fmadd_ss(_mm_set_ss(a),_mm_set_ss(b),_mm_set_ss(c))); }
-  __forceinline float msub  ( const float a, const float b, const float c) { return _mm_cvtss_f32(_mm_fmsub_ss(_mm_set_ss(a),_mm_set_ss(b),_mm_set_ss(c))); }
-  __forceinline float nmadd ( const float a, const float b, const float c) { return _mm_cvtss_f32(_mm_fnmadd_ss(_mm_set_ss(a),_mm_set_ss(b),_mm_set_ss(c))); }
+__forceinline float
+madd(const float a, const float b, const float c)
+{
+    return _mm_cvtss_f32(_mm_fmadd_ss(_mm_set_ss(a),
+                                      _mm_set_ss(b),
+                                      _mm_set_ss(c)));
+}
+__forceinline float
+msub(const float a, const float b, const float c)
+{
+    return _mm_cvtss_f32(_mm_fmsub_ss(_mm_set_ss(a),
+                                      _mm_set_ss(b),
+                                      _mm_set_ss(c)));
+}
+__forceinline float
+nmadd(const float a, const float b, const float c)
+{
+    return _mm_cvtss_f32(_mm_fnmadd_ss(_mm_set_ss(a),
+                                       _mm_set_ss(b),
+                                       _mm_set_ss(c)));
+}
   __forceinline float nmsub ( const float a, const float b, const float c) { return _mm_cvtss_f32(_mm_fnmsub_ss(_mm_set_ss(a),_mm_set_ss(b),_mm_set_ss(c))); }
 #else
   __forceinline float madd  ( const float a, const float b, const float c) { return a*b+c; }

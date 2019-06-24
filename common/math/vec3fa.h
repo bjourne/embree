@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../sys/alloc.h"
@@ -22,27 +6,35 @@
 
 namespace embree
 {
-  ////////////////////////////////////////////////////////////////////////////////
-  /// SSE Vec3fa Type
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// SSE Vec3fa Type
+////////////////////////////////////////////////////////////////////////////////
 
-  struct __aligned(16) Vec3fa
-  {
+struct __aligned(16) Vec3fa
+{
     ALIGNED_STRUCT_(16);
 
     typedef float Scalar;
     enum { N = 3 };
     union {
-      __m128 m128;
-      struct { float x,y,z; union { int a; unsigned u; float w; }; };
+        __m128 m128;
+        struct {
+            float x,y,z;
+            union {
+                int a;
+                unsigned u;
+                float w;
+            };
+        };
     };
 
-    ////////////////////////////////////////////////////////////////////////////////
     /// Constructors, Assignment & Cast Operators
-    ////////////////////////////////////////////////////////////////////////////////
-
-    __forceinline Vec3fa( ) {}
-    __forceinline Vec3fa( const __m128 a ) : m128(a) {}
+    __forceinline Vec3fa()
+    {
+    }
+    __forceinline Vec3fa(const __m128 a) : m128(a)
+    {
+    }
 
     __forceinline Vec3fa            ( const Vec3<float>& other  ) { x = other.x; y = other.y; z = other.z; }
     __forceinline Vec3fa& operator =( const Vec3<float>& other ) { x = other.x; y = other.y; z = other.z; return *this; }
@@ -56,7 +48,7 @@ namespace embree
 
     __forceinline Vec3fa( const Vec3fa& other, const int      a1) { m128 = other.m128; a = a1; }
     __forceinline Vec3fa( const Vec3fa& other, const unsigned a1) { m128 = other.m128; u = a1; }
-    __forceinline Vec3fa( const Vec3fa& other, const float    w1) {      
+    __forceinline Vec3fa( const Vec3fa& other, const float    w1) {
 #if defined (__SSE4_1__)
       m128 = _mm_insert_ps(other.m128, _mm_set_ss(w1),3 << 4);
 #else
@@ -79,26 +71,25 @@ namespace embree
     friend __forceinline Vec3fa copy_a( const Vec3fa& a, const Vec3fa& b ) { Vec3fa c = a; c.a = b.a; return c; }
 #endif
 
-    ////////////////////////////////////////////////////////////////////////////////
     /// Loads and Stores
-    ////////////////////////////////////////////////////////////////////////////////
-
-    static __forceinline Vec3fa load( const void* const a ) {
-      return Vec3fa(_mm_and_ps(_mm_load_ps((float*)a),_mm_castsi128_ps(_mm_set_epi32(0, -1, -1, -1))));
+    static __forceinline Vec3fa load(const void* const a)
+    {
+        return Vec3fa(
+            _mm_and_ps(_mm_load_ps((float*)a),
+                       _mm_castsi128_ps(_mm_set_epi32(0, -1, -1, -1))));
     }
 
-    static __forceinline Vec3fa loadu( const void* const a ) {
-      return Vec3fa(_mm_loadu_ps((float*)a));
+    static __forceinline Vec3fa loadu(const void* const a)
+    {
+        return Vec3fa(_mm_loadu_ps((float*)a));
     }
 
-    static __forceinline void storeu ( void* ptr, const Vec3fa& v ) {
-      _mm_storeu_ps((float*)ptr,v);
+    static __forceinline void storeu( void* ptr, const Vec3fa& v)
+    {
+        _mm_storeu_ps((float*)ptr,v);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
     /// Constants
-    ////////////////////////////////////////////////////////////////////////////////
-
     __forceinline Vec3fa( ZeroTy   ) : m128(_mm_setzero_ps()) {}
     __forceinline Vec3fa( OneTy    ) : m128(_mm_set1_ps(1.0f)) {}
     __forceinline Vec3fa( PosInfTy ) : m128(_mm_set1_ps(pos_inf)) {}
@@ -248,11 +239,11 @@ namespace embree
   /// Reductions
   ////////////////////////////////////////////////////////////////////////////////
 
-  __forceinline float reduce_add(const Vec3fa& v) { 
+  __forceinline float reduce_add(const Vec3fa& v) {
     const vfloat4 a(v);
     const vfloat4 b = shuffle<1>(a);
     const vfloat4 c = shuffle<2>(a);
-    return _mm_cvtss_f32(a+b+c); 
+    return _mm_cvtss_f32(a+b+c);
   }
 
   __forceinline float reduce_mul(const Vec3fa& v) { return v.x*v.y*v.z; }
@@ -295,14 +286,14 @@ namespace embree
   }
 #endif
 
-  __forceinline Vec3fa cross ( const Vec3fa& a, const Vec3fa& b )
-  {
+__forceinline Vec3fa cross ( const Vec3fa& a, const Vec3fa& b )
+{
     vfloat4 a0 = vfloat4(a);
     vfloat4 b0 = shuffle<1,2,0,3>(vfloat4(b));
     vfloat4 a1 = shuffle<1,2,0,3>(vfloat4(a));
     vfloat4 b1 = vfloat4(b);
     return Vec3fa(shuffle<1,2,0,3>(msub(a0,b0,a1*b1)));
-  }
+}
 
   __forceinline float  sqr_length ( const Vec3fa& a )                { return dot(a,a); }
   __forceinline float  rcp_length ( const Vec3fa& a )                { return rsqrt(dot(a,a)); }

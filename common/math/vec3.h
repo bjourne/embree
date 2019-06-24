@@ -89,15 +89,23 @@ rcp(const Vec3<T>& a)
 {
     return Vec3<T>(rcp(a.x), rcp(a.y), rcp(a.z));
 }
-  template<typename T> __forceinline Vec3<T> rsqrt     ( const Vec3<T>& a ) { return Vec3<T>(rsqrt(a.x), rsqrt(a.y), rsqrt(a.z)); }
-  template<typename T> __forceinline Vec3<T> sqrt      ( const Vec3<T>& a ) { return Vec3<T>(sqrt (a.x), sqrt (a.y), sqrt (a.z)); }
+template<typename T> __forceinline Vec3<T>
+rsqrt(const Vec3<T>& a)
+{
+    return Vec3<T>(rsqrt(a.x), rsqrt(a.y), rsqrt(a.z));
+}
+template<typename T> __forceinline Vec3<T>
+sqrt(const Vec3<T>& a)
+{
+    return Vec3<T>(sqrt (a.x), sqrt (a.y), sqrt (a.z));
+}
 
-  template<typename T> __forceinline Vec3<T> zero_fix( const Vec3<T>& a )
-  {
+template<typename T> __forceinline Vec3<T> zero_fix( const Vec3<T>& a )
+{
     return Vec3<T>(select(abs(a.x)<min_rcp_input,T(min_rcp_input),a.x),
                    select(abs(a.y)<min_rcp_input,T(min_rcp_input),a.y),
                    select(abs(a.z)<min_rcp_input,T(min_rcp_input),a.z));
-  }
+}
   template<typename T> __forceinline Vec3<T> rcp_safe(const Vec3<T>& a) { return rcp(zero_fix(a)); }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -119,12 +127,21 @@ rcp(const Vec3<T>& a)
   template<typename T> __forceinline Vec3<T> operator >>( const Vec3<T>& a, const int b ) { return Vec3<T>(a.x >> b, a.y >> b, a.z >> b); }
   template<typename T> __forceinline Vec3<T> operator <<( const Vec3<T>& a, const int b ) { return Vec3<T>(a.x << b, a.y << b, a.z << b); }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Ternary Operators
-  ////////////////////////////////////////////////////////////////////////////////
-
-  template<typename T> __forceinline Vec3<T> madd  ( const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c) { return Vec3<T>( madd(a.x,b.x,c.x), madd(a.y,b.y,c.y), madd(a.z,b.z,c.z)); }
-  template<typename T> __forceinline Vec3<T> msub  ( const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c) { return Vec3<T>( msub(a.x,b.x,c.x), msub(a.y,b.y,c.y), msub(a.z,b.z,c.z)); }
+/// Ternary Operators
+template<typename T> __forceinline Vec3<T>
+madd(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
+{
+    return Vec3<T>(madd(a.x,b.x,c.x),
+                   madd(a.y,b.y,c.y),
+                   madd(a.z,b.z,c.z));
+}
+template<typename T> __forceinline Vec3<T>
+msub(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
+{
+    return Vec3<T>(msub(a.x,b.x,c.x),
+                   msub(a.y,b.y,c.y),
+                   msub(a.z,b.z,c.z));
+}
   template<typename T> __forceinline Vec3<T> nmadd ( const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c) { return Vec3<T>(nmadd(a.x,b.x,c.x),nmadd(a.y,b.y,c.y),nmadd(a.z,b.z,c.z));}
   template<typename T> __forceinline Vec3<T> nmsub ( const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c) { return Vec3<T>(nmsub(a.x,b.x,c.x),nmsub(a.y,b.y,c.y),nmsub(a.z,b.z,c.z)); }
 
@@ -227,16 +244,41 @@ template<typename T> __forceinline Vec3<T>& operator +=(Vec3<T>& a, const Vec3<T
   template<typename T> __forceinline Vec3<bool> gt_mask( const Vec3<T>& a, const Vec3<T>& b ) { return Vec3<bool>(a.x> b.x,a.y> b.y,a.z> b.z); }
   template<typename T> __forceinline Vec3<bool> ge_mask( const Vec3<T>& a, const Vec3<T>& b ) { return Vec3<bool>(a.x>=b.x,a.y>=b.y,a.z>=b.z); }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Euclidian Space Operators
-  ////////////////////////////////////////////////////////////////////////////////
+/// Euclidian Space Operators
 
-  template<typename T> __forceinline T       dot      ( const Vec3<T>& a, const Vec3<T>& b ) { return madd(a.x,b.x,madd(a.y,b.y,a.z*b.z)); }
-  template<typename T> __forceinline T       length   ( const Vec3<T>& a )                   { return sqrt(dot(a,a)); }
-  template<typename T> __forceinline T       rcp_length( const Vec3<T>& a )                  { return rsqrt(dot(a,a)); }
-  template<typename T> __forceinline Vec3<T> normalize( const Vec3<T>& a )                   { return a*rsqrt(dot(a,a)); }
-  template<typename T> __forceinline T       distance ( const Vec3<T>& a, const Vec3<T>& b ) { return length(a-b); }
-  template<typename T> __forceinline Vec3<T> cross    ( const Vec3<T>& a, const Vec3<T>& b ) { return Vec3<T>(msub(a.y,b.z,a.z*b.y), msub(a.z,b.x,a.x*b.z), msub(a.x,b.y,a.y*b.x)); }
+template<typename T> __forceinline T
+dot(const Vec3<T>& a, const Vec3<T>& b)
+{
+    return madd(a.x, b.x, madd(a.y, b.y, a.z*b.z));
+}
+template<typename T> __forceinline T
+length(const Vec3<T>& a)
+{
+    return sqrt(dot(a,a));
+}
+template<typename T> __forceinline T
+rcp_length(const Vec3<T>& a)
+{
+    return rsqrt(dot(a,a));
+}
+template<typename T> __forceinline Vec3<T>
+normalize(const Vec3<T>& a)
+{
+    return a*rsqrt(dot(a,a));
+}
+template<typename T> __forceinline T
+distance(const Vec3<T>& a, const Vec3<T>& b)
+{
+    return length(a-b);
+}
+
+template<typename T> __forceinline Vec3<T>
+cross(const Vec3<T>& a, const Vec3<T>& b)
+{
+    return Vec3<T>(msub(a.y,b.z,a.z*b.y),
+                   msub(a.z,b.x,a.x*b.z),
+                   msub(a.x,b.y,a.y*b.x));
+}
 
   template<typename T> __forceinline Vec3<T> stable_triangle_normal( const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c )
   {
@@ -345,13 +387,19 @@ namespace embree
 #endif
 
 #if defined(__AVX__)
-  template<>
-  __forceinline Vec3<vfloat8>::Vec3(const Vec3fa& a) {
+template<>
+__forceinline Vec3<vfloat8>::Vec3(const Vec3fa& a)
+{
     x = a.x; y = a.y; z = a.z;
-  }
-  __forceinline Vec3<vfloat4> broadcast4f(const Vec3<vfloat8>& a, const size_t k) {
-    return Vec3<vfloat4>(vfloat4::broadcast(&a.x[k]), vfloat4::broadcast(&a.y[k]), vfloat4::broadcast(&a.z[k]));
-  }
+}
+__forceinline Vec3<vfloat4>
+broadcast4f(const Vec3<vfloat8>& a, const size_t k)
+{
+    return Vec3<vfloat4>(
+        vfloat4::broadcast(&a.x[k]),
+        vfloat4::broadcast(&a.y[k]),
+        vfloat4::broadcast(&a.z[k]));
+}
   __forceinline Vec3<vfloat8> broadcast8f(const Vec3<vfloat4>& a, const size_t k) {
     return Vec3<vfloat8>(vfloat8::broadcast(&a.x[k]), vfloat8::broadcast(&a.y[k]), vfloat8::broadcast(&a.z[k]));
   }
