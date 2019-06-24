@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../sys/platform.h"
@@ -29,36 +13,42 @@
 #if (__MSV_VER <= 1700)
 namespace std
 {
-  __forceinline bool isinf ( const float x ) { return _finite(x) == 0; }
-  __forceinline bool isnan ( const float x ) { return _isnan(x) != 0; }
-  __forceinline bool isfinite (const float x) { return _finite(x) != 0; }
+__forceinline bool isinf ( const float x )
+{
+    return _finite(x) == 0;
+}
+__forceinline bool isnan ( const float x )
+{
+    return _isnan(x) != 0;
+}
+__forceinline bool isfinite (const float x) { return _finite(x) != 0; }
 }
 #endif
 #endif
 
 namespace embree
 {
-  __forceinline bool isvalid ( const float& v ) {
+__forceinline bool isvalid ( const float& v ) {
     return (v > -FLT_LARGE) & (v < +FLT_LARGE);
-  }
+}
 
-  __forceinline int cast_f2i(float f) {
+__forceinline int cast_f2i(float f) {
     union { float f; int i; } v; v.f = f; return v.i;
-  }
+}
 
-  __forceinline float cast_i2f(int i) {
+__forceinline float cast_i2f(int i) {
     union { float f; int i; } v; v.i = i; return v.f;
-  }
+}
 
 #if defined(__WIN32__)
-  __forceinline bool finite ( const float x ) { return _finite(x) != 0; }
+__forceinline bool finite ( const float x ) { return _finite(x) != 0; }
 #endif
 
-  __forceinline float sign ( const float x ) { return x<0?-1.0f:1.0f; }
-  __forceinline float sqr  ( const float x ) { return x*x; }
+__forceinline float sign ( const float x ) { return x<0?-1.0f:1.0f; }
+__forceinline float sqr  ( const float x ) { return x*x; }
 
-  __forceinline float rcp  ( const float x )
-  {
+__forceinline float rcp  ( const float x )
+{
     const __m128 a = _mm_set_ss(x);
 
 #if defined(__AVX512VL__)
@@ -72,19 +62,19 @@ namespace embree
 #else
     return _mm_cvtss_f32(_mm_mul_ss(r,_mm_sub_ss(_mm_set_ss(2.0f), _mm_mul_ss(r, a))));
 #endif
-  }
+}
 
-  __forceinline float signmsk ( const float x ) {
+__forceinline float signmsk ( const float x ) {
     return _mm_cvtss_f32(_mm_and_ps(_mm_set_ss(x),_mm_castsi128_ps(_mm_set1_epi32(0x80000000))));
-  }
-  __forceinline float xorf( const float x, const float y ) {
+}
+__forceinline float xorf( const float x, const float y ) {
     return _mm_cvtss_f32(_mm_xor_ps(_mm_set_ss(x),_mm_set_ss(y)));
-  }
-  __forceinline float andf( const float x, const unsigned y ) {
+}
+__forceinline float andf( const float x, const unsigned y ) {
     return _mm_cvtss_f32(_mm_and_ps(_mm_set_ss(x),_mm_castsi128_ps(_mm_set1_epi32(y))));
-  }
-  __forceinline float rsqrt( const float x )
-  {
+}
+__forceinline float rsqrt( const float x )
+{
     const __m128 a = _mm_set_ss(x);
 #if defined(__AVX512VL__)
     const __m128 r = _mm_rsqrt14_ss(_mm_set_ss(0.0f),a);
@@ -94,24 +84,24 @@ namespace embree
     const __m128 c = _mm_add_ss(_mm_mul_ss(_mm_set_ss(1.5f), r),
                                 _mm_mul_ss(_mm_mul_ss(_mm_mul_ss(a, _mm_set_ss(-0.5f)), r), _mm_mul_ss(r, r)));
     return _mm_cvtss_f32(c);
-  }
+}
 
 #if defined(__WIN32__) && (__MSC_VER <= 1700)
-  __forceinline float nextafter(float x, float y) { if ((x<y) == (x>0)) return x*(1.1f+float(ulp)); else return x*(0.9f-float(ulp)); }
-  __forceinline double nextafter(double x, double y) { return _nextafter(x, y); }
-  __forceinline int roundf(float f) { return (int)(f + 0.5f); }
+__forceinline float nextafter(float x, float y) { if ((x<y) == (x>0)) return x*(1.1f+float(ulp)); else return x*(0.9f-float(ulp)); }
+__forceinline double nextafter(double x, double y) { return _nextafter(x, y); }
+__forceinline int roundf(float f) { return (int)(f + 0.5f); }
 #else
-  __forceinline float nextafter(float x, float y) { return ::nextafterf(x, y); }
-  __forceinline double nextafter(double x, double y) { return ::nextafter(x, y); }
+__forceinline float nextafter(float x, float y) { return ::nextafterf(x, y); }
+__forceinline double nextafter(double x, double y) { return ::nextafter(x, y); }
 #endif
 
-  __forceinline float abs  ( const float x ) { return ::fabsf(x); }
-  __forceinline float acos ( const float x ) { return ::acosf (x); }
-  __forceinline float asin ( const float x ) { return ::asinf (x); }
-  __forceinline float atan ( const float x ) { return ::atanf (x); }
-  __forceinline float atan2( const float y, const float x ) { return ::atan2f(y, x); }
-  __forceinline float cos  ( const float x ) { return ::cosf  (x); }
-  __forceinline float cosh ( const float x ) { return ::coshf (x); }
+__forceinline float abs  ( const float x ) { return ::fabsf(x); }
+__forceinline float acos ( const float x ) { return ::acosf (x); }
+__forceinline float asin ( const float x ) { return ::asinf (x); }
+__forceinline float atan ( const float x ) { return ::atanf (x); }
+__forceinline float atan2( const float y, const float x ) { return ::atan2f(y, x); }
+__forceinline float cos  ( const float x ) { return ::cosf  (x); }
+__forceinline float cosh ( const float x ) { return ::coshf (x); }
   __forceinline float exp  ( const float x ) { return ::expf  (x); }
   __forceinline float fmod ( const float x, const float y ) { return ::fmodf (x, y); }
   __forceinline float log  ( const float x ) { return ::logf  (x); }
@@ -140,15 +130,15 @@ namespace embree
   __forceinline double log10( const double x ) { return ::log10(x); }
   __forceinline double pow  ( const double x, const double y ) { return ::pow  (x, y); }
   __forceinline double rcp  ( const double x ) { return 1.0/x; }
-  __forceinline double rsqrt( const double x ) { return 1.0/::sqrt(x); }
-  __forceinline double sin  ( const double x ) { return ::sin  (x); }
-  __forceinline double sinh ( const double x ) { return ::sinh (x); }
-  __forceinline double sqr  ( const double x ) { return x*x; }
-  __forceinline double sqrt ( const double x ) { return ::sqrt (x); }
-  __forceinline double tan  ( const double x ) { return ::tan  (x); }
-  __forceinline double tanh ( const double x ) { return ::tanh (x); }
-  __forceinline double floor( const double x ) { return ::floor (x); }
-  __forceinline double ceil ( const double x ) { return ::ceil (x); }
+__forceinline double rsqrt( const double x ) { return 1.0/::sqrt(x); }
+__forceinline double sin  ( const double x ) { return ::sin  (x); }
+__forceinline double sinh ( const double x ) { return ::sinh (x); }
+__forceinline double sqr  ( const double x ) { return x*x; }
+__forceinline double sqrt ( const double x ) { return ::sqrt (x); }
+__forceinline double tan  ( const double x ) { return ::tan  (x); }
+__forceinline double tanh ( const double x ) { return ::tanh (x); }
+__forceinline double floor( const double x ) { return ::floor (x); }
+__forceinline double ceil ( const double x ) { return ::ceil (x); }
 
 #if defined(__SSE4_1__)
   __forceinline float mini(float a, float b) {
@@ -320,20 +310,20 @@ namespace embree
 
 #if defined(__AVX2__)
 
-  template<>
-    __forceinline unsigned int bitInterleave(const unsigned int &xi, const unsigned int& yi, const unsigned int& zi)
-  {
+template<>
+__forceinline unsigned int bitInterleave(const unsigned int &xi, const unsigned int& yi, const unsigned int& zi)
+{
     const unsigned int xx = pdep(xi,0x49249249 /* 0b01001001001001001001001001001001 */ );
     const unsigned int yy = pdep(yi,0x92492492 /* 0b10010010010010010010010010010010 */);
     const unsigned int zz = pdep(zi,0x24924924 /* 0b00100100100100100100100100100100 */);
     return xx | yy | zz;
-  }
+}
 
 #endif
 
-  /*! bit interleave operation for 64bit data types*/
-  template<class T>
-    __forceinline T bitInterleave64(const T& xin, const T& yin, const T& zin){
+/*! bit interleave operation for 64bit data types*/
+template<class T>
+__forceinline T bitInterleave64(const T& xin, const T& yin, const T& zin){
     T x = xin & 0x1fffff;
     T y = yin & 0x1fffff;
     T z = zin & 0x1fffff;
@@ -357,5 +347,5 @@ namespace embree
     z = (z | z << 2) & 0x1249249249249249;
 
     return x | (y << 1) | (z << 2);
-  }
+}
 }

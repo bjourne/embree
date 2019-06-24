@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "triangle.h"
@@ -34,16 +18,19 @@ namespace isa
 template<int M>
 struct MoellerTrumboreHitM
 {
-    __forceinline MoellerTrumboreHitM() {}
+    __forceinline
+    MoellerTrumboreHitM() {}
 
-    __forceinline MoellerTrumboreHitM(const vbool<M>& valid,
-                                      const vfloat<M>& U,
-                                      const vfloat<M>& V,
-                                      const vfloat<M>& T,
-                                      const vfloat<M>& absDen, const Vec3vf<M>& Ng)
+    __forceinline
+    MoellerTrumboreHitM(const vbool<M>& valid,
+                        const vfloat<M>& U,
+                        const vfloat<M>& V,
+                        const vfloat<M>& T,
+                        const vfloat<M>& absDen, const Vec3vf<M>& Ng)
         : U(U), V(V), T(T), absDen(absDen), valid(valid), vNg(Ng) {}
 
-    __forceinline void finalize()
+    __forceinline void
+    finalize()
     {
         const vfloat<M> rcpAbsDen = rcp(absDen);
         vt = T * rcpAbsDen;
@@ -51,13 +38,19 @@ struct MoellerTrumboreHitM
         vv = V * rcpAbsDen;
     }
 
-    __forceinline Vec2f uv (const size_t i) const {
+    __forceinline Vec2f
+    uv(const size_t i) const
+    {
         return Vec2f(vu[i],vv[i]);
     }
-    __forceinline float t  (const size_t i) const {
+    __forceinline float
+    t(const size_t i) const
+    {
         return vt[i];
     }
-    __forceinline Vec3fa Ng(const size_t i) const {
+    __forceinline Vec3fa
+    Ng(const size_t i) const
+    {
         return Vec3fa(vNg.x[i],vNg.y[i],vNg.z[i]);
     }
 
@@ -78,9 +71,14 @@ public:
 template<int M>
 struct MoellerTrumboreIntersector1
 {
-    __forceinline MoellerTrumboreIntersector1() {}
+    __forceinline MoellerTrumboreIntersector1()
+    {
+    }
 
-    __forceinline MoellerTrumboreIntersector1(const Ray& ray, const void* ptr) {}
+    __forceinline MoellerTrumboreIntersector1(const Ray& ray,
+                                              const void* ptr)
+    {
+    }
 
     __forceinline bool intersect(const vbool<M>& valid0,
                                  Ray& ray,

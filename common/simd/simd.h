@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../math/math.h"
@@ -75,42 +59,43 @@ namespace embree
     }
   }
 
-  /* returns the index of the next unique value i in vi and the corresponding valid_i mask */
-  template<typename vbool, typename vint>
-  __forceinline int next_unique_index(vbool& valid, const vint& vi, /*out*/ vbool& valid_i)
-  {
+/* returns the index of the next unique value i in vi and the
+   corresponding valid_i mask */
+template<typename vbool, typename vint> __forceinline int
+next_unique_index(vbool& valid, const vint& vi, /*out*/ vbool& valid_i)
+{
     assert(any(valid));
     const int j = int(bsf(movemask(valid)));
     const int i = vi[j];
     valid_i = valid & (i == vi);
     valid = andn(valid, valid_i);
     return j;
-  }
+}
 
-  template<typename Closure>
-  __forceinline void foreach2(int x0, int x1, int y0, int y1, const Closure& closure)
-  {
+template<typename Closure> __forceinline void
+foreach2(int x0, int x1, int y0, int y1, const Closure& closure)
+{
     __aligned(64) int U[2*VSIZEX];
     __aligned(64) int V[2*VSIZEX];
     int index = 0;
     for (int y=y0; y<y1; y++) {
-      const bool lasty = y+1>=y1;
-      const vintx vy = y;
-      for (int x=x0; x<x1; ) { //x+=VSIZEX) {
-        const bool lastx = x+VSIZEX >= x1;
-        vintx vx = x+vintx(step);
-        vintx::storeu(&U[index], vx);
-        vintx::storeu(&V[index], vy);
-        const int dx = min(x1-x,VSIZEX);
-        index += dx;
-        x += dx;
-        if (index >= VSIZEX || (lastx && lasty)) {
-          const vboolx valid = vintx(step) < vintx(index);
-          closure(valid, vintx::load(U), vintx::load(V));
-          x-= max(0, index-VSIZEX);
-          index = 0;
+        const bool lasty = y+1>=y1;
+        const vintx vy = y;
+        for (int x=x0; x<x1; ) { //x+=VSIZEX) {
+            const bool lastx = x+VSIZEX >= x1;
+            vintx vx = x+vintx(step);
+            vintx::storeu(&U[index], vx);
+            vintx::storeu(&V[index], vy);
+            const int dx = min(x1-x,VSIZEX);
+            index += dx;
+            x += dx;
+            if (index >= VSIZEX || (lastx && lasty)) {
+                const vboolx valid = vintx(step) < vintx(index);
+                closure(valid, vintx::load(U), vintx::load(V));
+                x-= max(0, index-VSIZEX);
+                index = 0;
+            }
         }
-      }
     }
-  }
+}
 }

@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../../common/sys/platform.h"
@@ -68,27 +52,27 @@
 
 namespace embree
 {
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Vec2 shortcuts
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+/// Vec2 shortcuts
+////////////////////////////////////////////////////////////////////////
 
-  template<int N> using Vec2vf  = Vec2<vfloat<N>>;
-  template<int N> using Vec2vd  = Vec2<vdouble<N>>;
-  template<int N> using Vec2vr  = Vec2<vreal<N>>;
-  template<int N> using Vec2vi  = Vec2<vint<N>>;
-  template<int N> using Vec2vl  = Vec2<vllong<N>>;
-  template<int N> using Vec2vb  = Vec2<vbool<N>>;
-  template<int N> using Vec2vbf = Vec2<vboolf<N>>;
-  template<int N> using Vec2vbd = Vec2<vboold<N>>;
+template<int N> using Vec2vf  = Vec2<vfloat<N>>;
+template<int N> using Vec2vd  = Vec2<vdouble<N>>;
+template<int N> using Vec2vr  = Vec2<vreal<N>>;
+template<int N> using Vec2vi  = Vec2<vint<N>>;
+template<int N> using Vec2vl  = Vec2<vllong<N>>;
+template<int N> using Vec2vb  = Vec2<vbool<N>>;
+template<int N> using Vec2vbf = Vec2<vboolf<N>>;
+template<int N> using Vec2vbd = Vec2<vboold<N>>;
 
-  typedef Vec2<vfloat4>  Vec2vf4;
-  typedef Vec2<vdouble4> Vec2vd4;
-  typedef Vec2<vreal4>   Vec2vr4;
-  typedef Vec2<vint4>    Vec2vi4;
-  typedef Vec2<vllong4>  Vec2vl4;
-  typedef Vec2<vbool4>   Vec2vb4;
-  typedef Vec2<vboolf4>  Vec2vbf4;
-  typedef Vec2<vboold4>  Vec2vbd4;
+typedef Vec2<vfloat4>  Vec2vf4;
+typedef Vec2<vdouble4> Vec2vd4;
+typedef Vec2<vreal4>   Vec2vr4;
+typedef Vec2<vint4>    Vec2vi4;
+typedef Vec2<vllong4>  Vec2vl4;
+typedef Vec2<vbool4>   Vec2vb4;
+typedef Vec2<vboolf4>  Vec2vbf4;
+typedef Vec2<vboold4>  Vec2vbd4;
 
   typedef Vec2<vfloat8>  Vec2vf8;
   typedef Vec2<vdouble8> Vec2vd8;
@@ -117,36 +101,36 @@ namespace embree
   typedef Vec2<vboolfx>  Vec2vbfx;
   typedef Vec2<vbooldx>  Vec2vbdx;
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Vec3 shortcuts
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+/// Vec3 shortcuts
+////////////////////////////////////////////////////////////////////////
 
-  template<int N> using Vec3vf  = Vec3<vfloat<N>>;
-  template<int N> using Vec3vd  = Vec3<vdouble<N>>;
-  template<int N> using Vec3vr  = Vec3<vreal<N>>;
-  template<int N> using Vec3vi  = Vec3<vint<N>>;
-  template<int N> using Vec3vl  = Vec3<vllong<N>>;
-  template<int N> using Vec3vb  = Vec3<vbool<N>>;
-  template<int N> using Vec3vbf = Vec3<vboolf<N>>;
-  template<int N> using Vec3vbd = Vec3<vboold<N>>;
+template<int N> using Vec3vf  = Vec3<vfloat<N>>;
+template<int N> using Vec3vd  = Vec3<vdouble<N>>;
+template<int N> using Vec3vr  = Vec3<vreal<N>>;
+template<int N> using Vec3vi  = Vec3<vint<N>>;
+template<int N> using Vec3vl  = Vec3<vllong<N>>;
+template<int N> using Vec3vb  = Vec3<vbool<N>>;
+template<int N> using Vec3vbf = Vec3<vboolf<N>>;
+template<int N> using Vec3vbd = Vec3<vboold<N>>;
 
-  typedef Vec3<vfloat4>  Vec3vf4;
-  typedef Vec3<vdouble4> Vec3vd4;
-  typedef Vec3<vreal4>   Vec3vr4;
-  typedef Vec3<vint4>    Vec3vi4;
-  typedef Vec3<vllong4>  Vec3vl4;
-  typedef Vec3<vbool4>   Vec3vb4;
-  typedef Vec3<vboolf4>  Vec3vbf4;
-  typedef Vec3<vboold4>  Vec3vbd4;
+typedef Vec3<vfloat4>  Vec3vf4;
+typedef Vec3<vdouble4> Vec3vd4;
+typedef Vec3<vreal4>   Vec3vr4;
+typedef Vec3<vint4>    Vec3vi4;
+typedef Vec3<vllong4>  Vec3vl4;
+typedef Vec3<vbool4>   Vec3vb4;
+typedef Vec3<vboolf4>  Vec3vbf4;
+typedef Vec3<vboold4>  Vec3vbd4;
 
-  typedef Vec3<vfloat8>  Vec3vf8;
-  typedef Vec3<vdouble8> Vec3vd8;
-  typedef Vec3<vreal8>   Vec3vr8;
-  typedef Vec3<vint8>    Vec3vi8;
-  typedef Vec3<vllong8>  Vec3vl8;
-  typedef Vec3<vbool8>   Vec3vb8;
-  typedef Vec3<vboolf8>  Vec3vbf8;
-  typedef Vec3<vboold8>  Vec3vbd8;
+typedef Vec3<vfloat8>  Vec3vf8;
+typedef Vec3<vdouble8> Vec3vd8;
+typedef Vec3<vreal8>   Vec3vr8;
+typedef Vec3<vint8>    Vec3vi8;
+typedef Vec3<vllong8>  Vec3vl8;
+typedef Vec3<vbool8>   Vec3vb8;
+typedef Vec3<vboolf8>  Vec3vbf8;
+typedef Vec3<vboold8>  Vec3vbd8;
 
   typedef Vec3<vfloat16>  Vec3vf16;
   typedef Vec3<vdouble16> Vec3vd16;

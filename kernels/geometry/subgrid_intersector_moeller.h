@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "subgrid.h"
@@ -29,7 +13,7 @@ namespace embree
     /* ----------------------------- */
 
     template<int M>
-      __forceinline void interpolateUV(MoellerTrumboreHitM<M> &hit,const GridMesh::Grid &g, const SubGrid& subgrid) 
+      __forceinline void interpolateUV(MoellerTrumboreHitM<M> &hit,const GridMesh::Grid &g, const SubGrid& subgrid)
     {
       /* correct U,V interpolation across the entire grid */
       const vint<M> sx((int)subgrid.x());
@@ -37,11 +21,11 @@ namespace embree
       const vint<M> sxM(sx + vint<M>(0,1,1,0));
       const vint<M> syM(sy + vint<M>(0,0,1,1));
       const float inv_resX = rcp((float)((int)g.resX-1));
-      const float inv_resY = rcp((float)((int)g.resY-1));          
+      const float inv_resY = rcp((float)((int)g.resY-1));
       hit.U = (hit.U + (vfloat<M>)sxM * hit.absDen) * inv_resX;
       hit.V = (hit.V + (vfloat<M>)syM * hit.absDen) * inv_resY;
     }
-    
+
     template<int M, bool filter>
       struct SubGridQuadMIntersector1MoellerTrumbore;
 
@@ -61,14 +45,14 @@ namespace embree
           Intersect1EpilogMU<M,filter> epilog(ray,context,subgrid.geomID(),subgrid.primID());
 
           /* intersect first triangle */
-          if (intersector.intersect(ray,v0,v1,v3,hit)) 
+          if (intersector.intersect(ray,v0,v1,v3,hit))
           {
             interpolateUV<M>(hit,g,subgrid);
             epilog(hit.valid,hit);
           }
 
           /* intersect second triangle */
-          if (intersector.intersect(ray,v2,v3,v1,hit)) 
+          if (intersector.intersect(ray,v2,v3,v1,hit))
           {
             hit.U = hit.absDen - hit.U;
             hit.V = hit.absDen - hit.V;
@@ -76,7 +60,7 @@ namespace embree
             epilog(hit.valid,hit);
           }
         }
-      
+
         __forceinline bool occluded(Ray& ray, IntersectContext* context,
                                     const Vec3vf<M>& v0, const Vec3vf<M>& v1, const Vec3vf<M>& v2, const Vec3vf<M>& v3,
                                     const GridMesh::Grid &g, const SubGrid& subgrid) const
@@ -84,9 +68,9 @@ namespace embree
           MoellerTrumboreHitM<M> hit;
           MoellerTrumboreIntersector1<M> intersector(ray,nullptr);
           Occluded1EpilogMU<M,filter> epilog(ray,context,subgrid.geomID(),subgrid.primID());
-          
+
           /* intersect first triangle */
-          if (intersector.intersect(ray,v0,v1,v3,hit)) 
+          if (intersector.intersect(ray,v0,v1,v3,hit))
           {
             interpolateUV<M>(hit,g,subgrid);
             if (epilog(hit.valid,hit))
@@ -94,7 +78,7 @@ namespace embree
           }
 
           /* intersect second triangle */
-          if (intersector.intersect(ray,v2,v3,v1,hit)) 
+          if (intersector.intersect(ray,v2,v3,v1,hit))
           {
             hit.U = hit.absDen - hit.U;
             hit.V = hit.absDen - hit.V;
@@ -115,14 +99,14 @@ namespace embree
       __forceinline SubGridQuadMIntersector1MoellerTrumbore() {}
 
       __forceinline SubGridQuadMIntersector1MoellerTrumbore(const Ray& ray, const void* ptr) {}
-      
+
       template<typename Epilog>
         __forceinline bool intersect(Ray& ray, const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3, const GridMesh::Grid &g, const SubGrid& subgrid, const Epilog& epilog) const
       {
         const Vec3vf8 vtx0(vfloat8(v0.x,v2.x),vfloat8(v0.y,v2.y),vfloat8(v0.z,v2.z));
 #if !defined(EMBREE_BACKFACE_CULLING)
         const Vec3vf8 vtx1(vfloat8(v1.x),vfloat8(v1.y),vfloat8(v1.z));
-        const Vec3vf8 vtx2(vfloat8(v3.x),vfloat8(v3.y),vfloat8(v3.z));        
+        const Vec3vf8 vtx2(vfloat8(v3.x),vfloat8(v3.y),vfloat8(v3.z));
 #else
         const Vec3vf8 vtx1(vfloat8(v1.x,v3.x),vfloat8(v1.y,v3.y),vfloat8(v1.z,v3.z));
         const Vec3vf8 vtx2(vfloat8(v3.x,v1.x),vfloat8(v3.y,v1.y),vfloat8(v3.z,v1.z));
@@ -137,7 +121,7 @@ namespace embree
 #if !defined(EMBREE_BACKFACE_CULLING)
           hit.U = select(flags,absDen-V,U);
           hit.V = select(flags,absDen-U,V);
-          hit.vNg *= select(flags,vfloat8(-1.0f),vfloat8(1.0f)); 
+          hit.vNg *= select(flags,vfloat8(-1.0f),vfloat8(1.0f));
 #else
           hit.U = select(flags,absDen-U,U);
           hit.V = select(flags,absDen-V,V);
@@ -148,25 +132,25 @@ namespace embree
           const vint8 sx8(sx + vint8(0,1,1,0,0,1,1,0));
           const vint8 sy8(sy + vint8(0,0,1,1,0,0,1,1));
           const float inv_resX = rcp((float)((int)g.resX-1));
-          const float inv_resY = rcp((float)((int)g.resY-1));          
+          const float inv_resY = rcp((float)((int)g.resY-1));
           hit.U = (hit.U + (vfloat8)sx8 * absDen) * inv_resX;
-          hit.V = (hit.V + (vfloat8)sy8 * absDen) * inv_resY;          
+          hit.V = (hit.V + (vfloat8)sy8 * absDen) * inv_resY;
 
           if (unlikely(epilog(hit.valid,hit)))
             return true;
         }
         return false;
       }
-      
+
       __forceinline bool intersect(RayHit& ray, IntersectContext* context,
-                                   const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3, 
+                                   const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3,
                                    const GridMesh::Grid &g, const SubGrid& subgrid) const
       {
           return intersect(ray,v0,v1,v2,v3,g,subgrid,Intersect1EpilogMU<8,filter>(ray,context,subgrid.geomID(),subgrid.primID()));
       }
-      
+
       __forceinline bool occluded(Ray& ray, IntersectContext* context,
-                                  const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3, 
+                                  const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3,
                                   const GridMesh::Grid &g, const SubGrid& subgrid) const
       {
           return intersect(ray,v0,v1,v2,v3,g,subgrid,Occluded1EpilogMU<8,filter>(ray,context,subgrid.geomID(),subgrid.primID()));
@@ -193,7 +177,7 @@ namespace embree
                                       const vfloat<K>& absDen,
                                       const Vec3vf<K>& Ng,
                                       const vbool<K>& flags,
-                                      const GridMesh::Grid &g, 
+                                      const GridMesh::Grid &g,
                                       const SubGrid& subgrid,
                                       const unsigned int i)
         : U(U), V(V), T(T), absDen(absDen), flags(flags), tri_Ng(Ng), g(g), subgrid(subgrid), i(i) {}
@@ -235,7 +219,7 @@ namespace embree
       struct SubGridQuadMIntersectorKMoellerTrumboreBase
       {
         __forceinline SubGridQuadMIntersectorKMoellerTrumboreBase(const vbool<K>& valid, const RayK<K>& ray) {}
-            
+
         template<typename Epilog>
         __forceinline vbool<K> intersectK(const vbool<K>& valid0,
                                           RayK<K>& ray,
@@ -244,11 +228,11 @@ namespace embree
                                           const Vec3vf<K>& tri_e2,
                                           const Vec3vf<K>& tri_Ng,
                                           const vbool<K>& flags,
-                                          const GridMesh::Grid &g, 
+                                          const GridMesh::Grid &g,
                                           const SubGrid &subgrid,
                                           const unsigned int i,
                                           const Epilog& epilog) const
-        { 
+        {
           /* calculate denominator */
           vbool<K> valid = valid0;
           const Vec3vf<K> C = tri_v0 - ray.org;
@@ -256,27 +240,27 @@ namespace embree
           const vfloat<K> den = dot(tri_Ng,ray.dir);
           const vfloat<K> absDen = abs(den);
           const vfloat<K> sgnDen = signmsk(den);
-        
+
           /* test against edge p2 p0 */
           const vfloat<K> U = dot(R,tri_e2) ^ sgnDen;
           valid &= U >= 0.0f;
           if (likely(none(valid))) return false;
-        
+
           /* test against edge p0 p1 */
           const vfloat<K> V = dot(R,tri_e1) ^ sgnDen;
           valid &= V >= 0.0f;
           if (likely(none(valid))) return false;
-        
+
           /* test against edge p1 p2 */
           const vfloat<K> W = absDen-U-V;
           valid &= W >= 0.0f;
           if (likely(none(valid))) return false;
-        
+
           /* perform depth test */
           const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
           valid &= (absDen*ray.tnear() < T) & (T <= absDen*ray.tfar);
           if (unlikely(none(valid))) return false;
-        
+
           /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
           valid &= den < vfloat<K>(zero);
@@ -285,20 +269,20 @@ namespace embree
           valid &= den != vfloat<K>(zero);
           if (unlikely(none(valid))) return false;
 #endif
-        
+
           /* calculate hit information */
           SubGridQuadHitK<K> hit(U,V,T,absDen,tri_Ng,flags,g,subgrid,i);
           return epilog(valid,hit);
         }
-      
+
         template<typename Epilog>
-        __forceinline vbool<K> intersectK(const vbool<K>& valid0, 
+        __forceinline vbool<K> intersectK(const vbool<K>& valid0,
                                           RayK<K>& ray,
                                           const Vec3vf<K>& tri_v0,
                                           const Vec3vf<K>& tri_v1,
                                           const Vec3vf<K>& tri_v2,
                                           const vbool<K>& flags,
-                                          const GridMesh::Grid &g, 
+                                          const GridMesh::Grid &g,
                                           const SubGrid &subgrid,
                                           const unsigned int i,
                                           const Epilog& epilog) const
@@ -310,13 +294,13 @@ namespace embree
         }
 
         template<typename Epilog>
-        __forceinline bool intersectK(const vbool<K>& valid0, 
+        __forceinline bool intersectK(const vbool<K>& valid0,
                                       RayK<K>& ray,
                                       const Vec3vf<K>& v0,
                                       const Vec3vf<K>& v1,
                                       const Vec3vf<K>& v2,
                                       const Vec3vf<K>& v3,
-                                      const GridMesh::Grid &g, 
+                                      const GridMesh::Grid &g,
                                       const SubGrid &subgrid,
                                       const unsigned int i,
                                       const Epilog& epilog) const
@@ -343,11 +327,11 @@ namespace embree
           const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
           const vfloat<M> absDen = abs(den);
           const vfloat<M> sgnDen = signmsk(den);
-        
+
           /* perform edge tests */
           const vfloat<M> U = dot(R,Vec3vf<M>(tri_e2)) ^ sgnDen;
           const vfloat<M> V = dot(R,Vec3vf<M>(tri_e1)) ^ sgnDen;
-        
+
           /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
           vbool<M> valid = (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
@@ -355,12 +339,12 @@ namespace embree
           vbool<M> valid = (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
 #endif
           if (likely(none(valid))) return false;
-        
+
           /* perform depth test */
           const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
           valid &= (absDen*vfloat<M>(ray.tnear()[k]) < T) & (T <= absDen*vfloat<M>(ray.tfar[k]));
           if (likely(none(valid))) return false;
-        
+
           /* calculate hit information */
           new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
           return true;
@@ -408,7 +392,7 @@ namespace embree
         }
 
       }
-      
+
       __forceinline bool occluded1(RayK<K>& ray, size_t k, IntersectContext* context,
                                    const Vec3vf<M>& v0, const Vec3vf<M>& v1, const Vec3vf<M>& v2, const Vec3vf<M>& v3, const GridMesh::Grid &g, const SubGrid &subgrid) const
       {
@@ -441,9 +425,9 @@ namespace embree
     {
       __forceinline SubGridQuadMIntersectorKMoellerTrumbore(const vbool<K>& valid, const RayK<K>& ray)
         : SubGridQuadMIntersectorKMoellerTrumboreBase<4,K,filter>(valid,ray) {}
-      
+
       template<typename Epilog>
-        __forceinline bool intersect1(RayK<K>& ray, size_t k,const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3, 
+        __forceinline bool intersect1(RayK<K>& ray, size_t k,const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3,
                                       const GridMesh::Grid &g, const SubGrid &subgrid, const Epilog& epilog) const
       {
         const Vec3vf8 vtx0(vfloat8(v0.x,v2.x),vfloat8(v0.y,v2.y),vfloat8(v0.z,v2.z));
@@ -463,7 +447,7 @@ namespace embree
 #if !defined(EMBREE_BACKFACE_CULLING)
           hit.U = select(flags,absDen-V,U);
           hit.V = select(flags,absDen-U,V);
-          hit.vNg *= select(flags,vfloat8(-1.0f),vfloat8(1.0f)); 
+          hit.vNg *= select(flags,vfloat8(-1.0f),vfloat8(1.0f));
 #else
           hit.U = select(flags,absDen-U,U);
           hit.V = select(flags,absDen-V,V);
@@ -475,22 +459,22 @@ namespace embree
           const vint8 sx8(sx + vint8(0,1,1,0,0,1,1,0));
           const vint8 sy8(sy + vint8(0,0,1,1,0,0,1,1));
           const float inv_resX = rcp((float)((int)g.resX-1));
-          const float inv_resY = rcp((float)((int)g.resY-1));          
+          const float inv_resY = rcp((float)((int)g.resY-1));
           hit.U = (hit.U + (vfloat8)sx8 * absDen) * inv_resX;
-          hit.V = (hit.V + (vfloat8)sy8 * absDen) * inv_resY;          
+          hit.V = (hit.V + (vfloat8)sy8 * absDen) * inv_resY;
           if (unlikely(epilog(hit.valid,hit)))
             return true;
 
         }
         return false;
       }
-      
+
       __forceinline bool intersect1(RayHitK<K>& ray, size_t k, IntersectContext* context,
                                     const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3, const GridMesh::Grid &g, const SubGrid &subgrid) const
       {
         return intersect1(ray,k,v0,v1,v2,v3,g,subgrid,Intersect1KEpilogMU<8,K,filter>(ray,k,context,subgrid.geomID(),subgrid.primID()));
       }
-      
+
       __forceinline bool occluded1(RayK<K>& ray, size_t k, IntersectContext* context,
                                    const Vec3vf4& v0, const Vec3vf4& v1, const Vec3vf4& v2, const Vec3vf4& v3, const GridMesh::Grid &g, const SubGrid &subgrid) const
       {

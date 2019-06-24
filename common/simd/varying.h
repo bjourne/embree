@@ -1,41 +1,53 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../sys/platform.h"
 
 namespace embree
 {
-  /* Varying numeric types */
-  template<int N>
-  struct vfloat
-  {
-    union { float f[N]; int i[N]; };
-    __forceinline const float& operator [](size_t index) const { assert(index < N); return f[index]; }
-    __forceinline       float& operator [](size_t index)       { assert(index < N); return f[index]; }
-  };
+/* Varying numeric types */
+template<int N>
+struct vfloat
+{
+    union
+    {
+        float f[N];
+        int i[N];
+    };
+    __forceinline const float&
+    operator [](size_t index) const
+    {
+        assert(index < N);
+        return f[index];
+    }
+    __forceinline       float&
+    operator [](size_t index)
+    {
+        assert(index < N);
+        return f[index];
+    }
+};
 
-  template<int N>
-  struct vdouble
-  {
-    union { double f[N]; long long i[N]; };
-    __forceinline const double& operator [](size_t index) const { assert(index < N); return f[index]; }
-    __forceinline       double& operator [](size_t index)       { assert(index < N); return f[index]; }
-  };
+template<int N>
+struct vdouble
+{
+    union
+    {
+        double f[N];
+        long long i[N];
+    };
+    __forceinline const double&
+    operator [](size_t index) const
+    {
+        assert(index < N);
+        return f[index];
+    }
+    __forceinline double&
+    operator [](size_t index)
+    {
+        assert(index < N);
+        return f[index];
+    }
+};
 
   template<int N>
   struct vint

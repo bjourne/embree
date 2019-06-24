@@ -1,73 +1,94 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "math.h"
 
 namespace embree
 {
-  struct Vec3fa;
+struct Vec3fa;
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Generic 3D vector Class
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+/// Generic 3D vector Class
+////////////////////////////////////////////////////////////////////////
 
-  template<typename T> struct Vec3
-  {
+template<typename T> struct Vec3
+{
     T x, y, z;
 
     typedef T Scalar;
     enum { N  = 3 };
 
-    ////////////////////////////////////////////////////////////////////////////////
     /// Construction
-    ////////////////////////////////////////////////////////////////////////////////
+    __forceinline Vec3()
+    {
+    }
+    __forceinline explicit Vec3(const T& a) : x(a), y(a), z(a)
+    {
+    }
+    __forceinline
+    Vec3(const T& x, const T& y, const T& z) : x(x), y(y), z(z)
+    {
+    }
 
-    __forceinline Vec3( ) {}
-    __forceinline explicit Vec3( const T& a                         ) : x(a), y(a), z(a) {}
-    __forceinline          Vec3( const T& x, const T& y, const T& z ) : x(x), y(y), z(z) {}
+    __forceinline
+    Vec3(const Vec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+    }
+    __forceinline
+    Vec3(const Vec3fa& other);
 
-    __forceinline Vec3( const Vec3& other ) { x = other.x; y = other.y; z = other.z; }
-    __forceinline Vec3( const Vec3fa& other );
+    template<typename T1> __forceinline
+    Vec3(const Vec3<T1>& a) : x(T(a.x)), y(T(a.y)), z(T(a.z))
+    {
+    }
+    template<typename T1> __forceinline Vec3&
+    operator =(const Vec3<T1>& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
 
-    template<typename T1> __forceinline Vec3( const Vec3<T1>& a ) : x(T(a.x)), y(T(a.y)), z(T(a.z)) {}
-    template<typename T1> __forceinline Vec3& operator =(const Vec3<T1>& other) { x = other.x; y = other.y; z = other.z; return *this; }
-
-    ////////////////////////////////////////////////////////////////////////////////
     /// Constants
-    ////////////////////////////////////////////////////////////////////////////////
-
-    __forceinline Vec3( ZeroTy   ) : x(zero), y(zero), z(zero) {}
+    __forceinline Vec3(ZeroTy) : x(zero), y(zero), z(zero)
+    {
+    }
     __forceinline Vec3( OneTy    ) : x(one),  y(one),  z(one) {}
     __forceinline Vec3( PosInfTy ) : x(pos_inf), y(pos_inf), z(pos_inf) {}
     __forceinline Vec3( NegInfTy ) : x(neg_inf), y(neg_inf), z(neg_inf) {}
 
     __forceinline const T& operator []( const size_t axis ) const { assert(axis < 3); return (&x)[axis]; }
-    __forceinline       T& operator []( const size_t axis )       { assert(axis < 3); return (&x)[axis]; }
-  };
+    __forceinline       T& operator []( const size_t axis )
+    {
+        assert(axis < 3); return (&x)[axis];
+    }
+};
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Unary Operators
-  ////////////////////////////////////////////////////////////////////////////////
+/// Unary Operators
 
-  template<typename T> __forceinline Vec3<T> operator +( const Vec3<T>& a ) { return Vec3<T>(+a.x, +a.y, +a.z); }
-  template<typename T> __forceinline Vec3<T> operator -( const Vec3<T>& a ) { return Vec3<T>(-a.x, -a.y, -a.z); }
-  template<typename T> __forceinline Vec3<T> abs       ( const Vec3<T>& a ) { return Vec3<T>(abs  (a.x), abs  (a.y), abs  (a.z)); }
-  template<typename T> __forceinline Vec3<T> rcp       ( const Vec3<T>& a ) { return Vec3<T>(rcp  (a.x), rcp  (a.y), rcp  (a.z)); }
+template<typename T> __forceinline Vec3<T>
+operator +(const Vec3<T>& a)
+{
+    return Vec3<T>(+a.x, +a.y, +a.z);
+}
+template<typename T> __forceinline Vec3<T>
+operator -(const Vec3<T>& a)
+{
+    return Vec3<T>(-a.x, -a.y, -a.z);
+}
+template<typename T> __forceinline Vec3<T>
+abs(const Vec3<T>& a)
+{
+    return Vec3<T>(abs(a.x), abs(a.y), abs(a.z));
+}
+template<typename T> __forceinline Vec3<T>
+rcp(const Vec3<T>& a)
+{
+    return Vec3<T>(rcp(a.x), rcp(a.y), rcp(a.z));
+}
   template<typename T> __forceinline Vec3<T> rsqrt     ( const Vec3<T>& a ) { return Vec3<T>(rsqrt(a.x), rsqrt(a.y), rsqrt(a.z)); }
   template<typename T> __forceinline Vec3<T> sqrt      ( const Vec3<T>& a ) { return Vec3<T>(sqrt (a.x), sqrt (a.y), sqrt (a.z)); }
 
@@ -116,8 +137,20 @@ namespace embree
   /// Assignment Operators
   ////////////////////////////////////////////////////////////////////////////////
 
-  template<typename T> __forceinline Vec3<T>& operator +=( Vec3<T>& a, const T        b ) { a.x += b;   a.y += b;   a.z += b;   return a; }
-  template<typename T> __forceinline Vec3<T>& operator +=( Vec3<T>& a, const Vec3<T>& b ) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
+template<typename T> __forceinline Vec3<T>& operator +=( Vec3<T>& a, const T        b )
+{
+    a.x += b;
+    a.y += b;
+    a.z += b;
+    return a;
+}
+template<typename T> __forceinline Vec3<T>& operator +=(Vec3<T>& a, const Vec3<T>& b)
+{
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+    return a;
+}
   template<typename T> __forceinline Vec3<T>& operator -=( Vec3<T>& a, const Vec3<T>& b ) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
   template<typename T> __forceinline Vec3<T>& operator *=( Vec3<T>& a, const       T& b ) { a.x *= b  ; a.y *= b  ; a.z *= b  ; return a; }
   template<typename T> __forceinline Vec3<T>& operator /=( Vec3<T>& a, const       T& b ) { a.x /= b  ; a.y /= b  ; a.z /= b  ; return a; }

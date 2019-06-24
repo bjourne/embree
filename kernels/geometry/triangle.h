@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "primitive.h"
@@ -39,25 +23,47 @@ public:
 public:
 
     /* Returns maximum number of stored triangles */
-    static __forceinline size_t max_size() { return M; }
+    static __forceinline size_t max_size()
+    {
+        return M;
+    }
 
     /* Returns required number of primitive blocks for N primitives */
-    static __forceinline size_t blocks(size_t N) { return (N+max_size()-1)/max_size(); }
+    static __forceinline size_t blocks(size_t N)
+    {
+        return (N+max_size()-1)/max_size();
+    }
 
 public:
 
     /* Default constructor */
-    __forceinline TriangleM() {}
+    __forceinline TriangleM()
+    {
+    }
 
     /* Construction from vertices and IDs */
-    __forceinline TriangleM(const Vec3vf<M>& v0, const Vec3vf<M>& v1, const Vec3vf<M>& v2, const vuint<M>& geomIDs, const vuint<M>& primIDs)
-      : v0(v0), e1(v0-v1), e2(v2-v0), geomIDs(geomIDs), primIDs(primIDs) {}
+    __forceinline TriangleM(const Vec3vf<M>& v0,
+                            const Vec3vf<M>& v1,
+                            const Vec3vf<M>& v2,
+                            const vuint<M>& geomIDs,
+                            const vuint<M>& primIDs)
+      : v0(v0), e1(v0-v1), e2(v2-v0),
+        geomIDs(geomIDs), primIDs(primIDs)
+    {
+    }
 
     /* Returns a mask that tells which triangles are valid */
-    __forceinline vbool<M> valid() const { return geomIDs != vuint<M>(-1); }
+    __forceinline vbool<M> valid() const
+    {
+        return geomIDs != vuint<M>(-1);
+    }
 
     /* Returns true if the specified triangle is valid */
-    __forceinline bool valid(const size_t i) const { assert(i<M); return geomIDs[i] != -1; }
+    __forceinline bool valid(const size_t i) const
+    {
+        assert(i<M);
+        return geomIDs[i] != -1;
+    }
 
     /* Returns the number of stored triangles */
     __forceinline size_t size() const { return bsf(~movemask(valid()));  }
@@ -92,7 +98,8 @@ public:
     }
 
     /* Non temporal store */
-    __forceinline static void store_nt(TriangleM* dst, const TriangleM& src)
+    __forceinline static void store_nt(TriangleM* dst,
+                                       const TriangleM& src)
     {
         vfloat<M>::store_nt(&dst->v0.x,src.v0.x);
         vfloat<M>::store_nt(&dst->v0.y,src.v0.y);
@@ -120,16 +127,23 @@ public:
             const PrimRef& prim = prims[begin];
             const unsigned geomID = prim.geomID();
             const unsigned primID = prim.primID();
-            const TriangleMesh* __restrict__ const mesh = scene->get<TriangleMesh>(geomID);
+            const TriangleMesh* __restrict__ const mesh =
+                scene->get<TriangleMesh>(geomID);
             const TriangleMesh::Triangle& tri = mesh->triangle(primID);
             const Vec3fa& p0 = mesh->vertex(tri.v[0]);
             const Vec3fa& p1 = mesh->vertex(tri.v[1]);
             const Vec3fa& p2 = mesh->vertex(tri.v[2]);
             vgeomID [i] = geomID;
             vprimID [i] = primID;
-            v0.x[i] = p0.x; v0.y[i] = p0.y; v0.z[i] = p0.z;
-            v1.x[i] = p1.x; v1.y[i] = p1.y; v1.z[i] = p1.z;
-            v2.x[i] = p2.x; v2.y[i] = p2.y; v2.z[i] = p2.z;
+            v0.x[i] = p0.x;
+            v0.y[i] = p0.y;
+            v0.z[i] = p0.z;
+            v1.x[i] = p1.x;
+            v1.y[i] = p1.y;
+            v1.z[i] = p1.z;
+            v2.x[i] = p2.x;
+            v2.y[i] = p2.y;
+            v2.z[i] = p2.z;
         }
         TriangleM::store_nt(this,TriangleM(v0,v1,v2,vgeomID,vprimID));
     }
