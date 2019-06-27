@@ -63,7 +63,6 @@ ADD_SUBDIRECTORY(triangle_geometry)
 ADD_SUBDIRECTORY(viewer)
 ADD_SUBDIRECTORY(bvh_access)
 ADD_SUBDIRECTORY(convert)
-ADD_SUBDIRECTORY(point_geometry)
 ADD_SUBDIRECTORY(buildbench)
 
 IF (EMBREE_RAY_PACKETS)
