@@ -178,13 +178,18 @@ public:
     void updateInterface();
 
     /* return number of geometries */
-    __forceinline size_t size() const { return geometries.size(); }
+    __forceinline size_t size() const
+    {
+        return geometries.size();
+    }
 
     /* bind geometry to the scene */
     unsigned int bind (unsigned geomID, Ref<Geometry> geometry);
 
     /* determines if scene is modified */
-    __forceinline bool isModified() const { return modified; }
+    __forceinline bool isModified() const {
+        return modified;
+    }
 
     /* sets modified flag */
     __forceinline void setModified(bool f = true) {
@@ -192,8 +197,15 @@ public:
     }
 
     /* get mesh by ID */
-    __forceinline       Geometry* get(size_t i)       { assert(i < geometries.size()); return geometries[i].ptr; }
-    __forceinline const Geometry* get(size_t i) const { assert(i < geometries.size()); return geometries[i].ptr; }
+    __forceinline Geometry* get(size_t i)
+    {
+        assert(i < geometries.size());
+        return geometries[i].ptr;
+    }
+    __forceinline const Geometry* get(size_t i) const {
+        assert(i < geometries.size());
+        return geometries[i].ptr;
+    }
 
     template<typename Mesh>
       __forceinline       Mesh* get(size_t i)       {

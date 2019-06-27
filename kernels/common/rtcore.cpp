@@ -296,7 +296,6 @@ rtcIntersect1(RTCScene hscene,
               RTCRayHit* rayhit)
 {
     Scene* scene = (Scene*)hscene;
-    RTC_CATCH_BEGIN;
     RTC_TRACE(rtcIntersect1);
 #if defined(DEBUG)
     RTC_VERIFY_HANDLE(hscene);
@@ -311,11 +310,14 @@ rtcIntersect1(RTCScene hscene,
 #if defined(DEBUG)
     ((RayHit*)rayhit)->verifyHit();
 #endif
-    RTC_CATCH_END2(scene);
 }
 
-  RTC_API void rtcIntersect4 (const int* valid, RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit4* rayhit)
-  {
+RTC_API void
+rtcIntersect4(const int* valid,
+              RTCScene hscene,
+              RTCIntersectContext* user_context,
+              RTCRayHit4* rayhit)
+{
     Scene* scene = (Scene*) hscene;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcIntersect4);
@@ -343,7 +345,7 @@ rtcIntersect1(RTCScene hscene,
 #endif
 
     RTC_CATCH_END2(scene);
-  }
+}
 
   RTC_API void rtcIntersect8 (const int* valid, RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit8* rayhit)
   {

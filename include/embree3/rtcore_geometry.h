@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "rtcore_buffer.h"
@@ -29,32 +13,32 @@ typedef struct RTCGeometryTy* RTCGeometry;
 /* Types of geometries */
 enum RTCGeometryType
 {
-  RTC_GEOMETRY_TYPE_TRIANGLE = 0, // triangle mesh
-  RTC_GEOMETRY_TYPE_QUAD     = 1, // quad (triangle pair) mesh
-  RTC_GEOMETRY_TYPE_GRID     = 2, // grid mesh
+    RTC_GEOMETRY_TYPE_TRIANGLE = 0, // triangle mesh
+    RTC_GEOMETRY_TYPE_QUAD     = 1, // quad (triangle pair) mesh
+    RTC_GEOMETRY_TYPE_GRID     = 2, // grid mesh
 
-  RTC_GEOMETRY_TYPE_SUBDIVISION = 8, // Catmull-Clark subdivision surface
+    RTC_GEOMETRY_TYPE_SUBDIVISION = 8, // Catmull-Clark subdivision surface
 
-  RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE   = 17, // flat (ribbon-like) linear curves
+    RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE   = 17, // flat (ribbon-like) linear curves
 
-  RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE  = 24, // round (tube-like) Bezier curves
-  RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE   = 25, // flat (ribbon-like) Bezier curves
-  RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BEZIER_CURVE  = 26, // flat normal-oriented Bezier curves
-  
-  RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE = 32, // round (tube-like) B-spline curves
-  RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE  = 33, // flat (ribbon-like) B-spline curves
-  RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BSPLINE_CURVE  = 34, // flat normal-oriented B-spline curves
+    RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE  = 24, // round (tube-like) Bezier curves
+    RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE   = 25, // flat (ribbon-like) Bezier curves
+    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BEZIER_CURVE  = 26, // flat normal-oriented Bezier curves
 
-  RTC_GEOMETRY_TYPE_ROUND_HERMITE_CURVE = 40, // round (tube-like) Hermite curves
-  RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE  = 41, // flat (ribbon-like) Hermite curves
-  RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE  = 42, // flat normal-oriented Hermite curves
+    RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE = 32, // round (tube-like) B-spline curves
+    RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE  = 33, // flat (ribbon-like) B-spline curves
+    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BSPLINE_CURVE  = 34, // flat normal-oriented B-spline curves
 
-  RTC_GEOMETRY_TYPE_SPHERE_POINT = 50,
-  RTC_GEOMETRY_TYPE_DISC_POINT = 51,
-  RTC_GEOMETRY_TYPE_ORIENTED_DISC_POINT = 52,
+    RTC_GEOMETRY_TYPE_ROUND_HERMITE_CURVE = 40, // round (tube-like) Hermite curves
+    RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE  = 41, // flat (ribbon-like) Hermite curves
+    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE  = 42, // flat normal-oriented Hermite curves
 
-  RTC_GEOMETRY_TYPE_USER     = 120, // user-defined geometry
-  RTC_GEOMETRY_TYPE_INSTANCE = 121  // scene instance
+    RTC_GEOMETRY_TYPE_SPHERE_POINT = 50,
+    RTC_GEOMETRY_TYPE_DISC_POINT = 51,
+    RTC_GEOMETRY_TYPE_ORIENTED_DISC_POINT = 52,
+
+    RTC_GEOMETRY_TYPE_USER     = 120, // user-defined geometry
+    RTC_GEOMETRY_TYPE_INSTANCE = 121  // scene instance
 };
 
 /* Interpolation modes for subdivision surfaces */
@@ -70,8 +54,8 @@ enum RTCSubdivisionMode
 /* Curve segment flags */
 enum RTCCurveFlags
 {
-  RTC_CURVE_FLAG_NEIGHBOR_LEFT  = (1 << 0), 
-  RTC_CURVE_FLAG_NEIGHBOR_RIGHT = (1 << 1) 
+  RTC_CURVE_FLAG_NEIGHBOR_LEFT  = (1 << 0),
+  RTC_CURVE_FLAG_NEIGHBOR_RIGHT = (1 << 1)
 };
 
 /* Arguments for RTCBoundsFunction */
@@ -136,7 +120,8 @@ struct RTCDisplacementFunctionNArguments
 typedef void (*RTCDisplacementFunctionN)(const struct RTCDisplacementFunctionNArguments* args);
 
 /* Creates a new geometry of specified type. */
-RTC_API RTCGeometry rtcNewGeometry(RTCDevice device, enum RTCGeometryType type);
+RTC_API RTCGeometry
+rtcNewGeometry(RTCDevice device, enum RTCGeometryType type);
 
 /* Retains the geometry (increments the reference count). */
 RTC_API void rtcRetainGeometry(RTCGeometry geometry);
@@ -160,7 +145,7 @@ RTC_API void rtcSetGeometryTimeStepCount(RTCGeometry geometry, unsigned int time
 
 /* Sets the motion blur time range of the geometry. */
 RTC_API void rtcSetGeometryTimeRange(RTCGeometry geometry, float startTime, float endTime);
-  
+
 /* Sets the number of vertex attributes of the geometry. */
 RTC_API void rtcSetGeometryVertexAttributeCount(RTCGeometry geometry, unsigned int vertexAttributeCount);
 
@@ -207,7 +192,9 @@ RTC_API void rtcSetGeometryUserPrimitiveCount(RTCGeometry geometry, unsigned int
 RTC_API void rtcSetGeometryBoundsFunction(RTCGeometry geometry, RTCBoundsFunction bounds, void* userPtr);
 
 /* Set the intersect callback function of a user geometry. */
-RTC_API void rtcSetGeometryIntersectFunction(RTCGeometry geometry, RTCIntersectFunctionN intersect);
+RTC_API void
+rtcSetGeometryIntersectFunction(RTCGeometry geometry,
+                                RTCIntersectFunctionN intersect);
 
 /* Set the occlusion callback function of a user geometry. */
 RTC_API void rtcSetGeometryOccludedFunction(RTCGeometry geometry, RTCOccludedFunctionN occluded);
@@ -375,5 +362,3 @@ struct RTCGrid
 };
 
 RTC_NAMESPACE_END
-
-

@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "default.h"
 #include "distribution2d.h"
 #include "../common/scenegraph/scenegraph.h"
@@ -21,24 +5,24 @@
 
 namespace embree
 {
-  extern "C" {
+extern "C" {
     RTCDevice g_device = nullptr;
-  }
-  
-  /* name of the tutorial */
-  bool embedTextures = true;
-  bool referenceMaterials = false;
-  bool referenceObjects = true;
-  float centerScale = 0.0f;
-  Vec3fa centerTranslate(0.0f,0.0f,0.0f);
+}
 
-  struct HeightField : public RefCount
-  {
+/* name of the tutorial */
+bool embedTextures = true;
+bool referenceMaterials = false;
+bool referenceObjects = true;
+float centerScale = 0.0f;
+Vec3fa centerTranslate(0.0f,0.0f,0.0f);
+
+struct HeightField : public RefCount
+{
     ALIGNED_STRUCT_(16);
 
     HeightField (Ref<Image> texture, const BBox3fa& bounds)
       : texture(texture), bounds(bounds) {}
-    
+
     const Vec3fa at(const size_t x, const size_t y)
     {
       const size_t width  = texture->width;
@@ -71,10 +55,10 @@ namespace embree
 
       const size_t width = texture->width;
       const size_t height = texture->height;
-      
+
       mesh->positions[0].resize(height*width);
-      for (size_t y=0; y<height; y++) 
-        for (size_t x=0; x<width; x++) 
+      for (size_t y=0; y<height; y++)
+        for (size_t x=0; x<width; x++)
           mesh->positions[0][y*width+x] = at(x,y);
 
       mesh->triangles.resize(2*(height-1)*(width-1));
@@ -91,7 +75,7 @@ namespace embree
       }
       return mesh.dynamicCast<SceneGraph::Node>();
     }
-    
+
   private:
     Ref<Image> texture;
     BBox3fa bounds;
@@ -112,10 +96,10 @@ namespace embree
           values[y*width+x] = luminance(distribution->get(x,y));
       dist = std::make_shared<Distribution2D>(values.data(),width,height);
     }
-        
-    void instantiate(Ref<SceneGraph::GroupNode>& group) 
+
+    void instantiate(Ref<SceneGraph::GroupNode>& group)
     {
-      for (size_t i=0; i<N; i++) 
+      for (size_t i=0; i<N; i++)
       {
         Vec2f r = Vec2f(random<float>(),random<float>());
         Vec2f p = dist->sample(r);
@@ -137,7 +121,7 @@ namespace embree
   /* scene */
   Ref<SceneGraph::GroupNode> g_scene = new SceneGraph::GroupNode;
   Ref<HeightField> g_height_field = nullptr;
-  
+
   static void parseCommandLine(Ref<ParseStream> cin, const FileName& path)
   {
     while (true)
@@ -220,7 +204,7 @@ namespace embree
       }
 
       /* load terrain */
-      else if (tag == "-terrain") 
+      else if (tag == "-terrain")
       {
         Ref<Image> tex = loadImage(path + cin->getFileName());
         const Vec3fa lower = cin->getVec3fa();
@@ -299,16 +283,16 @@ namespace embree
       }
     }
   }
-  
+
   /* main function in embree namespace */
-  int main(int argc, char** argv) 
+  int main(int argc, char** argv)
   {
     g_device = rtcNewDevice(nullptr);
-      
+
     /* create stream for parsing */
     Ref<ParseStream> stream = new ParseStream(new CommandLineStream(argc, argv));
 
-    /* parse command line */  
+    /* parse command line */
     parseCommandLine(stream, FileName());
 
     rtcReleaseDevice(g_device); g_device = nullptr;

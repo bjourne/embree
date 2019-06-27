@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
- 
 #include "curve_intersector_virtual.h"
 #include "intersector_epilog.h"
 
@@ -37,26 +21,26 @@
 
 namespace embree
 {
-  namespace isa
-  {
-    template<int N>
-    static VirtualCurveIntersector::Intersectors LinearRibbonNiIntersectors()
-    {
-      VirtualCurveIntersector::Intersectors intersectors;
-      intersectors.intersect1 = (VirtualCurveIntersector::Intersect1Ty)&FlatLinearCurveMiIntersector1<N,N,true>::intersect;
-      intersectors.occluded1  = (VirtualCurveIntersector::Occluded1Ty) &FlatLinearCurveMiIntersector1<N,N,true>::occluded;
-      intersectors.intersect4 = (VirtualCurveIntersector::Intersect4Ty)&FlatLinearCurveMiIntersectorK<N,N,4,true>::intersect;
-      intersectors.occluded4  = (VirtualCurveIntersector::Occluded4Ty) &FlatLinearCurveMiIntersectorK<N,N,4,true>::occluded;
+namespace isa
+{
+template<int N>
+static VirtualCurveIntersector::Intersectors LinearRibbonNiIntersectors()
+{
+    VirtualCurveIntersector::Intersectors intersectors;
+    intersectors.intersect1 = (VirtualCurveIntersector::Intersect1Ty)&FlatLinearCurveMiIntersector1<N,N,true>::intersect;
+    intersectors.occluded1  = (VirtualCurveIntersector::Occluded1Ty) &FlatLinearCurveMiIntersector1<N,N,true>::occluded;
+    intersectors.intersect4 = (VirtualCurveIntersector::Intersect4Ty)&FlatLinearCurveMiIntersectorK<N,N,4,true>::intersect;
+    intersectors.occluded4  = (VirtualCurveIntersector::Occluded4Ty) &FlatLinearCurveMiIntersectorK<N,N,4,true>::occluded;
 #if defined(__AVX__)
-      intersectors.intersect8 = (VirtualCurveIntersector::Intersect8Ty)&FlatLinearCurveMiIntersectorK<N,N,8,true>::intersect;
-      intersectors.occluded8  = (VirtualCurveIntersector::Occluded8Ty) &FlatLinearCurveMiIntersectorK<N,N,8,true>::occluded;
+    intersectors.intersect8 = (VirtualCurveIntersector::Intersect8Ty)&FlatLinearCurveMiIntersectorK<N,N,8,true>::intersect;
+    intersectors.occluded8  = (VirtualCurveIntersector::Occluded8Ty) &FlatLinearCurveMiIntersectorK<N,N,8,true>::occluded;
 #endif
 #if defined(__AVX512F__)
-      intersectors.intersect16 = (VirtualCurveIntersector::Intersect16Ty)&FlatLinearCurveMiIntersectorK<N,N,16,true>::intersect;
-      intersectors.occluded16  = (VirtualCurveIntersector::Occluded16Ty) &FlatLinearCurveMiIntersectorK<N,N,16,true>::occluded;
+    intersectors.intersect16 = (VirtualCurveIntersector::Intersect16Ty)&FlatLinearCurveMiIntersectorK<N,N,16,true>::intersect;
+    intersectors.occluded16  = (VirtualCurveIntersector::Occluded16Ty) &FlatLinearCurveMiIntersectorK<N,N,16,true>::occluded;
 #endif
-      return intersectors;
-    }
+    return intersectors;
+}
 
     template<int N>
     static VirtualCurveIntersector::Intersectors LinearRibbonNiMBIntersectors()
@@ -76,7 +60,7 @@ namespace embree
 #endif
       return intersectors;
     }
-    
+
     template<int N>
     static VirtualCurveIntersector::Intersectors SphereNiIntersectors()
     {
@@ -515,7 +499,7 @@ namespace embree
     }
 
 #if defined (__AVX__)
-    
+
     VirtualCurveIntersector* VirtualCurveIntersector8i()
     {
       static VirtualCurveIntersector function_local_static_prim;
@@ -553,7 +537,7 @@ namespace embree
       function_local_static_prim.vtbl[Geometry::GTY_ORIENTED_HERMITE_CURVE] = HermiteOrientedCurveNiIntersectors<HermiteCurve3fa,8>();
       return &function_local_static_prim;
     }
-    
+
     VirtualCurveIntersector* VirtualCurveIntersector8iMB()
     {
       static VirtualCurveIntersector function_local_static_prim;
@@ -572,7 +556,7 @@ namespace embree
       function_local_static_prim.vtbl[Geometry::GTY_ORIENTED_HERMITE_CURVE] = HermiteOrientedCurveNiMBIntersectors<HermiteCurve3fa,8>();
       return &function_local_static_prim;
     }
-  
+
 #endif
   }
 }

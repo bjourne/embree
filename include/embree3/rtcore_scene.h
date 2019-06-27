@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "rtcore_device.h"
@@ -30,11 +14,11 @@ struct RTCRayHitNp;
 /* Scene flags */
 enum RTCSceneFlags
 {
-  RTC_SCENE_FLAG_NONE                    = 0,
-  RTC_SCENE_FLAG_DYNAMIC                 = (1 << 0),
-  RTC_SCENE_FLAG_COMPACT                 = (1 << 1),
-  RTC_SCENE_FLAG_ROBUST                  = (1 << 2),
-  RTC_SCENE_FLAG_CONTEXT_FILTER_FUNCTION = (1 << 3)
+    RTC_SCENE_FLAG_NONE                    = 0,
+    RTC_SCENE_FLAG_DYNAMIC                 = (1 << 0),
+    RTC_SCENE_FLAG_COMPACT                 = (1 << 1),
+    RTC_SCENE_FLAG_ROBUST                  = (1 << 2),
+    RTC_SCENE_FLAG_CONTEXT_FILTER_FUNCTION = (1 << 3)
 };
 
 /* Creates a new scene. */
@@ -48,7 +32,8 @@ RTC_API void rtcReleaseScene(RTCScene scene);
 
 
 /* Attaches the geometry to a scene. */
-RTC_API unsigned int rtcAttachGeometry(RTCScene scene, RTCGeometry geometry);
+RTC_API unsigned int
+rtcAttachGeometry(RTCScene scene, RTCGeometry geometry);
 
 /* Attaches the geometry to a scene using the specified geometry ID. */
 RTC_API void rtcAttachGeometryByID(RTCScene scene, RTCGeometry geometry, unsigned int geomID);
@@ -86,7 +71,9 @@ RTC_API enum RTCSceneFlags rtcGetSceneFlags(RTCScene scene);
 RTC_API void rtcGetSceneBounds(RTCScene scene, struct RTCBounds* bounds_o);
 
 /* Returns the linear axis-aligned bounds of the scene. */
-RTC_API void rtcGetSceneLinearBounds(RTCScene scene, struct RTCLinearBounds* bounds_o);
+RTC_API void
+rtcGetSceneLinearBounds(RTCScene scene,
+                        struct RTCLinearBounds* bounds_o);
 
 /* Intersects a single ray with the scene. */
 RTC_API void

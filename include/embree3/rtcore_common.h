@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include <stddef.h>
@@ -66,13 +50,13 @@ typedef int ssize_t;
 /* Formats of buffers and other data structures */
 enum RTCFormat
 {
-  RTC_FORMAT_UNDEFINED = 0,
+    RTC_FORMAT_UNDEFINED = 0,
 
-  /* 8-bit unsigned integer */
-  RTC_FORMAT_UCHAR = 0x1001,
-  RTC_FORMAT_UCHAR2,
-  RTC_FORMAT_UCHAR3,
-  RTC_FORMAT_UCHAR4,
+    /* 8-bit unsigned integer */
+    RTC_FORMAT_UCHAR = 0x1001,
+    RTC_FORMAT_UCHAR2,
+    RTC_FORMAT_UCHAR3,
+    RTC_FORMAT_UCHAR4,
 
   /* 8-bit signed integer */
   RTC_FORMAT_CHAR = 0x2001,
@@ -156,8 +140,8 @@ enum RTCFormat
   RTC_FORMAT_FLOAT4X3_COLUMN_MAJOR = 0x9243,
   RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR = 0x9244,
 
-  /* special 12-byte format for grids */
-  RTC_FORMAT_GRID = 0xA001
+    /* special 12-byte format for grids */
+    RTC_FORMAT_GRID = 0xA001
 };
 
 /* Build quality levels */
@@ -214,7 +198,7 @@ struct RTCIntersectContext
 };
 
 /* Initializes an intersection context. */
-void
+RTC_FORCEINLINE void
 rtcInitIntersectContext(struct RTCIntersectContext* context)
 {
     context->flags = RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT;
