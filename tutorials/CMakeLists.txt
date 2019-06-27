@@ -39,7 +39,7 @@ IF (WIN32)
   )
 
 ELSE (WIN32)
-  
+
   FIND_PACKAGE(PkgConfig REQUIRED)
   PKG_SEARCH_MODULE(GLFW QUIET glfw3)
   IF (NOT GLFW_FOUND)
@@ -76,7 +76,6 @@ ADD_SUBDIRECTORY(bvh_access)
 ADD_SUBDIRECTORY(motion_blur_geometry)
 ADD_SUBDIRECTORY(interpolation)
 ADD_SUBDIRECTORY(convert)
-ADD_SUBDIRECTORY(curve_geometry)
 ADD_SUBDIRECTORY(point_geometry)
 ADD_SUBDIRECTORY(buildbench)
 
@@ -84,5 +83,3 @@ IF (EMBREE_RAY_PACKETS)
   ADD_SUBDIRECTORY(viewer_stream)
   ADD_SUBDIRECTORY(viewer_anim)
 ENDIF()
-
-
