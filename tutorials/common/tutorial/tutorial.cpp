@@ -1082,7 +1082,8 @@ GLFWwindow* TutorialApplication::createStandardWindow(int width, int height)
     }
   }
 
-int TutorialApplication::main(int argc, char** argv) try {
+int TutorialApplication::main(int argc, char** argv)
+{
     /* parse command line options */
     parseCommandLine(argc,argv);
 
@@ -1099,27 +1100,19 @@ int TutorialApplication::main(int argc, char** argv) try {
     /* start tutorial */
     run(argc,argv);
     return 0;
- }
- catch (const std::exception& e) {
-     std::cout << "Error: " << e.what() << std::endl;
-     return 1;
- }
- catch (...) {
-     std::cout << "Error: unknown exception caught." << std::endl;
-     return 1;
- }
+}
 
-  int SceneLoadingTutorialApplication::main(int argc, char** argv) try
-  {
+int SceneLoadingTutorialApplication::main(int argc, char** argv)
+{
     /* parse command line options */
     parseCommandLine(argc,argv);
 
     /* callback */
     try {
-      postParseCommandLine();
+        postParseCommandLine();
     }
     catch (const std::exception& e) {
-      std::cout << "Error: " << e.what() << std::endl;
+        std::cout << "Error: " << e.what() << std::endl;
     }
 
     /* create device */
@@ -1134,10 +1127,10 @@ int TutorialApplication::main(int argc, char** argv) try {
     /* load scene */
     if (sceneFilename != "")
     {
-      if (toLowerCase(sceneFilename.ext()) == std::string("obj"))
-        scene->add(loadOBJ(sceneFilename,subdiv_mode != ""));
-      else if (sceneFilename.ext() != "")
-        scene->add(SceneGraph::load(sceneFilename));
+        if (toLowerCase(sceneFilename.ext()) == std::string("obj"))
+            scene->add(loadOBJ(sceneFilename,subdiv_mode != ""));
+        else if (sceneFilename.ext() != "")
+            scene->add(SceneGraph::load(sceneFilename));
     }
 
     Application::instance->log(1,"loading scene done");
@@ -1145,68 +1138,71 @@ int TutorialApplication::main(int argc, char** argv) try {
     /* load key frames for animation */
     for (size_t i=0; i<keyFramesFilenames.size(); i++)
     {
-      if (verbosity >= 1)
-        std::cout << "Adding ["<< keyFramesFilenames[i] << "] to scene..." << std::flush;
+        if (verbosity >= 1)
+            std::cout << "Adding ["<< keyFramesFilenames[i] << "] to scene..." << std::flush;
 
-      if (toLowerCase(keyFramesFilenames[i].ext()) == std::string("obj"))
-        scene->add(loadOBJ(keyFramesFilenames[i],subdiv_mode != "",true));
-      else if (keyFramesFilenames[i].ext() != "")
-        scene->add(SceneGraph::load(keyFramesFilenames[i]));
+        if (toLowerCase(keyFramesFilenames[i].ext()) == std::string("obj"))
+            scene->add(loadOBJ(keyFramesFilenames[i],subdiv_mode != "",true));
+        else if (keyFramesFilenames[i].ext() != "")
+            scene->add(SceneGraph::load(keyFramesFilenames[i]));
 
-      if (verbosity >= 1)
-        std::cout << " [DONE]" << std::endl << std::flush;
+        if (verbosity >= 1)
+            std::cout << " [DONE]" << std::endl << std::flush;
     }
 
     /* clear texture cache */
     Texture::clearTextureCache();
 
     /* perform removals */
-    if (remove_mblur)     scene->remove_mblur(true);
-    if (remove_non_mblur) scene->remove_mblur(false);
+    if (remove_mblur)
+        scene->remove_mblur(true);
+    if (remove_non_mblur)
+        scene->remove_mblur(false);
 
     /* perform conversions */
     if (sgop.size() && verbosity >= 1) {
-      std::cout << std::endl;
-      std::cout << "scene statistics (pre-convert):" << std::endl;
-      SceneGraph::calculateStatistics(scene.dynamicCast<SceneGraph::Node>()).print();
-      std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "scene statistics (pre-convert):" << std::endl;
+        SceneGraph::calculateStatistics(scene.dynamicCast<SceneGraph::Node>()).print();
+        std::cout << std::endl;
     }
 
     /* perform scene graph conversions */
     for (auto& op : sgop)
     {
-      switch (op) {
-      case CONVERT_TRIANGLES_TO_QUADS   : scene->triangles_to_quads(convert_tris_to_quads_prop); break;
-      case CONVERT_BEZIER_TO_LINES      : scene->bezier_to_lines(); break;
-      case CONVERT_BEZIER_TO_BSPLINE    : scene->bezier_to_bspline(); break;
-      case CONVERT_BSPLINE_TO_BEZIER    : scene->bspline_to_bezier(); break;
-      case CONVERT_BEZIER_TO_HERMITE    : scene->bezier_to_hermite(); break;
-      case CONVERT_FLAT_TO_ROUND_CURVES : scene->flat_to_round_curves(); break;
-      case CONVERT_ROUND_TO_FLAT_CURVES : scene->round_to_flat_curves(); break;
-      case MERGE_QUADS_TO_GRIDS         : scene->merge_quads_to_grids(); break;
-      case CONVERT_QUADS_TO_GRIDS       : scene->quads_to_grids(grid_resX,grid_resY); break;
-      case CONVERT_GRIDS_TO_QUADS       : scene->grids_to_quads(); break;
-      case CONVERT_MBLUR_TO_NONMBLUR    : convert_mblur_to_nonmblur(scene.dynamicCast<SceneGraph::Node>()); break;
-      default : throw std::runtime_error("unsupported scene graph operation");
-      }
+        switch (op) {
+        case CONVERT_TRIANGLES_TO_QUADS   : scene->triangles_to_quads(convert_tris_to_quads_prop); break;
+        case CONVERT_BEZIER_TO_LINES      : scene->bezier_to_lines(); break;
+        case CONVERT_BEZIER_TO_BSPLINE    : scene->bezier_to_bspline(); break;
+        case CONVERT_BSPLINE_TO_BEZIER    : scene->bspline_to_bezier(); break;
+        case CONVERT_BEZIER_TO_HERMITE    : scene->bezier_to_hermite(); break;
+        case CONVERT_FLAT_TO_ROUND_CURVES : scene->flat_to_round_curves(); break;
+        case CONVERT_ROUND_TO_FLAT_CURVES : scene->round_to_flat_curves(); break;
+        case MERGE_QUADS_TO_GRIDS         : scene->merge_quads_to_grids(); break;
+        case CONVERT_QUADS_TO_GRIDS       : scene->quads_to_grids(grid_resX,grid_resY); break;
+        case CONVERT_GRIDS_TO_QUADS       : scene->grids_to_quads(); break;
+        case CONVERT_MBLUR_TO_NONMBLUR    : convert_mblur_to_nonmblur(scene.dynamicCast<SceneGraph::Node>()); break;
+        default : throw std::runtime_error("unsupported scene graph operation");
+        }
     }
     Application::instance->log(1,"converting scene done");
 
     if (verbosity >= 1) {
-      std::cout << std::endl;
-      std::cout << "scene statistics (pre-flattening):" << std::endl;
-      SceneGraph::calculateStatistics(scene.dynamicCast<SceneGraph::Node>()).print();
-      std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "scene statistics (pre-flattening):" << std::endl;
+        SceneGraph::calculateStatistics(scene.dynamicCast<SceneGraph::Node>()).print();
+        std::cout << std::endl;
     }
 
-    Ref<SceneGraph::GroupNode> flattened_scene = SceneGraph::flatten(scene,instancing_mode);
+    Ref<SceneGraph::GroupNode> flattened_scene =
+        SceneGraph::flatten(scene,instancing_mode);
     Application::instance->log(1,"flattening scene done");
 
     if (verbosity >= 1) {
-      std::cout << std::endl;
-      std::cout << "scene statistics (post-flattening):" << std::endl;
-      SceneGraph::calculateStatistics(flattened_scene.dynamicCast<SceneGraph::Node>()).print();
-      std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << "scene statistics (post-flattening):" << std::endl;
+        SceneGraph::calculateStatistics(flattened_scene.dynamicCast<SceneGraph::Node>()).print();
+        std::cout << std::endl;
     }
 
     /* convert model */
@@ -1217,20 +1213,20 @@ int TutorialApplication::main(int argc, char** argv) try {
 
     /* print all cameras */
     if (print_scene_cameras) {
-      obj_scene.print_camera_names();
-      return 0;
+        obj_scene.print_camera_names();
+        return 0;
     }
 
     /* use specified camera */
     if (camera_name != "") {
-      Ref<SceneGraph::PerspectiveCameraNode> c = obj_scene.getCamera(camera_name);
-      camera = Camera(c->from,c->to,c->up,c->fov,camera.handedness);
+        Ref<SceneGraph::PerspectiveCameraNode> c = obj_scene.getCamera(camera_name);
+        camera = Camera(c->from,c->to,c->up,c->fov,camera.handedness);
     }
 
     /* otherwise use default camera */
     else if (!command_line_camera) {
-      Ref<SceneGraph::PerspectiveCameraNode> c = obj_scene.getDefaultCamera();
-      if (c) camera = Camera(c->from,c->to,c->up,c->fov,camera.handedness);
+        Ref<SceneGraph::PerspectiveCameraNode> c = obj_scene.getDefaultCamera();
+        if (c) camera = Camera(c->from,c->to,c->up,c->fov,camera.handedness);
     }
 
     /* send model */
@@ -1241,38 +1237,30 @@ int TutorialApplication::main(int argc, char** argv) try {
     run(argc,argv);
 
     return 0;
-  }
-  catch (const std::exception& e) {
-    std::cout << "Error: " << e.what() << std::endl;
-    return 1;
-  }
-  catch (...) {
-    std::cout << "Error: unknown exception caught." << std::endl;
-    return 1;
-  }
+}
 
-  /* draws progress bar */
-  static int progressWidth = 0;
-  static std::atomic<size_t> progressDots(0);
+/* draws progress bar */
+static int progressWidth = 0;
+static std::atomic<size_t> progressDots(0);
 
-  extern "C" void progressStart()
-  {
+extern "C" void progressStart()
+{
     progressDots = 0;
     progressWidth = max(3,getTerminalWidth());
     std::cout << "[" << std::flush;
-  }
+}
 
-  extern "C" bool progressMonitor(void* ptr, const double n)
-  {
+extern "C" bool progressMonitor(void* ptr, const double n)
+{
     size_t olddots = progressDots;
     size_t maxdots = progressWidth-2;
     size_t newdots = max(olddots,min(size_t(maxdots),size_t(n*double(maxdots))));
     if (progressDots.compare_exchange_strong(olddots,newdots))
-      for (size_t i=olddots; i<newdots; i++) std::cout << "." << std::flush;
+        for (size_t i=olddots; i<newdots; i++) std::cout << "." << std::flush;
     return true;
-  }
+}
 
-  extern "C" void progressEnd() {
+extern "C" void progressEnd() {
     std::cout << "]" << std::endl;
 }
 }
