@@ -1,37 +1,24 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "../common/tutorial/tutorial_device.h"
 #include "../common/tutorial/scene_device.h"
 
 namespace embree {
 
-  static const MAYBE_UNUSED size_t skip_iterations               = 5;
-  static const MAYBE_UNUSED size_t iterations_dynamic_deformable = 200;
-  static const MAYBE_UNUSED size_t iterations_dynamic_dynamic    = 200;
-  static const MAYBE_UNUSED size_t iterations_dynamic_static     = 50;
-  static const MAYBE_UNUSED size_t iterations_static_static      = 30;
+static const MAYBE_UNUSED size_t skip_iterations               = 5;
+static const MAYBE_UNUSED size_t iterations_dynamic_deformable = 200;
+static const MAYBE_UNUSED size_t iterations_dynamic_dynamic    = 200;
+static const MAYBE_UNUSED size_t iterations_dynamic_static     = 50;
+static const MAYBE_UNUSED size_t iterations_static_static      = 30;
 
-  extern "C" ISPCScene* g_ispc_scene;
+extern "C" ISPCScene* g_ispc_scene;
 
-  /* scene data */
-  RTCScene g_scene = nullptr;
+/* scene data */
+RTCScene g_scene = nullptr;
 
-  void convertTriangleMesh(ISPCTriangleMesh* mesh, RTCScene scene_out, RTCBuildQuality quality)
-  {
+void
+convertTriangleMesh(ISPCTriangleMesh* mesh,
+                    RTCScene scene_out,
+                    RTCBuildQuality quality)
+{
     RTCGeometry geom = rtcNewGeometry (g_device, RTC_GEOMETRY_TYPE_TRIANGLE);
     rtcSetGeometryTimeStepCount(geom,mesh->numTimeSteps);
     rtcSetGeometryBuildQuality(geom, quality);
@@ -334,14 +321,14 @@ namespace embree {
     Benchmark_Static_Create(g_ispc_scene,iterations_static_static,RTC_BUILD_QUALITY_MEDIUM,RTC_BUILD_QUALITY_HIGH);
   }
 
-  /* called by the C++ code to render */
-  extern "C" void device_render (int* pixels,
-                                 const unsigned int width,
-                                 const unsigned int height,
-                                 const float time,
-                                 const ISPCCamera& camera)
-  {
-  }
+/* called by the C++ code to render */
+extern "C" void device_render (int* pixels,
+                               const unsigned int width,
+                               const unsigned int height,
+                               const float time,
+                               const ISPCCamera& camera)
+{
+}
 
   /* renders a single screen tile */
   void renderTileStandard(int taskIndex,

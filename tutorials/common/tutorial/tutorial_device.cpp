@@ -35,32 +35,35 @@ extern "C" float g_debug;
 renderTileFunc renderTile;
 
 /* renders a single pixel with eyelight shading */
-Vec3fa renderPixelEyeLight(float x, float y, const ISPCCamera& camera, RayStats& stats)
+Vec3fa
+renderPixelEyeLight(float x, float y,
+                    const ISPCCamera& camera,
+                    RayStats& stats)
 {
-  /* initialize ray */
-  Ray ray;
-  ray.org = Vec3fa(camera.xfm.p);
-  ray.dir = Vec3fa(normalize(x*camera.xfm.l.vx + y*camera.xfm.l.vy + camera.xfm.l.vz));
-  ray.tnear() = 0.0f;
-  ray.tfar = inf;
-  ray.geomID = RTC_INVALID_GEOMETRY_ID;
-  ray.primID = RTC_INVALID_GEOMETRY_ID;
-  ray.mask = -1;
-  ray.time() = g_debug;
+    /* initialize ray */
+    Ray ray;
+    ray.org = Vec3fa(camera.xfm.p);
+    ray.dir = Vec3fa(normalize(x*camera.xfm.l.vx + y*camera.xfm.l.vy + camera.xfm.l.vz));
+    ray.tnear() = 0.0f;
+    ray.tfar = inf;
+    ray.geomID = RTC_INVALID_GEOMETRY_ID;
+    ray.primID = RTC_INVALID_GEOMETRY_ID;
+    ray.mask = -1;
+    ray.time() = g_debug;
 
-  /* intersect ray with scene */
-  IntersectContext context;
-  InitIntersectionContext(&context);
-  rtcIntersect1(g_scene,&context.context,RTCRayHit_(ray));
-  RayStats_addRay(stats);
+    /* intersect ray with scene */
+    IntersectContext context;
+    InitIntersectionContext(&context);
+    rtcIntersect1(g_scene,&context.context,RTCRayHit_(ray));
+    RayStats_addRay(stats);
 
-  /* shade pixel */
-  if (ray.geomID == RTC_INVALID_GEOMETRY_ID)
-    return Vec3fa(0.0f);
-  else if (dot(ray.dir,ray.Ng) < 0.0f)
-    return Vec3fa(0.0f,abs(dot(ray.dir,normalize(ray.Ng))),0.0f);
-  else
-    return Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))),0.0f,0.0f);
+    /* shade pixel */
+    if (ray.geomID == RTC_INVALID_GEOMETRY_ID)
+        return Vec3fa(0.0f);
+    else if (dot(ray.dir,ray.Ng) < 0.0f)
+        return Vec3fa(0.0f,abs(dot(ray.dir,normalize(ray.Ng))),0.0f);
+    else
+        return Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))),0.0f,0.0f);
 }
 
 void renderTileEyeLight(int taskIndex,
@@ -94,7 +97,9 @@ void renderTileEyeLight(int taskIndex,
 }
 
 /* renders a single pixel with occlusion shading */
-Vec3fa renderPixelOcclusion(float x, float y, const ISPCCamera& camera, RayStats& stats)
+Vec3fa
+renderPixelOcclusion(float x, float y,
+                     const ISPCCamera& camera, RayStats& stats)
 {
   /* initialize ray */
   Ray ray;
@@ -114,9 +119,9 @@ Vec3fa renderPixelOcclusion(float x, float y, const ISPCCamera& camera, RayStats
   RayStats_addRay(stats);
 
   /* return black if nothing hit */
-  if (ray.tfar >= 0.0f) 
+  if (ray.tfar >= 0.0f)
     return Vec3fa(0.0f,0.0f,0.0f);
-  else 
+  else
     return Vec3fa(1.0f,1.0f,1.0f);
 }
 
@@ -688,41 +693,45 @@ Vec3fa renderPixelDifferentials(float x, float y, const ISPCCamera& camera, RayS
   return clamp(color,Vec3fa(0.0f),Vec3fa(1.0f));
 }
 
-void renderTileDifferentials(int taskIndex,
-                             int threadIndex,
-                             int* pixels,
-                             const unsigned int width,
-                             const unsigned int height,
-                             const float time,
-                             const ISPCCamera& camera,
-                             const int numTilesX,
-                             const int numTilesY)
+void
+renderTileDifferentials(int taskIndex,
+                        int threadIndex,
+                        int* pixels,
+                        const unsigned int width,
+                        const unsigned int height,
+                        const float time,
+                        const ISPCCamera& camera,
+                        const int numTilesX,
+                        const int numTilesY)
 {
-  const int t = taskIndex;
-  const unsigned int tileY = t / numTilesX;
-  const unsigned int tileX = t - tileY * numTilesX;
-  const unsigned int x0 = tileX * TILE_SIZE_X;
-  const unsigned int x1 = min(x0+TILE_SIZE_X,width);
-  const unsigned int y0 = tileY * TILE_SIZE_Y;
-  const unsigned int y1 = min(y0+TILE_SIZE_Y,height);
+    const int t = taskIndex;
+    const unsigned int tileY = t / numTilesX;
+    const unsigned int tileX = t - tileY * numTilesX;
+    const unsigned int x0 = tileX * TILE_SIZE_X;
+    const unsigned int x1 = min(x0+TILE_SIZE_X,width);
+    const unsigned int y0 = tileY * TILE_SIZE_Y;
+    const unsigned int y1 = min(y0+TILE_SIZE_Y,height);
 
-  for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
-  {
-    Vec3fa color = renderPixelDifferentials((float)x,(float)y,camera,g_stats[threadIndex]);
+    for (unsigned int y=y0; y<y1; y++)
+        for (unsigned int x=x0; x<x1; x++)
+        {
+            Vec3fa color =
+                renderPixelDifferentials((float)x,(float)y,camera,g_stats[threadIndex]);
 
-    /* write color to framebuffer */
-    unsigned int r = (unsigned int) (255.0f * clamp(color.x,0.0f,1.0f));
-    unsigned int g = (unsigned int) (255.0f * clamp(color.y,0.0f,1.0f));
-    unsigned int b = (unsigned int) (255.0f * clamp(color.z,0.0f,1.0f));
-    pixels[y*width+x] = (b << 16) + (g << 8) + r;
-  }
+            /* write color to framebuffer */
+            unsigned int r = (unsigned int) (255.0f * clamp(color.x,0.0f,1.0f));
+            unsigned int g = (unsigned int) (255.0f * clamp(color.y,0.0f,1.0f));
+            unsigned int b = (unsigned int) (255.0f * clamp(color.z,0.0f,1.0f));
+            pixels[y*width+x] = (b << 16) + (g << 8) + r;
+        }
 }
 
 /* returns the point seen through specified pixel */
-extern "C" bool device_pick(const float x,
-                                const float y,
-                                const ISPCCamera& camera,
-                                Vec3fa& hitPos)
+extern "C" bool
+device_pick(const float x,
+            const float y,
+            const ISPCCamera& camera,
+            Vec3fa& hitPos)
 {
   /* initialize ray */
   Ray1 ray;
@@ -754,62 +763,63 @@ extern "C" bool device_pick(const float x,
 /* called when a key is pressed */
 extern "C" void device_key_pressed_default(int key)
 {
-  if (key == GLFW_KEY_F1) {
-    renderTile = renderTileStandard;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F2) {
-    renderTile = renderTileEyeLight;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F3) {
-    renderTile = renderTileOcclusion;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F4) {
-    renderTile = renderTileUV;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F5) {
-    renderTile = renderTileNg;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F6) {
-    renderTile = renderTileGeomID;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F7) {
-    renderTile = renderTileGeomIDPrimID;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F8) {
-    if (renderTile == renderTileTexCoords) render_texcoords_mode++;
-    renderTile = renderTileTexCoords;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F9) {
-    if (renderTile == renderTileCycles) scale *= 2.0f;
-    renderTile = renderTileCycles;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F10) {
-    if (renderTile == renderTileCycles) scale *= 0.5f;
-    renderTile = renderTileCycles;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F11) {
-    renderTile = renderTileAmbientOcclusion;
-    g_changed = true;
-  }
-  else if (key == GLFW_KEY_F12) {
-    if (renderTile == renderTileDifferentials) {
-      differentialMode = (differentialMode+1)%17;
-    } else {
-      renderTile = renderTileDifferentials;
-      differentialMode = 0;
+    if (key == GLFW_KEY_F1) {
+        renderTile = renderTileStandard;
+        g_changed = true;
     }
-    g_changed = true;
-  }
+    else if (key == GLFW_KEY_F2) {
+        renderTile = renderTileEyeLight;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F3) {
+        renderTile = renderTileOcclusion;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F4) {
+        renderTile = renderTileUV;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F5) {
+        renderTile = renderTileNg;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F6) {
+        renderTile = renderTileGeomID;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F7) {
+        renderTile = renderTileGeomIDPrimID;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F8) {
+        if (renderTile == renderTileTexCoords)
+            render_texcoords_mode++;
+        renderTile = renderTileTexCoords;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F9) {
+        if (renderTile == renderTileCycles) scale *= 2.0f;
+        renderTile = renderTileCycles;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F10) {
+        if (renderTile == renderTileCycles) scale *= 0.5f;
+        renderTile = renderTileCycles;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F11) {
+        renderTile = renderTileAmbientOcclusion;
+        g_changed = true;
+    }
+    else if (key == GLFW_KEY_F12) {
+        if (renderTile == renderTileDifferentials) {
+            differentialMode = (differentialMode+1)%17;
+        } else {
+            renderTile = renderTileDifferentials;
+            differentialMode = 0;
+        }
+        g_changed = true;
+    }
 }
 
 /* called when a key is pressed */

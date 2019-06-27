@@ -259,10 +259,13 @@ TutorialApplication::TutorialApplication (const std::string& tutorialName,
         "  stream  : stream mode\n");
     }
 
-    registerOption("coherent", [this] (Ref<ParseStream> cin, const FileName& path) {
-        g_iflags_coherent   = iflags_coherent   = RTC_INTERSECT_CONTEXT_FLAG_COHERENT;
-        g_iflags_incoherent = iflags_incoherent = RTC_INTERSECT_CONTEXT_FLAG_COHERENT;
-      }, "--coherent: force using RTC_INTERSECT_CONTEXT_FLAG_COHERENT hint when tracing rays");
+    registerOption(
+        "coherent",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            g_iflags_coherent = iflags_coherent = RTC_INTERSECT_CONTEXT_FLAG_COHERENT;
+            g_iflags_incoherent = iflags_incoherent = RTC_INTERSECT_CONTEXT_FLAG_COHERENT;
+        },
+        "--coherent: force using RTC_INTERSECT_CONTEXT_FLAG_COHERENT hint when tracing rays");
 
     registerOption("incoherent", [this] (Ref<ParseStream> cin, const FileName& path) {
         g_iflags_coherent   = iflags_coherent   = RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT;
@@ -616,46 +619,47 @@ void TutorialApplication::renderBenchmark()
     FilteredStatistics fpsStat(0.5f,0.0f);
     FilteredStatistics mraypsStat(0.5f,0.0f);
     {
-      size_t numTotalFrames = skipBenchmarkFrames + numBenchmarkFrames;
-      for (size_t i=0; i<skipBenchmarkFrames; i++)
-      {
-        initRayStats();
-        double t0 = getSeconds();
-        device_render(pixels,width,height,0.0f,ispccamera);
-        double t1 = getSeconds();
-        std::cout << "frame [" << std::setw(3) << i << " / " << std::setw(3) << numTotalFrames << "]: " <<  std::setw(8) << 1.0/(t1-t0) << " fps (skipped)" << std::endl << std::flush;
-      }
-
-      for (size_t i=skipBenchmarkFrames; i<numTotalFrames; i++)
-      {
-        initRayStats();
-        double t0 = getSeconds();
-        device_render(pixels,width,height,0.0f,ispccamera);
-        double t1 = getSeconds();
-
-        float fps = float(1.0/(t1-t0));
-        fpsStat.add(fps);
-
-        float mrayps = float(double(getNumRays())/(1000000.0*(t1-t0)));
-        mraypsStat.add(mrayps);
-
-        if (numTotalFrames >= 1024 && (i % 64 == 0))
+        size_t numTotalFrames = skipBenchmarkFrames + numBenchmarkFrames;
+        for (size_t i=0; i<skipBenchmarkFrames; i++)
         {
-          std::cout << "frame [" << std::setw(3) << i << " / " << std::setw(3) << numTotalFrames << "]: "
-                    << std::setw(8) << fps << " fps, "
-                    << "min = " << std::setw(8) << fpsStat.getMin() << " fps, "
-                    << "avg = " << std::setw(8) << fpsStat.getAvg() << " fps, "
-                    << "max = " << std::setw(8) << fpsStat.getMax() << " fps, "
-                    << "sigma = " << std::setw(6) << fpsStat.getSigma() << " (" << 100.0f*fpsStat.getSigma()/fpsStat.getAvg() << "%)" << std::endl << std::flush;
+            initRayStats();
+            double t0 = getSeconds();
+            device_render(pixels,width,height,0.0f,ispccamera);
+            double t1 = getSeconds();
+            std::cout << "frame [" << std::setw(3) << i << " / " << std::setw(3) << numTotalFrames << "]: " <<  std::setw(8) << 1.0/(t1-t0) << " fps (skipped)" << std::endl << std::flush;
         }
-      }
 
-      std::cout << "frame [" << std::setw(3) << skipBenchmarkFrames << " - " << std::setw(3) << numTotalFrames << "]: "
-                << "              "
-                << "min = " << std::setw(8) << fpsStat.getMin() << " fps, "
-                << "avg = " << std::setw(8) << fpsStat.getAvg() << " fps, "
-                << "max = " << std::setw(8) << fpsStat.getMax() << " fps, "
-                << "sigma = " << std::setw(6) << fpsStat.getAvgSigma() << " (" << 100.0f*fpsStat.getAvgSigma()/fpsStat.getAvg() << "%)" << std::endl;
+        for (size_t i=skipBenchmarkFrames; i<numTotalFrames; i++)
+        {
+            initRayStats();
+            double t0 = getSeconds();
+            device_render(pixels,width,height,0.0f,ispccamera);
+            double t1 = getSeconds();
+
+            float fps = float(1.0/(t1-t0));
+            fpsStat.add(fps);
+
+            float mrayps = float(double(getNumRays())/(1000000.0*(t1-t0)));
+            mraypsStat.add(mrayps);
+
+            if (numTotalFrames >= 1024 && (i % 64 == 0))
+            {
+                std::cout << "frame [" << std::setw(3) << i << " / " << std::setw(3) << numTotalFrames << "]: "
+                          << std::setw(8) << fps << " fps, "
+                          << "min = " << std::setw(8) << fpsStat.getMin() << " fps, "
+                          << "avg = " << std::setw(8) << fpsStat.getAvg() << " fps, "
+                          << "max = " << std::setw(8) << fpsStat.getMax() << " fps, "
+                          << "sigma = " << std::setw(6) << fpsStat.getSigma() << " (" << 100.0f*fpsStat.getSigma()/fpsStat.getAvg() << "%)" << std::endl << std::flush;
+            }
+        }
+
+        std::cout
+            << "frame [" << std::setw(3) << skipBenchmarkFrames << " - " << std::setw(3) << numTotalFrames << "]: "
+            << "              "
+            << "min = " << std::setw(8) << fpsStat.getMin() << " fps, "
+            << "avg = " << std::setw(8) << fpsStat.getAvg() << " fps, "
+            << "max = " << std::setw(8) << fpsStat.getMax() << " fps, "
+            << "sigma = " << std::setw(6) << fpsStat.getAvgSigma() << " (" << 100.0f*fpsStat.getAvgSigma()/fpsStat.getAvg() << "%)" << std::endl;
     }
 
     std::cout << "BENCHMARK_RENDER_MIN " << fpsStat.getMin() << std::endl;
@@ -718,12 +722,12 @@ void TutorialApplication::renderToFile(const FileName& fileName)
   void motionFunc(GLFWwindow* window, double x, double y) {
     TutorialApplication::instance->motionFunc(window,x,y);
   }
-  void displayFunc() {
+void displayFunc() {
     TutorialApplication::instance->displayFunc();
-  }
-  void reshapeFunc(GLFWwindow* window, int width, int height) {
+}
+void reshapeFunc(GLFWwindow* window, int width, int height) {
     TutorialApplication::instance->reshapeFunc(window,width,height);
-  }
+}
 
 GLFWwindow* TutorialApplication::createFullScreenWindow()
 {
@@ -892,13 +896,13 @@ GLFWwindow* TutorialApplication::createStandardWindow(int width, int height)
     }
   }
 
-  void TutorialApplication::displayFunc()
-  {
+void TutorialApplication::displayFunc()
+{
     /* update camera */
     camera.move(moveDelta.x*speed, moveDelta.y*speed, moveDelta.z*speed);
     ISPCCamera ispccamera = camera.getISPCCamera(width,height,true);
-     if (print_camera)
-      std::cout << camera.str() << std::endl;
+    if (print_camera)
+        std::cout << camera.str() << std::endl;
 
     /* render image using ISPC */
     initRayStats();
@@ -948,10 +952,10 @@ GLFWwindow* TutorialApplication::createStandardWindow(int width, int height)
     static bool macMoved = false;
 
     if (!macMoved) {
-      int x, y;
-      glfwGetWindowPos(window, &x, &y);
-      glfwSetWindowPos(window, ++x, y);
-      macMoved = true;
+        int x, y;
+        glfwGetWindowPos(window, &x, &y);
+        glfwSetWindowPos(window, ++x, y);
+        macMoved = true;
     }
 #endif
 
@@ -960,34 +964,34 @@ GLFWwindow* TutorialApplication::createStandardWindow(int width, int height)
 
     if (print_frame_rate)
     {
-      std::ostringstream stream;
-      stream.setf(std::ios::fixed, std::ios::floatfield);
-      stream.precision(2);
-      stream << "render: ";
-      stream << 1.0f/dt0 << " fps, ";
-      stream << dt0*1000.0f << " ms, ";
+        std::ostringstream stream;
+        stream.setf(std::ios::fixed, std::ios::floatfield);
+        stream.precision(2);
+        stream << "render: ";
+        stream << 1.0f/dt0 << " fps, ";
+        stream << dt0*1000.0f << " ms, ";
 #if defined(RAY_STATS)
-      stream << mrayps << " Mray/s, ";
+        stream << mrayps << " Mray/s, ";
 #endif
-      stream << "display: ";
-      stream << 1.0f/dt1 << " fps, ";
-      stream << dt1*1000.0f << " ms, ";
-      stream << width << "x" << height << " pixels";
-      std::cout << stream.str() << std::endl;
+        stream << "display: ";
+        stream << 1.0f/dt1 << " fps, ";
+        stream << dt1*1000.0f << " ms, ";
+        stream << width << "x" << height << " pixels";
+        std::cout << stream.str() << std::endl;
     }
-  }
+}
 
-  void TutorialApplication::reshapeFunc(GLFWwindow* window, int, int)
-  {
+void TutorialApplication::reshapeFunc(GLFWwindow* window, int, int)
+{
     int width,height;
     glfwGetFramebufferSize(window, &width, &height);
     resize(width,height);
     glViewport(0, 0, width, height);
     this->width = width; this->height = height;
-  }
+}
 
-  void TutorialApplication::run(int argc, char** argv)
-  {
+void TutorialApplication::run(int argc, char** argv)
+{
     /* set debug values */
     rtcSetDeviceProperty(nullptr,(RTCDeviceProperty) 1000000, debug0);
     rtcSetDeviceProperty(nullptr,(RTCDeviceProperty) 1000001, debug1);
@@ -1014,43 +1018,44 @@ GLFWwindow* TutorialApplication::createStandardWindow(int width, int height)
 
     /* benchmark mode */
     if (numBenchmarkFrames) {
-      renderBenchmark();
+        renderBenchmark();
     }
 
     /* render to disk */
     if (outputImageFilename.str() != "")
-      renderToFile(outputImageFilename);
+        renderToFile(outputImageFilename);
 
     /* interactive mode */
     if (interactive)
     {
-      window_width = width;
-      window_height = height;
-      glfwSetErrorCallback(errorFunc);
-      glfwInit();
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,2);
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,0);
+        window_width = width;
+        window_height = height;
+        glfwSetErrorCallback(errorFunc);
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,0);
 
-      if (fullscreen) window = createFullScreenWindow();
-      else            window = createStandardWindow(width,height);
+        if (fullscreen)
+            window = createFullScreenWindow();
+        else
+            window = createStandardWindow(width,height);
 
-      glfwMakeContextCurrent(window);
-      glfwSwapInterval(1);
-      reshapeFunc(window,0,0);
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(1);
+        reshapeFunc(window,0,0);
 
-      // Setup ImGui binding
-      ImGui::CreateContext();
-      ImGuiIO& io = ImGui::GetIO(); (void)io;
-      //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-      ImGui_ImplGlfwGL2_Init(window, false);
+        // Setup ImGui binding
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGui_ImplGlfwGL2_Init(window, false);
 
-      // Setup style
-      ImGui::StyleColorsDark();
-      //ImGui::StyleColorsClassic();
+        // Setup style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsClassic();
 
-      // Load Fonts
-      // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-      // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
+        // Load Fonts
+        // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+        // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
       // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
       // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
       // - Read 'misc/fonts/README.txt' for more instructions and details.
@@ -1063,9 +1068,9 @@ GLFWwindow* TutorialApplication::createStandardWindow(int width, int height)
       //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
       //IM_ASSERT(font != NULL);
 
-      while (!glfwWindowShouldClose(window))
-      {
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+        while (!glfwWindowShouldClose(window))
+        {
+            // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.

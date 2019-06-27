@@ -19,7 +19,7 @@
 #include "rtcore_device.h"
 
 RTC_NAMESPACE_BEGIN
-  
+
 /* Forward declarations for ray structures */
 struct RTCRayHit;
 struct RTCRayHit4;
@@ -89,7 +89,10 @@ RTC_API void rtcGetSceneBounds(RTCScene scene, struct RTCBounds* bounds_o);
 RTC_API void rtcGetSceneLinearBounds(RTCScene scene, struct RTCLinearBounds* bounds_o);
 
 /* Intersects a single ray with the scene. */
-RTC_API void rtcIntersect1(RTCScene scene, struct RTCIntersectContext* context, struct RTCRayHit* rayhit);
+RTC_API void
+rtcIntersect1(RTCScene scene,
+              struct RTCIntersectContext* context,
+              struct RTCRayHit* rayhit);
 
 /* Intersects a packet of 4 rays with the scene. */
 RTC_API void rtcIntersect4(const int* valid, RTCScene scene, struct RTCIntersectContext* context, struct RTCRayHit4* rayhit);
@@ -146,4 +149,3 @@ inline RTCSceneFlags operator|(RTCSceneFlags a, RTCSceneFlags b) {
 #endif
 
 RTC_NAMESPACE_END
-

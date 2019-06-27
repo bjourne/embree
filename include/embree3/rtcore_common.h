@@ -48,7 +48,7 @@ typedef int ssize_t;
 #endif
 #endif
 
-#if defined(_WIN32) 
+#if defined(_WIN32)
 #  define RTC_FORCEINLINE __forceinline
 #else
 #  define RTC_FORCEINLINE inline __attribute__((always_inline))
@@ -214,11 +214,12 @@ struct RTCIntersectContext
 };
 
 /* Initializes an intersection context. */
-RTC_FORCEINLINE void rtcInitIntersectContext(struct RTCIntersectContext* context)
+void
+rtcInitIntersectContext(struct RTCIntersectContext* context)
 {
-  context->flags = RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT;
-  context->filter = NULL;
-  context->instID[0] = RTC_INVALID_GEOMETRY_ID;
+    context->flags = RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT;
+    context->filter = NULL;
+    context->instID[0] = RTC_INVALID_GEOMETRY_ID;
 }
-  
+
 RTC_NAMESPACE_END

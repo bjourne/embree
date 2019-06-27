@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
- 
 #pragma once
 
 #include "default.h"
@@ -35,128 +19,128 @@
 
 namespace embree
 {
-  /*! Base class all scenes are derived from */
-  class Scene : public AccelN
-  {
+/*! Base class all scenes are derived from */
+class Scene : public AccelN
+{
     ALIGNED_CLASS_(16);
 
-  public:
+public:
     template<typename Ty, bool mblur = false>
-      class Iterator
-      {
-      public:
-      Iterator ()  {}
-      
-      Iterator (Scene* scene, bool all = false) 
-      : scene(scene), all(all) {}
-      
-      __forceinline Ty* at(const size_t i)
-      {
-        Geometry* geom = scene->geometries[i].ptr;
-        if (geom == nullptr) return nullptr;
-        if (!all && !geom->isEnabled()) return nullptr;
-        const size_t mask = geom->getTypeMask() & Ty::geom_type; 
-        if (!(mask)) return nullptr;
-        if ((geom->numTimeSteps != 1) != mblur) return nullptr;
-        return (Ty*) geom;
-      }
+    class Iterator
+    {
+    public:
+        Iterator ()  {}
 
-      __forceinline Ty* operator[] (const size_t i) {
-        return at(i);
-      }
+        Iterator (Scene* scene, bool all = false)
+            : scene(scene), all(all) {}
 
-      __forceinline size_t size() const {
-        return scene->size();
-      }
-      
-      __forceinline size_t numPrimitives() const {
-        return scene->getNumPrimitives<Ty,mblur>();
-      }
-
-      __forceinline size_t maxPrimitivesPerGeometry() 
-      {
-        size_t ret = 0;
-        for (size_t i=0; i<scene->size(); i++) {
-          Ty* mesh = at(i);
-          if (mesh == nullptr) continue;
-          ret = max(ret,mesh->size());
+        __forceinline Ty* at(const size_t i)
+        {
+            Geometry* geom = scene->geometries[i].ptr;
+            if (geom == nullptr) return nullptr;
+            if (!all && !geom->isEnabled()) return nullptr;
+            const size_t mask = geom->getTypeMask() & Ty::geom_type;
+            if (!(mask)) return nullptr;
+            if ((geom->numTimeSteps != 1) != mblur) return nullptr;
+            return (Ty*) geom;
         }
-        return ret;
-      }
 
-      __forceinline unsigned int maxGeomID() 
-      {
-        unsigned int ret = 0;
-        for (size_t i=0; i<scene->size(); i++) {
-          Ty* mesh = at(i);
-          if (mesh == nullptr) continue;
-          ret = max(ret,mesh->geomID);
+        __forceinline Ty* operator[] (const size_t i) {
+            return at(i);
         }
-        return ret;
-      }
 
-      __forceinline unsigned maxTimeStepsPerGeometry()
-      {
-        unsigned ret = 0;
-        for (size_t i=0; i<scene->size(); i++) {
-          Ty* mesh = at(i);
-          if (mesh == nullptr) continue;
-          ret = max(ret,mesh->numTimeSteps);
+        __forceinline size_t size() const {
+            return scene->size();
         }
-        return ret;
-      }
-      
+
+        __forceinline size_t numPrimitives() const {
+            return scene->getNumPrimitives<Ty,mblur>();
+        }
+
+        __forceinline size_t maxPrimitivesPerGeometry()
+        {
+            size_t ret = 0;
+            for (size_t i=0; i<scene->size(); i++) {
+                Ty* mesh = at(i);
+                if (mesh == nullptr) continue;
+                ret = max(ret,mesh->size());
+            }
+            return ret;
+        }
+
+        __forceinline unsigned int maxGeomID()
+        {
+            unsigned int ret = 0;
+            for (size_t i=0; i<scene->size(); i++) {
+                Ty* mesh = at(i);
+                if (mesh == nullptr) continue;
+                ret = max(ret,mesh->geomID);
+            }
+            return ret;
+        }
+
+        __forceinline unsigned maxTimeStepsPerGeometry()
+        {
+            unsigned ret = 0;
+            for (size_t i=0; i<scene->size(); i++) {
+                Ty* mesh = at(i);
+                if (mesh == nullptr) continue;
+                ret = max(ret,mesh->numTimeSteps);
+            }
+            return ret;
+        }
+
     private:
-      Scene* scene;
-      bool all;
-      };
-
-      class Iterator2
-      {
-      public:
-      Iterator2 () {}
-      
-      Iterator2 (Scene* scene, Geometry::GTypeMask typemask, bool mblur) 
-      : scene(scene), typemask(typemask), mblur(mblur) {}
-      
-      __forceinline Geometry* at(const size_t i)
-      {
-        Geometry* geom = scene->geometries[i].ptr;
-        if (geom == nullptr) return nullptr;
-        if (!geom->isEnabled()) return nullptr;
-        if (!(geom->getTypeMask() & typemask)) return nullptr;
-        if ((geom->numTimeSteps != 1) != mblur) return nullptr;
-        return geom;
-      }
-
-      __forceinline Geometry* operator[] (const size_t i) {
-        return at(i);
-      }
-
-      __forceinline size_t size() const {
-        return scene->size();
-      }
-      
-    private:
-      Scene* scene;
-      Geometry::GTypeMask typemask;
-      bool mblur;
+        Scene* scene;
+        bool all;
     };
 
-  public:
-    
+    class Iterator2
+    {
+    public:
+        Iterator2 () {}
+
+        Iterator2 (Scene* scene, Geometry::GTypeMask typemask, bool mblur)
+            : scene(scene), typemask(typemask), mblur(mblur) {}
+
+        __forceinline Geometry* at(const size_t i)
+        {
+            Geometry* geom = scene->geometries[i].ptr;
+            if (geom == nullptr) return nullptr;
+            if (!geom->isEnabled()) return nullptr;
+            if (!(geom->getTypeMask() & typemask)) return nullptr;
+            if ((geom->numTimeSteps != 1) != mblur) return nullptr;
+            return geom;
+        }
+
+        __forceinline Geometry* operator[] (const size_t i) {
+            return at(i);
+        }
+
+        __forceinline size_t size() const {
+            return scene->size();
+        }
+
+    private:
+        Scene* scene;
+        Geometry::GTypeMask typemask;
+        bool mblur;
+    };
+
+public:
+
     /*! Scene construction */
     Scene (Device* device);
 
     /*! Scene destruction */
     ~Scene ();
 
-  private:
+private:
     /*! class is non-copyable */
     Scene (const Scene& other) DELETED; // do not implement
     Scene& operator= (const Scene& other) DELETED; // do not implement
 
-  public:
+public:
     void createTriangleAccel();
     void createTriangleMBAccel();
     void createQuadAccel();
@@ -183,10 +167,10 @@ namespace embree
 
     void setBuildQuality(RTCBuildQuality quality_flags);
     RTCBuildQuality getBuildQuality() const;
-    
+
     void setSceneFlags(RTCSceneFlags scene_flags);
     RTCSceneFlags getSceneFlags() const;
-    
+
     void commit (bool join);
     void commit_task ();
     void build () {}
@@ -195,16 +179,16 @@ namespace embree
 
     /* return number of geometries */
     __forceinline size_t size() const { return geometries.size(); }
-    
+
     /* bind geometry to the scene */
     unsigned int bind (unsigned geomID, Ref<Geometry> geometry);
-    
+
     /* determines if scene is modified */
     __forceinline bool isModified() const { return modified; }
 
     /* sets modified flag */
-    __forceinline void setModified(bool f = true) { 
-      modified = f; 
+    __forceinline void setModified(bool f = true) {
+      modified = f;
     }
 
     /* get mesh by ID */
@@ -212,16 +196,16 @@ namespace embree
     __forceinline const Geometry* get(size_t i) const { assert(i < geometries.size()); return geometries[i].ptr; }
 
     template<typename Mesh>
-      __forceinline       Mesh* get(size_t i)       { 
-      assert(i < geometries.size()); 
+      __forceinline       Mesh* get(size_t i)       {
+      assert(i < geometries.size());
       assert(geometries[i]->getTypeMask() & Mesh::geom_type);
-      return (Mesh*)geometries[i].ptr; 
+      return (Mesh*)geometries[i].ptr;
     }
     template<typename Mesh>
-      __forceinline const Mesh* get(size_t i) const { 
-      assert(i < geometries.size()); 
+      __forceinline const Mesh* get(size_t i) const {
+      assert(i < geometries.size());
       assert(geometries[i]->getTypeMask() & Mesh::geom_type);
-      return (Mesh*)geometries[i].ptr; 
+      return (Mesh*)geometries[i].ptr;
     }
 
     template<typename Mesh>
@@ -234,8 +218,8 @@ namespace embree
 
     __forceinline Ref<Geometry> get_locked(size_t i)  {
       Lock<SpinLock> lock(geometriesMutex);
-      assert(i < geometries.size()); 
-      return geometries[i]; 
+      assert(i < geometries.size());
+      return geometries[i];
     }
 
     /* flag decoding */
@@ -244,7 +228,7 @@ namespace embree
     __forceinline bool isRobustAccel()  const { return scene_flags & RTC_SCENE_FLAG_ROBUST; }
     __forceinline bool isStaticAccel()  const { return !(scene_flags & RTC_SCENE_FLAG_DYNAMIC); }
     __forceinline bool isDynamicAccel() const { return scene_flags & RTC_SCENE_FLAG_DYNAMIC; }
-    
+
     __forceinline bool hasContextFilterFunction() const {
       return scene_flags & RTC_SCENE_FLAG_CONTEXT_FILTER_FUNCTION;
     }
@@ -254,7 +238,7 @@ namespace embree
     __forceinline bool hasFilterFunction() {
       return hasContextFilterFunction() || hasGeometryFilterFunction();
     }
-    
+
     /* test if scene got already build */
     __forceinline bool isBuild() const { return is_build; }
 
@@ -262,23 +246,23 @@ namespace embree
     IDPool<unsigned,0xFFFFFFFE> id_pool;
     vector<Ref<Geometry>> geometries; //!< list of all user geometries
     vector<float*> vertices;
-    
+
   public:
     Device* device;
 
     /* these are to detect if we need to recreate the acceleration structures */
     bool flags_modified;
     unsigned int enabled_geometry_types;
-    
+
     RTCSceneFlags scene_flags;
     RTCBuildQuality quality_flags;
     MutexSys buildMutex;
     SpinLock geometriesMutex;
     bool is_build;
     bool modified;                   //!< true if scene got modified
-    
+
     /*! global lock step task scheduler */
-#if defined(TASKING_INTERNAL) 
+#if defined(TASKING_INTERNAL)
     MutexSys schedulerMutex;
     Ref<TaskScheduler> scheduler;
 #elif defined(TASKING_TBB)
@@ -288,10 +272,10 @@ namespace embree
     concurrency::task_group* group;
     BarrierActiveAutoReset group_barrier;
 #endif
-    
+
   public:
     struct BuildProgressMonitorInterface : public BuildProgressMonitor {
-      BuildProgressMonitorInterface(Scene* scene) 
+      BuildProgressMonitorInterface(Scene* scene)
       : scene(scene) {}
       void operator() (size_t dn) const { scene->progressMonitor(double(dn)); }
     private:
@@ -305,7 +289,7 @@ namespace embree
     void setProgressMonitorFunction(RTCProgressMonitorFunction func, void* ptr);
 
   public:
-    struct GeometryCounts 
+    struct GeometryCounts
     {
       __forceinline GeometryCounts()
         : numTriangles(0), numQuads(0), numBezierCurves(0), numLineSegments(0), numSubdivPatches(0), numUserGeometries(0), numInstances(0), numGrids(0), numPoints(0) {}
@@ -342,7 +326,7 @@ namespace embree
      __forceinline unsigned int enabledGeometryTypesMask() const {
        return (world.enabledGeometryTypesMask() << 8) + worldMB.enabledGeometryTypesMask();
      }
-    
+
     GeometryCounts world;               //!< counts for non-motion blurred geometry
     GeometryCounts worldMB;             //!< counts for motion blurred geometry
 
@@ -353,7 +337,7 @@ namespace embree
     }
 
     template<typename Mesh, bool mblur> __forceinline size_t getNumPrimitives() const;
-    
+
     template<typename Mesh, bool mblur>
     __forceinline unsigned getNumTimeSteps()
     {
@@ -370,7 +354,7 @@ namespace embree
       Scene::Iterator<Mesh,mblur> iter(this);
       return iter.maxGeomID();
     }
-   
+
     std::atomic<size_t> numIntersectionFiltersN;   //!< number of enabled intersection/occlusion filters for N-wide ray packets
   };
 

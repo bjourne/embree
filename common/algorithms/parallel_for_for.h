@@ -21,7 +21,7 @@
 namespace embree
 {
   template<typename ArrayArray, typename Func>
-    __forceinline void sequential_for_for( ArrayArray& array2, const size_t minStepSize, const Func& func ) 
+    __forceinline void sequential_for_for( ArrayArray& array2, const size_t minStepSize, const Func& func )
   {
     size_t k=0;
     for (size_t i=0; i!=array2.size(); ++i) {
@@ -37,13 +37,13 @@ namespace embree
 
     enum { MAX_TASKS = 64 };
 
-    __forceinline ParallelForForState () 
+    __forceinline ParallelForForState ()
       : taskCount(0) {}
 
     template<typename ArrayArray>
       __forceinline ParallelForForState (ArrayArray& array2, const size_t minStepSize) {
       init(array2,minStepSize);
-    } 
+    }
 
     template<typename ArrayArray>
       __forceinline void init ( ArrayArray& array2, const size_t minStepSize )
@@ -59,13 +59,13 @@ namespace embree
       const size_t numThreads = TaskScheduler::threadCount();
       const size_t numBlocks  = (N+minStepSize-1)/minStepSize;
       taskCount = max(size_t(1),min(numThreads,numBlocks,size_t(ParallelForForState::MAX_TASKS)));
-      
+
       /* calculate start (i,j) for each task */
       size_t taskIndex = 0;
       i0[taskIndex] = 0;
       j0[taskIndex] = 0;
       size_t k0 = (++taskIndex)*N/taskCount;
-      for (size_t i=0, k=0; taskIndex < taskCount; i++) 
+      for (size_t i=0, k=0; taskIndex < taskCount; i++)
       {
 	assert(i<array2.size());
 	size_t j=0, M = array2[i] ? array2[i]->size() : 0;
@@ -83,7 +83,7 @@ namespace embree
     __forceinline size_t size() const {
       return N;
     }
-    
+
   public:
     size_t i0[MAX_TASKS];
     size_t j0[MAX_TASKS];
@@ -91,12 +91,13 @@ namespace embree
     size_t N;
   };
 
-  template<typename ArrayArray, typename Func>
-    __forceinline void parallel_for_for( ArrayArray& array2, const size_t minStepSize, const Func& func )
+template<typename ArrayArray, typename Func>
+__forceinline void
+parallel_for_for(ArrayArray& array2, const size_t minStepSize, const Func& func)
   {
     ParallelForForState state(array2,minStepSize);
-    
-    parallel_for(state.taskCount, [&](const size_t taskIndex) 
+
+    parallel_for(state.taskCount, [&](const size_t taskIndex)
     {
       /* calculate range */
       const size_t k0 = (taskIndex+0)*state.size()/state.taskCount;
@@ -129,8 +130,8 @@ namespace embree
 
     for (size_t i=0; i<state.taskCount; i++)
       temp[i] = identity;
-    
-    parallel_for(state.taskCount, [&](const size_t taskIndex) 
+
+    parallel_for(state.taskCount, [&](const size_t taskIndex)
     {
       /* calculate range */
       const size_t k0 = (taskIndex+0)*state.size()/state.taskCount;
