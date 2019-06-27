@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../common/scene.h"
@@ -23,37 +7,60 @@
 
 namespace embree
 {
-  namespace isa
-  {
-    template<typename Intersector>
-    struct ArrayIntersector1
+namespace isa
+{
+template<typename Intersector>
+struct ArrayIntersector1
+{
+    typedef typename Intersector::Primitive Primitive;
+    typedef typename Intersector::Precalculations Precalculations;
+
+    template<int N, int Nx, bool robust>
+    static __forceinline void
+    intersect(const Accel::Intersectors* This,
+              Precalculations& pre,
+              RayHit& ray,
+              IntersectContext* context,
+              const Primitive* prim,
+              size_t num,
+              const TravRay<N,Nx,robust> &tray,
+              size_t& lazy_node)
     {
-      typedef typename Intersector::Primitive Primitive;
-      typedef typename Intersector::Precalculations Precalculations;
-
-      template<int N, int Nx, bool robust>
-      static __forceinline void intersect(const Accel::Intersectors* This, Precalculations& pre, RayHit& ray, IntersectContext* context, const Primitive* prim, size_t num, const TravRay<N,Nx,robust> &tray, size_t& lazy_node)
-      {
         for (size_t i=0; i<num; i++)
-          Intersector::intersect(pre,ray,context,prim[i]);
-      }
+            Intersector::intersect(pre,ray,context,prim[i]);
+    }
 
-      template<int N, int Nx, bool robust>
-      static __forceinline bool occluded(const Accel::Intersectors* This, Precalculations& pre, Ray& ray, IntersectContext* context, const Primitive* prim, size_t num, const TravRay<N,Nx,robust> &tray, size_t& lazy_node)
-      {
+    template<int N, int Nx, bool robust>
+    static __forceinline bool
+    occluded(const Accel::Intersectors* This,
+             Precalculations& pre,
+             Ray& ray,
+             IntersectContext* context,
+             const Primitive* prim,
+             size_t num,
+             const TravRay<N,Nx,robust> &tray,
+             size_t& lazy_node)
+    {
         for (size_t i=0; i<num; i++) {
-          if (Intersector::occluded(pre,ray,context,prim[i]))
-            return true;
+            if (Intersector::occluded(pre,ray,context,prim[i]))
+                return true;
         }
         return false;
-      }
+    }
 
-      template<int K>
-      static __forceinline void intersectK(const vbool<K>& valid, /* PrecalculationsK& pre, */ RayHitK<K>& ray, IntersectContext* context, const Primitive* prim, size_t num, size_t& lazy_node)
-      {
-      }
+    template<int K>
+    static __forceinline void
+    intersectK(const vbool<K>& valid,
+               /* PrecalculationsK& pre, */
+               RayHitK<K>& ray,
+               IntersectContext* context,
+               const Primitive* prim,
+               size_t num,
+               size_t& lazy_node)
+    {
+    }
 
-      template<int K>
+    template<int K>
       static __forceinline vbool<K> occludedK(const vbool<K>& valid, /* PrecalculationsK& pre, */ RayK<K>& ray, IntersectContext* context, const Primitive* prim, size_t num, size_t& lazy_node)
       {
         return valid;

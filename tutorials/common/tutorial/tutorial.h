@@ -31,50 +31,51 @@
 
 namespace embree
 {
-  /* functions provided by each tutorial */
-  extern "C" void device_init(const char* cfg);
-  extern "C" void device_resize(int width, int height);
-  extern "C" void device_render(unsigned* pixels, const unsigned width, const unsigned height, const float time, const ISPCCamera& camera);
-  extern "C" bool device_pick(const float x, const float y, const ISPCCamera& camera, Vec3fa& hitPos);
-  extern "C" void device_key_pressed (int key);
-  extern "C" void device_cleanup();
 
-  template<typename Ty>
-    struct Averaged
-  {
+/* functions provided by each tutorial */
+extern "C" void device_init(const char* cfg);
+extern "C" void device_resize(int width, int height);
+extern "C" void device_render(unsigned* pixels, const unsigned width, const unsigned height, const float time, const ISPCCamera& camera);
+extern "C" bool device_pick(const float x, const float y, const ISPCCamera& camera, Vec3fa& hitPos);
+extern "C" void device_key_pressed (int key);
+extern "C" void device_cleanup();
+
+template<typename Ty>
+struct Averaged
+{
     Averaged (size_t N, double dt)
     : N(N), dt(dt) {}
 
     void add(double v)
     {
-      values.push_front(std::make_pair(getSeconds(),v));
-      if (values.size() > N) values.resize(N);
+        values.push_front(std::make_pair(getSeconds(),v));
+        if (values.size() > N) values.resize(N);
     }
 
     Ty get() const
     {
-      if (values.size() == 0) return zero;
-      double t_begin = values[0].first-dt;
+        if (values.size() == 0) return zero;
+        double t_begin = values[0].first-dt;
 
-      Ty sum(zero);
-      size_t num(0);
-      for (size_t i=0; i<values.size(); i++) {
-        if (values[i].first >= t_begin) {
-          sum += values[i].second;
-          num++;
+        Ty sum(zero);
+        size_t num(0);
+        for (size_t i=0; i<values.size(); i++) {
+            if (values[i].first >= t_begin) {
+                sum += values[i].second;
+                num++;
+            }
         }
-      }
-      return sum/Ty(num);
+        return sum/Ty(num);
     }
 
     std::deque<std::pair<double,Ty>> values;
     size_t N;
     double dt;
-  };
+};
 
-  class TutorialApplication : public Application
-  {
-  public:
+class TutorialApplication : public Application
+{
+public:
     TutorialApplication (const std::string& tutorialName, const int features);
     virtual ~TutorialApplication();
 
@@ -82,7 +83,7 @@ namespace embree
     TutorialApplication (const TutorialApplication& other) DELETED; // do not implement
     TutorialApplication& operator= (const TutorialApplication& other) DELETED; // do not implement
 
-  public:
+public:
     /* starts tutorial */
     void run(int argc, char** argv);
 
@@ -112,7 +113,7 @@ namespace embree
 
     /* create a standard window of specified size */
     GLFWwindow* createStandardWindow(int width, int height);
- 
+
     /* GLFW callback functions */
   public:
     virtual void keyboardFunc(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -120,9 +121,9 @@ namespace embree
     virtual void motionFunc(GLFWwindow* window, double x, double y);
     virtual void displayFunc();
     virtual void reshapeFunc(GLFWwindow* window, int width, int height);
-    virtual void drawGUI() {}; 
+    virtual void drawGUI() {};
 
-  public:
+public:
     std::string tutorialName;
 
     /* render settings */
@@ -185,30 +186,30 @@ namespace embree
     static TutorialApplication* instance;
   };
 
-  class SceneLoadingTutorialApplication : public TutorialApplication
-  {
-  public:
+class SceneLoadingTutorialApplication : public TutorialApplication
+{
+public:
     SceneLoadingTutorialApplication (const std::string& tutorialName, int features);
 
     virtual int main(int argc, char** argv);
 
-  public:
+public:
     TutorialScene obj_scene;
     Ref<SceneGraph::GroupNode> scene;
 
     enum SceneGraphOperations
     {
-      CONVERT_TRIANGLES_TO_QUADS,
-      CONVERT_BEZIER_TO_LINES,
-      CONVERT_BEZIER_TO_BSPLINE,
-      CONVERT_BEZIER_TO_HERMITE,
-      CONVERT_BSPLINE_TO_BEZIER,
-      CONVERT_FLAT_TO_ROUND_CURVES,
-      CONVERT_ROUND_TO_FLAT_CURVES,
-      MERGE_QUADS_TO_GRIDS,
-      CONVERT_QUADS_TO_GRIDS,
-      CONVERT_GRIDS_TO_QUADS,
-      CONVERT_MBLUR_TO_NONMBLUR,
+        CONVERT_TRIANGLES_TO_QUADS,
+        CONVERT_BEZIER_TO_LINES,
+        CONVERT_BEZIER_TO_BSPLINE,
+        CONVERT_BEZIER_TO_HERMITE,
+        CONVERT_BSPLINE_TO_BEZIER,
+        CONVERT_FLAT_TO_ROUND_CURVES,
+        CONVERT_ROUND_TO_FLAT_CURVES,
+        MERGE_QUADS_TO_GRIDS,
+        CONVERT_QUADS_TO_GRIDS,
+        CONVERT_GRIDS_TO_QUADS,
+        CONVERT_MBLUR_TO_NONMBLUR,
     };
     std::vector<SceneGraphOperations> sgop;
 
@@ -222,5 +223,5 @@ namespace embree
     std::string subdiv_mode;
     bool print_scene_cameras;
     std::string camera_name;
-  };
+};
 }

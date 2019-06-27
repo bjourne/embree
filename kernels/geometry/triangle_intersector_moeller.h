@@ -120,22 +120,24 @@ struct MoellerTrumboreIntersector1
         return true;
     }
 
-    __forceinline bool intersectEdge(Ray& ray,
-                                     const Vec3vf<M>& tri_v0,
-                                     const Vec3vf<M>& tri_e1,
-                                     const Vec3vf<M>& tri_e2,
-                                     MoellerTrumboreHitM<M>& hit) const
+    __forceinline bool
+    intersectEdge(Ray& ray,
+                  const Vec3vf<M>& tri_v0,
+                  const Vec3vf<M>& tri_e1,
+                  const Vec3vf<M>& tri_e2,
+                  MoellerTrumboreHitM<M>& hit) const
     {
           vbool<M> valid = true;
           const Vec3<vfloat<M>> tri_Ng = cross(tri_e2,tri_e1);
           return intersect(valid,ray,tri_v0,tri_e1,tri_e2,tri_Ng,hit);
     }
 
-    __forceinline bool intersect(Ray& ray,
-                                 const Vec3vf<M>& v0,
-                                 const Vec3vf<M>& v1,
-                                 const Vec3vf<M>& v2,
-                                 MoellerTrumboreHitM<M>& hit) const
+    __forceinline bool
+    intersect(Ray& ray,
+              const Vec3vf<M>& v0,
+              const Vec3vf<M>& v1,
+              const Vec3vf<M>& v2,
+              MoellerTrumboreHitM<M>& hit) const
     {
         const Vec3vf<M> e1 = v0-v1;
         const Vec3vf<M> e2 = v2-v0;

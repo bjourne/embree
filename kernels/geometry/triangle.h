@@ -71,12 +71,23 @@ public:
     /* Returns the geometry IDs */
     __forceinline       vuint<M>& geomID()       { return geomIDs;  }
     __forceinline const vuint<M>& geomID() const { return geomIDs;  }
-    __forceinline unsigned int geomID(const size_t i) const { assert(i<M); return geomIDs[i]; }
+    __forceinline unsigned int geomID(const size_t i) const
+    {
+        assert(i<M); return geomIDs[i];
+    }
 
     /* Returns the primitive IDs */
-    __forceinline       vuint<M>& primID()       { return primIDs; }
-    __forceinline const vuint<M>& primID() const { return primIDs; }
-    __forceinline unsigned int primID(const size_t i) const { assert(i<M); return primIDs[i]; }
+    __forceinline       vuint<M>& primID()
+    {
+        return primIDs;
+    }
+    __forceinline const vuint<M>& primID() const
+    { return primIDs;
+    }
+    __forceinline unsigned int primID(const size_t i) const
+    {
+        assert(i<M); return primIDs[i];
+    }
 
     /* Calculate the bounds of the triangle */
     __forceinline BBox3fa bounds() const
