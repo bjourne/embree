@@ -103,8 +103,8 @@ struct MoellerTrumboreIntersector1
         const vfloat<M> sgnDen = signmsk(den);
 
         /* perform edge tests */
-        const vfloat<M> U = dot(R,Vec3vf<M>(tri_e2)) ^ sgnDen;
-        const vfloat<M> V = dot(R,Vec3vf<M>(tri_e1)) ^ sgnDen;
+        const vfloat<M> U = dot(R, Vec3vf<M>(tri_e2)) ^ sgnDen;
+        const vfloat<M> V = dot(R, Vec3vf<M>(tri_e1)) ^ sgnDen;
 
         /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
@@ -121,7 +121,7 @@ struct MoellerTrumboreIntersector1
             return false;
 
         /* update hit information */
-        new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
+        new (&hit) MoellerTrumboreHitM<M>(valid, U, V, T, absDen, tri_Ng);
         return true;
     }
 
@@ -202,10 +202,15 @@ struct MoellerTrumboreIntersector1
     template<int K>
     struct MoellerTrumboreHitK
     {
-        __forceinline MoellerTrumboreHitK(const vfloat<K>& U, const vfloat<K>& V, const vfloat<K>& T, const vfloat<K>& absDen, const Vec3vf<K>& Ng)
+        __forceinline MoellerTrumboreHitK(const vfloat<K>& U,
+                                          const vfloat<K>& V,
+                                          const vfloat<K>& T,
+                                          const vfloat<K>& absDen,
+                                          const Vec3vf<K>& Ng)
             : U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
 
-        __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>> operator() () const
+        __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>>
+            operator() () const
         {
             const vfloat<K> rcpAbsDen = rcp(absDen);
             const vfloat<K> t = T * rcpAbsDen;

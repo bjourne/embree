@@ -36,8 +36,14 @@ struct vfloat<4>
     }
 
     __forceinline vfloat(__m128 a) : v(a) {}
-    __forceinline operator const __m128&() const { return v; }
-    __forceinline operator       __m128&()       { return v; }
+    __forceinline operator const __m128&() const
+    {
+        return v;
+    }
+    __forceinline operator       __m128&()
+    {
+        return v;
+    }
 
     __forceinline vfloat(float a) : v(_mm_set1_ps(a)) {}
     __forceinline vfloat(float a, float b, float c, float d)
@@ -78,7 +84,10 @@ struct vfloat<4>
     {
         return _mm_load_ps((float*)a);
     }
-    static __forceinline vfloat4 loadu(const void* a) { return _mm_loadu_ps((float*)a); }
+    static __forceinline vfloat4 loadu(const void* a)
+    {
+        return _mm_loadu_ps((float*)a);
+    }
 
     static __forceinline void store (void* ptr, const vfloat4& v) { _mm_store_ps((float*)ptr,v); }
     static __forceinline void storeu(void* ptr, const vfloat4& v) { _mm_storeu_ps((float*)ptr,v); }
@@ -279,7 +288,10 @@ __forceinline vfloat4 operator -(const vfloat4& a) { return _mm_xor_ps(a, _mm_ca
 #else
   __forceinline vfloat4 sign(const vfloat4& a) { return blendv_ps(vfloat4(one), -vfloat4(one), _mm_cmplt_ps(a, vfloat4(zero))); }
 #endif
-  __forceinline vfloat4 signmsk(const vfloat4& a) { return _mm_and_ps(a,_mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
+__forceinline vfloat4 signmsk(const vfloat4& a)
+{
+    return _mm_and_ps(a,_mm_castsi128_ps(_mm_set1_epi32(0x80000000)));
+}
 
   __forceinline vfloat4 rcp(const vfloat4& a)
   {
