@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "scene.h"
 
 #include "../bvh/bvh4_factory.h"
@@ -358,68 +342,68 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 #endif
   }
 
-  void Scene::createHairAccel()
-  {
-#if defined(EMBREE_GEOMETRY_CURVE) || defined(EMBREE_GEOMETRY_POINT)
-    if (device->hair_accel == "default")
-    {
-      int mode = 2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-#if defined (EMBREE_TARGET_SIMD8)
-      if (device->canUseAVX2()) // only enable on HSW machines, for SNB this codepath is slower
-      {
-        switch (mode) {
-        case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8v(this)); break;
-        case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8v(this)); break;
-        case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8i(this)); break;
-        case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8i(this)); break;
-        }
-      }
-      else
-#endif
-      {
-        switch (mode) {
-        case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4v(this)); break;
-        case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4v(this)); break;
-        case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4i(this)); break;
-        case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4i(this)); break;
-        }
-      }
-    }
-    else if (device->hair_accel == "bvh4obb.virtualcurve4v" ) accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4v(this));
-    else if (device->hair_accel == "bvh4obb.virtualcurve4i" ) accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4i(this));
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->hair_accel == "bvh8obb.virtualcurve8v" ) accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8v(this));
-    else if (device->hair_accel == "bvh4obb.virtualcurve8i" ) accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8i(this));
-#endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown hair acceleration structure "+device->hair_accel);
-#endif
-  }
+//   void Scene::createHairAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_CURVE) || defined(EMBREE_GEOMETRY_POINT)
+//     if (device->hair_accel == "default")
+//     {
+//       int mode = 2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+// #if defined (EMBREE_TARGET_SIMD8)
+//       if (device->canUseAVX2()) // only enable on HSW machines, for SNB this codepath is slower
+//       {
+//         switch (mode) {
+//         case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8v(this)); break;
+//         case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8v(this)); break;
+//         case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8i(this)); break;
+//         case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8i(this)); break;
+//         }
+//       }
+//       else
+// #endif
+//       {
+//         switch (mode) {
+//         case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4v(this)); break;
+//         case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4v(this)); break;
+//         case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4i(this)); break;
+//         case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4i(this)); break;
+//         }
+//       }
+//     }
+//     else if (device->hair_accel == "bvh4obb.virtualcurve4v" ) accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4v(this));
+//     else if (device->hair_accel == "bvh4obb.virtualcurve4i" ) accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4i(this));
+// #if defined (EMBREE_TARGET_SIMD8)
+//     else if (device->hair_accel == "bvh8obb.virtualcurve8v" ) accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8v(this));
+//     else if (device->hair_accel == "bvh4obb.virtualcurve8i" ) accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8i(this));
+// #endif
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown hair acceleration structure "+device->hair_accel);
+// #endif
+//   }
 
-  void Scene::createHairMBAccel()
-  {
-#if defined(EMBREE_GEOMETRY_CURVE) || defined(EMBREE_GEOMETRY_POINT)
-    if (device->hair_accel_mb == "default")
-    {
-#if defined (EMBREE_TARGET_SIMD8)
-      if (device->canUseAVX2()) // only enable on HSW machines, on SNB this codepath is slower
-      {
-        accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8iMB(this));
-      }
-      else
-#endif
-      {
-        accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4iMB(this));
-      }
-    }
-    else if (device->hair_accel_mb == "bvh4.virtualcurve4imb") accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4iMB(this));
+//   void Scene::createHairMBAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_CURVE) || defined(EMBREE_GEOMETRY_POINT)
+//     if (device->hair_accel_mb == "default")
+//     {
+// #if defined (EMBREE_TARGET_SIMD8)
+//       if (device->canUseAVX2()) // only enable on HSW machines, on SNB this codepath is slower
+//       {
+//         accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8iMB(this));
+//       }
+//       else
+// #endif
+//       {
+//         accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4iMB(this));
+//       }
+//     }
+//     else if (device->hair_accel_mb == "bvh4.virtualcurve4imb") accels_add(device->bvh4_factory->BVH4OBBVirtualCurve4iMB(this));
 
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->hair_accel_mb == "bvh4.virtualcurve8imb") accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8iMB(this));
-    else if (device->hair_accel_mb == "bvh8.virtualcurve8imb") accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8iMB(this));
-#endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown motion blur hair acceleration structure "+device->hair_accel_mb);
-#endif
-  }
+// #if defined (EMBREE_TARGET_SIMD8)
+//     else if (device->hair_accel_mb == "bvh4.virtualcurve8imb") accels_add(device->bvh4_factory->BVH4OBBVirtualCurve8iMB(this));
+//     else if (device->hair_accel_mb == "bvh8.virtualcurve8imb") accels_add(device->bvh8_factory->BVH8OBBVirtualCurve8iMB(this));
+// #endif
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown motion blur hair acceleration structure "+device->hair_accel_mb);
+// #endif
+//   }
 
   void Scene::createSubdivAccel()
   {
@@ -646,8 +630,8 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
       if (getNumPrimitives<GridMesh,true>()) createGridMBAccel();
       if (getNumPrimitives<SubdivMesh,false>()) createSubdivAccel();
       if (getNumPrimitives<SubdivMesh,true>()) createSubdivMBAccel();
-      if (getNumPrimitives<CurveGeometry,false>()) createHairAccel();
-      if (getNumPrimitives<CurveGeometry,true>()) createHairMBAccel();
+      //if (getNumPrimitives<CurveGeometry,false>()) createHairAccel();
+      //if (getNumPrimitives<CurveGeometry,true>()) createHairMBAccel();
       if (getNumPrimitives<UserGeometry,false>()) createUserGeometryAccel();
       if (getNumPrimitives<UserGeometry,true>()) createUserGeometryMBAccel();
       if (getNumPrimitives<Instance,false>()) createInstanceAccel();

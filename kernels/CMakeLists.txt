@@ -32,7 +32,7 @@ SOURCE_GROUP("Source Files\\algorithms" "/algorithms/")
 SOURCE_GROUP("" FILES embree.rc)
 
 SET(EMBREE_LIBRARY_FILES
- 
+
   embree.rc
 
   common/device.cpp
@@ -59,7 +59,6 @@ SET(EMBREE_LIBRARY_FILES
 
   geometry/primitive4.cpp
   geometry/instance_intersector.cpp
-  geometry/curve_intersector_virtual.cpp
   builders/primrefgen.cpp
 
   bvh/bvh.cpp
@@ -87,7 +86,7 @@ IF (EMBREE_GEOMETRY_SUBDIVISION)
   subdiv/tessellation_cache.cpp
   subdiv/subdivpatch1base.cpp
   subdiv/catmullclark_coefficients.cpp
-  geometry/grid_soa.cpp	
+  geometry/grid_soa.cpp
   subdiv/subdivpatch1base_eval.cpp
   bvh/bvh_builder_subdiv.cpp)
 ENDIF()
@@ -101,28 +100,27 @@ IF (EMBREE_RAY_PACKETS)
 ENDIF()
 
 MACRO(embree_files TARGET ISA)
-      
+
   SET(${TARGET}
     geometry/instance_intersector.cpp
-    geometry/curve_intersector_virtual.cpp
     bvh/bvh_intersector1_bvh4.cpp)
 
   IF (${ISA} EQUAL ${ISA_LOWEST_AVX})
     LIST(APPEND ${TARGET} geometry/primitive8.cpp)
-  ENDIF() 
+  ENDIF()
 
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA} EQUAL ${AVX512SKX} OR ${ISA_LOWEST} EQUAL ${ISA})
-    
+
     LIST(APPEND ${TARGET}
       common/scene_user_geometry.cpp
       common/scene_instance.cpp
       common/scene_triangle_mesh.cpp
-      common/scene_quad_mesh.cpp 
+      common/scene_quad_mesh.cpp
       common/scene_curves.cpp
       common/scene_line_segments.cpp
       common/scene_grid_mesh.cpp
       common/scene_points.cpp
-      
+
       bvh/bvh_refit.cpp
       bvh/bvh_builder.cpp
       bvh/bvh_builder_hair.cpp
@@ -143,7 +141,7 @@ MACRO(embree_files TARGET ISA)
       bvh/bvh_rotate.cpp
       builders/primrefgen.cpp)
   ENDIF()
-    
+
   IF (${ISA} GREATER ${SSE42})
     LIST(APPEND ${TARGET} bvh/bvh_intersector1_bvh8.cpp)
   ENDIF()
@@ -160,7 +158,7 @@ MACRO(embree_files TARGET ISA)
         geometry/grid_soa.cpp
         subdiv/subdivpatch1base_eval.cpp)
   ENDIF()
-    
+
   IF (EMBREE_RAY_PACKETS)
     LIST(APPEND ${TARGET}
       bvh/bvh_intersector_hybrid4_bvh4.cpp
@@ -181,7 +179,7 @@ MACRO(embree_files TARGET ISA)
         bvh/bvh_intersector_hybrid16_bvh4.cpp)
     ENDIF()
   ENDIF()
-  
+
 ENDMACRO()
 
 #embree_files(EMBREE_LIBRARY_FILES_SSE2 ${SSE2})
@@ -207,7 +205,7 @@ MACRO (CreateISADummyFiles list isa)
     SET(dst_file ${CMAKE_BINARY_DIR}/${src}.${isa}.cpp)
     SET(${list} ${${list}} ${dst_file})
     ADD_CUSTOM_COMMAND(OUTPUT ${dst_file}
-      COMMAND ${CMAKE_COMMAND} 
+      COMMAND ${CMAKE_COMMAND}
        -D src=${src_file}
        -D dst=${dst_file}
        -P ${PROJECT_SOURCE_DIR}/common/cmake/create_isa_dummy_file.cmake
@@ -319,7 +317,7 @@ SET_TARGET_PROPERTIES(embree PROPERTIES OUTPUT_NAME ${EMBREE_LIBRARY_NAME})
 IF (WIN32)
 ELSEIF (APPLE)
   SET_TARGET_PROPERTIES(embree PROPERTIES LINK_FLAGS -Wl,-exported_symbols_list,${PROJECT_SOURCE_DIR}/kernels/export.macosx.map)
-  SET_SOURCE_FILES_PROPERTIES(common/rtcore.cpp PROPERTIES OBJECT_DEPENDS ${PROJECT_SOURCE_DIR}/kernels/export.macosx.map) 
+  SET_SOURCE_FILES_PROPERTIES(common/rtcore.cpp PROPERTIES OBJECT_DEPENDS ${PROJECT_SOURCE_DIR}/kernels/export.macosx.map)
 ELSE()
   SET_TARGET_PROPERTIES(embree PROPERTIES LINK_FLAGS -Wl,--version-script=${PROJECT_SOURCE_DIR}/kernels/export.linux.map)
   SET_SOURCE_FILES_PROPERTIES(common/rtcore.cpp PROPERTIES OBJECT_DEPENDS ${PROJECT_SOURCE_DIR}/kernels/export.linux.map)

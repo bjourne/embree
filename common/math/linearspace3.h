@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "vec3.h"
@@ -21,12 +5,12 @@
 
 namespace embree
 {
-  ////////////////////////////////////////////////////////////////////////////////
-  /// 3D Linear Transform (3x3 Matrix)
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// 3D Linear Transform (3x3 Matrix)
+////////////////////////////////////////////////////////////////////////////////
 
-  template<typename T> struct LinearSpace3
-  {
+template<typename T> struct LinearSpace3
+{
     typedef T Vector;
     typedef typename T::Scalar Scalar;
 
@@ -104,13 +88,13 @@ namespace embree
   };
 
   /*! compute transposed matrix */
-  template<> __forceinline const LinearSpace3<Vec3fa> LinearSpace3<Vec3fa>::transposed() const { 
+  template<> __forceinline const LinearSpace3<Vec3fa> LinearSpace3<Vec3fa>::transposed() const {
     vfloat4 rx,ry,rz; transpose((vfloat4&)vx,(vfloat4&)vy,(vfloat4&)vz,vfloat4(zero),rx,ry,rz);
-    return LinearSpace3<Vec3fa>(Vec3fa(rx),Vec3fa(ry),Vec3fa(rz)); 
+    return LinearSpace3<Vec3fa>(Vec3fa(rx),Vec3fa(ry),Vec3fa(rz));
   }
 
   template<typename T>
-    __forceinline const LinearSpace3<T> transposed(const LinearSpace3<T>& xfm) { 
+    __forceinline const LinearSpace3<T> transposed(const LinearSpace3<T>& xfm) {
     return xfm.transposed();
   }
 
@@ -123,7 +107,7 @@ namespace embree
   template<typename T> __forceinline LinearSpace3<T> rcp       ( const LinearSpace3<T>& a ) { return a.inverse(); }
 
   /* constructs a coordinate frame form a normalized normal */
-  template<typename T> __forceinline LinearSpace3<T> frame(const T& N) 
+  template<typename T> __forceinline LinearSpace3<T> frame(const T& N)
   {
     const T dx0(0,N.z,-N.y);
     const T dx1(-N.z,0,N.x);
@@ -140,7 +124,7 @@ namespace embree
     const T dy = normalize(cross(N,dx));
     return LinearSpace3<T>(dx,dy,N);
   }
-  
+
   /* clamps linear space to range -1 to +1 */
   template<typename T> __forceinline LinearSpace3<T> clamp(const LinearSpace3<T>& space) {
     return LinearSpace3<T>(clamp(space.vx,T(-1.0f),T(1.0f)),
@@ -186,7 +170,7 @@ namespace embree
 
   /*! blending */
   template<typename T>
-    __forceinline LinearSpace3<T> lerp(const LinearSpace3<T>& l0, const LinearSpace3<T>& l1, const float t) 
+    __forceinline LinearSpace3<T> lerp(const LinearSpace3<T>& l0, const LinearSpace3<T>& l1, const float t)
   {
     return LinearSpace3<T>(lerp(l0.vx,l1.vx,t),
                            lerp(l0.vy,l1.vy,t),
@@ -197,11 +181,13 @@ namespace embree
   /// Output Operators
   ////////////////////////////////////////////////////////////////////////////////
 
-  template<typename T> static std::ostream& operator<<(std::ostream& cout, const LinearSpace3<T>& m) {
+template<typename T> static std::ostream&
+operator<<(std::ostream& cout, const LinearSpace3<T>& m)
+{
     return cout << "{ vx = " << m.vx << ", vy = " << m.vy << ", vz = " << m.vz << "}";
-  }
+}
 
-  /*! Shortcuts for common linear spaces. */
-  typedef LinearSpace3<Vec3f> LinearSpace3f;
-  typedef LinearSpace3<Vec3fa> LinearSpace3fa;
+/*! Shortcuts for common linear spaces. */
+typedef LinearSpace3<Vec3f> LinearSpace3f;
+typedef LinearSpace3<Vec3fa> LinearSpace3fa;
 }

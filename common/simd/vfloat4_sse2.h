@@ -1,48 +1,49 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 namespace embree
 {
-  /* 4-wide SSE float type */
-  template<>
-  struct vfloat<4>
-  {
+
+/* 4-wide SSE float type */
+template<>
+struct vfloat<4>
+{
     typedef vboolf4 Bool;
     typedef vint4   Int;
     typedef vfloat4 Float;
 
-    enum  { size = 4 };                        // number of SIMD elements
-    union { __m128 v; float f[4]; int i[4]; }; // data
+    enum
+    {
+        size = 4
+    };                        // number of SIMD elements
+    union
+    {
+        __m128 v; float f[4]; int i[4];
+    }; // data
 
     ////////////////////////////////////////////////////////////////////////////////
     /// Constructors, Assignment & Cast Operators
     ////////////////////////////////////////////////////////////////////////////////
 
     __forceinline vfloat() {}
-    __forceinline vfloat(const vfloat4& other) { v = other.v; }
-    __forceinline vfloat4& operator =(const vfloat4& other) { v = other.v; return *this; }
+    __forceinline vfloat(const vfloat4& other)
+    {
+        v = other.v;
+    }
+    __forceinline vfloat4& operator =(const vfloat4& other)
+    {
+        v = other.v;
+        return *this;
+    }
 
     __forceinline vfloat(__m128 a) : v(a) {}
     __forceinline operator const __m128&() const { return v; }
     __forceinline operator       __m128&()       { return v; }
 
     __forceinline vfloat(float a) : v(_mm_set1_ps(a)) {}
-    __forceinline vfloat(float a, float b, float c, float d) : v(_mm_set_ps(d, c, b, a)) {}
+    __forceinline vfloat(float a, float b, float c, float d)
+        : v(_mm_set_ps(d, c, b, a))
+    {
+    }
 
     __forceinline explicit vfloat(const vint4& a) : v(_mm_cvtepi32_ps(a)) {}
     __forceinline explicit vfloat(const vuint4& x) {
@@ -276,7 +277,10 @@ namespace embree
 #endif
   }
   __forceinline vfloat4 sqr (const vfloat4& a) { return _mm_mul_ps(a,a); }
-  __forceinline vfloat4 sqrt(const vfloat4& a) { return _mm_sqrt_ps(a); }
+  __forceinline vfloat4 sqrt(const vfloat4& a)
+  {
+      return _mm_sqrt_ps(a);
+  }
 
   __forceinline vfloat4 rsqrt(const vfloat4& a)
   {
@@ -718,18 +722,18 @@ nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c)
   /// Euclidian Space Operators
   ////////////////////////////////////////////////////////////////////////////////
 
-  __forceinline float dot(const vfloat4& a, const vfloat4& b) {
+__forceinline float dot(const vfloat4& a, const vfloat4& b) {
     return reduce_add(a*b);
-  }
+}
 
-  __forceinline vfloat4 cross(const vfloat4& a, const vfloat4& b)
-  {
+__forceinline vfloat4 cross(const vfloat4& a, const vfloat4& b)
+{
     const vfloat4 a0 = a;
     const vfloat4 b0 = shuffle<1,2,0,3>(b);
     const vfloat4 a1 = shuffle<1,2,0,3>(a);
     const vfloat4 b1 = b;
     return shuffle<1,2,0,3>(msub(a0,b0,a1*b1));
-  }
+}
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Output Operators

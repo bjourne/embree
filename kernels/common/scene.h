@@ -145,8 +145,8 @@ public:
     void createTriangleMBAccel();
     void createQuadAccel();
     void createQuadMBAccel();
-    void createHairAccel();
-    void createHairMBAccel();
+    // void createHairAccel();
+    // void createHairMBAccel();
     void createSubdivAccel();
     void createSubdivMBAccel();
     void createUserGeometryAccel();
