@@ -19,19 +19,21 @@
 
 namespace embree
 {
-  /* foreach unique */
-  template<typename vbool, typename vint, typename Closure>
-  __forceinline void foreach_unique(const vbool& valid0, const vint& vi, const Closure& closure)
-  {
+/* foreach unique */
+template<typename vbool, typename vint, typename Closure>
+__forceinline void foreach_unique(const vbool& valid0,
+                                  const vint& vi,
+                                  const Closure& closure)
+{
     vbool valid1 = valid0;
     while (any(valid1)) {
-      const int j = int(bsf(movemask(valid1)));
-      const int i = vi[j];
-      const vbool valid2 = valid1 & (i == vi);
-      valid1 = andn(valid1, valid2);
-      closure(valid2, i);
+        const int j = int(bsf(movemask(valid1)));
+        const int i = vi[j];
+        const vbool valid2 = valid1 & (i == vi);
+        valid1 = andn(valid1, valid2);
+        closure(valid2, i);
     }
-  }
+}
 
   /* returns the next unique value i in vi and the corresponding valid_i mask */
   template<typename vbool, typename vint>

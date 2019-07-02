@@ -1,31 +1,18 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 namespace embree
 {
-  /* 4-wide AVX-512 bool type */
-  template<>
-  struct vboold<4>
-  {
+/* 4-wide AVX-512 bool type */
+template<>
+struct vboold<4>
+{
     typedef vboold4 Bool;
     typedef vint4   Int;
 
-    enum { size = 4 }; // number of SIMD elements
+    enum
+    {
+        size = 4
+    }; // number of SIMD elements
     __mmask8 v;        // data
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -45,17 +32,17 @@ namespace embree
 
     /* return int8 mask */
     __forceinline __m128i mask8() const {
-      return _mm_movm_epi8(v);
+        return _mm_movm_epi8(v);
     }
 
     /* return int32 mask */
     __forceinline __m128i mask32() const {
-      return _mm_movm_epi32(v);
+        return _mm_movm_epi32(v);
     }
 
     /* return int64 mask */
     __forceinline __m256i mask64() const {
-      return _mm256_movm_epi64(v);
+        return _mm256_movm_epi64(v);
     }
 
     ////////////////////////////////////////////////////////////////////////////////

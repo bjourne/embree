@@ -94,7 +94,10 @@ struct MoellerTrumboreIntersector1
         const Vec3vf<M> O = Vec3vf<M>(ray.org);
         const Vec3vf<M> D = Vec3vf<M>(ray.dir);
         const Vec3vf<M> C = Vec3vf<M>(tri_v0) - O;
-        const Vec3vf<M> R = cross(C,D);
+
+        const Vec3<vfloat<M>> R = cross(C, D);
+
+        //const Vec3vf<M> R = cross(C,D);
         const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
         const vfloat<M> absDen = abs(den);
         const vfloat<M> sgnDen = signmsk(den);
@@ -114,7 +117,8 @@ struct MoellerTrumboreIntersector1
         /* perform depth test */
         const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
         valid &= (absDen*vfloat<M>(ray.tnear()) < T) & (T <= absDen*vfloat<M>(ray.tfar));
-        if (likely(none(valid))) return false;
+        if (likely(none(valid)))
+            return false;
 
         /* update hit information */
         new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);

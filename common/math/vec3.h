@@ -108,13 +108,25 @@ template<typename T> __forceinline Vec3<T> zero_fix( const Vec3<T>& a )
 }
   template<typename T> __forceinline Vec3<T> rcp_safe(const Vec3<T>& a) { return rcp(zero_fix(a)); }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Binary Operators
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// Binary Operators
+////////////////////////////////////////////////////////////////////////////////
 
-  template<typename T> __forceinline Vec3<T> operator +( const Vec3<T>& a, const Vec3<T>& b ) { return Vec3<T>(a.x + b.x, a.y + b.y, a.z + b.z); }
-  template<typename T> __forceinline Vec3<T> operator -( const Vec3<T>& a, const Vec3<T>& b ) { return Vec3<T>(a.x - b.x, a.y - b.y, a.z - b.z); }
-  template<typename T> __forceinline Vec3<T> operator *( const Vec3<T>& a, const Vec3<T>& b ) { return Vec3<T>(a.x * b.x, a.y * b.y, a.z * b.z); }
+template<typename T> __forceinline Vec3<T>
+operator +( const Vec3<T>& a, const Vec3<T>& b )
+{
+    return Vec3<T>(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+template<typename T> __forceinline Vec3<T>
+operator -( const Vec3<T>& a, const Vec3<T>& b )
+{
+    return Vec3<T>(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+template<typename T> __forceinline Vec3<T>
+operator *(const Vec3<T>& a, const Vec3<T>& b)
+{
+    return Vec3<T>(a.x * b.x, a.y * b.y, a.z * b.z);
+}
   template<typename T> __forceinline Vec3<T> operator *( const       T& a, const Vec3<T>& b ) { return Vec3<T>(a   * b.x, a   * b.y, a   * b.z); }
   template<typename T> __forceinline Vec3<T> operator *( const Vec3<T>& a, const       T& b ) { return Vec3<T>(a.x * b  , a.y * b  , a.z * b  ); }
   template<typename T> __forceinline Vec3<T> operator /( const Vec3<T>& a, const       T& b ) { return Vec3<T>(a.x / b  , a.y / b  , a.z / b  ); }
@@ -131,9 +143,9 @@ template<typename T> __forceinline Vec3<T> zero_fix( const Vec3<T>& a )
 template<typename T> __forceinline Vec3<T>
 madd(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
 {
-    return Vec3<T>(madd(a.x,b.x,c.x),
-                   madd(a.y,b.y,c.y),
-                   madd(a.z,b.z,c.z));
+    return Vec3<T>(madd(a.x, b.x, c.x),
+                   madd(a.y, b.y, c.y),
+                   madd(a.z, b.z, c.z));
 }
 template<typename T> __forceinline Vec3<T>
 msub(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
@@ -275,13 +287,14 @@ distance(const Vec3<T>& a, const Vec3<T>& b)
 template<typename T> __forceinline Vec3<T>
 cross(const Vec3<T>& a, const Vec3<T>& b)
 {
-    return Vec3<T>(msub(a.y,b.z,a.z*b.y),
-                   msub(a.z,b.x,a.x*b.z),
-                   msub(a.x,b.y,a.y*b.x));
+    return Vec3<T>(msub(a.y, b.z, a.z*b.y),
+                   msub(a.z, b.x, a.x*b.z),
+                   msub(a.x, b.y, a.y*b.x));
 }
 
-  template<typename T> __forceinline Vec3<T> stable_triangle_normal( const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c )
-  {
+template<typename T> __forceinline Vec3<T>
+stable_triangle_normal(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
+{
     const T ab_x = a.z*b.y, ab_y = a.x*b.z, ab_z = a.y*b.x;
     const T bc_x = b.z*c.y, bc_y = b.x*c.z, bc_z = b.y*c.x;
     const Vec3<T> cross_ab(msub(a.y,b.z,ab_x), msub(a.z,b.x,ab_y), msub(a.x,b.y,ab_z));
@@ -292,7 +305,7 @@ cross(const Vec3<T>& a, const Vec3<T>& b)
     return Vec3<T>(select(sx,cross_ab.x,cross_bc.x),
                    select(sy,cross_ab.y,cross_bc.y),
                    select(sz,cross_ab.z,cross_bc.z));
-  }
+}
 
   template<typename T> __forceinline T       sum      ( const Vec3<T>& a )                   { return a.x+a.y+a.z; }
 

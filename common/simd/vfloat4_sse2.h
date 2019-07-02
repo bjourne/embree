@@ -45,20 +45,24 @@ struct vfloat<4>
     {
     }
 
-    __forceinline explicit vfloat(const vint4& a) : v(_mm_cvtepi32_ps(a)) {}
+    __forceinline explicit vfloat(const vint4& a) : v(_mm_cvtepi32_ps(a))
+    {
+    }
     __forceinline explicit vfloat(const vuint4& x) {
-      const __m128i a   = _mm_and_si128(x,_mm_set1_epi32(0x7FFFFFFF));
-      const __m128i b   = _mm_and_si128(_mm_srai_epi32(x,31),_mm_set1_epi32(0x4F000000)); //0x4F000000 = 2^31
-      const __m128  af  = _mm_cvtepi32_ps(a);
-      const __m128  bf  = _mm_castsi128_ps(b);
-      v  = _mm_add_ps(af,bf);
+        const __m128i a   = _mm_and_si128(x,_mm_set1_epi32(0x7FFFFFFF));
+        const __m128i b   = _mm_and_si128(_mm_srai_epi32(x,31),_mm_set1_epi32(0x4F000000)); //0x4F000000 = 2^31
+        const __m128  af  = _mm_cvtepi32_ps(a);
+        const __m128  bf  = _mm_castsi128_ps(b);
+        v  = _mm_add_ps(af,bf);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
     /// Constants
     ////////////////////////////////////////////////////////////////////////////////
 
-    __forceinline vfloat(ZeroTy)   : v(_mm_setzero_ps()) {}
+    __forceinline vfloat(ZeroTy)   : v(_mm_setzero_ps())
+    {
+    }
     __forceinline vfloat(OneTy)    : v(_mm_set1_ps(1.0f)) {}
     __forceinline vfloat(PosInfTy) : v(_mm_set1_ps(pos_inf)) {}
     __forceinline vfloat(NegInfTy) : v(_mm_set1_ps(neg_inf)) {}
@@ -70,7 +74,10 @@ struct vfloat<4>
     /// Loads and Stores
     ////////////////////////////////////////////////////////////////////////////////
 
-    static __forceinline vfloat4 load (const void* a) { return _mm_load_ps((float*)a); }
+    static __forceinline vfloat4 load (const void* a)
+    {
+        return _mm_load_ps((float*)a);
+    }
     static __forceinline vfloat4 loadu(const void* a) { return _mm_loadu_ps((float*)a); }
 
     static __forceinline void store (void* ptr, const vfloat4& v) { _mm_store_ps((float*)ptr,v); }
@@ -247,12 +254,24 @@ struct vfloat<4>
   /// Unary Operators
   ////////////////////////////////////////////////////////////////////////////////
 
-  __forceinline vfloat4 asFloat(const vint4&   a) { return _mm_castsi128_ps(a); }
-  __forceinline vint4   asInt  (const vfloat4& a) { return _mm_castps_si128(a); }
-  __forceinline vuint4  asUInt (const vfloat4& a) { return _mm_castps_si128(a); }
+__forceinline vfloat4 asFloat(const vint4&   a)
+{
+    return _mm_castsi128_ps(a);
+}
+__forceinline vint4   asInt  (const vfloat4& a)
+{
+    return _mm_castps_si128(a);
+}
+__forceinline vuint4  asUInt (const vfloat4& a)
+{
+    return _mm_castps_si128(a);
+}
 
-  __forceinline vfloat4 operator +(const vfloat4& a) { return a; }
-  __forceinline vfloat4 operator -(const vfloat4& a) { return _mm_xor_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
+__forceinline vfloat4 operator +(const vfloat4& a)
+{
+    return a;
+}
+__forceinline vfloat4 operator -(const vfloat4& a) { return _mm_xor_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
 
   __forceinline vfloat4 abs(const vfloat4& a) { return _mm_and_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff))); }
 #if defined(__AVX512VL__)
@@ -312,7 +331,10 @@ struct vfloat<4>
   /// Binary Operators
   ////////////////////////////////////////////////////////////////////////////////
 
-  __forceinline vfloat4 operator +(const vfloat4& a, const vfloat4& b) { return _mm_add_ps(a, b); }
+__forceinline vfloat4 operator +(const vfloat4& a, const vfloat4& b)
+{
+    return _mm_add_ps(a, b);
+}
   __forceinline vfloat4 operator +(const vfloat4& a, float          b) { return a + vfloat4(b); }
   __forceinline vfloat4 operator +(float          a, const vfloat4& b) { return vfloat4(a) + b; }
 
@@ -320,8 +342,14 @@ struct vfloat<4>
   __forceinline vfloat4 operator -(const vfloat4& a, float          b) { return a - vfloat4(b); }
   __forceinline vfloat4 operator -(float          a, const vfloat4& b) { return vfloat4(a) - b; }
 
-  __forceinline vfloat4 operator *(const vfloat4& a, const vfloat4& b) { return _mm_mul_ps(a, b); }
-  __forceinline vfloat4 operator *(const vfloat4& a, float          b) { return a * vfloat4(b); }
+__forceinline vfloat4 operator *(const vfloat4& a, const vfloat4& b)
+{
+    return _mm_mul_ps(a, b);
+}
+__forceinline vfloat4 operator *(const vfloat4& a, float          b)
+{
+    return a * vfloat4(b);
+}
   __forceinline vfloat4 operator *(float          a, const vfloat4& b) { return vfloat4(a) * b; }
 
   __forceinline vfloat4 operator /(const vfloat4& a, const vfloat4& b) { return _mm_div_ps(a,b); }
@@ -335,8 +363,14 @@ struct vfloat<4>
   __forceinline vfloat4 min(const vfloat4& a, float          b) { return _mm_min_ps(a,vfloat4(b)); }
   __forceinline vfloat4 min(float          a, const vfloat4& b) { return _mm_min_ps(vfloat4(a),b); }
 
-  __forceinline vfloat4 max(const vfloat4& a, const vfloat4& b) { return _mm_max_ps(a,b); }
-  __forceinline vfloat4 max(const vfloat4& a, float          b) { return _mm_max_ps(a,vfloat4(b)); }
+__forceinline vfloat4 max(const vfloat4& a, const vfloat4& b)
+{
+    return _mm_max_ps(a,b);
+}
+__forceinline vfloat4 max(const vfloat4& a, float b)
+{
+    return _mm_max_ps(a,vfloat4(b));
+}
   __forceinline vfloat4 max(float          a, const vfloat4& b) { return _mm_max_ps(vfloat4(a),b); }
 
 #if defined(__SSE4_1__)
@@ -383,7 +417,7 @@ struct vfloat<4>
 __forceinline vfloat4
 madd(const vfloat4& a, const vfloat4& b, const vfloat4& c)
 {
-    return _mm_fmadd_ps(a,b,c);
+    return _mm_fmadd_ps(a, b, c);
 }
 __forceinline vfloat4
 msub(const vfloat4& a, const vfloat4& b, const vfloat4& c)
@@ -423,21 +457,39 @@ nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c)
 }
 #endif
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Assignment Operators
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// Assignment Operators
+////////////////////////////////////////////////////////////////////////////////
 
-  __forceinline vfloat4& operator +=(vfloat4& a, const vfloat4& b) { return a = a + b; }
-  __forceinline vfloat4& operator +=(vfloat4& a, float          b) { return a = a + b; }
+__forceinline vfloat4& operator +=(vfloat4& a, const vfloat4& b)
+{
+    return a = a + b;
+}
+__forceinline vfloat4& operator +=(vfloat4& a, float          b)
+{
+    return a = a + b;
+}
 
-  __forceinline vfloat4& operator -=(vfloat4& a, const vfloat4& b) { return a = a - b; }
-  __forceinline vfloat4& operator -=(vfloat4& a, float          b) { return a = a - b; }
+__forceinline vfloat4& operator -=(vfloat4& a, const vfloat4& b)
+{
+    return a = a - b;
+}
+__forceinline vfloat4& operator -=(vfloat4& a, float          b)
+{
+    return a = a - b;
+}
 
-  __forceinline vfloat4& operator *=(vfloat4& a, const vfloat4& b) { return a = a * b; }
-  __forceinline vfloat4& operator *=(vfloat4& a, float          b) { return a = a * b; }
+__forceinline vfloat4& operator *=(vfloat4& a, const vfloat4& b)
+{
+    return a = a * b;
+}
+__forceinline vfloat4& operator *=(vfloat4& a, float          b)
+{
+    return a = a * b;
+}
 
-  __forceinline vfloat4& operator /=(vfloat4& a, const vfloat4& b) { return a = a / b; }
-  __forceinline vfloat4& operator /=(vfloat4& a, float          b) { return a = a / b; }
+__forceinline vfloat4& operator /=(vfloat4& a, const vfloat4& b) { return a = a / b; }
+__forceinline vfloat4& operator /=(vfloat4& a, float          b) { return a = a / b; }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Comparison Operators + Select
@@ -531,8 +583,14 @@ nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c)
   ////////////////////////////////////////////////////////////////////////////////
 
 #if defined (__SSE4_1__)
-  __forceinline vfloat4 floor(const vfloat4& a) { return _mm_round_ps(a, _MM_FROUND_TO_NEG_INF   ); }
-  __forceinline vfloat4 ceil (const vfloat4& a) { return _mm_round_ps(a, _MM_FROUND_TO_POS_INF   ); }
+__forceinline vfloat4 floor(const vfloat4& a)
+{
+    return _mm_round_ps(a, _MM_FROUND_TO_NEG_INF   );
+}
+__forceinline vfloat4 ceil (const vfloat4& a)
+{
+    return _mm_round_ps(a, _MM_FROUND_TO_POS_INF   );
+}
   __forceinline vfloat4 trunc(const vfloat4& a) { return _mm_round_ps(a, _MM_FROUND_TO_ZERO      ); }
 #else
   __forceinline vfloat4 floor(const vfloat4& a) { return vfloat4(floorf(a[0]),floorf(a[1]),floorf(a[2]),floorf(a[3]));  }
@@ -556,10 +614,12 @@ nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c)
   __forceinline vfloat4 unpacklo(const vfloat4& a, const vfloat4& b) { return _mm_unpacklo_ps(a, b); }
   __forceinline vfloat4 unpackhi(const vfloat4& a, const vfloat4& b) { return _mm_unpackhi_ps(a, b); }
 
-  template<int i0, int i1, int i2, int i3>
-  __forceinline vfloat4 shuffle(const vfloat4& v) {
-    return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v), _MM_SHUFFLE(i3, i2, i1, i0)));
-  }
+template<int i0, int i1, int i2, int i3>
+__forceinline vfloat4 shuffle(const vfloat4& v)
+{
+    return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v),
+                                              _MM_SHUFFLE(i3, i2, i1, i0)));
+}
 
   template<int i0, int i1, int i2, int i3>
   __forceinline vfloat4 shuffle(const vfloat4& a, const vfloat4& b) {
@@ -682,8 +742,12 @@ nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c)
     c3 = unpackhi(h02,h13);
   }
 
-  __forceinline void transpose(const vfloat4& r0, const vfloat4& r1, const vfloat4& r2, const vfloat4& r3, vfloat4& c0, vfloat4& c1, vfloat4& c2)
-  {
+__forceinline void transpose(const vfloat4& r0,
+                             const vfloat4& r1,
+                             const vfloat4& r2,
+                             const vfloat4& r3,
+                             vfloat4& c0, vfloat4& c1, vfloat4& c2)
+{
     vfloat4 l02 = unpacklo(r0,r2);
     vfloat4 h02 = unpackhi(r0,r2);
     vfloat4 l13 = unpacklo(r1,r3);
@@ -691,36 +755,57 @@ nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c)
     c0 = unpacklo(l02,l13);
     c1 = unpackhi(l02,l13);
     c2 = unpacklo(h02,h13);
-  }
+}
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Reductions
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// Reductions
+////////////////////////////////////////////////////////////////////////////////
 
-  __forceinline vfloat4 vreduce_min(const vfloat4& v) { vfloat4 h = min(shuffle<1,0,3,2>(v),v); return min(shuffle<2,3,0,1>(h),h); }
-  __forceinline vfloat4 vreduce_max(const vfloat4& v) { vfloat4 h = max(shuffle<1,0,3,2>(v),v); return max(shuffle<2,3,0,1>(h),h); }
-  __forceinline vfloat4 vreduce_add(const vfloat4& v) { vfloat4 h = shuffle<1,0,3,2>(v)   + v ; return shuffle<2,3,0,1>(h)   + h ; }
+__forceinline vfloat4 vreduce_min(const vfloat4& v)
+{
+    vfloat4 h = min(shuffle<1,0,3,2>(v),v);
+    return min(shuffle<2,3,0,1>(h),h);
+}
+__forceinline vfloat4 vreduce_max(const vfloat4& v)
+{
+    vfloat4 h = max(shuffle<1,0,3,2>(v),v);
+    return max(shuffle<2,3,0,1>(h),h);
+}
+__forceinline vfloat4 vreduce_add(const vfloat4& v)
+{
+    vfloat4 h = shuffle<1,0,3,2>(v)   + v ;
+    return shuffle<2,3,0,1>(h)   + h ;
+}
 
-  __forceinline float reduce_min(const vfloat4& v) { return _mm_cvtss_f32(vreduce_min(v)); }
-  __forceinline float reduce_max(const vfloat4& v) { return _mm_cvtss_f32(vreduce_max(v)); }
-  __forceinline float reduce_add(const vfloat4& v) { return _mm_cvtss_f32(vreduce_add(v)); }
+__forceinline float reduce_min(const vfloat4& v)
+{
+    return _mm_cvtss_f32(vreduce_min(v));
+}
+__forceinline float reduce_max(const vfloat4& v)
+{
+    return _mm_cvtss_f32(vreduce_max(v));
+}
+__forceinline float reduce_add(const vfloat4& v)
+{
+    return _mm_cvtss_f32(vreduce_add(v));
+}
 
-  __forceinline size_t select_min(const vboolf4& valid, const vfloat4& v)
-  {
+__forceinline size_t select_min(const vboolf4& valid, const vfloat4& v)
+{
     const vfloat4 a = select(valid,v,vfloat4(pos_inf));
     const vbool4 valid_min = valid & (a == vreduce_min(a));
     return bsf(movemask(any(valid_min) ? valid_min : valid));
-  }
-  __forceinline size_t select_max(const vboolf4& valid, const vfloat4& v)
-  {
+}
+__forceinline size_t select_max(const vboolf4& valid, const vfloat4& v)
+{
     const vfloat4 a = select(valid,v,vfloat4(neg_inf));
     const vbool4 valid_max = valid & (a == vreduce_max(a));
     return bsf(movemask(any(valid_max) ? valid_max : valid));
-  }
+}
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Euclidian Space Operators
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// Euclidian Space Operators
+////////////////////////////////////////////////////////////////////////////////
 
 __forceinline float dot(const vfloat4& a, const vfloat4& b) {
     return reduce_add(a*b);
@@ -735,12 +820,14 @@ __forceinline vfloat4 cross(const vfloat4& a, const vfloat4& b)
     return shuffle<1,2,0,3>(msub(a0,b0,a1*b1));
 }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Output Operators
-  ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/// Output Operators
+////////////////////////////////////////////////////////////////////////////////
 
-  inline std::ostream& operator <<(std::ostream& cout, const vfloat4& a) {
+inline std::ostream&
+operator <<(std::ostream& cout, const vfloat4& a)
+{
     return cout << "<" << a[0] << ", " << a[1] << ", " << a[2] << ", " << a[3] << ">";
-  }
+}
 
 }
