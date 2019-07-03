@@ -57,51 +57,51 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
     device->refDec();
   }
 
-  void Scene::printStatistics()
-  {
+void Scene::printStatistics()
+{
     /* calculate maximum number of time segments */
     unsigned max_time_steps = 0;
     for (size_t i=0; i<size(); i++) {
-      if (!get(i)) continue;
-      max_time_steps = max(max_time_steps,get(i)->numTimeSteps);
+        if (!get(i)) continue;
+        max_time_steps = max(max_time_steps,get(i)->numTimeSteps);
     }
 
     /* initialize vectors*/
     std::vector<size_t> statistics[Geometry::GTY_END];
     for (size_t i=0; i<Geometry::GTY_END; i++)
-      statistics[i].resize(max_time_steps);
+        statistics[i].resize(max_time_steps);
 
     /* gather statistics */
     for (size_t i=0; i<size(); i++)
     {
-      if (!get(i)) continue;
-      int ty = get(i)->getType();
-      assert(ty<Geometry::GTY_END);
-      int timesegments = get(i)->numTimeSegments();
-      assert((unsigned int)timesegments < max_time_steps);
-      statistics[ty][timesegments] += get(i)->size();
+        if (!get(i)) continue;
+        int ty = get(i)->getType();
+        assert(ty<Geometry::GTY_END);
+        int timesegments = get(i)->numTimeSegments();
+        assert((unsigned int)timesegments < max_time_steps);
+        statistics[ty][timesegments] += get(i)->size();
     }
 
     /* print statistics */
     std::cout << std::setw(23) << "segments" << ": ";
     for (size_t t=0; t<max_time_steps; t++)
-      std::cout << std::setw(10) << t;
+        std::cout << std::setw(10) << t;
     std::cout << std::endl;
 
     std::cout << "-------------------------";
     for (size_t t=0; t<max_time_steps; t++)
-      std::cout << "----------";
+        std::cout << "----------";
     std::cout << std::endl;
 
     for (size_t p=0; p<Geometry::GTY_END; p++)
     {
-      if (std::string(Geometry::gtype_names[p]) == "") continue;
-      std::cout << std::setw(23) << Geometry::gtype_names[p] << ": ";
-      for (size_t t=0; t<max_time_steps; t++)
-        std::cout << std::setw(10) << statistics[p][t];
-      std::cout << std::endl;
+        if (std::string(Geometry::gtype_names[p]) == "") continue;
+        std::cout << std::setw(23) << Geometry::gtype_names[p] << ": ";
+        for (size_t t=0; t<max_time_steps; t++)
+            std::cout << std::setw(10) << statistics[p][t];
+        std::cout << std::endl;
     }
-  }
+}
 
   void Scene::createTriangleAccel()
   {
@@ -490,16 +490,16 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
     vertices[geomID] = nullptr;
   }
 
-  void Scene::updateInterface()
-  {
+void Scene::updateInterface()
+{
     is_build = true;
-  }
+}
 
-  void Scene::commit_task ()
-  {
+void Scene::commit_task ()
+{
     /* print scene statistics */
     if (device->verbosity(2))
-      printStatistics();
+        printStatistics();
 
     progress_monitor_counter = 0;
 
@@ -513,31 +513,23 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
     unsigned int new_enabled_geometry_types = enabledGeometryTypesMask();
     if (flags_modified || new_enabled_geometry_types != enabled_geometry_types)
     {
-      accels_init();
+        accels_init();
 
-      /* we need to make all geometries modified, otherwise two level builder will
-        not rebuild currently not modified geometries */
-      parallel_for(geometries.size(), [&] ( const size_t i ) {
-          if (geometries[i]) geometries[i]->setModified();
-        });
+        /* we need to make all geometries modified, otherwise two level builder will
+           not rebuild currently not modified geometries */
+        parallel_for(geometries.size(), [&] ( const size_t i ) {
+                                            if (geometries[i]) geometries[i]->setModified();
+                                        });
 
-      if (getNumPrimitives<TriangleMesh,false>()) createTriangleAccel();
-      //if (getNumPrimitives<TriangleMesh,true>()) createTriangleMBAccel();
-      if (getNumPrimitives<QuadMesh,false>()) createQuadAccel();
-      //if (getNumPrimitives<QuadMesh,true>()) createQuadMBAccel();
-      if (getNumPrimitives<GridMesh,false>()) createGridAccel();
-      //if (getNumPrimitives<GridMesh,true>()) createGridMBAccel();
-      if (getNumPrimitives<SubdivMesh,false>()) createSubdivAccel();
-      //if (getNumPrimitives<SubdivMesh,true>()) createSubdivMBAccel();
-      //if (getNumPrimitives<CurveGeometry,false>()) createHairAccel();
-      //if (getNumPrimitives<CurveGeometry,true>()) createHairMBAccel();
-      if (getNumPrimitives<UserGeometry,false>()) createUserGeometryAccel();
-      //if (getNumPrimitives<UserGeometry,true>()) createUserGeometryMBAccel();
-      if (getNumPrimitives<Instance,false>()) createInstanceAccel();
-      //if (getNumPrimitives<Instance,true>()) createInstanceMBAccel();
+        if (getNumPrimitives<TriangleMesh,false>()) createTriangleAccel();
+        if (getNumPrimitives<QuadMesh,false>()) createQuadAccel();
+        if (getNumPrimitives<GridMesh,false>()) createGridAccel();
+        if (getNumPrimitives<SubdivMesh,false>()) createSubdivAccel();
+        if (getNumPrimitives<UserGeometry,false>()) createUserGeometryAccel();
+        if (getNumPrimitives<Instance,false>()) createInstanceAccel();
 
-      flags_modified = false;
-      enabled_geometry_types = new_enabled_geometry_types;
+        flags_modified = false;
+        enabled_geometry_types = new_enabled_geometry_types;
     }
 
     /* select fast code path if no filter function is present */
