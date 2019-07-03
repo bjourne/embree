@@ -288,8 +288,8 @@ TutorialApplication::~TutorialApplication()
 }
 
 SceneLoadingTutorialApplication::SceneLoadingTutorialApplication (
-    const std::string& tutorialName, int features)
-
+    const std::string& tutorialName,
+    int features)
     : TutorialApplication(tutorialName, features),
       scene(new SceneGraph::GroupNode),
       convert_tris_to_quads_prop(inf),

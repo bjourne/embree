@@ -300,9 +300,11 @@ rtcIntersect1(RTCScene hscene,
 #if defined(DEBUG)
     RTC_VERIFY_HANDLE(hscene);
     if (scene->isModified())
-        throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
+        throw_RTCError(RTC_ERROR_INVALID_OPERATION,
+                       "scene got not committed");
     if (((size_t)rayhit) & 0x0F)
-        throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "ray not aligned to 16 bytes");
+        throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,
+                       "ray not aligned to 16 bytes");
 #endif
     STAT3(normal.travs,1,1,1);
     IntersectContext context(scene,user_context);

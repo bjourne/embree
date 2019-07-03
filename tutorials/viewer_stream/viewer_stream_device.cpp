@@ -97,7 +97,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateMeshEdgeLevelBufferTask((int)i,threadIndex,scene_in,cam_pos);
-  }); 
+  });
 #endif
 
   /* now update large meshes */
@@ -112,7 +112,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateSubMeshEdgeLevelBufferTask((int)i,threadIndex,mesh,cam_pos);
-  }); 
+  });
 #else
     updateEdgeLevelBuffer(mesh,cam_pos,0,mesh->numFaces);
 #endif
@@ -318,7 +318,7 @@ void renderTileStandard(int taskIndex,
   for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
   {
     /* ISPC workaround for mask == 0 */
-    
+
 
     RandomSampler sampler;
     RandomSampler_init(sampler, x, y, 0);
@@ -354,7 +354,7 @@ void renderTileStandard(int taskIndex,
   for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
   {
     /* ISPC workaround for mask == 0 */
-    
+
     Ray& ray = rays[N++];
 
     /* eyelight shading */
@@ -375,13 +375,13 @@ void renderTileStandard(int taskIndex,
       int materialID = postIntersect(ray,dg);
       dg.Ng = face_forward(ray.dir,normalize(dg.Ng));
       dg.Ns = face_forward(ray.dir,normalize(dg.Ns));
-      
+
       /* shade */
       if (g_ispc_scene->materials[materialID]->type == MATERIAL_OBJ) {
         ISPCOBJMaterial* material = (ISPCOBJMaterial*) g_ispc_scene->materials[materialID];
         Kd = Vec3fa(material->Kd);
       }
-      
+
       color = Kd*dot(neg(ray.dir),dg.Ns);
 #else
       color = Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))));
@@ -420,27 +420,32 @@ extern "C" void device_init (char* cfg)
 }
 
 /* called by the C++ code to render */
-extern "C" void device_render (int* pixels,
-                           const unsigned int width,
-                           const unsigned int height,
-                           const float time,
-                           const ISPCCamera& camera)
+extern "C" void
+device_render (int* pixels,
+               const unsigned int width,
+               const unsigned int height,
+               const float time,
+               const ISPCCamera& camera)
 {
-  /* create scene */
-  if (!g_scene) {
-    g_scene = convertScene(g_ispc_scene);
-    updateEdgeLevels(g_ispc_scene, camera.xfm.p);
-    rtcCommitScene (g_scene);
-  }
-  
-  /* render image */
-  const int numTilesX = (width +TILE_SIZE_X-1)/TILE_SIZE_X;
-  const int numTilesY = (height+TILE_SIZE_Y-1)/TILE_SIZE_Y;
-  parallel_for(size_t(0),size_t(numTilesX*numTilesY),[&](const range<size_t>& range) {
-    const int threadIndex = (int)TaskScheduler::threadIndex();
-    for (size_t i=range.begin(); i<range.end(); i++)
-      renderTileTask((int)i,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
-  }); 
+    /* create scene */
+    if (!g_scene) {
+        g_scene = convertScene(g_ispc_scene);
+        updateEdgeLevels(g_ispc_scene, camera.xfm.p);
+        rtcCommitScene (g_scene);
+    }
+
+    /* render image */
+    const int numTilesX = (width +TILE_SIZE_X-1)/TILE_SIZE_X;
+    const int numTilesY = (height+TILE_SIZE_Y-1)/TILE_SIZE_Y;
+    parallel_for(size_t(0),size_t(numTilesX*numTilesY),
+                 [&](const range<size_t>& range) {
+                     const int threadIndex =
+                         (int)TaskScheduler::threadIndex();
+                     for (size_t i=range.begin(); i<range.end(); i++)
+                         renderTileTask((int)i,threadIndex,
+                                        pixels,width,height,
+                                        time,camera,numTilesX,numTilesY);
+                 });
 }
 
 /* called by the C++ code for cleanup */

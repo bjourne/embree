@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "../common/math/random_sampler.h"
 #include "../common/core/differential_geometry.h"
 #include "../common/tutorial/tutorial_device.h"
@@ -266,11 +250,13 @@ renderPixelStandard(float x, float y,
     RandomSampler_init(sampler, (int)x, (int)y, 0);
 
     /* initialize ray */
-    Ray ray(Vec3fa(camera.xfm.p),
-            Vec3fa(normalize(x*camera.xfm.l.vx + y*camera.xfm.l.vy + camera.xfm.l.vz)),
-            0.0f,
-            inf,
-            RandomSampler_get1D(sampler));
+    Ray ray(
+        Vec3fa(camera.xfm.p),
+        Vec3fa(normalize(x * camera.xfm.l.vx +
+                         y * camera.xfm.l.vy + camera.xfm.l.vz)),
+        0.0f,
+        inf,
+        RandomSampler_get1D(sampler));
 
     /* intersect ray with scene */
     RTCIntersectContext context;
@@ -340,17 +326,20 @@ renderTileStandard(int taskIndex,
     const unsigned int y0 = tileY * TILE_SIZE_Y;
     const unsigned int y1 = min(y0+TILE_SIZE_Y,height);
 
-    for (unsigned int y=y0; y<y1; y++)
+    for (unsigned int y = y0; y < y1; y++)
     {
-        for (unsigned int x=x0; x<x1; x++)
+        for (unsigned int x = x0; x < x1; x++)
         {
             Vec3fa color = renderPixelStandard(
                 (float)x, (float)y, camera, g_stats[threadIndex]);
 
             /* write color to framebuffer */
-            unsigned int r = (unsigned int) (255.0f * clamp(color.x,0.0f,1.0f));
-            unsigned int g = (unsigned int) (255.0f * clamp(color.y,0.0f,1.0f));
-            unsigned int b = (unsigned int) (255.0f * clamp(color.z,0.0f,1.0f));
+            unsigned int r = (unsigned int)
+                (255.0f * clamp(color.x,0.0f,1.0f));
+            unsigned int g = (unsigned int)
+                (255.0f * clamp(color.y,0.0f,1.0f));
+            unsigned int b = (unsigned int)
+                (255.0f * clamp(color.z,0.0f,1.0f));
             pixels[y*width+x] = (b << 16) + (g << 8) + r;
         }
     }
@@ -366,9 +355,10 @@ renderTileTask(int taskIndex, int threadIndex, int* pixels,
                const int numTilesX,
                const int numTilesY)
 {
-    //printf("Render tile %d, %d * %d\n", threadIndex, numTilesX, numTilesY);
     renderTile(taskIndex, threadIndex,
-               pixels, width, height, time, camera, numTilesX, numTilesY);
+               pixels, width, height,
+               time, camera,
+               numTilesX, numTilesY);
 }
 
 Vec3fa old_p;

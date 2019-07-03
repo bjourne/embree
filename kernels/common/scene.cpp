@@ -186,44 +186,6 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 #endif
   }
 
-//   void Scene::createTriangleMBAccel()
-//   {
-// #if defined(EMBREE_GEOMETRY_TRIANGLE)
-//     if (device->tri_accel_mb == "default")
-//     {
-//       int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-
-// #if defined (EMBREE_TARGET_SIMD8)
-//       if (device->canUseAVX2()) // BVH8 reduces performance on AVX only-machines
-//       {
-//         switch (mode) {
-//         case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-//         case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//         case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-//         case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//         }
-//       }
-//       else
-// #endif
-//       {
-//         switch (mode) {
-//         case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-//         case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//         case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-//         case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//         }
-//       }
-//     }
-//     else if (device->tri_accel_mb == "bvh4.triangle4imb") accels_add(device->bvh4_factory->BVH4Triangle4iMB(this));
-//     else if (device->tri_accel_mb == "bvh4.triangle4vmb") accels_add(device->bvh4_factory->BVH4Triangle4vMB(this));
-// #if defined (EMBREE_TARGET_SIMD8)
-//     else if (device->tri_accel_mb == "bvh8.triangle4imb") accels_add(device->bvh8_factory->BVH8Triangle4iMB(this));
-//     else if (device->tri_accel_mb == "bvh8.triangle4vmb") accels_add(device->bvh8_factory->BVH8Triangle4vMB(this));
-// #endif
-//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown motion blur triangle acceleration structure "+device->tri_accel_mb);
-// #endif
-//   }
-
   void Scene::createQuadAccel()
   {
 #if defined(EMBREE_GEOMETRY_QUAD)

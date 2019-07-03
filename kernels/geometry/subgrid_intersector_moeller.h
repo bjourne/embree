@@ -5,61 +5,61 @@
 
 namespace embree
 {
-  namespace isa
-  {
+namespace isa
+{
 
-    /* ----------------------------- */
-    /* -- single ray intersectors -- */
-    /* ----------------------------- */
+/* ----------------------------- */
+/* -- single ray intersectors -- */
+/* ----------------------------- */
 
-    template<int M>
-      __forceinline void interpolateUV(MoellerTrumboreHitM<M> &hit,const GridMesh::Grid &g, const SubGrid& subgrid)
+template<int M>
+__forceinline void interpolateUV(MoellerTrumboreHitM<M> &hit,const GridMesh::Grid &g, const SubGrid& subgrid)
+{
+    /* correct U,V interpolation across the entire grid */
+    const vint<M> sx((int)subgrid.x());
+    const vint<M> sy((int)subgrid.y());
+    const vint<M> sxM(sx + vint<M>(0,1,1,0));
+    const vint<M> syM(sy + vint<M>(0,0,1,1));
+    const float inv_resX = rcp((float)((int)g.resX-1));
+    const float inv_resY = rcp((float)((int)g.resY-1));
+    hit.U = (hit.U + (vfloat<M>)sxM * hit.absDen) * inv_resX;
+    hit.V = (hit.V + (vfloat<M>)syM * hit.absDen) * inv_resY;
+}
+
+template<int M, bool filter>
+struct SubGridQuadMIntersector1MoellerTrumbore;
+
+template<int M, bool filter>
+struct SubGridQuadMIntersector1MoellerTrumbore
+{
+    __forceinline SubGridQuadMIntersector1MoellerTrumbore() {}
+
+    __forceinline SubGridQuadMIntersector1MoellerTrumbore(const Ray& ray, const void* ptr) {}
+
+    __forceinline void intersect(RayHit& ray, IntersectContext* context,
+                                 const Vec3vf<M>& v0, const Vec3vf<M>& v1, const Vec3vf<M>& v2, const Vec3vf<M>& v3,
+                                 const GridMesh::Grid &g, const SubGrid& subgrid) const
     {
-      /* correct U,V interpolation across the entire grid */
-      const vint<M> sx((int)subgrid.x());
-      const vint<M> sy((int)subgrid.y());
-      const vint<M> sxM(sx + vint<M>(0,1,1,0));
-      const vint<M> syM(sy + vint<M>(0,0,1,1));
-      const float inv_resX = rcp((float)((int)g.resX-1));
-      const float inv_resY = rcp((float)((int)g.resY-1));
-      hit.U = (hit.U + (vfloat<M>)sxM * hit.absDen) * inv_resX;
-      hit.V = (hit.V + (vfloat<M>)syM * hit.absDen) * inv_resY;
-    }
+        MoellerTrumboreHitM<M> hit;
+        MoellerTrumboreIntersector1<M> intersector(ray,nullptr);
+        Intersect1EpilogMU<M,filter> epilog(ray,context,subgrid.geomID(),subgrid.primID());
 
-    template<int M, bool filter>
-      struct SubGridQuadMIntersector1MoellerTrumbore;
-
-    template<int M, bool filter>
-      struct SubGridQuadMIntersector1MoellerTrumbore
-      {
-        __forceinline SubGridQuadMIntersector1MoellerTrumbore() {}
-
-        __forceinline SubGridQuadMIntersector1MoellerTrumbore(const Ray& ray, const void* ptr) {}
-
-        __forceinline void intersect(RayHit& ray, IntersectContext* context,
-                                     const Vec3vf<M>& v0, const Vec3vf<M>& v1, const Vec3vf<M>& v2, const Vec3vf<M>& v3,
-                                     const GridMesh::Grid &g, const SubGrid& subgrid) const
+        /* intersect first triangle */
+        if (intersector.intersect(ray,v0,v1,v3,hit))
         {
-          MoellerTrumboreHitM<M> hit;
-          MoellerTrumboreIntersector1<M> intersector(ray,nullptr);
-          Intersect1EpilogMU<M,filter> epilog(ray,context,subgrid.geomID(),subgrid.primID());
-
-          /* intersect first triangle */
-          if (intersector.intersect(ray,v0,v1,v3,hit))
-          {
             interpolateUV<M>(hit,g,subgrid);
             epilog(hit.valid,hit);
-          }
+        }
 
-          /* intersect second triangle */
-          if (intersector.intersect(ray,v2,v3,v1,hit))
-          {
+        /* intersect second triangle */
+        if (intersector.intersect(ray,v2,v3,v1,hit))
+        {
             hit.U = hit.absDen - hit.U;
             hit.V = hit.absDen - hit.V;
             interpolateUV<M>(hit,g,subgrid);
             epilog(hit.valid,hit);
-          }
         }
+    }
 
         __forceinline bool occluded(Ray& ray, IntersectContext* context,
                                     const Vec3vf<M>& v0, const Vec3vf<M>& v1, const Vec3vf<M>& v2, const Vec3vf<M>& v3,
