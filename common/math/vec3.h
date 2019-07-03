@@ -309,8 +309,15 @@ stable_triangle_normal(const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c)
 
   template<typename T> __forceinline T       sum      ( const Vec3<T>& a )                   { return a.x+a.y+a.z; }
 
-  template<typename T> __forceinline      T  halfArea ( const Vec3<T>& d )                  { return madd(d.x,(d.y+d.z),d.y*d.z); }
-  template<typename T> __forceinline      T  area     ( const Vec3<T>& d )                  { return 2.0f*halfArea(d); }
+template<typename T> __forceinline      T
+halfArea (const Vec3<T>& d)
+{
+    return madd(d.x, (d.y+d.z), d.y*d.z);
+}
+template<typename T> __forceinline      T  area(const Vec3<T>& d )
+{
+    return 2.0f*halfArea(d);
+}
 
   template<typename T> __forceinline Vec3<T> normalize_safe( const Vec3<T>& a ) {
     const T d = dot(a,a); return select(d == T( zero ), a ,  a*rsqrt(d) );

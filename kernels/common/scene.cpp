@@ -186,43 +186,43 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 #endif
   }
 
-  void Scene::createTriangleMBAccel()
-  {
-#if defined(EMBREE_GEOMETRY_TRIANGLE)
-    if (device->tri_accel_mb == "default")
-    {
-      int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+//   void Scene::createTriangleMBAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_TRIANGLE)
+//     if (device->tri_accel_mb == "default")
+//     {
+//       int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
 
-#if defined (EMBREE_TARGET_SIMD8)
-      if (device->canUseAVX2()) // BVH8 reduces performance on AVX only-machines
-      {
-        switch (mode) {
-        case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-        case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-        case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-        case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-        }
-      }
-      else
-#endif
-      {
-        switch (mode) {
-        case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-        case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-        case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-        case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-        }
-      }
-    }
-    else if (device->tri_accel_mb == "bvh4.triangle4imb") accels_add(device->bvh4_factory->BVH4Triangle4iMB(this));
-    else if (device->tri_accel_mb == "bvh4.triangle4vmb") accels_add(device->bvh4_factory->BVH4Triangle4vMB(this));
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->tri_accel_mb == "bvh8.triangle4imb") accels_add(device->bvh8_factory->BVH8Triangle4iMB(this));
-    else if (device->tri_accel_mb == "bvh8.triangle4vmb") accels_add(device->bvh8_factory->BVH8Triangle4vMB(this));
-#endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown motion blur triangle acceleration structure "+device->tri_accel_mb);
-#endif
-  }
+// #if defined (EMBREE_TARGET_SIMD8)
+//       if (device->canUseAVX2()) // BVH8 reduces performance on AVX only-machines
+//       {
+//         switch (mode) {
+//         case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
+//         case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//         case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
+//         case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//         }
+//       }
+//       else
+// #endif
+//       {
+//         switch (mode) {
+//         case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
+//         case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//         case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
+//         case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//         }
+//       }
+//     }
+//     else if (device->tri_accel_mb == "bvh4.triangle4imb") accels_add(device->bvh4_factory->BVH4Triangle4iMB(this));
+//     else if (device->tri_accel_mb == "bvh4.triangle4vmb") accels_add(device->bvh4_factory->BVH4Triangle4vMB(this));
+// #if defined (EMBREE_TARGET_SIMD8)
+//     else if (device->tri_accel_mb == "bvh8.triangle4imb") accels_add(device->bvh8_factory->BVH8Triangle4iMB(this));
+//     else if (device->tri_accel_mb == "bvh8.triangle4vmb") accels_add(device->bvh8_factory->BVH8Triangle4vMB(this));
+// #endif
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown motion blur triangle acceleration structure "+device->tri_accel_mb);
+// #endif
+//   }
 
   void Scene::createQuadAccel()
   {
@@ -305,42 +305,42 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 #endif
   }
 
-  void Scene::createQuadMBAccel()
-  {
-#if defined(EMBREE_GEOMETRY_QUAD)
-    if (device->quad_accel_mb == "default")
-    {
-      int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-      switch (mode) {
-      case /*0b00*/ 0:
-#if defined (EMBREE_TARGET_SIMD8)
-        if (device->canUseAVX())
-          accels_add(device->bvh8_factory->BVH8Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
-        else
-#endif
-          accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
-        break;
+//   void Scene::createQuadMBAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_QUAD)
+//     if (device->quad_accel_mb == "default")
+//     {
+//       int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+//       switch (mode) {
+//       case /*0b00*/ 0:
+// #if defined (EMBREE_TARGET_SIMD8)
+//         if (device->canUseAVX())
+//           accels_add(device->bvh8_factory->BVH8Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+//         else
+// #endif
+//           accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+//         break;
 
-      case /*0b01*/ 1:
-#if defined (EMBREE_TARGET_SIMD8)
-        if (device->canUseAVX())
-          accels_add(device->bvh8_factory->BVH8Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-        else
-#endif
-          accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-        break;
+//       case /*0b01*/ 1:
+// #if defined (EMBREE_TARGET_SIMD8)
+//         if (device->canUseAVX())
+//           accels_add(device->bvh8_factory->BVH8Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
+//         else
+// #endif
+//           accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
+//         break;
 
-      case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-      case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-      }
-    }
-    else if (device->quad_accel_mb == "bvh4.quad4imb") accels_add(device->bvh4_factory->BVH4Quad4iMB(this));
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->quad_accel_mb == "bvh8.quad4imb") accels_add(device->bvh8_factory->BVH8Quad4iMB(this));
-#endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown quad motion blur acceleration structure "+device->quad_accel_mb);
-#endif
-  }
+//       case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
+//       case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4iMB(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//       }
+//     }
+//     else if (device->quad_accel_mb == "bvh4.quad4imb") accels_add(device->bvh4_factory->BVH4Quad4iMB(this));
+// #if defined (EMBREE_TARGET_SIMD8)
+//     else if (device->quad_accel_mb == "bvh8.quad4imb") accels_add(device->bvh8_factory->BVH8Quad4iMB(this));
+// #endif
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown quad motion blur acceleration structure "+device->quad_accel_mb);
+// #endif
+//   }
 
   void Scene::createSubdivAccel()
   {
@@ -354,15 +354,15 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 #endif
   }
 
-  void Scene::createSubdivMBAccel()
-  {
-#if defined(EMBREE_GEOMETRY_SUBDIVISION)
-    if (device->subdiv_accel_mb == "default") {
-      accels_add(device->bvh4_factory->BVH4SubdivPatch1MB(this));
-    }
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown subdiv mblur accel "+device->subdiv_accel_mb);
-#endif
-  }
+//   void Scene::createSubdivMBAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_SUBDIVISION)
+//     if (device->subdiv_accel_mb == "default") {
+//       accels_add(device->bvh4_factory->BVH4SubdivPatch1MB(this));
+//     }
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown subdiv mblur accel "+device->subdiv_accel_mb);
+// #endif
+//   }
 
   void Scene::createUserGeometryAccel()
   {
@@ -396,24 +396,24 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 #endif
   }
 
-  void Scene::createUserGeometryMBAccel()
-  {
-#if defined(EMBREE_GEOMETRY_USER)
-    if (device->object_accel_mb == "default"    ) {
-#if defined (EMBREE_TARGET_SIMD8)
-      if (device->canUseAVX() && !isCompactAccel())
-        accels_add(device->bvh8_factory->BVH8UserGeometryMB(this));
-      else
-#endif
-        accels_add(device->bvh4_factory->BVH4UserGeometryMB(this));
-    }
-    else if (device->object_accel_mb == "bvh4.object") accels_add(device->bvh4_factory->BVH4UserGeometryMB(this));
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->object_accel_mb == "bvh8.object") accels_add(device->bvh8_factory->BVH8UserGeometryMB(this));
-#endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown user geometry mblur accel "+device->object_accel_mb);
-#endif
-  }
+//   void Scene::createUserGeometryMBAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_USER)
+//     if (device->object_accel_mb == "default"    ) {
+// #if defined (EMBREE_TARGET_SIMD8)
+//       if (device->canUseAVX() && !isCompactAccel())
+//         accels_add(device->bvh8_factory->BVH8UserGeometryMB(this));
+//       else
+// #endif
+//         accels_add(device->bvh4_factory->BVH4UserGeometryMB(this));
+//     }
+//     else if (device->object_accel_mb == "bvh4.object") accels_add(device->bvh4_factory->BVH4UserGeometryMB(this));
+// #if defined (EMBREE_TARGET_SIMD8)
+//     else if (device->object_accel_mb == "bvh8.object") accels_add(device->bvh8_factory->BVH8UserGeometryMB(this));
+// #endif
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown user geometry mblur accel "+device->object_accel_mb);
+// #endif
+//   }
 
   void Scene::createInstanceAccel()
   {
@@ -431,21 +431,21 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 #endif
   }
 
-  void Scene::createInstanceMBAccel()
-  {
-#if defined(EMBREE_GEOMETRY_INSTANCE)
-    //if (device->instance_accel_mb == "default")
-    {
-#if defined (EMBREE_TARGET_SIMD8)
-      if (device->canUseAVX() && !isCompactAccel())
-        accels_add(device->bvh8_factory->BVH8InstanceMB(this));
-      else
-#endif
-        accels_add(device->bvh4_factory->BVH4InstanceMB(this));
-    }
-    //else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown instance mblur accel "+device->instance_accel_mb);
-#endif
-  }
+//   void Scene::createInstanceMBAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_INSTANCE)
+//     //if (device->instance_accel_mb == "default")
+//     {
+// #if defined (EMBREE_TARGET_SIMD8)
+//       if (device->canUseAVX() && !isCompactAccel())
+//         accels_add(device->bvh8_factory->BVH8InstanceMB(this));
+//       else
+// #endif
+//         accels_add(device->bvh4_factory->BVH4InstanceMB(this));
+//     }
+//     //else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown instance mblur accel "+device->instance_accel_mb);
+// #endif
+//   }
 
   void Scene::createGridAccel()
   {
@@ -473,18 +473,18 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
 
   }
 
-  void Scene::createGridMBAccel()
-  {
-#if defined(EMBREE_GEOMETRY_GRID)
-    if (device->grid_accel_mb == "default")
-    {
-      accels_add(device->bvh4_factory->BVH4GridMB(this,BVHFactory::BuildVariant::STATIC));
-    }
-    else if (device->grid_accel_mb == "bvh4mb.grid") accels_add(device->bvh4_factory->BVH4GridMB(this));
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown grid mb accel "+device->grid_accel);
-#endif
+//   void Scene::createGridMBAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_GRID)
+//     if (device->grid_accel_mb == "default")
+//     {
+//       accels_add(device->bvh4_factory->BVH4GridMB(this,BVHFactory::BuildVariant::STATIC));
+//     }
+//     else if (device->grid_accel_mb == "bvh4mb.grid") accels_add(device->bvh4_factory->BVH4GridMB(this));
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown grid mb accel "+device->grid_accel);
+// #endif
 
-  }
+//   }
 
   void Scene::clear() {
   }
@@ -560,19 +560,19 @@ void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcI
         });
 
       if (getNumPrimitives<TriangleMesh,false>()) createTriangleAccel();
-      if (getNumPrimitives<TriangleMesh,true>()) createTriangleMBAccel();
+      //if (getNumPrimitives<TriangleMesh,true>()) createTriangleMBAccel();
       if (getNumPrimitives<QuadMesh,false>()) createQuadAccel();
-      if (getNumPrimitives<QuadMesh,true>()) createQuadMBAccel();
+      //if (getNumPrimitives<QuadMesh,true>()) createQuadMBAccel();
       if (getNumPrimitives<GridMesh,false>()) createGridAccel();
-      if (getNumPrimitives<GridMesh,true>()) createGridMBAccel();
+      //if (getNumPrimitives<GridMesh,true>()) createGridMBAccel();
       if (getNumPrimitives<SubdivMesh,false>()) createSubdivAccel();
-      if (getNumPrimitives<SubdivMesh,true>()) createSubdivMBAccel();
+      //if (getNumPrimitives<SubdivMesh,true>()) createSubdivMBAccel();
       //if (getNumPrimitives<CurveGeometry,false>()) createHairAccel();
       //if (getNumPrimitives<CurveGeometry,true>()) createHairMBAccel();
       if (getNumPrimitives<UserGeometry,false>()) createUserGeometryAccel();
-      if (getNumPrimitives<UserGeometry,true>()) createUserGeometryMBAccel();
+      //if (getNumPrimitives<UserGeometry,true>()) createUserGeometryMBAccel();
       if (getNumPrimitives<Instance,false>()) createInstanceAccel();
-      if (getNumPrimitives<Instance,true>()) createInstanceMBAccel();
+      //if (getNumPrimitives<Instance,true>()) createInstanceMBAccel();
 
       flags_modified = false;
       enabled_geometry_types = new_enabled_geometry_types;

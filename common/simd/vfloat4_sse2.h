@@ -20,10 +20,7 @@ struct vfloat<4>
         __m128 v; float f[4]; int i[4];
     }; // data
 
-    ////////////////////////////////////////////////////////////////////////////////
     /// Constructors, Assignment & Cast Operators
-    ////////////////////////////////////////////////////////////////////////////////
-
     __forceinline vfloat() {}
     __forceinline vfloat(const vfloat4& other)
     {
@@ -244,10 +241,16 @@ struct vfloat<4>
     /// Array Access
     ////////////////////////////////////////////////////////////////////////////////
 
-    __forceinline const float& operator [](size_t index) const { assert(index < 4); return f[index]; }
+    __forceinline const float&
+    operator [](size_t index) const
+    {
+        assert(index < 4); return f[index];
+    }
     __forceinline       float& operator [](size_t index)       { assert(index < 4); return f[index]; }
 
-    friend __forceinline vfloat4 select(const vboolf4& m, const vfloat4& t, const vfloat4& f) {
+    friend __forceinline vfloat4
+    select(const vboolf4& m, const vfloat4& t, const vfloat4& f)
+    {
 #if defined(__AVX512VL__)
       return _mm_mask_blend_ps(m, f, t);
 #elif defined(__SSE4_1__)
@@ -256,7 +259,7 @@ struct vfloat<4>
       return _mm_or_ps(_mm_and_ps(m, t), _mm_andnot_ps(m, f));
 #endif
     }
-  };
+};
 
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -815,10 +818,7 @@ __forceinline size_t select_max(const vboolf4& valid, const vfloat4& v)
     return bsf(movemask(any(valid_max) ? valid_max : valid));
 }
 
-////////////////////////////////////////////////////////////////////////////////
 /// Euclidian Space Operators
-////////////////////////////////////////////////////////////////////////////////
-
 __forceinline float dot(const vfloat4& a, const vfloat4& b) {
     return reduce_add(a*b);
 }

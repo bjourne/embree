@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "bvh_intersector_hybrid.h"
 #include "bvh_traverser1.h"
 #include "node_intersector1.h"
@@ -129,11 +113,11 @@ namespace embree
                                                                                                IntersectContext* __restrict__ context)
     {
       BVH* __restrict__ bvh = (BVH*)This->ptr;
-      
+
       /* we may traverse an empty BVH in case all geometry was invalid */
       if (bvh->root == BVH::emptyNode)
         return;
-            
+
 #if ENABLE_FAST_COHERENT_CODEPATHS == 1
       assert(context);
       if (unlikely(types == BVH_AN1 && context->user && context->isCoherent()))
@@ -173,7 +157,7 @@ namespace embree
       {
         tray.tnear = select(valid, org_ray_tnear, vfloat<K>(pos_inf));
         tray.tfar  = select(valid, org_ray_tfar , vfloat<K>(neg_inf));
-        
+
         for (; valid_bits!=0; ) {
           const size_t i = bscf(valid_bits);
           intersect1(This, bvh, bvh->root, i, pre, ray, tray, context);
@@ -212,7 +196,7 @@ namespace embree
           ((diff_octant >> 0) & 1);
 
         vbool<K> octant_valid = (count_diff_octant <= 1) & (octant != vint<K>(0xffffffff));
-        if (!single || !split) octant_valid = valid; // deactivate octant sorting in pure chunk mode, otherwise instance traversal performance goes down 
+        if (!single || !split) octant_valid = valid; // deactivate octant sorting in pure chunk mode, otherwise instance traversal performance goes down
 
 
         octant = select(octant_valid,vint<K>(0xffffffff),octant);
@@ -295,7 +279,7 @@ namespace embree
               /* if we hit the child we choose to continue with that child if it
                  is closer than the current next child, or we push it onto the stack */
               if (likely(any(lhit)))
-              {                                
+              {
                 assert(sptr_node < stackEnd);
                 assert(child != BVH::emptyNode);
                 const vfloat<K> childDist = select(lhit, lnearP, inf);
@@ -313,7 +297,7 @@ namespace embree
 
                 /* push hit child onto stack */
                 else {
-                  num_child_hits++;                  
+                  num_child_hits++;
                   *sptr_node = child; sptr_node++;
                   *sptr_near = childDist; sptr_near++;
                 }
@@ -326,7 +310,7 @@ namespace embree
 
             if (unlikely(cur == BVH::emptyNode))
               goto pop;
-            
+
             /* improved distance sorting for 3 or more hits */
             if (unlikely(num_child_hits >= 2))
             {
@@ -397,7 +381,7 @@ namespace embree
                                                                                                        IntersectContext* context)
     {
       BVH* __restrict__ bvh = (BVH*)This->ptr;
-      
+
       /* filter out invalid rays */
       vbool<K> valid = *valid_i == -1;
 #if defined(EMBREE_IGNORE_INVALID_RAYS)
@@ -464,7 +448,7 @@ namespace embree
             if (unlikely(!m_frustum_node)) goto pop;
             cur = BVH::emptyNode;
             curDist = pos_inf;
-            
+
 #if defined(__AVX__)
             //STAT3(normal.trav_hit_boxes[popcnt(m_frustum_node)], 1, 1, 1);
 #endif
@@ -477,7 +461,7 @@ namespace embree
               BVHNNodeIntersectorK<N, K, types, robust>::intersect(nodeRef, i, tray, ray.time(), lnearP, lhit);
 
               if (likely(any(lhit)))
-              {                                
+              {
                 const vfloat<K> childDist = fmin[i];
                 const NodeRef child = node->child(i);
                 child.prefetch();
@@ -498,7 +482,7 @@ namespace embree
                   stackPtr->ptr = child;
                   *(float*)&stackPtr->dist = toScalar(childDist);
                   stackPtr++;
-                }                
+                }
               }
             } while(m_frustum_node);
 
@@ -543,7 +527,7 @@ namespace embree
             stackPtr++;
           }
         }
-        
+
       } while(valid_bits);
     }
 
@@ -624,11 +608,11 @@ namespace embree
                                                                                               IntersectContext* context)
     {
       BVH* __restrict__ bvh = (BVH*)This->ptr;
-      
+
       /* we may traverse an empty BVH in case all geometry was invalid */
       if (bvh->root == BVH::emptyNode)
         return;
-      
+
 #if ENABLE_FAST_COHERENT_CODEPATHS == 1
       assert(context);
       if (unlikely(types == BVH_AN1 && context->user && context->isCoherent()))
@@ -705,7 +689,7 @@ namespace embree
         {
           size_t bits = movemask(active);
 #if FORCE_SINGLE_MODE == 0
-          if (unlikely(popcnt(bits) <= switchThreshold)) 
+          if (unlikely(popcnt(bits) <= switchThreshold))
 #endif
           {
             for (; bits!=0; ) {
@@ -809,7 +793,7 @@ namespace embree
                                                                                                       IntersectContext* context)
     {
       BVH* __restrict__ bvh = (BVH*)This->ptr;
-      
+
       /* filter out invalid rays */
       vbool<K> valid = *valid_i == -1;
 #if defined(EMBREE_IGNORE_INVALID_RAYS)
@@ -891,7 +875,7 @@ namespace embree
               BVHNNodeIntersectorK<N, K, types, robust>::intersect(nodeRef, i, tray, ray.time(), lnearP, lhit);
 
               if (likely(any(lhit)))
-              {                                
+              {
                 const NodeRef child = node->child(i);
                 assert(child != BVH::emptyNode);
                 child.prefetch();

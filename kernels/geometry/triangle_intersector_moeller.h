@@ -97,7 +97,6 @@ struct MoellerTrumboreIntersector1
 
         const Vec3<vfloat<M>> R = cross(C, D);
 
-        //const Vec3vf<M> R = cross(C,D);
         const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
         const vfloat<M> absDen = abs(den);
         const vfloat<M> sgnDen = signmsk(den);
