@@ -140,49 +140,49 @@ struct vextend
     static const int size = N;
     #define SIMD_MODE(N) N, N
 #endif
-  };
+};
 
-  /* 4-wide shortcuts */
-  typedef vfloat<4>  vfloat4;
-  typedef vdouble<4> vdouble4;
-  typedef vreal<4>   vreal4;
-  typedef vint<4>    vint4;
-  typedef vuint<4>  vuint4;
-  typedef vllong<4>  vllong4;
-  typedef vbool<4>   vbool4;
-  typedef vboolf<4>  vboolf4;
-  typedef vboold<4>  vboold4;
+/* 4-wide shortcuts */
+typedef vfloat<4>  vfloat4;
+typedef vdouble<4> vdouble4;
+typedef vreal<4>   vreal4;
+typedef vint<4>    vint4;
+typedef vuint<4>  vuint4;
+typedef vllong<4>  vllong4;
+typedef vbool<4>   vbool4;
+typedef vboolf<4>  vboolf4;
+typedef vboold<4>  vboold4;
 
-  /* 8-wide shortcuts */
-  typedef vfloat<8>  vfloat8;
-  typedef vdouble<8> vdouble8;
-  typedef vreal<8>   vreal8;
-  typedef vint<8>    vint8;
-  typedef vuint<8>    vuint8;
-  typedef vllong<8>  vllong8;
-  typedef vbool<8>   vbool8;
-  typedef vboolf<8>  vboolf8;
-  typedef vboold<8>  vboold8;
+/* 8-wide shortcuts */
+typedef vfloat<8>  vfloat8;
+typedef vdouble<8> vdouble8;
+typedef vreal<8>   vreal8;
+typedef vint<8>    vint8;
+typedef vuint<8>    vuint8;
+typedef vllong<8>  vllong8;
+typedef vbool<8>   vbool8;
+typedef vboolf<8>  vboolf8;
+typedef vboold<8>  vboold8;
 
-  /* 16-wide shortcuts */
-  typedef vfloat<16>  vfloat16;
-  typedef vdouble<16> vdouble16;
-  typedef vreal<16>   vreal16;
-  typedef vint<16>    vint16;
-  typedef vuint<16>   vuint16;
-  typedef vllong<16>  vllong16;
-  typedef vbool<16>   vbool16;
-  typedef vboolf<16>  vboolf16;
-  typedef vboold<16>  vboold16;
+/* 16-wide shortcuts */
+typedef vfloat<16>  vfloat16;
+typedef vdouble<16> vdouble16;
+typedef vreal<16>   vreal16;
+typedef vint<16>    vint16;
+typedef vuint<16>   vuint16;
+typedef vllong<16>  vllong16;
+typedef vbool<16>   vbool16;
+typedef vboolf<16>  vboolf16;
+typedef vboold<16>  vboold16;
 
-  /* Default shortcuts */
-  typedef vfloat<VSIZEX>  vfloatx;
-  typedef vdouble<VSIZEX> vdoublex;
-  typedef vreal<VSIZEX>   vrealx;
-  typedef vint<VSIZEX>    vintx;
-  typedef vuint<VSIZEX>   vuintx;
-  typedef vllong<VSIZEX>  vllongx;
-  typedef vbool<VSIZEX>   vboolx;
-  typedef vboolf<VSIZEX>  vboolfx;
-  typedef vboold<VSIZEX>  vbooldx;
+/* Default shortcuts */
+typedef vfloat<VSIZEX>  vfloatx;
+typedef vdouble<VSIZEX> vdoublex;
+typedef vreal<VSIZEX>   vrealx;
+typedef vint<VSIZEX>    vintx;
+typedef vuint<VSIZEX>   vuintx;
+typedef vllong<VSIZEX>  vllongx;
+typedef vbool<VSIZEX>   vboolx;
+typedef vboolf<VSIZEX>  vboolfx;
+typedef vboold<VSIZEX>  vbooldx;
 }

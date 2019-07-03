@@ -75,7 +75,6 @@ RTC_API void
 rtcGetSceneLinearBounds(RTCScene scene,
                         struct RTCLinearBounds* bounds_o);
 
-/* Intersects a single ray with the scene. */
 RTC_API void
 rtcIntersect1(RTCScene scene,
               struct RTCIntersectContext* context,
@@ -91,7 +90,11 @@ RTC_API void rtcIntersect8(const int* valid, RTCScene scene, struct RTCIntersect
 RTC_API void rtcIntersect16(const int* valid, RTCScene scene, struct RTCIntersectContext* context, struct RTCRayHit16* rayhit);
 
 /* Intersects a stream of M rays with the scene. */
-RTC_API void rtcIntersect1M(RTCScene scene, struct RTCIntersectContext* context, struct RTCRayHit* rayhit, unsigned int M, size_t byteStride);
+RTC_API void rtcIntersect1M(RTCScene scene,
+                            struct RTCIntersectContext* context,
+                            struct RTCRayHit* rayhit,
+                            unsigned int M,
+                            size_t byteStride);
 
 /* Intersects a stream of pointers to M rays with the scene. */
 RTC_API void rtcIntersect1Mp(RTCScene scene, struct RTCIntersectContext* context, struct RTCRayHit** rayhit, unsigned int M);

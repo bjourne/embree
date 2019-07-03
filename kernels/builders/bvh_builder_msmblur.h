@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #define MBLUR_NUM_TEMPORAL_BINS 2
@@ -112,80 +96,80 @@ namespace embree
         size_t numSharedPrimVecs;
       };
 
-    template<typename Mesh>
-      struct RecalculatePrimRef
-      {
-        Scene* scene;
+template<typename Mesh>
+struct RecalculatePrimRef
+{
+    Scene* scene;
 
-        __forceinline RecalculatePrimRef (Scene* scene)
-          : scene(scene) {}
-
-        __forceinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range) const
-        {
-          const unsigned geomID = prim.geomID();
-          const unsigned primID = prim.primID();
-          const Mesh* mesh = scene->get<Mesh>(geomID);
-          const LBBox3fa lbounds = mesh->linearBounds(primID, time_range);
-          const range<int> tbounds = mesh->timeSegmentRange(time_range);
-          return PrimRefMB (lbounds, tbounds.size(), mesh->time_range, mesh->numTimeSegments(), geomID, primID);
-        }
-
-        // __noinline is workaround for ICC16 bug under MacOSX
-        __noinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const
-        {
-          const unsigned geomID = prim.geomID();
-          const unsigned primID = prim.primID();
-          const Mesh* mesh = scene->get<Mesh>(geomID);
-          const LBBox3fa lbounds = mesh->linearBounds(space, primID, time_range);
-          const range<int> tbounds = mesh->timeSegmentRange(time_range);
-          return PrimRefMB (lbounds, tbounds.size(), mesh->time_range, mesh->numTimeSegments(), geomID, primID);
-        }
-
-        __forceinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range) const {
-          return scene->get<Mesh>(prim.geomID())->linearBounds(prim.primID(), time_range);
-        }
-
-        // __noinline is workaround for ICC16 bug under MacOSX
-        __noinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const {
-          return scene->get<Mesh>(prim.geomID())->linearBounds(space, prim.primID(), time_range);
-        }
-      };
-
-    struct VirtualRecalculatePrimRef
-    {
-      Scene* scene;
-      
-      __forceinline VirtualRecalculatePrimRef (Scene* scene)
+    __forceinline RecalculatePrimRef (Scene* scene)
         : scene(scene) {}
-      
-      __forceinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range) const
-      {
+
+    __forceinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range) const
+    {
+        const unsigned geomID = prim.geomID();
+        const unsigned primID = prim.primID();
+        const Mesh* mesh = scene->get<Mesh>(geomID);
+        const LBBox3fa lbounds = mesh->linearBounds(primID, time_range);
+        const range<int> tbounds = mesh->timeSegmentRange(time_range);
+        return PrimRefMB (lbounds, tbounds.size(), mesh->time_range, mesh->numTimeSegments(), geomID, primID);
+    }
+
+    // __noinline is workaround for ICC16 bug under MacOSX
+    __noinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const
+    {
+        const unsigned geomID = prim.geomID();
+        const unsigned primID = prim.primID();
+        const Mesh* mesh = scene->get<Mesh>(geomID);
+        const LBBox3fa lbounds = mesh->linearBounds(space, primID, time_range);
+        const range<int> tbounds = mesh->timeSegmentRange(time_range);
+        return PrimRefMB (lbounds, tbounds.size(), mesh->time_range, mesh->numTimeSegments(), geomID, primID);
+    }
+
+    __forceinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range) const {
+        return scene->get<Mesh>(prim.geomID())->linearBounds(prim.primID(), time_range);
+    }
+
+    // __noinline is workaround for ICC16 bug under MacOSX
+    __noinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const {
+        return scene->get<Mesh>(prim.geomID())->linearBounds(space, prim.primID(), time_range);
+    }
+};
+
+struct VirtualRecalculatePrimRef
+{
+    Scene* scene;
+
+    __forceinline VirtualRecalculatePrimRef (Scene* scene)
+        : scene(scene) {}
+
+    __forceinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range) const
+    {
         const unsigned geomID = prim.geomID();
         const unsigned primID = prim.primID();
         const Geometry* mesh = scene->get(geomID);
         const LBBox3fa lbounds = mesh->vlinearBounds(primID, time_range);
         const range<int> tbounds = mesh->timeSegmentRange(time_range);
         return PrimRefMB (lbounds, tbounds.size(), mesh->time_range, mesh->numTimeSegments(), geomID, primID);
-      }
-      
-      __forceinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const
-      {
+    }
+
+    __forceinline PrimRefMB operator() (const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const
+    {
         const unsigned geomID = prim.geomID();
         const unsigned primID = prim.primID();
         const Geometry* mesh = scene->get(geomID);
         const LBBox3fa lbounds = mesh->vlinearBounds(space, primID, time_range);
         const range<int> tbounds = mesh->timeSegmentRange(time_range);
         return PrimRefMB (lbounds, tbounds.size(), mesh->time_range, mesh->numTimeSegments(), geomID, primID);
-      }
-      
-      __forceinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range) const {
+    }
+
+    __forceinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range) const {
         return scene->get(prim.geomID())->vlinearBounds(prim.primID(), time_range);
-      }
-      
-      __forceinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const {
+    }
+
+    __forceinline LBBox3fa linearBounds(const PrimRefMB& prim, const BBox1f time_range, const LinearSpace3fa& space) const {
         return scene->get(prim.geomID())->vlinearBounds(space, prim.primID(), time_range);
-      }
-    };
+    }
+};
 
     struct BVHBuilderMSMBlur
     {
@@ -238,12 +222,12 @@ namespace embree
       {
         __forceinline BuildRecordSplit () {}
 
-        __forceinline BuildRecordSplit (size_t depth) 
+        __forceinline BuildRecordSplit (size_t depth)
           : BuildRecord(depth) {}
 
         __forceinline BuildRecordSplit (const BuildRecord& record, const BinSplit<MBLUR_NUM_OBJECT_BINS>& split)
           : BuildRecord(record), split(split) {}
-        
+
         BinSplit<MBLUR_NUM_OBJECT_BINS> split;
       };
 
@@ -349,7 +333,7 @@ namespace embree
             /* split if primitives are not from same geometry */
             if (!sameGeometry(set))
               return Split(0.0f,Split::SPLIT_GEOMID);
-            
+
             /* if a leaf can only hold a single time-segment, we might have to do additional temporal splits */
             if (cfg.singleLeafTimeSegment)
             {
@@ -366,7 +350,7 @@ namespace embree
                   return Split(0.0f,(unsigned)Split::SPLIT_TEMPORAL,0,splitTime);
                 }
               }
-            }        
+            }
 
             /* otherwise return fallback split */
             return Split(0.0f,Split::SPLIT_FALLBACK);
@@ -417,14 +401,14 @@ namespace embree
             mvector<PrimRefMB>& prims = *set.prims;
             const size_t begin = set.begin();
             const size_t end   = set.end();
-            
+
             PrimInfoMB left(empty);
             PrimInfoMB right(empty);
             unsigned int geomID = prims[begin].geomID();
             size_t center = serial_partitioning(prims.data(),begin,end,left,right,
                                                 [&] ( const PrimRefMB& prim ) { return prim.geomID() == geomID; },
                                                 [ ] ( PrimInfoMB& dst, const PrimRefMB& prim ) { dst.add_primref(prim); });
-            
+
             new (&lset) SetMB(left, set.prims,range<size_t>(begin,center),set.time_range);
             new (&rset) SetMB(right,set.prims,range<size_t>(center,end  ),set.time_range);
           }
@@ -448,7 +432,7 @@ namespace embree
                 mvector<PrimRefMB>& prims = *current.prims.prims;
                 c.extend(prims[i].time_range);
               }
-              
+
               force_split = c.lower > p.lower || c.upper < p.upper;
             }
 
@@ -472,7 +456,7 @@ namespace embree
                   continue;
 
                 force_split = false;
-                
+
                 /* remember child with largest size */
                 if (children[i].size() > bestSize) {
                   bestSize = children[i].size();
@@ -557,7 +541,7 @@ namespace embree
             }
 
             /*! split until node is full or SAH tells us to stop */
-            while (children.size() < cfg.branchingFactor) 
+            while (children.size() < cfg.branchingFactor)
             {
               /*! find best child to split */
               float bestArea = neg_inf;
@@ -650,14 +634,13 @@ namespace embree
           const ProgressMonitor progressMonitor;
         };
 
-      template<typename NodeRef,
-        typename RecalculatePrimRef,
-        typename CreateAllocFunc,
-        typename CreateNodeFunc,
-        typename SetNodeFunc,
-        typename CreateLeafFunc,
-        typename ProgressMonitorFunc>
-
+        template<typename NodeRef,
+                 typename RecalculatePrimRef,
+                 typename CreateAllocFunc,
+                 typename CreateNodeFunc,
+                 typename SetNodeFunc,
+                 typename CreateLeafFunc,
+                 typename ProgressMonitorFunc>
         static const BVHNodeRecordMB4D<NodeRef> build(mvector<PrimRefMB>& prims,
                                                       const PrimInfoMB& pinfo,
                                                       MemoryMonitorInterface* device,

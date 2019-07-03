@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../common/ray.h"
@@ -25,8 +9,8 @@
 
 namespace embree
 {
-  namespace isa
-  {
+namespace isa
+{
     template<typename NativeCurve3fa, int M>
     struct RibbonHit
     {
@@ -35,27 +19,27 @@ namespace embree
       __forceinline RibbonHit(const vbool<M>& valid, const vfloat<M>& U, const vfloat<M>& V, const vfloat<M>& T, const int i, const int N,
                               const NativeCurve3fa& curve3D)
         : U(U), V(V), T(T), i(i), N(N), curve3D(curve3D), valid(valid) {}
-      
-      __forceinline void finalize() 
+
+      __forceinline void finalize()
       {
         vu = (vfloat<M>(step)+U+vfloat<M>(float(i)))*(1.0f/float(N));
         vv = V;
         vt = T;
       }
-      
+
       __forceinline Vec2f uv (const size_t i) const { return Vec2f(vu[i],vv[i]); }
       __forceinline float t  (const size_t i) const { return vt[i]; }
-      __forceinline Vec3fa Ng(const size_t i) const { 
+      __forceinline Vec3fa Ng(const size_t i) const {
         return curve3D.eval_du(vu[i]);
       }
-      
+
     public:
       vfloat<M> U;
       vfloat<M> V;
       vfloat<M> T;
       int i, N;
       NativeCurve3fa curve3D;
-      
+
     public:
       vbool<M> valid;
       vfloat<M> vu;
@@ -70,7 +54,7 @@ namespace embree
       const vfloatx den2 = dot(p2-p1,p2-p1);
       return std::make_pair(num*num,den2);
     }
-    
+
     /* performs culling against a cylinder */
     __forceinline vboolx cylinder_culling_test(const Vec2vfx& p0, const Vec2vfx& p1, const Vec2vfx& p2, const vfloatx& r)
     {
@@ -87,15 +71,15 @@ namespace embree
       /* transform control points into ray space */
       const NativeCurve3fa curve2D = curve3D.xfm_pr(ray_space,ray_org);
       float eps = 4.0f*float(ulp)*reduce_max(max(abs(curve2D.v0),abs(curve2D.v1),abs(curve2D.v2),abs(curve2D.v3)));
-      
+
       /* evaluate the bezier curve */
       bool ishit = false;
       vboolx valid = vfloatx(step) < vfloatx(float(N));
       const Vec4vfx p0 = curve2D.template eval0<VSIZEX>(0,N);
       const Vec4vfx p1 = curve2D.template eval1<VSIZEX>(0,N);
       valid &= cylinder_culling_test(zero,Vec2vfx(p0.x,p0.y),Vec2vfx(p1.x,p1.y),max(p0.w,p1.w));
-      
-      if (any(valid)) 
+
+      if (any(valid))
       {
         Vec3vfx dp0dt = curve2D.template derivative0<VSIZEX>(0,N);
         Vec3vfx dp1dt = curve2D.template derivative1<VSIZEX>(0,N);
@@ -109,7 +93,7 @@ namespace embree
         const Vec3vfx lp1 = madd(p1.w,nn1,Vec3vfx(p1));
         const Vec3vfx up0 = nmadd(p0.w,nn0,Vec3vfx(p0));
         const Vec3vfx up1 = nmadd(p1.w,nn1,Vec3vfx(p1));
-        
+
         vfloatx vu,vv,vt;
         vboolx valid0 = intersect_quad_backface_culling(valid,zero,Vec3fa(0,0,1),ray_tnear,ray_tfar,lp0,lp1,up1,up0,vu,vv,vt);
 
@@ -120,7 +104,7 @@ namespace embree
             vfloatx r = lerp(p0.w, p1.w, vu);
             valid0 &= vt > float(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR)*r*depth_scale;
           }
-          
+
           if (any(valid0))
           {
             vv = madd(2.0f,vv,vfloatx(-1.0f));
@@ -129,8 +113,8 @@ namespace embree
           }
         }
       }
-      
-      if (unlikely(VSIZEX < N)) 
+
+      if (unlikely(VSIZEX < N))
       {
         /* process SIMD-size many segments per iteration */
         for (int i=VSIZEX; i<N; i+=VSIZEX)
@@ -141,7 +125,7 @@ namespace embree
           const Vec4vfx p1 = curve2D.template eval1<VSIZEX>(i,N);
           valid &= cylinder_culling_test(zero,Vec2vfx(p0.x,p0.y),Vec2vfx(p1.x,p1.y),max(p0.w,p1.w));
           if (none(valid)) continue;
-          
+
           Vec3vfx dp0dt = curve2D.template derivative0<VSIZEX>(i,N);
           Vec3vfx dp1dt = curve2D.template derivative1<VSIZEX>(i,N);
           dp0dt = select(reduce_max(abs(dp0dt)) < vfloatx(eps),Vec3vfx(p1-p0),dp0dt);
@@ -154,7 +138,7 @@ namespace embree
           const Vec3vfx lp1 = madd(p1.w,nn1,Vec3vfx(p1));
           const Vec3vfx up0 = nmadd(p0.w,nn0,Vec3vfx(p0));
           const Vec3vfx up1 = nmadd(p1.w,nn1,Vec3vfx(p1));
-          
+
           vfloatx vu,vv,vt;
           vboolx valid0 = intersect_quad_backface_culling(valid,zero,Vec3fa(0,0,1),ray_tnear,ray_tfar,lp0,lp1,up1,up0,vu,vv,vt);
 
@@ -165,7 +149,7 @@ namespace embree
               vfloatx r = lerp(p0.w, p1.w, vu);
               valid0 &= vt > float(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR)*r*depth_scale;
             }
-            
+
             if (any(valid0))
             {
               vv = madd(2.0f,vv,vfloatx(-1.0f));
@@ -177,7 +161,7 @@ namespace embree
       }
       return ishit;
     }
-        
+
     template<typename NativeCurve3fa>
     struct RibbonCurve1Intersector1
     {
@@ -195,7 +179,7 @@ namespace embree
                                                 epilog);
       }
     };
-    
+
     template<typename NativeCurve3fa, int K>
     struct RibbonCurve1IntersectorK
     {

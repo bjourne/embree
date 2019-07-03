@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../common/ray.h"
@@ -22,49 +6,55 @@
 
 namespace embree
 {
-  namespace isa
-  {
-    template<int M>
-    struct UVIdentity {
-      __forceinline void operator() (vfloat<M>& u, vfloat<M>& v) const {}
-    };
+namespace isa
+{
+template<int M>
+struct UVIdentity {
+    __forceinline void operator() (vfloat<M>& u, vfloat<M>& v) const {}
+};
 
-    template<bool filter>
-    struct Intersect1Epilog1
+template<bool filter>
+struct Intersect1Epilog1
+{
+    RayHit& ray;
+    IntersectContext* context;
+    const unsigned int geomID;
+    const unsigned int primID;
+
+    __forceinline Intersect1Epilog1(RayHit& ray,
+                                    IntersectContext* context,
+                                    const unsigned int geomID,
+                                    const unsigned int primID)
+        : ray(ray),
+          context(context),
+          geomID(geomID),
+          primID(primID) {}
+
+    template<typename Hit>
+    __forceinline bool operator() (Hit& hit) const
     {
-      RayHit& ray;
-      IntersectContext* context;
-      const unsigned int geomID;
-      const unsigned int primID;
-
-      __forceinline Intersect1Epilog1(RayHit& ray,
-                                      IntersectContext* context,
-                                      const unsigned int geomID,
-                                      const unsigned int primID)
-        : ray(ray), context(context), geomID(geomID), primID(primID) {}
-
-      template<typename Hit>
-      __forceinline bool operator() (Hit& hit) const
-      {
         /* ray mask test */
         Scene* scene = context->scene;
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 #if defined(EMBREE_RAY_MASK)
-        if ((geometry->mask & ray.mask) == 0) return false;
+        if ((geometry->mask & ray.mask) == 0)
+            return false;
 #endif
         hit.finalize();
 
         /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
-        if (filter) {
-          if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
-            HitK<1> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
-            const float old_t = ray.tfar;
-            ray.tfar = hit.t;
-            bool found = runIntersectionFilter1(geometry,ray,context,h);
-            if (!found) ray.tfar = old_t;
-            return found;
-          }
+        if (filter)
+        {
+            if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter()))
+            {
+                HitK<1> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
+                const float old_t = ray.tfar;
+                ray.tfar = hit.t;
+                bool found = runIntersectionFilter1(geometry,ray,context,h);
+                if (!found) ray.tfar = old_t;
+                return found;
+            }
         }
 #endif
 
@@ -77,12 +67,12 @@ namespace embree
         ray.geomID = geomID;
         ray.instID = context->instID;
         return true;
-      }
-    };
+    }
+};
 
-    template<bool filter>
-    struct Occluded1Epilog1
-    {
+template<bool filter>
+struct Occluded1Epilog1
+{
       Ray& ray;
       IntersectContext* context;
       const unsigned int geomID;
@@ -124,44 +114,44 @@ namespace embree
       }
     };
 
-    template<int K, bool filter>
-    struct Intersect1KEpilog1
-    {
-      RayHitK<K>& ray;
-      size_t k;
-      IntersectContext* context;
-      const unsigned int geomID;
-      const unsigned int primID;
+template<int K, bool filter>
+struct Intersect1KEpilog1
+{
+    RayHitK<K>& ray;
+    size_t k;
+    IntersectContext* context;
+    const unsigned int geomID;
+    const unsigned int primID;
 
-      __forceinline Intersect1KEpilog1(RayHitK<K>& ray, size_t k,
-                                       IntersectContext* context,
-                                       const unsigned int geomID,
-                                       const unsigned int primID)
+    __forceinline Intersect1KEpilog1(RayHitK<K>& ray, size_t k,
+                                     IntersectContext* context,
+                                     const unsigned int geomID,
+                                     const unsigned int primID)
         : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
 
-      template<typename Hit>
-      __forceinline bool operator() (Hit& hit) const
-      {
+    template<typename Hit>
+    __forceinline bool operator() (Hit& hit) const
+    {
         /* ray mask test */
         Scene* scene = context->scene;
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 #if defined(EMBREE_RAY_MASK)
         if ((geometry->mask & ray.mask[k]) == 0)
-          return false;
+            return false;
 #endif
         hit.finalize();
 
         /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
         if (filter) {
-          if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
-            HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
-            const float old_t = ray.tfar[k];
-            ray.tfar[k] = hit.t;
-            const bool found = any(runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
-            if (!found) ray.tfar[k] = old_t;
-            return found;
-          }
+            if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
+                HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
+                const float old_t = ray.tfar[k];
+                ray.tfar[k] = hit.t;
+                const bool found = any(runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
+                if (!found) ray.tfar[k] = old_t;
+                return found;
+            }
         }
 #endif
 
@@ -176,9 +166,9 @@ namespace embree
         ray.geomID[k] = geomID;
         ray.instID[k] = context->instID;
         return true;
-      }
-    };
-    
+    }
+};
+
     template<int K, bool filter>
     struct Occluded1KEpilog1
     {
@@ -218,11 +208,11 @@ namespace embree
             return found;
           }
         }
-#endif 
+#endif
         return true;
       }
     };
-    
+
     template<int M, int Mx, bool filter>
     struct Intersect1EpilogM
     {
@@ -268,7 +258,7 @@ namespace embree
           }
 #endif
 
-#if defined(EMBREE_FILTER_FUNCTION) 
+#if defined(EMBREE_FILTER_FUNCTION)
           /* call intersection filter function */
           if (filter) {
             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
@@ -352,7 +342,7 @@ namespace embree
           }
 #endif
 
-#if defined(EMBREE_FILTER_FUNCTION) 
+#if defined(EMBREE_FILTER_FUNCTION)
           /* call intersection filter function */
           if (filter) {
             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
@@ -380,8 +370,8 @@ namespace embree
 
       }
     };
-#endif    
-    
+#endif
+
     template<int M, int Mx, bool filter>
     struct Occluded1EpilogM
     {
@@ -450,7 +440,7 @@ namespace embree
       }
     };
 
-    
+
     template<int M, bool filter>
     struct Intersect1EpilogMU
     {
@@ -519,7 +509,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, bool filter>
     struct Occluded1EpilogMU
     {
@@ -564,7 +554,7 @@ namespace embree
         return true;
       }
     };
-        
+
     template<int M, int K, bool filter>
     struct IntersectKEpilogM
     {
@@ -629,7 +619,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct OccludedKEpilogM
     {
@@ -685,7 +675,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct IntersectKEpilogMU
     {
@@ -744,7 +734,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct OccludedKEpilogMU
     {
@@ -795,7 +785,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int Mx, int K, bool filter>
     struct Intersect1KEpilogM
     {
@@ -843,7 +833,7 @@ namespace embree
           }
 #endif
 
-#if defined(EMBREE_FILTER_FUNCTION) 
+#if defined(EMBREE_FILTER_FUNCTION)
           /* call intersection filter function */
           if (filter) {
             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
@@ -884,7 +874,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, int Mx, int K, bool filter>
     struct Occluded1KEpilogM
     {
@@ -953,7 +943,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct Intersect1KEpilogMU
     {
@@ -1031,7 +1021,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct Occluded1KEpilogMU
     {
@@ -1076,7 +1066,7 @@ namespace embree
             return false;
           }
         }
-#endif 
+#endif
         return true;
       }
     };

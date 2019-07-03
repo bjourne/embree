@@ -119,23 +119,31 @@ void device_key_pressed_handler(int key)
 RTCScene
 convertScene(ISPCScene* scene_in)
 {
-    for (unsigned int i=0; i<scene_in->numGeometries; i++)
+    for (unsigned int i = 0; i < scene_in->numGeometries; i++)
     {
         ISPCGeometry* geometry = scene_in->geometries[i];
-        if (geometry->type == SUBDIV_MESH) {
-            g_subdiv_mode = true; break;
+        if (geometry->type == SUBDIV_MESH)
+        {
+            g_subdiv_mode = true;
+            break;
         }
     }
 
-    RTCScene scene_out = ConvertScene(g_device, g_ispc_scene, RTC_BUILD_QUALITY_MEDIUM);
-    rtcSetSceneProgressMonitorFunction(scene_out,monitorProgressFunction,nullptr);
+    RTCScene scene_out = ConvertScene(g_device,
+                                      g_ispc_scene,
+                                      RTC_BUILD_QUALITY_MEDIUM);
+    rtcSetSceneProgressMonitorFunction(scene_out,
+                                       monitorProgressFunction,
+                                       nullptr);
 
     /* commit individual objects in case of instancing */
     if (g_instancing_mode != ISPC_INSTANCING_NONE)
     {
-        for (unsigned int i=0; i<scene_in->numGeometries; i++) {
+        for (unsigned int i=0; i<scene_in->numGeometries; i++)
+        {
             ISPCGeometry* geometry = g_ispc_scene->geometries[i];
-            if (geometry->type == GROUP) rtcCommitScene(geometry->scene);
+            if (geometry->type == GROUP)
+                rtcCommitScene(geometry->scene);
         }
     }
 
@@ -384,7 +392,8 @@ device_render (int* pixels,
     g_changed = false;
 
     /* create scene */
-    if (g_scene == nullptr) {
+    if (g_scene == nullptr)
+    {
         printf("scene was null?\n");
         g_scene = convertScene(g_ispc_scene);
         if (g_subdiv_mode)

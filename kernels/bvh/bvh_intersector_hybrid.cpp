@@ -11,13 +11,13 @@
 #include "../geometry/quadi_intersector.h"
 #include "../geometry/curveNv_intersector.h"
 #include "../geometry/curveNi_intersector.h"
-#include "../geometry/curveNi_mb_intersector.h"
+//#include "../geometry/curveNi_mb_intersector.h"
 #include "../geometry/linei_intersector.h"
 #include "../geometry/subdivpatch1_intersector.h"
 #include "../geometry/object_intersector.h"
 #include "../geometry/instance_intersector.h"
 #include "../geometry/subgrid_intersector.h"
-#include "../geometry/subgrid_mb_intersector.h"
+//#include "../geometry/subgrid_mb_intersector.h"
 #include "../geometry/curve_intersector_virtual.h"
 
 #define SWITCH_DURING_DOWN_TRAVERSAL 1
@@ -27,31 +27,31 @@
 
 namespace embree
 {
-  namespace isa
-  {
-    template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
-    void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::intersect1(Accel::Intersectors* This,
-                                                                                                const BVH* bvh,
-                                                                                                NodeRef root,
-                                                                                                size_t k,
-                                                                                                Precalculations& pre,
-                                                                                                RayHitK<K>& ray,
-                                                                                                const TravRayK<K, robust>& tray,
-                                                                                                IntersectContext* context)
+namespace isa
+{
+template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
+void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::intersect1(Accel::Intersectors* This,
+                                                                                            const BVH* bvh,
+                                                                                            NodeRef root,
+                                                                                            size_t k,
+                                                                                            Precalculations& pre,
+                                                                                            RayHitK<K>& ray,
+                                                                                            const TravRayK<K, robust>& tray,
+                                                                                            IntersectContext* context)
+{
+    /* stack state */
+    StackItemT<NodeRef> stack[stackSizeSingle];  // stack of nodes
+    StackItemT<NodeRef>* stackPtr = stack + 1;   // current stack pointer
+    StackItemT<NodeRef>* stackEnd = stack + stackSizeSingle;
+    stack[0].ptr = root;
+    stack[0].dist = neg_inf;
+
+    /* load the ray into SIMD registers */
+    TravRay<N,Nx,robust> tray1(k, tray.org, tray.dir, tray.rdir, tray.nearXYZ, tray.tnear[k], tray.tfar[k]);
+
+    /* pop loop */
+    while (true) pop:
     {
-      /* stack state */
-      StackItemT<NodeRef> stack[stackSizeSingle];  // stack of nodes
-      StackItemT<NodeRef>* stackPtr = stack + 1;   // current stack pointer
-      StackItemT<NodeRef>* stackEnd = stack + stackSizeSingle;
-      stack[0].ptr = root;
-      stack[0].dist = neg_inf;
-
-      /* load the ray into SIMD registers */
-      TravRay<N,Nx,robust> tray1(k, tray.org, tray.dir, tray.rdir, tray.nearXYZ, tray.tnear[k], tray.tfar[k]);
-
-      /* pop loop */
-      while (true) pop:
-      {
         /* pop next node */
         if (unlikely(stackPtr == stack)) break;
         stackPtr--;
@@ -61,30 +61,30 @@ namespace embree
 #if defined(__AVX512ER__)
         /* much faster on KNL */
         if (unlikely(any(vfloat<Nx>(*(float*)&stackPtr->dist) > tray1.tfar)))
-          continue;
+            continue;
 #else
         if (unlikely(*(float*)&stackPtr->dist > ray.tfar[k]))
-          continue;
+            continue;
 #endif
 
         /* downtraversal loop */
         while (true)
         {
-          /* stop if we found a leaf node */
-          if (unlikely(cur.isLeaf())) break;
-          STAT3(normal.trav_nodes, 1, 1, 1);
+            /* stop if we found a leaf node */
+            if (unlikely(cur.isLeaf())) break;
+            STAT3(normal.trav_nodes, 1, 1, 1);
 
-          /* intersect node */
-          size_t mask = 0;
-          vfloat<Nx> tNear;
-          BVHNNodeIntersector1<N, Nx, types, robust>::intersect(cur, tray1, ray.time()[k], tNear, mask);
+            /* intersect node */
+            size_t mask = 0;
+            vfloat<Nx> tNear;
+            BVHNNodeIntersector1<N, Nx, types, robust>::intersect(cur, tray1, ray.time()[k], tNear, mask);
 
-          /* if no child is hit, pop next node */
-          if (unlikely(mask == 0))
-            goto pop;
+            /* if no child is hit, pop next node */
+            if (unlikely(mask == 0))
+                goto pop;
 
-          /* select next child and push other children */
-          BVHNNodeTraverser1Hit<N, Nx, types>::traverseClosestHit(cur, mask, tNear, stackPtr, stackEnd);
+            /* select next child and push other children */
+            BVHNNodeTraverser1Hit<N, Nx, types>::traverseClosestHit(cur, mask, tNear, stackPtr, stackEnd);
         }
 
         /* this is a leaf node */
@@ -98,48 +98,51 @@ namespace embree
         tray1.tfar = ray.tfar[k];
 
         if (unlikely(lazy_node)) {
-          stackPtr->ptr = lazy_node;
-          stackPtr->dist = neg_inf;
-          stackPtr++;
+            stackPtr->ptr = lazy_node;
+            stackPtr->dist = neg_inf;
+            stackPtr++;
         }
-      }
     }
+}
 
-    template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
-    void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::intersect(vint<K>* __restrict__ valid_i,
-                                                                                               Accel::Intersectors* __restrict__ This,
-                                                                                               RayHitK<K>& __restrict__ ray,
-                                                                                               IntersectContext* __restrict__ context)
-    {
-      BVH* __restrict__ bvh = (BVH*)This->ptr;
+template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
+void
+BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::intersect(
+    vint<K>* __restrict__ valid_i,
+    Accel::Intersectors* __restrict__ This,
+    RayHitK<K>& __restrict__ ray,
+    IntersectContext* __restrict__ context)
+{
+    BVH* __restrict__ bvh = (BVH*)This->ptr;
 
-      /* we may traverse an empty BVH in case all geometry was invalid */
-      if (bvh->root == BVH::emptyNode)
+    /* we may traverse an empty BVH in case all geometry was invalid */
+    if (bvh->root == BVH::emptyNode)
         return;
 
 #if ENABLE_FAST_COHERENT_CODEPATHS == 1
-      assert(context);
-      if (unlikely(types == BVH_AN1 && context->user && context->isCoherent()))
-      {
+    assert(context);
+    if (unlikely(types == BVH_AN1 && context->user && context->isCoherent()))
+    {
         intersectCoherent(valid_i, This, ray, context);
         return;
-      }
+    }
 #endif
 
-      /* filter out invalid rays */
-      vbool<K> valid = *valid_i == -1;
+    /* filter out invalid rays */
+    vbool<K> valid = *valid_i == -1;
 #if defined(EMBREE_IGNORE_INVALID_RAYS)
-      valid &= ray.valid();
+    valid &= ray.valid();
 #endif
 
-      /* return if there are no valid rays */
-      size_t valid_bits = movemask(valid);
+    /* return if there are no valid rays */
+    size_t valid_bits = movemask(valid);
 
 #if defined(__AVX__)
-      STAT3(normal.trav_hit_boxes[popcnt(movemask(valid))], 1, 1, 1);
+    STAT3(normal.trav_hit_boxes[popcnt(movemask(valid))], 1, 1, 1);
 #endif
 
-      if (unlikely(valid_bits == 0)) return;
+    if (unlikely(valid_bits == 0))
+        return;
 
       /* verify correct input */
       assert(all(valid, ray.valid()));
@@ -195,7 +198,8 @@ namespace embree
           ((diff_octant >> 0) & 1);
 
         vbool<K> octant_valid = (count_diff_octant <= 1) & (octant != vint<K>(0xffffffff));
-        if (!single || !split) octant_valid = valid; // deactivate octant sorting in pure chunk mode, otherwise instance traversal performance goes down
+        if (!single || !split)
+            octant_valid = valid; // deactivate octant sorting in pure chunk mode, otherwise instance traversal performance goes down
 
 
         octant = select(octant_valid,vint<K>(0xffffffff),octant);

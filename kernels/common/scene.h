@@ -62,7 +62,8 @@ public:
             size_t ret = 0;
             for (size_t i=0; i<scene->size(); i++) {
                 Ty* mesh = at(i);
-                if (mesh == nullptr) continue;
+                if (mesh == nullptr)
+                    continue;
                 ret = max(ret,mesh->size());
             }
             return ret;
@@ -144,17 +145,15 @@ public:
     void createTriangleAccel();
     void createTriangleMBAccel();
     void createQuadAccel();
-    void createQuadMBAccel();
-    // void createHairAccel();
-    // void createHairMBAccel();
+    //void createQuadMBAccel();
     void createSubdivAccel();
-    void createSubdivMBAccel();
+    //void createSubdivMBAccel();
     void createUserGeometryAccel();
-    void createUserGeometryMBAccel();
+    //void createUserGeometryMBAccel();
     void createInstanceAccel();
-    void createInstanceMBAccel();
+    //void createInstanceMBAccel();
     void createGridAccel();
-    void createGridMBAccel();
+    //void createGridMBAccel();
 
     /*! prints statistics about the scene */
     void printStatistics();
@@ -235,8 +234,14 @@ public:
     }
 
     /* flag decoding */
-    __forceinline bool isFastAccel() const { return !isCompactAccel() && !isRobustAccel(); }
-    __forceinline bool isCompactAccel() const { return scene_flags & RTC_SCENE_FLAG_COMPACT; }
+    __forceinline bool isFastAccel() const
+    {
+        return !isCompactAccel() && !isRobustAccel();
+    }
+    __forceinline bool isCompactAccel() const
+    {
+        return scene_flags & RTC_SCENE_FLAG_COMPACT;
+    }
     __forceinline bool isRobustAccel()  const { return scene_flags & RTC_SCENE_FLAG_ROBUST; }
     __forceinline bool isStaticAccel()  const { return !(scene_flags & RTC_SCENE_FLAG_DYNAMIC); }
     __forceinline bool isDynamicAccel() const { return scene_flags & RTC_SCENE_FLAG_DYNAMIC; }
@@ -371,10 +376,16 @@ public:
   };
 
   template<> __forceinline size_t Scene::getNumPrimitives<TriangleMesh,false>() const { return world.numTriangles; }
-  template<> __forceinline size_t Scene::getNumPrimitives<TriangleMesh,true>() const { return worldMB.numTriangles; }
+  template<> __forceinline size_t Scene::getNumPrimitives<TriangleMesh,true>() const
+  {
+      return worldMB.numTriangles;
+  }
   template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,false>() const { return world.numQuads; }
   template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,true>() const { return worldMB.numQuads; }
-  template<> __forceinline size_t Scene::getNumPrimitives<CurveGeometry,false>() const { return world.numBezierCurves+world.numLineSegments+world.numPoints; }
+  template<> __forceinline size_t Scene::getNumPrimitives<CurveGeometry,false>() const
+  {
+      return world.numBezierCurves+world.numLineSegments+world.numPoints;
+  }
   template<> __forceinline size_t Scene::getNumPrimitives<CurveGeometry,true>() const { return worldMB.numBezierCurves+worldMB.numLineSegments+worldMB.numPoints; }
   template<> __forceinline size_t Scene::getNumPrimitives<LineSegments,false>() const { return world.numLineSegments; }
   template<> __forceinline size_t Scene::getNumPrimitives<LineSegments,true>() const { return worldMB.numLineSegments; }

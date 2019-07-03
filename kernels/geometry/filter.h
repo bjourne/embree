@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../common/geometry.h"
@@ -23,31 +7,33 @@
 
 namespace embree
 {
-  namespace isa
-  {
-    __forceinline bool runIntersectionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
+namespace isa
+{
+__forceinline bool runIntersectionFilter1Helper(RTCFilterFunctionNArguments* args,
+                                                const Geometry* const geometry,
+                                                IntersectContext* context)
+{
+    if (geometry->intersectionFilterN)
     {
-      if (geometry->intersectionFilterN)
-      {
         assert(context->scene->hasGeometryFilterFunction());
         geometry->intersectionFilterN(args);
 
         if (args->valid[0] == 0)
-          return false;
-      }
-            
-      if (context->user->filter) {
+            return false;
+    }
+
+    if (context->user->filter) {
         assert(context->scene->hasContextFilterFunction());
         context->user->filter(args);
 
         if (args->valid[0] == 0)
-          return false;
-      }
-      
-      copyHitToRay(*(RayHit*)args->ray,*(Hit*)args->hit);
-      return true;
+            return false;
     }
-    
+
+    copyHitToRay(*(RayHit*)args->ray,*(Hit*)args->hit);
+    return true;
+}
+
     __forceinline bool runIntersectionFilter1(const Geometry* const geometry, RayHit& ray, IntersectContext* context, Hit& hit)
     {
       RTCFilterFunctionNArguments args;
@@ -70,7 +56,7 @@ namespace embree
         assert(context->scene->hasGeometryFilterFunction());
         geometry->intersectionFilterN(filter_args);
       }
-      
+
       //if (args->valid[0] == 0)
       //  return;
 
@@ -80,7 +66,7 @@ namespace embree
       }
 #endif
     }
-    
+
     __forceinline bool runOcclusionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
     {
       if (geometry->occlusionFilterN)
@@ -91,7 +77,7 @@ namespace embree
         if (args->valid[0] == 0)
           return false;
       }
-      
+
       if (context->user->filter) {
         assert(context->scene->hasContextFilterFunction());
         context->user->filter(args);
@@ -124,10 +110,10 @@ namespace embree
         assert(context->scene->hasGeometryFilterFunction());
         geometry->occlusionFilterN(filter_args);
       }
-      
+
       //if (args->valid[0] == 0)
       //  return false;
-      
+
       if (context->user->filter) {
         assert(context->scene->hasContextFilterFunction());
         context->user->filter(filter_args);
@@ -155,11 +141,11 @@ namespace embree
 
       valid_o = *mask != vint<K>(zero);
       if (none(valid_o)) return valid_o;
-      
+
       copyHitToRay(valid_o,*(RayHitK<K>*)args->ray,*(HitK<K>*)args->hit);
       return valid_o;
     }
-    
+
     template<int K>
     __forceinline vbool<K> runIntersectionFilter(const vbool<K>& valid, const Geometry* const geometry, RayHitK<K>& ray, IntersectContext* context, HitK<K>& hit)
     {
@@ -185,7 +171,7 @@ namespace embree
       }
 
       vbool<K> valid_o = *mask != vint<K>(zero);
-      
+
       if (none(valid_o)) return valid_o;
 
       if (context->user->filter) {

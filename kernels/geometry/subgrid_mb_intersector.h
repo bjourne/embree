@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "subgrid_intersector.h"
@@ -63,20 +47,20 @@ namespace embree
           const float time = prim[i].adjustTime(ray.time());
 
           assert(time <= 1.0f);
-          size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist); 
+          size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist);
 #if defined(__AVX__)
           STAT3(normal.trav_hit_boxes[popcnt(mask)],1,1,1);
 #endif
           while(mask != 0)
           {
-            const size_t ID = bscf(mask); 
+            const size_t ID = bscf(mask);
             if (unlikely(dist[ID] > ray.tfar)) continue;
             intersect(pre,ray,context,prim[i].subgrid(ID));
           }
         }
       }
 
-      template<int Nx, bool robust>        
+      template<int Nx, bool robust>
         static __forceinline bool occluded(const Accel::Intersectors* This, Precalculations& pre, Ray& ray, IntersectContext* context, const Primitive* prim, size_t num, const TravRay<N,Nx,robust> &tray, size_t& lazy_node)
       {
         BVHNQuantizedBaseNodeIntersector1<N,Nx,robust> isec1;
@@ -85,10 +69,10 @@ namespace embree
           const float time = prim[i].adjustTime(ray.time());
           assert(time <= 1.0f);
           vfloat<Nx> dist;
-          size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist); 
+          size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist);
           while(mask != 0)
           {
-            const size_t ID = bscf(mask); 
+            const size_t ID = bscf(mask);
             if (occluded(pre,ray,context,prim[i].subgrid(ID)))
               return true;
           }
@@ -132,7 +116,7 @@ namespace embree
         STAT3(normal.trav_prims,1,1,1);
         const GridMesh* mesh    = context->scene->get<GridMesh>(subgrid.geomID());
         const GridMesh::Grid &g = mesh->grid(subgrid.primID());
- 
+
         vfloat<K> ftime;
         const vint<K> itime = mesh->timeSegment(ray.time(), ftime);
         Vec3vf4 v0,v1,v2,v3; subgrid.gatherMB(v0,v1,v2,v3,context->scene,itime[k],ftime[k]);
@@ -170,7 +154,7 @@ namespace embree
           }
         }
 
-        template<bool robust>        
+        template<bool robust>
         static __forceinline vbool<K> occluded(const vbool<K>& valid, const Accel::Intersectors* This, Precalculations& pre, RayK<K>& ray, IntersectContext* context, const Primitive* prim, size_t num, const TravRayK<K, robust> &tray, size_t& lazy_node)
         {
           BVHNQuantizedBaseNodeIntersectorK<N,K,robust> isecK;
@@ -192,7 +176,7 @@ namespace embree
           return !valid0;
         }
 
-        template<int Nx, bool robust>        
+        template<int Nx, bool robust>
           static __forceinline void intersect(const Accel::Intersectors* This, Precalculations& pre, RayHitK<K>& ray, size_t k, IntersectContext* context, const Primitive* prim, size_t num, const TravRay<N,Nx,robust> &tray, size_t& lazy_node)
         {
           BVHNQuantizedBaseNodeIntersector1<N,Nx,robust> isec1;
@@ -202,31 +186,31 @@ namespace embree
             const float time = prim[i].adjustTime(ray.time()[k]);
             assert(time <= 1.0f);
 
-            size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist); 
+            size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist);
             while(mask != 0)
             {
-              const size_t ID = bscf(mask); 
+              const size_t ID = bscf(mask);
               if (unlikely(dist[ID] > ray.tfar[k])) continue;
               intersect(pre,ray,k,context,prim[i].subgrid(ID));
             }
           }
         }
-        
+
         template<int Nx, bool robust>
         static __forceinline bool occluded(const Accel::Intersectors* This, Precalculations& pre, RayK<K>& ray, size_t k, IntersectContext* context, const Primitive* prim, size_t num, const TravRay<N,Nx,robust> &tray, size_t& lazy_node)
         {
           BVHNQuantizedBaseNodeIntersector1<N,Nx,robust> isec1;
-          
+
           for (size_t i=0;i<num;i++)
           {
             vfloat<N> dist;
             const float time = prim[i].adjustTime(ray.time()[k]);
             assert(time <= 1.0f);
 
-            size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist); 
+            size_t mask = isec1.intersect(&prim[i].qnode,tray,time,dist);
             while(mask != 0)
             {
-              const size_t ID = bscf(mask); 
+              const size_t ID = bscf(mask);
               if (occluded(pre,ray,k,context,prim[i].subgrid(ID)))
                 return true;
             }

@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "../../kernels/common/default.h"
 #include "../../include/embree3/rtcore.h"
 RTC_NAMESPACE_OPEN
@@ -40,46 +24,46 @@ namespace embree
   {
   public:
     mutable RTCDevice device;
-    
-    RTCDeviceRef () 
+
+    RTCDeviceRef ()
       : device(nullptr) {}
 
-    RTCDeviceRef (nullptr_t) 
+    RTCDeviceRef (nullptr_t)
       : device(nullptr) {}
-    
-    RTCDeviceRef (RTCDevice device) 
+
+    RTCDeviceRef (RTCDevice device)
     : device(device) {}
 
-    RTCDeviceRef (const RTCDeviceRef& in) 
+    RTCDeviceRef (const RTCDeviceRef& in)
     {
       device = in.device;
       in.device = nullptr;
     }
-    
+
     ~RTCDeviceRef ()
     {
       if (device == nullptr) return;
       rtcReleaseDevice(device);
     }
-    
+
     operator RTCDevice () const { return device; }
-    
-    RTCDeviceRef& operator= (RTCDevice in) 
+
+    RTCDeviceRef& operator= (RTCDevice in)
     {
       device = in;
       return *this;
     }
 
-    RTCDeviceRef& operator= (const RTCDeviceRef& in) 
+    RTCDeviceRef& operator= (const RTCDeviceRef& in)
     {
-      if (in.device != device && device) 
+      if (in.device != device && device)
         rtcReleaseDevice(device);
       device = in.device;
       in.device = nullptr;
       return *this;
     }
-      
-    RTCDeviceRef& operator= (nullptr_t) 
+
+    RTCDeviceRef& operator= (nullptr_t)
     {
       if (device) rtcReleaseDevice(device);
       device = nullptr;
@@ -91,20 +75,20 @@ namespace embree
   {
   public:
     mutable RTCScene scene;
-    
-    RTCSceneRef (nullptr_t) 
+
+    RTCSceneRef (nullptr_t)
       : scene(nullptr) {}
-    
-    RTCSceneRef (RTCScene scene) 
+
+    RTCSceneRef (RTCScene scene)
     : scene(scene) {}
-    
-    ~RTCSceneRef () { 
-      rtcReleaseScene(scene); 
+
+    ~RTCSceneRef () {
+      rtcReleaseScene(scene);
     }
-    
+
     __forceinline operator RTCScene () const { return scene; }
-    
-    __forceinline RTCSceneRef& operator= (const RTCSceneRef& in) 
+
+    __forceinline RTCSceneRef& operator= (const RTCSceneRef& in)
     {
       RTCScene tmp = in.scene;
       in.scene = nullptr;
@@ -112,15 +96,15 @@ namespace embree
       scene = tmp;
       return *this;
     }
-      
-    __forceinline RTCSceneRef& operator= (RTCScene in) 
+
+    __forceinline RTCSceneRef& operator= (RTCScene in)
     {
       if (scene) rtcReleaseScene(scene);
       scene = in;
       return *this;
     }
-        
-    __forceinline RTCSceneRef& operator= (nullptr_t) 
+
+    __forceinline RTCSceneRef& operator= (nullptr_t)
     {
       if (scene) rtcReleaseScene(scene);
       scene = nullptr;
@@ -150,7 +134,7 @@ namespace embree
     rh.hit.instID[0] = -1;
   }
 
-  __forceinline RTCRayHit makeRay(const Vec3fa& org, const Vec3fa& dir) 
+  __forceinline RTCRayHit makeRay(const Vec3fa& org, const Vec3fa& dir)
   {
     RTCRayHit rh; clearRay(rh);
     rh.ray.org_x = org.x; rh.ray.org_y = org.y; rh.ray.org_z = org.z;
@@ -161,7 +145,7 @@ namespace embree
     return rh;
   }
 
-  __forceinline RTCRayHit makeRay(const Vec3fa& org, const Vec3fa& dir, float tnear, float tfar) 
+  __forceinline RTCRayHit makeRay(const Vec3fa& org, const Vec3fa& dir, float tnear, float tfar)
   {
     RTCRayHit rh; clearRay(rh);
     rh.ray.org_x = org.x; rh.ray.org_y = org.y; rh.ray.org_z = org.z;
@@ -172,14 +156,14 @@ namespace embree
     return rh;
   }
 
-  __forceinline RTCRayHit fastMakeRay(const Vec3fa& org, const Vec3fa& dir) 
+  __forceinline RTCRayHit fastMakeRay(const Vec3fa& org, const Vec3fa& dir)
   {
     RTCRayHit rh;
     *(Vec3fa*)&rh.ray.org_x = org;
     *(Vec3fa*)&rh.ray.dir_x = dir;
-    rh.ray.tnear = 0.0f; 
+    rh.ray.tnear = 0.0f;
     rh.ray.tfar = inf;
-    rh.ray.time = 0; 
+    rh.ray.time = 0;
     rh.ray.mask = -1;
     rh.hit.geomID = rh.hit.primID = rh.hit.instID[0] = -1;
     return rh;
@@ -190,13 +174,13 @@ namespace embree
     return fastMakeRay(org, 2.0f*RandomSampler_get3D(sampler)-Vec3fa(1.0f));
   }
 
-  __forceinline void fastMakeRay(RTCRayHit& rh, const Vec3fa& org, const Vec3fa& dir) 
+  __forceinline void fastMakeRay(RTCRayHit& rh, const Vec3fa& org, const Vec3fa& dir)
   {
     *(Vec3fa*)&rh.ray.org_x = org;
     *(Vec3fa*)&rh.ray.dir_x = dir;
-    rh.ray.tnear = 0.0f; 
+    rh.ray.tnear = 0.0f;
     rh.ray.tfar = inf;
-    rh.ray.time = 0; 
+    rh.ray.time = 0;
     rh.ray.mask = -1;
     rh.hit.geomID = rh.hit.primID = rh.hit.instID[0] = -1;
   }
@@ -206,7 +190,7 @@ namespace embree
     fastMakeRay(ray, org, 2.0f*RandomSampler_get3D(sampler)-Vec3fa(1.0f));
   }
 
-  __forceinline RTCRayHit fastMakeRay(Vec3f org, Vec3f dir, float tnear, float tfar) 
+  __forceinline RTCRayHit fastMakeRay(Vec3f org, Vec3f dir, float tnear, float tfar)
   {
     RTCRayHit rh;
     rh.ray.org_x = org.x; rh.ray.org_y = org.y; rh.ray.org_z = org.z; // FIXME: optimize
@@ -447,7 +431,7 @@ namespace embree
     return ray_o;
   }
 
-  enum IntersectMode 
+  enum IntersectMode
   {
     MODE_INTERSECT_NONE,
     MODE_INTERSECT1,
@@ -503,7 +487,7 @@ namespace embree
     default              : return 0;
     }
   }
-  
+
   enum IntersectVariant
   {
     VARIANT_INTERSECT = 1,
@@ -512,7 +496,7 @@ namespace embree
     VARIANT_INCOHERENT = 4,
     VARIANT_INTERSECT_OCCLUDED_MASK = 3,
     VARIANT_COHERENT_INCOHERENT_MASK = 4,
-    
+
     VARIANT_INTERSECT_COHERENT = 1,
     VARIANT_OCCLUDED_COHERENT = 2,
     VARIANT_INTERSECT_INCOHERENT = 5,
@@ -579,10 +563,10 @@ namespace embree
     else ret += "Static";
     if (scene_flags & RTC_SCENE_FLAG_COMPACT) ret += "Compact";
     if (scene_flags & RTC_SCENE_FLAG_ROBUST ) ret += "Robust";
-    if (!(scene_flags & RTC_SCENE_FLAG_COMPACT) && !(scene_flags & RTC_SCENE_FLAG_ROBUST)) ret += "Fast"; 
+    if (!(scene_flags & RTC_SCENE_FLAG_COMPACT) && !(scene_flags & RTC_SCENE_FLAG_ROBUST)) ret += "Fast";
     return ret;
   }
-  
+
   inline std::string to_string(RTCBuildQuality quality_flags)
   {
     if      (quality_flags == RTC_BUILD_QUALITY_LOW   ) return "LowQuality";
@@ -600,7 +584,7 @@ namespace embree
     RTCSceneFlags sflags;
     RTCBuildQuality qflags;
   };
-  
+
   inline std::string to_string(SceneFlags sflags) {
     return to_string(sflags.sflags) + "." + to_string(sflags.qflags);
   }
@@ -619,7 +603,7 @@ namespace embree
   static const size_t numSceneGeomFlags = 32;
 
   inline bool supportsIntersectMode(RTCDevice device, IntersectMode imode)
-  { 
+  {
     switch (imode) {
     case MODE_INTERSECT_NONE: return true;
     case MODE_INTERSECT1:   return true;
@@ -646,29 +630,29 @@ namespace embree
     const size_t alignment = size_t(rays) % 64;
     __aligned(64) char data[1024*sizeof(RTCRayHit)+64];
     assert((size_t)data % 64 == 0);
-    for (size_t i=0; i<Nrays; i+=N) 
+    for (size_t i=0; i<Nrays; i+=N)
     {
       unsigned int L = (unsigned int)min(size_t(N),Nrays-i);
       RTCRayHitN* ray = (RTCRayHitN*) &data[alignment+i*sizeof(RTCRayHit)];
       for (unsigned int j=0; j<L; j++) setRay(ray,N,j,rays[i+j]);
       for (unsigned int j=L; j<N; j++) setRay(ray,N,j,makeRay(zero,zero,pos_inf,neg_inf));
     }
-    
+
     unsigned int M = ((unsigned int)Nrays+N-1)/N;
     switch (ivariant & VARIANT_INTERSECT_OCCLUDED_MASK) {
     case VARIANT_INTERSECT: rtcIntersectNM(scene,context,(RTCRayHitN*)&data[alignment],N,M,N*sizeof(RTCRayHit)); break;
     case VARIANT_OCCLUDED : rtcOccludedNM(scene,context,(RTCRayN*)&data[alignment],N,M,N*sizeof(RTCRayHit)); break;
     default: assert(false);
     }
-    
-    for (size_t i=0; i<Nrays; i+=N) 
+
+    for (size_t i=0; i<Nrays; i+=N)
     {
       size_t L = min(size_t(N),Nrays-i);
       RTCRayHitN* ray = (RTCRayHitN*) &data[alignment+i*sizeof(RTCRayHit)];
       for (unsigned int j=0; j<L; j++) rays[i+j] = getRay(ray,N,j);
     }
   }
-	
+
   __noinline void IntersectWithNpMode(IntersectVariant ivariant, RTCScene scene, RTCIntersectContext* context, RTCRayHit* rays, unsigned int N)
   {
     assert(N < 1024);
@@ -676,7 +660,7 @@ namespace embree
     __aligned(64) char data[1024 * sizeof(RTCRayHit) + 64];
     RTCRayHitN* rayhit = (RTCRayHitN*)&data[alignment];
     for (unsigned int j = 0; j < N; j++) setRay(rayhit, N, j, rays[j]);
-    
+
     RTCRayHitNp rayp;
     RTCRayN* ray = RTCRayHitN_RayN(rayhit,N);
     RTCHitN* hit = RTCRayHitN_HitN(rayhit,N);
@@ -700,25 +684,25 @@ namespace embree
     rayp.hit.Ng_x = &RTCHitN_Ng_x(hit, N, 0);
     rayp.hit.Ng_y = &RTCHitN_Ng_y(hit, N, 0);
     rayp.hit.Ng_z = &RTCHitN_Ng_z(hit, N, 0);
-    
+
     switch (ivariant & VARIANT_INTERSECT_OCCLUDED_MASK) {
     case VARIANT_INTERSECT: rtcIntersectNp(scene, context, &rayp, N); break;
     case VARIANT_OCCLUDED:  rtcOccludedNp(scene, context, (RTCRayNp*)&rayp, N); break;
     default: assert(false);
     }
-    
+
     for (unsigned int j = 0; j < N; j++) rays[j] = getRay(rayhit, N, j);
   }
-	
+
   __noinline void IntersectWithModeInternal(IntersectMode mode, IntersectVariant ivariant, RTCScene scene, RTCRayHit* rays, unsigned int N)
   {
     RTCIntersectContext context;
     rtcInitIntersectContext(&context);
     context.flags = ((ivariant & VARIANT_COHERENT_INCOHERENT_MASK) == VARIANT_COHERENT) ? RTC_INTERSECT_CONTEXT_FLAG_COHERENT :  RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT;
 
-    switch (mode) 
+    switch (mode)
     {
-    case MODE_INTERSECT_NONE: 
+    case MODE_INTERSECT_NONE:
       break;
     case MODE_INTERSECT1:
     {
@@ -730,9 +714,9 @@ namespace embree
       break;
     }
 
-    case MODE_INTERSECT4: 
+    case MODE_INTERSECT4:
     {
-      for (size_t i=0; i<N; i+=4) 
+      for (size_t i=0; i<N; i+=4)
       {
         size_t M = min(size_t(4),N-i);
         __aligned(16) int valid[4];
@@ -749,9 +733,9 @@ namespace embree
       }
       break;
     }
-    case MODE_INTERSECT8: 
+    case MODE_INTERSECT8:
     {
-      for (size_t i=0; i<N; i+=8) 
+      for (size_t i=0; i<N; i+=8)
       {
         size_t M = min(size_t(8),N-i);
         __aligned(32) int valid[8];
@@ -768,9 +752,9 @@ namespace embree
       }
       break;
     }
-    case MODE_INTERSECT16: 
+    case MODE_INTERSECT16:
     {
-      for (size_t i=0; i<N; i+=16) 
+      for (size_t i=0; i<N; i+=16)
       {
         size_t M = min(size_t(16),N-i);
         __aligned(64) int valid[16];
@@ -787,7 +771,7 @@ namespace embree
       }
       break;
     }
-    case MODE_INTERSECT1M: 
+    case MODE_INTERSECT1M:
     {
       switch (ivariant & VARIANT_INTERSECT_OCCLUDED_MASK) {
       case VARIANT_INTERSECT: rtcIntersect1M(scene,&context,rays,N,sizeof(RTCRayHit)); break;
@@ -796,7 +780,7 @@ namespace embree
       }
       break;
     }
-    case MODE_INTERSECT1Mp: 
+    case MODE_INTERSECT1Mp:
     {
       assert(N<1024);
       RTCRayHit* rptrs[1024];
@@ -925,9 +909,9 @@ namespace embree
   /* error reporting function */
   void error_handler(void* userPtr, const RTCError code, const char* str = nullptr)
   {
-    if (code == RTC_ERROR_NONE) 
+    if (code == RTC_ERROR_NONE)
       return;
-    
+
     std::string errorStr;
     errorStr += "Embree: ";
     errorStr += string_of(code);
@@ -935,4 +919,3 @@ namespace embree
     throw std::runtime_error(errorStr);
   }
 }
-

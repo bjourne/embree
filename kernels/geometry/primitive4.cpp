@@ -1,27 +1,11 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "primitive.h"
 #include "curveNv.h"
 #include "curveNi.h"
-#include "curveNi_mb.h"
+//#include "curveNi_mb.h"
 #include "linei.h"
 #include "triangle.h"
 #include "trianglev.h"
-#include "trianglev_mb.h"
+//#include "trianglev_mb.h"
 #include "trianglei.h"
 #include "quadv.h"
 #include "quadi.h"
@@ -100,41 +84,41 @@ namespace embree
        return Curve4i::bytes(sizeActive(This));
   }
 
-  /********************** Curve4iMB **************************/
+// /********************** Curve4iMB **************************/
 
-  template<>
-  const char* Curve4iMB::Type::name () const {
-    return "curve4imb";
-  }
+//   template<>
+//   const char* Curve4iMB::Type::name () const {
+//     return "curve4imb";
+//   }
 
-  template<>
-  size_t Curve4iMB::Type::sizeActive(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return ((Line4i*)This)->size();
-    else
-      return ((Curve4iMB*)This)->N;
-  }
+//   template<>
+//   size_t Curve4iMB::Type::sizeActive(const char* This) const
+//   {
+//     if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
+//       return ((Line4i*)This)->size();
+//     else
+//       return ((Curve4iMB*)This)->N;
+//   }
 
-  template<>
-  size_t Curve4iMB::Type::sizeTotal(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return 4;
-    else
-      return ((Curve4iMB*)This)->N;
-  }
+//   template<>
+//   size_t Curve4iMB::Type::sizeTotal(const char* This) const
+//   {
+//     if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
+//       return 4;
+//     else
+//       return ((Curve4iMB*)This)->N;
+//   }
 
-  template<>
-  size_t Curve4iMB::Type::getBytes(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-       return Line4i::bytes(sizeActive(This));
-     else
-       return Curve4iMB::bytes(sizeActive(This));
-  }
+//   template<>
+//   size_t Curve4iMB::Type::getBytes(const char* This) const
+//   {
+//     if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
+//        return Line4i::bytes(sizeActive(This));
+//      else
+//        return Curve4iMB::bytes(sizeActive(This));
+//   }
 
-  /********************** Line4i **************************/
+//   /********************** Line4i **************************/
 
   template<>
   const char* Line4i::Type::name () const {
@@ -222,27 +206,27 @@ namespace embree
     return sizeof(Triangle4i);
   }
 
-  /********************** Triangle4vMB **************************/
+  // /********************** Triangle4vMB **************************/
 
-  template<>
-  const char* Triangle4vMB::Type::name () const {
-    return  "triangle4vmb";
-  }
+  // template<>
+  // const char* Triangle4vMB::Type::name () const {
+  //   return  "triangle4vmb";
+  // }
 
-  template<>
-  size_t Triangle4vMB::Type::sizeActive(const char* This) const {
-    return ((Triangle4vMB*)This)->size();
-  }
+  // template<>
+  // size_t Triangle4vMB::Type::sizeActive(const char* This) const {
+  //   return ((Triangle4vMB*)This)->size();
+  // }
 
-  template<>
-  size_t Triangle4vMB::Type::sizeTotal(const char* This) const {
-    return 4;
-  }
+  // template<>
+  // size_t Triangle4vMB::Type::sizeTotal(const char* This) const {
+  //   return 4;
+  // }
 
-  template<>
-  size_t Triangle4vMB::Type::getBytes(const char* This) const {
-    return sizeof(Triangle4vMB);
-  }
+  // template<>
+  // size_t Triangle4vMB::Type::getBytes(const char* This) const {
+  //   return sizeof(Triangle4vMB);
+  // }
 
   /********************** Quad4v **************************/
 
@@ -367,26 +351,26 @@ namespace embree
   }
 
   SubGrid::Type SubGrid::type;
-  
+
   /********************** SubGridQBVH4 **************************/
 
-  template<>
-  const char* SubGridQBVH4::Type::name () const {
+template<>
+const char* SubGridQBVH4::Type::name () const {
     return "SubGridQBVH4";
-  }
+}
 
-  template<>
-  size_t SubGridQBVH4::Type::sizeActive(const char* This) const {
+template<>
+size_t SubGridQBVH4::Type::sizeActive(const char* This) const {
     return 1;
-  }
+}
 
-  template<>
-  size_t SubGridQBVH4::Type::sizeTotal(const char* This) const {
+template<>
+size_t SubGridQBVH4::Type::sizeTotal(const char* This) const {
     return 1;
-  }
+}
 
-  template<>
-  size_t SubGridQBVH4::Type::getBytes(const char* This) const {
+template<>
+size_t SubGridQBVH4::Type::getBytes(const char* This) const {
     return sizeof(SubGridQBVH4);
-  }
+}
 }
