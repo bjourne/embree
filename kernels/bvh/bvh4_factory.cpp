@@ -82,18 +82,6 @@ DECLARE_SYMBOL2(Accel::Intersector8,BVH4InstanceIntersector8Chunk);
   DECLARE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridMoeller);
   DECLARE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridPluecker);
 
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Triangle4Intersector16HybridMoeller);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Triangle4Intersector16HybridMoellerNoFilter);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Triangle4iIntersector16HybridMoeller);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Triangle4vIntersector16HybridPluecker);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Triangle4iIntersector16HybridPluecker);
-
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Quad4vIntersector16HybridMoeller);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Quad4vIntersector16HybridMoellerNoFilter);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Quad4iIntersector16HybridMoeller);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Quad4vIntersector16HybridPluecker);
-// DECLARE_SYMBOL2(Accel::Intersector16,BVH4Quad4iIntersector16HybridPluecker);
-
 DECLARE_SYMBOL2(Accel::Intersector16,BVH4SubdivPatch1Intersector16);
 
 DECLARE_SYMBOL2(Accel::Intersector16,BVH4VirtualIntersector16Chunk);
@@ -623,8 +611,10 @@ void BVH4Factory::createTriangleMeshTriangle4Morton(TriangleMesh* mesh,
     }
   }
 
-  void BVH4Factory::createUserGeometryMesh(UserGeometry* mesh, AccelData*& accel, Builder*& builder)
-  {
+void BVH4Factory::createUserGeometryMesh(UserGeometry* mesh,
+                                         AccelData*& accel,
+                                         Builder*& builder)
+{
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
     accel = new BVH4(Object::type,mesh->scene);
     switch (mesh->quality) {
@@ -634,19 +624,23 @@ void BVH4Factory::createTriangleMeshTriangle4Morton(TriangleMesh* mesh,
     case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH4VirtualMeshRefitSAH(accel,mesh,0); break;
     default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
     }
-  }
+}
 
-Accel* BVH4Factory::BVH4Triangle4(Scene* scene, BuildVariant bvariant, IntersectVariant ivariant)
+Accel* BVH4Factory::BVH4Triangle4(Scene* scene,
+                                  BuildVariant bvariant,
+                                  IntersectVariant ivariant)
 {
+    printf("BVH4Factory::BVH4Triangle4 %s\n", scene->device->tri_traverser);
+
     BVH4* accel = new BVH4(Triangle4::type,scene);
 
     Accel::Intersectors intersectors;
-    if      (scene->device->tri_traverser == "default")
+    if (scene->device->tri_traverser == "default")
         intersectors = BVH4Triangle4Intersectors(accel,ivariant);
     else if (scene->device->tri_traverser == "fast"   )
         intersectors = BVH4Triangle4Intersectors(accel,IntersectVariant::FAST);
     else
-        throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown traverser "+scene->device->tri_traverser+" for BVH4<Triangle4>");
+        throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown traverser "+scene->device->tri_traverser+" for BVH4<Triangle4>");
 
     Builder* builder = nullptr;
     if (scene->device->tri_builder == "default") {
