@@ -43,7 +43,6 @@ namespace embree
 
 typedef Grid1IntersectorK<4>  SubdivPatch1Intersector4;
 typedef Grid1IntersectorK<8>  SubdivPatch1Intersector8;
-typedef Grid1IntersectorK<16> SubdivPatch1Intersector16;
 
   }
 }

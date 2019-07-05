@@ -235,26 +235,6 @@ void BVH8Factory::selectBuilders(int features)
     }
   }
 
-  void BVH8Factory::createQuadMeshQuad4v(QuadMesh* mesh, AccelData*& accel, Builder*& builder)
-  {
-    BVH8Factory* factory = mesh->scene->device->bvh8_factory.get();
-    accel = new BVH8(Quad4v::type,mesh->scene);
-    switch (mesh->quality) {
-    case RTC_BUILD_QUALITY_LOW:    builder = factory->BVH8Quad4vMeshBuilderMortonGeneral(accel,mesh,0); break;
-    case RTC_BUILD_QUALITY_MEDIUM:
-    case RTC_BUILD_QUALITY_HIGH:   builder = factory->BVH8Quad4vMeshBuilderSAH(accel,mesh,0); break;
-    case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH8Quad4vMeshRefitSAH(accel,mesh,0); break;
-    default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
-    }
-  }
-
-  void BVH8Factory::createQuadMeshQuad4vMorton(QuadMesh* mesh, AccelData*& accel, Builder*& builder)
-  {
-    BVH8Factory* factory = mesh->scene->device->bvh8_factory.get();
-    accel = new BVH8(Quad4v::type,mesh->scene);
-    builder = factory->BVH8Quad4vMeshBuilderMortonGeneral(accel,mesh,0);
-  }
-
   void BVH8Factory::createUserGeometryMesh(UserGeometry* mesh, AccelData*& accel, Builder*& builder)
   {
     BVH8Factory* factory = mesh->scene->device->bvh8_factory.get();

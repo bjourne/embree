@@ -26,16 +26,12 @@ DECLARE_SYMBOL2(Accel::Intersector1,BVH4Triangle4iIntersector1Pluecker);
 DECLARE_SYMBOL2(Accel::Intersector1,QBVH4Triangle4iIntersector1Pluecker);
 DECLARE_SYMBOL2(Accel::Intersector1,QBVH4Quad4iIntersector1Pluecker);
 
-DECLARE_SYMBOL2(Accel::Intersector1,BVH4SubdivPatch1Intersector1);
-
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4VirtualIntersector1);
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4InstanceIntersector1);
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Moeller);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Pluecker);
-
-//DECLARE_SYMBOL2(Accel::Intersector4,BVH4SubdivPatch1Intersector4);
 
 DECLARE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
 
@@ -47,15 +43,8 @@ DECLARE_SYMBOL2(Accel::Intersector8,BVH4VirtualIntersector8Chunk);
 
 DECLARE_SYMBOL2(Accel::Intersector8,BVH4InstanceIntersector8Chunk);
 
-//DECLARE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridMoeller);
-//  DECLARE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridPluecker);
-
 DECLARE_ISA_FUNCTION(Builder*,BVH4BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
 DECLARE_ISA_FUNCTION(Builder*,BVH4BuilderTwoLevelQuadMeshSAH,void* COMMA Scene* COMMA const createQuadMeshAccelTy);
-
-// DECLARE_ISA_FUNCTION(Builder*,BVH4Curve4vBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
-// DECLARE_ISA_FUNCTION(Builder*,BVH4Curve4iBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
-// DECLARE_ISA_FUNCTION(Builder*,BVH4Curve8iBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
 
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4vSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
@@ -166,7 +155,6 @@ void BVH4Factory::selectIntersectors(int features)
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX512SKX(features,BVH4Triangle4iIntersector1Pluecker));
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX512SKX(features,QBVH4Triangle4iIntersector1Pluecker));
-    IF_ENABLED_SUBDIV(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4SubdivPatch1Intersector1));
     IF_ENABLED_USER(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector1));
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector1));
 
@@ -174,7 +162,6 @@ void BVH4Factory::selectIntersectors(int features)
 
     IF_ENABLED_USER(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector4Chunk));
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector4Chunk));
-    IF_ENABLED_SUBDIV(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4SubdivPatch1Intersector8));
     IF_ENABLED_USER(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector8Chunk));
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector8Chunk));
 
@@ -237,14 +224,6 @@ Accel::Intersectors BVH4Factory::BVH4Triangle4vIntersectors(BVH4* bvh, Intersect
     return intersectors;
   }
 
-  Accel::Intersectors BVH4Factory::BVH4SubdivPatch1Intersectors(BVH4* bvh)
-  {
-    Accel::Intersectors intersectors;
-    intersectors.ptr = bvh;
-    intersectors.intersector1  = BVH4SubdivPatch1Intersector1();
-    return intersectors;
-  }
-
 void BVH4Factory::createTriangleMeshTriangle4Morton(TriangleMesh* mesh,
                                                     AccelData*& accel,
                                                     Builder*& builder)
@@ -266,13 +245,6 @@ void BVH4Factory::createTriangleMeshTriangle4Morton(TriangleMesh* mesh,
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
     accel = new BVH4(Triangle4i::type,mesh->scene);
     builder = factory->BVH4Triangle4iMeshBuilderMortonGeneral(accel,mesh,0);
-  }
-
-  void BVH4Factory::createQuadMeshQuad4vMorton(QuadMesh* mesh, AccelData*& accel, Builder*& builder)
-  {
-    BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
-    accel = new BVH4(Quad4v::type,mesh->scene);
-    builder = factory->BVH4Quad4vMeshBuilderMortonGeneral(accel,mesh,0);
   }
 
   void BVH4Factory::createTriangleMeshTriangle4(TriangleMesh* mesh, AccelData*& accel, Builder*& builder)
@@ -310,19 +282,6 @@ void BVH4Factory::createTriangleMeshTriangle4Morton(TriangleMesh* mesh,
     case RTC_BUILD_QUALITY_MEDIUM:
     case RTC_BUILD_QUALITY_HIGH:   builder = factory->BVH4Triangle4iMeshBuilderSAH(accel,mesh,0); break;
     case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH4Triangle4iMeshRefitSAH(accel,mesh,0); break;
-    default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
-    }
-  }
-
-  void BVH4Factory::createQuadMeshQuad4v(QuadMesh* mesh, AccelData*& accel, Builder*& builder)
-  {
-    BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
-    accel = new BVH4(Quad4v::type,mesh->scene);
-    switch (mesh->quality) {
-    case RTC_BUILD_QUALITY_LOW:    builder = factory->BVH4Quad4vMeshBuilderMortonGeneral(accel,mesh,0); break;
-    case RTC_BUILD_QUALITY_MEDIUM:
-    case RTC_BUILD_QUALITY_HIGH:   builder = factory->BVH4Quad4vMeshBuilderSAH(accel,mesh,0); break;
-    case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH4Quad4vMeshRefitSAH(accel,mesh,0); break;
     default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
     }
   }
@@ -445,14 +404,6 @@ Accel* BVH4Factory::BVH4Triangle4i(Scene* scene, BuildVariant bvariant, Intersec
     return new AccelInstance(accel,builder,intersectors);
   }
 
-  Accel* BVH4Factory::BVH4SubdivPatch1(Scene* scene)
-  {
-    BVH4* accel = new BVH4(SubdivPatch1::type,scene);
-    Accel::Intersectors intersectors = BVH4SubdivPatch1Intersectors(accel);
-    Builder* builder = BVH4SubdivPatch1BuilderSAH(accel,scene,0);
-    return new AccelInstance(accel,builder,intersectors);
-  }
-
 Accel* BVH4Factory::BVH4Instance(Scene* scene, BuildVariant bvariant)
 {
     printf("Creating BVH4Instance\n");
@@ -472,22 +423,10 @@ BVH4Factory::BVH4GridIntersectors(BVH4* bvh,
     if (ivariant == IntersectVariant::FAST)
     {
         intersectors.intersector1  = BVH4GridIntersector1Moeller();
-// #if defined (EMBREE_RAY_PACKETS)
-//         intersectors.intersector4  = BVH4GridIntersector4HybridMoeller();
-//         intersectors.intersector8  = BVH4GridIntersector8HybridMoeller();
-//         intersectors.intersector16 = BVH4GridIntersector16HybridMoeller();
-//         intersectors.intersectorN  = BVH4IntersectorStreamPacketFallback();
-// #endif
     }
     else /* if (ivariant == IntersectVariant::ROBUST) */
     {
         intersectors.intersector1  = BVH4GridIntersector1Pluecker();
-// #if defined (EMBREE_RAY_PACKETS)
-//         intersectors.intersector4  = BVH4GridIntersector4HybridPluecker();
-//         intersectors.intersector8  = BVH4GridIntersector8HybridPluecker();
-//         intersectors.intersector16 = BVH4GridIntersector16HybridPluecker();
-//         intersectors.intersectorN  = BVH4IntersectorStreamPacketFallback();
-// #endif
     }
     return intersectors;
 }

@@ -62,8 +62,6 @@ private:
     static void createTriangleMeshTriangle4v(TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
     static void createTriangleMeshTriangle4i(TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
 
-    static void createQuadMeshQuad4v(QuadMesh* mesh, AccelData*& accel, Builder*& builder);
-    static void createQuadMeshQuad4vMorton(QuadMesh* mesh, AccelData*& accel, Builder*& builder);
 
     static void createUserGeometryMesh(UserGeometry* mesh, AccelData*& accel, Builder*& builder);
 
@@ -75,8 +73,6 @@ private:
 
     DEFINE_SYMBOL2(Accel::Intersector1,QBVH4Triangle4iIntersector1Pluecker);
     DEFINE_SYMBOL2(Accel::Intersector1,QBVH4Quad4iIntersector1Pluecker);
-
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH4SubdivPatch1Intersector1);
 
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4VirtualIntersector1);
 
