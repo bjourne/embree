@@ -18,27 +18,20 @@ IF_ENABLED_QUADS(DEFINE_INTERSECTOR1(BVH8Quad4iIntersector1Moeller, BVHNIntersec
 IF_ENABLED_QUADS(DEFINE_INTERSECTOR1(BVH8Quad4vIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_AN1 COMMA true  COMMA ArrayIntersector1<QuadMvIntersector1Pluecker<4 COMMA true> > >));
 IF_ENABLED_QUADS(DEFINE_INTERSECTOR1(BVH8Quad4iIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_AN1 COMMA true  COMMA ArrayIntersector1<QuadMiIntersector1Pluecker<4 COMMA true> > >));
 
-//IF_ENABLED_QUADS(DEFINE_INTERSECTOR1(BVH8Quad4iMBIntersector1Moeller, BVHNIntersector1<8 COMMA BVH_AN2_AN4D COMMA false COMMA ArrayIntersector1<QuadMiMBIntersector1Moeller <4 COMMA true> > >));
-//IF_ENABLED_QUADS(DEFINE_INTERSECTOR1(BVH8Quad4iMBIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_AN2_AN4D COMMA true  COMMA ArrayIntersector1<QuadMiMBIntersector1Pluecker<4 COMMA true> > >));
+IF_ENABLED_TRIS(DEFINE_INTERSECTOR1(QBVH8Triangle4iIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_QN1 COMMA false COMMA ArrayIntersector1<TriangleMiIntersector1Pluecker<SIMD_MODE(4) COMMA true> > >));
+IF_ENABLED_TRIS(DEFINE_INTERSECTOR1(QBVH8Triangle4Intersector1Moeller,BVHNIntersector1<8 COMMA BVH_QN1 COMMA false COMMA ArrayIntersector1<TriangleMIntersector1Moeller  <SIMD_MODE(4) COMMA true> > >));
 
-    IF_ENABLED_TRIS(DEFINE_INTERSECTOR1(QBVH8Triangle4iIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_QN1 COMMA false COMMA ArrayIntersector1<TriangleMiIntersector1Pluecker<SIMD_MODE(4) COMMA true> > >));
-    IF_ENABLED_TRIS(DEFINE_INTERSECTOR1(QBVH8Triangle4Intersector1Moeller,BVHNIntersector1<8 COMMA BVH_QN1 COMMA false COMMA ArrayIntersector1<TriangleMIntersector1Moeller  <SIMD_MODE(4) COMMA true> > >));
+IF_ENABLED_QUADS(DEFINE_INTERSECTOR1(QBVH8Quad4iIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_QN1 COMMA false COMMA ArrayIntersector1<QuadMiIntersector1Pluecker<4 COMMA true> > >));
 
-    IF_ENABLED_QUADS(DEFINE_INTERSECTOR1(QBVH8Quad4iIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_QN1 COMMA false COMMA ArrayIntersector1<QuadMiIntersector1Pluecker<4 COMMA true> > >));
+IF_ENABLED_CURVES(DEFINE_INTERSECTOR1(BVH8OBBVirtualCurveIntersector1,BVHNIntersector1<8 COMMA BVH_AN1_UN1 COMMA false COMMA VirtualCurveIntersector1 >));
 
-    IF_ENABLED_CURVES(DEFINE_INTERSECTOR1(BVH8OBBVirtualCurveIntersector1,BVHNIntersector1<8 COMMA BVH_AN1_UN1 COMMA false COMMA VirtualCurveIntersector1 >));
-//IF_ENABLED_CURVES(DEFINE_INTERSECTOR1(BVH8OBBVirtualCurveIntersector1MB,BVHNIntersector1<8 COMMA BVH_AN2_AN4D_UN2 COMMA false COMMA VirtualCurveIntersector1 >));
+IF_ENABLED_USER(DEFINE_INTERSECTOR1(BVH8VirtualIntersector1,BVHNIntersector1<8 COMMA BVH_AN1 COMMA false COMMA ArrayIntersector1<ObjectIntersector1<false>> >));
 
-    IF_ENABLED_USER(DEFINE_INTERSECTOR1(BVH8VirtualIntersector1,BVHNIntersector1<8 COMMA BVH_AN1 COMMA false COMMA ArrayIntersector1<ObjectIntersector1<false>> >));
-//IF_ENABLED_USER(DEFINE_INTERSECTOR1(BVH8VirtualMBIntersector1,BVHNIntersector1<8 COMMA BVH_AN2_AN4D COMMA false COMMA ArrayIntersector1<ObjectIntersector1<true>> >));
+IF_ENABLED_INSTANCE(DEFINE_INTERSECTOR1(BVH8InstanceIntersector1,BVHNIntersector1<8 COMMA BVH_AN1 COMMA false COMMA ArrayIntersector1<InstanceIntersector1> >));
 
-    IF_ENABLED_INSTANCE(DEFINE_INTERSECTOR1(BVH8InstanceIntersector1,BVHNIntersector1<8 COMMA BVH_AN1 COMMA false COMMA ArrayIntersector1<InstanceIntersector1> >));
-//IF_ENABLED_INSTANCE(DEFINE_INTERSECTOR1(BVH8InstanceMBIntersector1,BVHNIntersector1<8 COMMA BVH_AN2_AN4D COMMA false COMMA ArrayIntersector1<InstanceIntersector1MB> >));
+IF_ENABLED_GRIDS(DEFINE_INTERSECTOR1(BVH8GridIntersector1Moeller,BVHNIntersector1<8 COMMA BVH_AN1 COMMA false COMMA SubGridIntersector1Moeller<8 COMMA true> >));
 
-    IF_ENABLED_GRIDS(DEFINE_INTERSECTOR1(BVH8GridIntersector1Moeller,BVHNIntersector1<8 COMMA BVH_AN1 COMMA false COMMA SubGridIntersector1Moeller<8 COMMA true> >));
-//IF_ENABLED_GRIDS(DEFINE_INTERSECTOR1(BVH8GridMBIntersector1Moeller,BVHNIntersector1<8 COMMA BVH_AN2_AN4D COMMA true COMMA SubGridMBIntersector1Pluecker<8 COMMA true> >));
+IF_ENABLED_GRIDS(DEFINE_INTERSECTOR1(BVH8GridIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_AN1 COMMA true COMMA SubGridIntersector1Pluecker<8 COMMA true> >));
 
-    IF_ENABLED_GRIDS(DEFINE_INTERSECTOR1(BVH8GridIntersector1Pluecker,BVHNIntersector1<8 COMMA BVH_AN1 COMMA true COMMA SubGridIntersector1Pluecker<8 COMMA true> >));
-
-  }
+}
 }

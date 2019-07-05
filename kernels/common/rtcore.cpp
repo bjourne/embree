@@ -382,39 +382,6 @@ rtcIntersect4(const int* valid,
     RTC_CATCH_END2(scene);
   }
 
-//   RTC_API void rtcIntersect16 (const int* valid, RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit16* rayhit)
-//   {
-//     Scene* scene = (Scene*) hscene;
-//     RTC_CATCH_BEGIN;
-//     RTC_TRACE(rtcIntersect16);
-
-// #if defined(DEBUG)
-//     RTC_VERIFY_HANDLE(hscene);
-//     if (scene->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
-//     if (((size_t)valid) & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "mask not aligned to 64 bytes");
-//     if (((size_t)rayhit)   & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "rayhit not aligned to 64 bytes");
-// #endif
-//     STAT(size_t cnt=0; for (size_t i=0; i<16; i++) cnt += ((int*)valid)[i] == -1;);
-//     STAT3(normal.travs,cnt,cnt,cnt);
-
-//     IntersectContext context(scene,user_context);
-// #if !defined(EMBREE_RAY_PACKETS)
-//     Ray16* ray16 = (Ray16*) rayhit;
-//     for (size_t i=0; i<16; i++) {
-//       if (!valid[i]) continue;
-//       RayHit ray1; ray16->get(i,ray1);
-//       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-//       ray16->set(i,ray1);
-//     }
-// #else
-//     if (likely(scene->intersectors.intersector16))
-//       scene->intersectors.intersect16(valid,*rayhit,&context);
-//     else
-//       scene->device->rayStreamFilters.intersectSOA(scene,(char*)rayhit,16,1,sizeof(RTCRayHit16),&context);
-// #endif
-//     RTC_CATCH_END2(scene);
-//   }
-
 RTC_API void
 rtcIntersect1M(RTCScene hscene,
                RTCIntersectContext* user_context,

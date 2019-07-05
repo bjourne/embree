@@ -145,12 +145,6 @@ MACRO(embree_files TARGET ISA)
         bvh/bvh_intersector_hybrid4_bvh8.cpp
         bvh/bvh_intersector_hybrid8_bvh8.cpp)
     ENDIF()
-
-    IF (${ISA} GREATER ${AVX2})
-      LIST(APPEND ${TARGET}
-        bvh/bvh_intersector_hybrid16_bvh8.cpp
-        bvh/bvh_intersector_hybrid16_bvh4.cpp)
-    ENDIF()
   ENDIF()
 
 ENDMACRO()
