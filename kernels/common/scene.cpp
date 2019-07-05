@@ -186,86 +186,86 @@ void Scene::createTriangleAccel()
 #endif
 }
 
-  void Scene::createQuadAccel()
-  {
-#if defined(EMBREE_GEOMETRY_QUAD)
-    if (device->quad_accel == "default")
-    {
-      if (quality_flags != RTC_BUILD_QUALITY_LOW)
-      {
-        /* static */
-        int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-        switch (mode) {
-        case /*0b00*/ 0:
-#if defined (EMBREE_TARGET_SIMD8)
-          if (device->canUseAVX())
-          {
-            if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-              accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-            else
-              accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
-          }
-          else
-#endif
-          {
-            if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-              accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-            else
-              accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
-          }
-          break;
+//   void Scene::createQuadAccel()
+//   {
+// #if defined(EMBREE_GEOMETRY_QUAD)
+//     if (device->quad_accel == "default")
+//     {
+//       if (quality_flags != RTC_BUILD_QUALITY_LOW)
+//       {
+//         /* static */
+//         int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+//         switch (mode) {
+//         case /*0b00*/ 0:
+// #if defined (EMBREE_TARGET_SIMD8)
+//           if (device->canUseAVX())
+//           {
+//             if (quality_flags == RTC_BUILD_QUALITY_HIGH)
+//               accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
+//             else
+//               accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+//           }
+//           else
+// #endif
+//           {
+//             if (quality_flags == RTC_BUILD_QUALITY_HIGH)
+//               accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
+//             else
+//               accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+//           }
+//           break;
 
-        case /*0b01*/ 1:
-#if defined (EMBREE_TARGET_SIMD8)
-          if (device->canUseAVX())
-            accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-          else
-#endif
-            accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-          break;
+//         case /*0b01*/ 1:
+// #if defined (EMBREE_TARGET_SIMD8)
+//           if (device->canUseAVX())
+//             accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
+//           else
+// #endif
+//             accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
+//           break;
 
-        case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST)); break;
-        case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
-        }
-      }
-      else /* dynamic */
-      {
-#if defined (EMBREE_TARGET_SIMD8)
-          if (device->canUseAVX())
-	  {
-            int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-            switch (mode) {
-            case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
-            case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-            case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
-            case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-            }
-          }
-          else
-#endif
-          {
-            int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-            switch (mode) {
-            case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
-            case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-            case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
-            case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-            }
-          }
-      }
-    }
-    else if (device->quad_accel == "bvh4.quad4v")       accels_add(device->bvh4_factory->BVH4Quad4v(this));
-    else if (device->quad_accel == "bvh4.quad4i")       accels_add(device->bvh4_factory->BVH4Quad4i(this));
-    else if (device->quad_accel == "qbvh4.quad4i")      accels_add(device->bvh4_factory->BVH4QuantizedQuad4i(this));
+//         case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST)); break;
+//         case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//         }
+//       }
+//       else /* dynamic */
+//       {
+// #if defined (EMBREE_TARGET_SIMD8)
+//           if (device->canUseAVX())
+// 	  {
+//             int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+//             switch (mode) {
+//             case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
+//             case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//             case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
+//             case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//             }
+//           }
+//           else
+// #endif
+//           {
+//             int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+//             switch (mode) {
+//             case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
+//             case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//             case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST)); break;
+//             case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Quad4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//             }
+//           }
+//       }
+//     }
+//     else if (device->quad_accel == "bvh4.quad4v")       accels_add(device->bvh4_factory->BVH4Quad4v(this));
+//     else if (device->quad_accel == "bvh4.quad4i")       accels_add(device->bvh4_factory->BVH4Quad4i(this));
+//     else if (device->quad_accel == "qbvh4.quad4i")      accels_add(device->bvh4_factory->BVH4QuantizedQuad4i(this));
 
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->quad_accel == "bvh8.quad4v")       accels_add(device->bvh8_factory->BVH8Quad4v(this));
-    else if (device->quad_accel == "bvh8.quad4i")       accels_add(device->bvh8_factory->BVH8Quad4i(this));
-    else if (device->quad_accel == "qbvh8.quad4i")      accels_add(device->bvh8_factory->BVH8QuantizedQuad4i(this));
-#endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown quad acceleration structure "+device->quad_accel);
-#endif
-  }
+// #if defined (EMBREE_TARGET_SIMD8)
+//     else if (device->quad_accel == "bvh8.quad4v")       accels_add(device->bvh8_factory->BVH8Quad4v(this));
+//     else if (device->quad_accel == "bvh8.quad4i")       accels_add(device->bvh8_factory->BVH8Quad4i(this));
+//     else if (device->quad_accel == "qbvh8.quad4i")      accels_add(device->bvh8_factory->BVH8QuantizedQuad4i(this));
+// #endif
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown quad acceleration structure "+device->quad_accel);
+// #endif
+//   }
 
 //   void Scene::createQuadMBAccel()
 //   {
@@ -474,7 +474,7 @@ void Scene::commit_task ()
                                         });
 
         if (getNumPrimitives<TriangleMesh,false>()) createTriangleAccel();
-        if (getNumPrimitives<QuadMesh,false>()) createQuadAccel();
+        //if (getNumPrimitives<QuadMesh,false>()) createQuadAccel();
         if (getNumPrimitives<GridMesh,false>()) createGridAccel();
         if (getNumPrimitives<SubdivMesh,false>()) createSubdivAccel();
         if (getNumPrimitives<UserGeometry,false>()) createUserGeometryAccel();
