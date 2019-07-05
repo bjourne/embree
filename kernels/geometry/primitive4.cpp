@@ -140,12 +140,12 @@ namespace embree
     return sizeof(Line4i);
   }
 
-  /********************** Triangle4 **************************/
+/********************** Triangle4 **************************/
 
-  template<>
-  const char* Triangle4::Type::name () const {
+template<>
+const char* Triangle4::Type::name () const {
     return "triangle4";
-  }
+}
 
   template<>
   size_t Triangle4::Type::sizeActive(const char* This) const {
@@ -205,28 +205,6 @@ namespace embree
   size_t Triangle4i::Type::getBytes(const char* This) const {
     return sizeof(Triangle4i);
   }
-
-  // /********************** Triangle4vMB **************************/
-
-  // template<>
-  // const char* Triangle4vMB::Type::name () const {
-  //   return  "triangle4vmb";
-  // }
-
-  // template<>
-  // size_t Triangle4vMB::Type::sizeActive(const char* This) const {
-  //   return ((Triangle4vMB*)This)->size();
-  // }
-
-  // template<>
-  // size_t Triangle4vMB::Type::sizeTotal(const char* This) const {
-  //   return 4;
-  // }
-
-  // template<>
-  // size_t Triangle4vMB::Type::getBytes(const char* This) const {
-  //   return sizeof(Triangle4vMB);
-  // }
 
   /********************** Quad4v **************************/
 

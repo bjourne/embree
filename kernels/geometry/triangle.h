@@ -6,7 +6,10 @@ namespace embree
 {
 /* Precalculated representation for M triangles. Stores for each
    triangle a base vertex, two edges, and the geometry normal to
-   speed up intersection calculations */
+   speed up intersection calculations
+
+   TODO: Check if this is true - I can't find the normals.
+*/
 template<int M>
 struct TriangleM
 {
@@ -66,11 +69,17 @@ public:
     }
 
     /* Returns the number of stored triangles */
-    __forceinline size_t size() const { return bsf(~movemask(valid()));  }
+    __forceinline size_t size() const {
+        return bsf(~movemask(valid()));
+    }
 
     /* Returns the geometry IDs */
-    __forceinline       vuint<M>& geomID()       { return geomIDs;  }
-    __forceinline const vuint<M>& geomID() const { return geomIDs;  }
+    __forceinline       vuint<M>& geomID()       {
+        return geomIDs;
+    }
+    __forceinline const vuint<M>& geomID() const {
+        return geomIDs;
+    }
     __forceinline unsigned int geomID(const size_t i) const
     {
         assert(i<M); return geomIDs[i];
@@ -90,7 +99,8 @@ public:
     }
 
     /* Calculate the bounds of the triangle */
-    __forceinline BBox3fa bounds() const
+    __forceinline BBox3fa
+    bounds() const
     {
         Vec3vf<M> p0 = v0;
         Vec3vf<M> p1 = v0-e1;
@@ -104,8 +114,12 @@ public:
         upper.x = select(mask,upper.x,vfloat<M>(neg_inf));
         upper.y = select(mask,upper.y,vfloat<M>(neg_inf));
         upper.z = select(mask,upper.z,vfloat<M>(neg_inf));
-        return BBox3fa(Vec3fa(reduce_min(lower.x),reduce_min(lower.y),reduce_min(lower.z)),
-                       Vec3fa(reduce_max(upper.x),reduce_max(upper.y),reduce_max(upper.z)));
+        return BBox3fa(Vec3fa(reduce_min(lower.x),
+                              reduce_min(lower.y),
+                              reduce_min(lower.z)),
+                       Vec3fa(reduce_max(upper.x),
+                              reduce_max(upper.y),
+                              reduce_max(upper.z)));
     }
 
     /* Non temporal store */
@@ -133,7 +147,7 @@ public:
         vuint<M> vgeomID = -1, vprimID = -1;
         Vec3vf<M> v0 = zero, v1 = zero, v2 = zero;
 
-        for (size_t i=0; i<M && begin<end; i++, begin++)
+        for (size_t i=0; i < M && begin < end; i++, begin++)
         {
             const PrimRef& prim = prims[begin];
             const unsigned geomID = prim.geomID();
