@@ -382,41 +382,46 @@ rtcIntersect4(const int* valid,
     RTC_CATCH_END2(scene);
   }
 
-  RTC_API void rtcIntersect16 (const int* valid, RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit16* rayhit)
-  {
-    Scene* scene = (Scene*) hscene;
-    RTC_CATCH_BEGIN;
-    RTC_TRACE(rtcIntersect16);
+//   RTC_API void rtcIntersect16 (const int* valid, RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit16* rayhit)
+//   {
+//     Scene* scene = (Scene*) hscene;
+//     RTC_CATCH_BEGIN;
+//     RTC_TRACE(rtcIntersect16);
 
-#if defined(DEBUG)
-    RTC_VERIFY_HANDLE(hscene);
-    if (scene->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
-    if (((size_t)valid) & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "mask not aligned to 64 bytes");
-    if (((size_t)rayhit)   & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "rayhit not aligned to 64 bytes");
-#endif
-    STAT(size_t cnt=0; for (size_t i=0; i<16; i++) cnt += ((int*)valid)[i] == -1;);
-    STAT3(normal.travs,cnt,cnt,cnt);
+// #if defined(DEBUG)
+//     RTC_VERIFY_HANDLE(hscene);
+//     if (scene->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
+//     if (((size_t)valid) & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "mask not aligned to 64 bytes");
+//     if (((size_t)rayhit)   & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "rayhit not aligned to 64 bytes");
+// #endif
+//     STAT(size_t cnt=0; for (size_t i=0; i<16; i++) cnt += ((int*)valid)[i] == -1;);
+//     STAT3(normal.travs,cnt,cnt,cnt);
 
-    IntersectContext context(scene,user_context);
-#if !defined(EMBREE_RAY_PACKETS)
-    Ray16* ray16 = (Ray16*) rayhit;
-    for (size_t i=0; i<16; i++) {
-      if (!valid[i]) continue;
-      RayHit ray1; ray16->get(i,ray1);
-      scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-      ray16->set(i,ray1);
-    }
-#else
-    if (likely(scene->intersectors.intersector16))
-      scene->intersectors.intersect16(valid,*rayhit,&context);
-    else
-      scene->device->rayStreamFilters.intersectSOA(scene,(char*)rayhit,16,1,sizeof(RTCRayHit16),&context);
-#endif
-    RTC_CATCH_END2(scene);
-  }
+//     IntersectContext context(scene,user_context);
+// #if !defined(EMBREE_RAY_PACKETS)
+//     Ray16* ray16 = (Ray16*) rayhit;
+//     for (size_t i=0; i<16; i++) {
+//       if (!valid[i]) continue;
+//       RayHit ray1; ray16->get(i,ray1);
+//       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
+//       ray16->set(i,ray1);
+//     }
+// #else
+//     if (likely(scene->intersectors.intersector16))
+//       scene->intersectors.intersect16(valid,*rayhit,&context);
+//     else
+//       scene->device->rayStreamFilters.intersectSOA(scene,(char*)rayhit,16,1,sizeof(RTCRayHit16),&context);
+// #endif
+//     RTC_CATCH_END2(scene);
+//   }
 
-  RTC_API void rtcIntersect1M (RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit* rayhit, unsigned int M, size_t byteStride)
-  {
+RTC_API void
+rtcIntersect1M(RTCScene hscene,
+               RTCIntersectContext* user_context,
+               RTCRayHit* rayhit,
+               unsigned int M,
+               size_t byteStride)
+{
     Scene* scene = (Scene*) hscene;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcIntersect1M);
@@ -432,19 +437,19 @@ rtcIntersect4(const int* valid,
 
     /* fast codepath for single rays */
     if (likely(M == 1)) {
-      if (likely(rayhit->ray.tnear <= rayhit->ray.tfar))
-        scene->intersectors.intersect(*rayhit,&context);
+        if (likely(rayhit->ray.tnear <= rayhit->ray.tfar))
+            scene->intersectors.intersect(*rayhit,&context);
     }
 
     /* codepath for streams */
     else {
-      scene->device->rayStreamFilters.intersectAOS(scene,rayhit,M,byteStride,&context);
+        scene->device->rayStreamFilters.intersectAOS(scene,rayhit,M,byteStride,&context);
     }
 #else
     throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect1M not supported");
 #endif
     RTC_CATCH_END2(scene);
-  }
+}
 
   RTC_API void rtcIntersect1Mp (RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit** rn, unsigned int M)
   {
@@ -634,39 +639,39 @@ rtcIntersect4(const int* valid,
     RTC_CATCH_END2(scene);
   }
 
-  RTC_API void rtcOccluded16 (const int* valid, RTCScene hscene, RTCIntersectContext* user_context, RTCRay16* ray)
-  {
-    Scene* scene = (Scene*) hscene;
-    RTC_CATCH_BEGIN;
-    RTC_TRACE(rtcOccluded16);
+//   RTC_API void rtcOccluded16 (const int* valid, RTCScene hscene, RTCIntersectContext* user_context, RTCRay16* ray)
+//   {
+//     Scene* scene = (Scene*) hscene;
+//     RTC_CATCH_BEGIN;
+//     RTC_TRACE(rtcOccluded16);
 
-#if defined(DEBUG)
-    RTC_VERIFY_HANDLE(hscene);
-    if (scene->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
-    if (((size_t)valid) & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "mask not aligned to 64 bytes");
-    if (((size_t)ray)   & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "ray not aligned to 64 bytes");
-#endif
-    STAT(size_t cnt=0; for (size_t i=0; i<16; i++) cnt += ((int*)valid)[i] == -1;);
-    STAT3(shadow.travs,cnt,cnt,cnt);
+// #if defined(DEBUG)
+//     RTC_VERIFY_HANDLE(hscene);
+//     if (scene->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
+//     if (((size_t)valid) & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "mask not aligned to 64 bytes");
+//     if (((size_t)ray)   & 0x3F) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "ray not aligned to 64 bytes");
+// #endif
+//     STAT(size_t cnt=0; for (size_t i=0; i<16; i++) cnt += ((int*)valid)[i] == -1;);
+//     STAT3(shadow.travs,cnt,cnt,cnt);
 
-    IntersectContext context(scene,user_context);
-#if !defined(EMBREE_RAY_PACKETS)
-    RayHit16* ray16 = (RayHit16*) ray;
-    for (size_t i=0; i<16; i++) {
-      if (!valid[i]) continue;
-      RayHit ray1; ray16->get(i,ray1);
-      scene->intersectors.occluded((RTCRay&)ray1,&context);
-      ray16->set(i,ray1);
-    }
-#else
-    if (likely(scene->intersectors.intersector16))
-      scene->intersectors.occluded16(valid,*ray,&context);
-    else
-      scene->device->rayStreamFilters.occludedSOA(scene,(char*)ray,16,1,sizeof(RTCRay16),&context);
-#endif
+//     IntersectContext context(scene,user_context);
+// #if !defined(EMBREE_RAY_PACKETS)
+//     RayHit16* ray16 = (RayHit16*) ray;
+//     for (size_t i=0; i<16; i++) {
+//       if (!valid[i]) continue;
+//       RayHit ray1; ray16->get(i,ray1);
+//       scene->intersectors.occluded((RTCRay&)ray1,&context);
+//       ray16->set(i,ray1);
+//     }
+// #else
+//     if (likely(scene->intersectors.intersector16))
+//       scene->intersectors.occluded16(valid,*ray,&context);
+//     else
+//       scene->device->rayStreamFilters.occludedSOA(scene,(char*)ray,16,1,sizeof(RTCRay16),&context);
+// #endif
 
-    RTC_CATCH_END2(scene);
-  }
+//     RTC_CATCH_END2(scene);
+//   }
 
   RTC_API void rtcOccluded1M(RTCScene hscene, RTCIntersectContext* user_context, RTCRay* ray, unsigned int M, size_t byteStride)
   {
@@ -891,8 +896,12 @@ rtcIntersect4(const int* valid,
     }
   }
 
-  RTC_API void rtcSetGeometryTransform(RTCGeometry hgeometry, unsigned int timeStep, RTCFormat format, const void* xfm)
-  {
+RTC_API void
+rtcSetGeometryTransform(RTCGeometry hgeometry,
+                        unsigned int timeStep,
+                        RTCFormat format,
+                        const void* xfm)
+{
     Geometry* geometry = (Geometry*) hgeometry;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcSetGeometryTransform);
@@ -901,7 +910,7 @@ rtcIntersect4(const int* valid,
     const AffineSpace3fa transform = loadTransform(format, (const float*)xfm);
     geometry->setTransform(transform, timeStep);
     RTC_CATCH_END2(geometry);
-  }
+}
 
   RTC_API void rtcGetGeometryTransform(RTCGeometry hgeometry, float time, RTCFormat format, void* xfm)
   {

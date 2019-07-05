@@ -93,7 +93,8 @@ Device::Device (const char* cfg)
 #if defined(EMBREE_RAY_PACKETS)
     RayStreamFilterFuncsType rayStreamFilterFuncs;
     SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512KNL_AVX512SKX(enabled_cpu_features,rayStreamFilterFuncs);
-    rayStreamFilters = rayStreamFilterFuncs();
+    rayStreamFilters = nullptr;
+    //rayStreamFilters = rayStreamFilterFuncs();
 #endif
   }
 

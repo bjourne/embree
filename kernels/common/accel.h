@@ -15,11 +15,11 @@ class AccelData : public RefCount
 public:
     enum Type
     {
-     TY_UNKNOWN = 0,
-     TY_ACCELN = 1,
-     TY_ACCEL_INSTANCE = 2,
-     TY_BVH4 = 3,
-     TY_BVH8 = 4
+        TY_UNKNOWN = 0,
+        TY_ACCELN = 1,
+        TY_ACCEL_INSTANCE = 2,
+        TY_BVH4 = 3,
+        TY_BVH8 = 4
     };
 
 public:
@@ -185,39 +185,39 @@ public:
         const char* name;
     };
 
-    struct Intersector16
-    {
-        Intersector16 (ErrorFunc error = nullptr)
-            : intersect((IntersectFunc16)error), occluded((OccludedFunc16)error), name(nullptr) {}
+    // struct Intersector16
+    // {
+    //     Intersector16 (ErrorFunc error = nullptr)
+    //         : intersect((IntersectFunc16)error), occluded((OccludedFunc16)error), name(nullptr) {}
 
-        Intersector16 (IntersectFunc16 intersect, OccludedFunc16 occluded, const char* name)
-            : intersect(intersect), occluded(occluded), name(name) {}
+    //     Intersector16 (IntersectFunc16 intersect, OccludedFunc16 occluded, const char* name)
+    //         : intersect(intersect), occluded(occluded), name(name) {}
 
-        operator bool() const { return name; }
+    //     operator bool() const { return name; }
 
-    public:
-        static const char* type;
-        IntersectFunc16 intersect;
-        OccludedFunc16 occluded;
-        const char* name;
-    };
+    // public:
+    //     static const char* type;
+    //     IntersectFunc16 intersect;
+    //     OccludedFunc16 occluded;
+    //     const char* name;
+    // };
 
-    struct IntersectorN
-    {
-        IntersectorN (ErrorFunc error = nullptr)
-            : intersect((IntersectFuncN)error), occluded((OccludedFuncN)error), name(nullptr) {}
+    // struct IntersectorN
+    // {
+    //     IntersectorN (ErrorFunc error = nullptr)
+    //         : intersect((IntersectFuncN)error), occluded((OccludedFuncN)error), name(nullptr) {}
 
-        IntersectorN (IntersectFuncN intersect, OccludedFuncN occluded, const char* name)
-            : intersect(intersect), occluded(occluded), name(name) {}
+    //     IntersectorN (IntersectFuncN intersect, OccludedFuncN occluded, const char* name)
+    //         : intersect(intersect), occluded(occluded), name(name) {}
 
-        operator bool() const { return name; }
+    //     operator bool() const { return name; }
 
-    public:
-        static const char* type;
-        IntersectFuncN intersect;
-        OccludedFuncN occluded;
-        const char* name;
-    };
+    // public:
+    //     static const char* type;
+    //     IntersectFuncN intersect;
+    //     OccludedFuncN occluded;
+    //     const char* name;
+    // };
 
     struct Intersectors
     {
@@ -226,18 +226,22 @@ public:
               leafIntersector(nullptr),
               intersector1(nullptr),
               intersector4(nullptr),
-              intersector8(nullptr),
-              intersector16(nullptr),
-              intersectorN(nullptr) {}
+              intersector8(nullptr)
+        {
+        }
+              //intersector16(nullptr),
+              //intersectorN(nullptr) {}
 
         Intersectors (ErrorFunc error)
             : ptr(nullptr),
               leafIntersector(nullptr),
               intersector1(error),
               intersector4(error),
-              intersector8(error),
-              intersector16(error),
-              intersectorN(error) {}
+              intersector8(error)
+        {
+        }
+              //intersector16(error),
+              //intersectorN(error) {}
 
         void print(size_t ident)
         {
@@ -253,14 +257,14 @@ public:
                 for (size_t i=0; i<ident; i++) std::cout << " ";
                 std::cout << "intersector8  = " << intersector8.name << std::endl;
             }
-            if (intersector16.name) {
-                for (size_t i=0; i<ident; i++) std::cout << " ";
-                std::cout << "intersector16 = " << intersector16.name << std::endl;
-            }
-            if (intersectorN.name) {
-                for (size_t i=0; i<ident; i++) std::cout << " ";
-                std::cout << "intersectorN = " << intersectorN.name << std::endl;
-            }
+            // if (intersector16.name) {
+            //     for (size_t i=0; i<ident; i++) std::cout << " ";
+            //     std::cout << "intersector16 = " << intersector16.name << std::endl;
+            // }
+            // if (intersectorN.name) {
+            //     for (size_t i=0; i<ident; i++) std::cout << " ";
+            //     std::cout << "intersectorN = " << intersectorN.name << std::endl;
+            // }
         }
 
         void select(bool filter)
@@ -273,14 +277,14 @@ public:
                 if (filter) intersector8 = intersector8_filter;
                 else        intersector8 = intersector8_nofilter;
             }
-            if (intersector16_filter) {
-                if (filter) intersector16 = intersector16_filter;
-                else         intersector16 = intersector16_nofilter;
-            }
-            if (intersectorN_filter) {
-                if (filter) intersectorN = intersectorN_filter;
-                else        intersectorN = intersectorN_nofilter;
-            }
+            // if (intersector16_filter) {
+            //     if (filter) intersector16 = intersector16_filter;
+            //     else         intersector16 = intersector16_nofilter;
+            // }
+            // if (intersectorN_filter) {
+            //     if (filter) intersectorN = intersectorN_filter;
+            //     else        intersectorN = intersectorN_nofilter;
+            // }
         }
 
         /*! Intersects a single ray with the scene. */
@@ -305,20 +309,6 @@ public:
             intersector8.intersect(valid,this,ray,context);
         }
 
-        /*! Intersects a packet of 16 rays with the scene. */
-        __forceinline void intersect16 (const void* valid, RTCRayHit16& ray, IntersectContext* context) {
-            //printf("accel.h::intersect16\n");
-            assert(intersector16.intersect);
-            intersector16.intersect(valid,this,ray,context);
-        }
-
-        /*! Intersects a stream of N rays in SOA layout with the scene. */
-        __forceinline void intersectN (RTCRayHitN** rayN, const size_t N, IntersectContext* context)
-        {
-            assert(intersectorN.intersect);
-            intersectorN.intersect(this,rayN,N,context);
-        }
-
 #if defined(__SSE__)
         __forceinline void intersect(const vbool4& valid, RayHitK<4>& ray, IntersectContext* context) {
             const vint<4> mask = valid.mask32();
@@ -338,11 +328,11 @@ public:
       }
 #endif
 
-      template<int K>
-      __forceinline void intersectN (RayHitK<K>** rayN, const size_t N, IntersectContext* context)
-      {
-        intersectN((RTCRayHitN**)rayN,N,context);
-      }
+      // template<int K>
+      // __forceinline void intersectN (RayHitK<K>** rayN, const size_t N, IntersectContext* context)
+      // {
+      //   intersectN((RTCRayHitN**)rayN,N,context);
+      // }
 
       /*! Tests if single ray is occluded by the scene. */
       __forceinline void occluded (RTCRay& ray, IntersectContext* context) {
@@ -360,19 +350,6 @@ public:
       __forceinline void occluded8 (const void* valid, RTCRay8& ray, IntersectContext* context) {
         assert(intersector8.occluded);
         intersector8.occluded(valid,this,ray,context);
-      }
-
-      /*! Tests if a packet of 16 rays is occluded by the scene. */
-      __forceinline void occluded16 (const void* valid, RTCRay16& ray, IntersectContext* context) {
-        assert(intersector16.occluded);
-        intersector16.occluded(valid,this,ray,context);
-      }
-
-      /*! Tests if a stream of N rays in SOA layout is occluded by the scene. */
-      __forceinline void occludedN (RTCRayN** rayN, const size_t N, IntersectContext* context)
-      {
-        assert(intersectorN.occluded);
-        intersectorN.occluded(this,rayN,N,context);
       }
 
 #if defined(__SSE__)
@@ -394,12 +371,6 @@ public:
       }
 #endif
 
-        template<int K>
-        __forceinline void occludedN (RayK<K>** rayN, const size_t N, IntersectContext* context)
-        {
-            occludedN((RTCRayN**)rayN,N,context);
-        }
-
         __forceinline void intersect(RTCRay& ray, IntersectContext* context) {
             occluded(ray, context);
         }
@@ -410,11 +381,11 @@ public:
             occluded(valid, ray, context);
         }
 
-        /*! Tests if a packet of N rays in SOA layout is occluded by the scene. */
-        template<int K>
-        __forceinline void intersectN(RayK<K>** rayN, const size_t N, IntersectContext* context) {
-            occludedN(rayN, N, context);
-        }
+        // /*! Tests if a packet of N rays in SOA layout is occluded by the scene. */
+        // template<int K>
+        // __forceinline void intersectN(RayK<K>** rayN, const size_t N, IntersectContext* context) {
+        //     occludedN(rayN, N, context);
+        // }
 
     public:
         AccelData* ptr;
@@ -426,12 +397,12 @@ public:
         Intersector8 intersector8;
         Intersector8 intersector8_filter;
         Intersector8 intersector8_nofilter;
-        Intersector16 intersector16;
-        Intersector16 intersector16_filter;
-        Intersector16 intersector16_nofilter;
-        IntersectorN intersectorN;
-        IntersectorN intersectorN_filter;
-        IntersectorN intersectorN_nofilter;
+        // Intersector16 intersector16;
+        // Intersector16 intersector16_filter;
+        // Intersector16 intersector16_nofilter;
+        // IntersectorN intersectorN;
+        // IntersectorN intersectorN_filter;
+        // IntersectorN intersectorN_nofilter;
     };
 
 public:
@@ -475,20 +446,6 @@ public:
   Accel::Intersector8 symbol() {                                              \
     return Accel::Intersector8((Accel::IntersectFunc8)intersector::intersect, \
                                (Accel::OccludedFunc8)intersector::occluded,   \
-                               TOSTRING(isa) "::" TOSTRING(symbol));          \
-  }
-
-#define DEFINE_INTERSECTOR16(symbol,intersector)                                \
-  Accel::Intersector16 symbol() {                                               \
-    return Accel::Intersector16((Accel::IntersectFunc16)intersector::intersect, \
-                                (Accel::OccludedFunc16)intersector::occluded,   \
-                                TOSTRING(isa) "::" TOSTRING(symbol));           \
-  }
-
-#define DEFINE_INTERSECTORN(symbol,intersector)                               \
-  Accel::IntersectorN symbol() {                                              \
-    return Accel::IntersectorN((Accel::IntersectFuncN)intersector::intersect, \
-                               (Accel::OccludedFuncN)intersector::occluded,   \
                                TOSTRING(isa) "::" TOSTRING(symbol));          \
   }
 

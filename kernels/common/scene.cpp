@@ -358,25 +358,6 @@ void Scene::createTriangleAccel()
 #endif
   }
 
-//   void Scene::createUserGeometryMBAccel()
-//   {
-// #if defined(EMBREE_GEOMETRY_USER)
-//     if (device->object_accel_mb == "default"    ) {
-// #if defined (EMBREE_TARGET_SIMD8)
-//       if (device->canUseAVX() && !isCompactAccel())
-//         accels_add(device->bvh8_factory->BVH8UserGeometryMB(this));
-//       else
-// #endif
-//         accels_add(device->bvh4_factory->BVH4UserGeometryMB(this));
-//     }
-//     else if (device->object_accel_mb == "bvh4.object") accels_add(device->bvh4_factory->BVH4UserGeometryMB(this));
-// #if defined (EMBREE_TARGET_SIMD8)
-//     else if (device->object_accel_mb == "bvh8.object") accels_add(device->bvh8_factory->BVH8UserGeometryMB(this));
-// #endif
-//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown user geometry mblur accel "+device->object_accel_mb);
-// #endif
-//   }
-
   void Scene::createInstanceAccel()
   {
 #if defined(EMBREE_GEOMETRY_INSTANCE)
@@ -392,22 +373,6 @@ void Scene::createTriangleAccel()
     //else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown instance accel "+device->instance_accel);
 #endif
   }
-
-//   void Scene::createInstanceMBAccel()
-//   {
-// #if defined(EMBREE_GEOMETRY_INSTANCE)
-//     //if (device->instance_accel_mb == "default")
-//     {
-// #if defined (EMBREE_TARGET_SIMD8)
-//       if (device->canUseAVX() && !isCompactAccel())
-//         accels_add(device->bvh8_factory->BVH8InstanceMB(this));
-//       else
-// #endif
-//         accels_add(device->bvh4_factory->BVH4InstanceMB(this));
-//     }
-//     //else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown instance mblur accel "+device->instance_accel_mb);
-// #endif
-//   }
 
   void Scene::createGridAccel()
   {
@@ -435,42 +400,29 @@ void Scene::createTriangleAccel()
 
   }
 
-//   void Scene::createGridMBAccel()
-//   {
-// #if defined(EMBREE_GEOMETRY_GRID)
-//     if (device->grid_accel_mb == "default")
-//     {
-//       accels_add(device->bvh4_factory->BVH4GridMB(this,BVHFactory::BuildVariant::STATIC));
-//     }
-//     else if (device->grid_accel_mb == "bvh4mb.grid") accels_add(device->bvh4_factory->BVH4GridMB(this));
-//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown grid mb accel "+device->grid_accel);
-// #endif
+void Scene::clear() {
+}
 
-//   }
-
-  void Scene::clear() {
-  }
-
-  unsigned Scene::bind(unsigned geomID, Ref<Geometry> geometry)
-  {
+unsigned Scene::bind(unsigned geomID, Ref<Geometry> geometry)
+{
     Lock<SpinLock> lock(geometriesMutex);
     if (geomID == RTC_INVALID_GEOMETRY_ID) {
-      geomID = id_pool.allocate();
-      if (geomID == RTC_INVALID_GEOMETRY_ID)
-        throw_RTCError(RTC_ERROR_INVALID_OPERATION,"too many geometries inside scene");
+        geomID = id_pool.allocate();
+        if (geomID == RTC_INVALID_GEOMETRY_ID)
+            throw_RTCError(RTC_ERROR_INVALID_OPERATION,"too many geometries inside scene");
     }
     else
     {
-      if (!id_pool.add(geomID))
-        throw_RTCError(RTC_ERROR_INVALID_OPERATION,"invalid geometry ID provided");
+        if (!id_pool.add(geomID))
+            throw_RTCError(RTC_ERROR_INVALID_OPERATION,"invalid geometry ID provided");
     }
     if (geomID >= geometries.size()) {
-      geometries.resize(geomID+1);
-      vertices.resize(geomID+1);
+        geometries.resize(geomID+1);
+        vertices.resize(geomID+1);
     }
     geometries[geomID] = geometry->attach(this,geomID);
     return geomID;
-  }
+}
 
   void Scene::detachGeometry(size_t geomID)
   {
