@@ -246,6 +246,7 @@ struct MoellerTrumboreIntersectorK
                                       const Vec3vf<K>& tri_Ng,
                                       const Epilog& epilog) const
     {
+        printf("MoellerTrumboreIntersectorK::intersectK\n");
         /* calculate denominator */
         vbool<K> valid = valid0;
         const Vec3vf<K> C = tri_v0 - ray_org;
