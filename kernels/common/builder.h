@@ -68,6 +68,5 @@ namespace embree
   typedef void (*createLineSegmentsAccelTy)(LineSegments* mesh, AccelData*& accel, Builder*& builder);
   typedef void (*createTriangleMeshAccelTy)(TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
   typedef void (*createQuadMeshAccelTy)(QuadMesh* mesh, AccelData*& accel, Builder*& builder);
-  typedef void (*createUserGeometryAccelTy)(UserGeometry* mesh, AccelData*& accel, Builder*& builder);
 
 }

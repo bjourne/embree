@@ -14,224 +14,224 @@ struct UVIdentity {
     __forceinline void operator() (vfloat<M>& u, vfloat<M>& v) const {}
 };
 
-template<bool filter>
-struct Intersect1Epilog1
+// template<bool filter>
+// struct Intersect1Epilog1
+// {
+//     RayHit& ray;
+//     IntersectContext* context;
+//     const unsigned int geomID;
+//     const unsigned int primID;
+
+//     __forceinline Intersect1Epilog1(RayHit& ray,
+//                                     IntersectContext* context,
+//                                     const unsigned int geomID,
+//                                     const unsigned int primID)
+//         : ray(ray),
+//           context(context),
+//           geomID(geomID),
+//           primID(primID) {}
+
+//     template<typename Hit>
+//     __forceinline bool operator() (Hit& hit) const
+//     {
+//         /* ray mask test */
+//         Scene* scene = context->scene;
+//         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+// #if defined(EMBREE_RAY_MASK)
+//         if ((geometry->mask & ray.mask) == 0)
+//             return false;
+// #endif
+//         hit.finalize();
+
+//         /* intersection filter test */
+// #if defined(EMBREE_FILTER_FUNCTION)
+//         if (filter)
+//         {
+//             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter()))
+//             {
+//                 HitK<1> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
+//                 const float old_t = ray.tfar;
+//                 ray.tfar = hit.t;
+//                 bool found = runIntersectionFilter1(geometry,ray,context,h);
+//                 if (!found) ray.tfar = old_t;
+//                 return found;
+//             }
+//         }
+// #endif
+
+//         /* update hit information */
+//         ray.tfar = hit.t;
+//         ray.Ng = hit.Ng;
+//         ray.u = hit.u;
+//         ray.v = hit.v;
+//         ray.primID = primID;
+//         ray.geomID = geomID;
+//         ray.instID = context->instID;
+//         return true;
+//     }
+// };
+
+// template<bool filter>
+// struct Occluded1Epilog1
+// {
+//       Ray& ray;
+//       IntersectContext* context;
+//       const unsigned int geomID;
+//       const unsigned int primID;
+
+//       __forceinline Occluded1Epilog1(Ray& ray,
+//                                      IntersectContext* context,
+//                                      const unsigned int geomID,
+//                                      const unsigned int primID)
+//         : ray(ray), context(context), geomID(geomID), primID(primID) {}
+
+//       template<typename Hit>
+//       __forceinline bool operator() (Hit& hit) const
+//       {
+//         /* ray mask test */
+//         Scene* scene = context->scene;
+//         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+
+
+// #if defined(EMBREE_RAY_MASK)
+//         if ((geometry->mask & ray.mask) == 0) return false;
+// #endif
+//         hit.finalize();
+
+//         /* intersection filter test */
+// #if defined(EMBREE_FILTER_FUNCTION)
+//         if (filter) {
+//           if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter())) {
+//             HitK<1> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
+//             const float old_t = ray.tfar;
+//             ray.tfar = hit.t;
+//             const bool found = runOcclusionFilter1(geometry,ray,context,h);
+//             if (!found) ray.tfar = old_t;
+//             return found;
+//           }
+//         }
+// #endif
+//         return true;
+//       }
+//     };
+
+// template<int K, bool filter>
+// struct Intersect1KEpilog1
+// {
+//     RayHitK<K>& ray;
+//     size_t k;
+//     IntersectContext* context;
+//     const unsigned int geomID;
+//     const unsigned int primID;
+
+//     __forceinline Intersect1KEpilog1(RayHitK<K>& ray, size_t k,
+//                                      IntersectContext* context,
+//                                      const unsigned int geomID,
+//                                      const unsigned int primID)
+//         : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
+
+//     template<typename Hit>
+//     __forceinline bool operator() (Hit& hit) const
+//     {
+//         /* ray mask test */
+//         Scene* scene = context->scene;
+//         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+// #if defined(EMBREE_RAY_MASK)
+//         if ((geometry->mask & ray.mask[k]) == 0)
+//             return false;
+// #endif
+//         hit.finalize();
+
+//         /* intersection filter test */
+// #if defined(EMBREE_FILTER_FUNCTION)
+//         if (filter) {
+//             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
+//                 HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
+//                 const float old_t = ray.tfar[k];
+//                 ray.tfar[k] = hit.t;
+//                 const bool found = any(runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
+//                 if (!found) ray.tfar[k] = old_t;
+//                 return found;
+//             }
+//         }
+// #endif
+
+//         /* update hit information */
+//         ray.tfar[k] = hit.t;
+//         ray.Ng.x[k] = hit.Ng.x;
+//         ray.Ng.y[k] = hit.Ng.y;
+//         ray.Ng.z[k] = hit.Ng.z;
+//         ray.u[k] = hit.u;
+//         ray.v[k] = hit.v;
+//         ray.primID[k] = primID;
+//         ray.geomID[k] = geomID;
+//         ray.instID[k] = context->instID;
+//         return true;
+//     }
+// };
+
+// template<int K, bool filter>
+// struct Occluded1KEpilog1
+// {
+//     RayK<K>& ray;
+//     size_t k;
+//     IntersectContext* context;
+//     const unsigned int geomID;
+//     const unsigned int primID;
+
+//     __forceinline Occluded1KEpilog1(RayK<K>& ray, size_t k,
+//                                     IntersectContext* context,
+//                                     const unsigned int geomID,
+//                                     const unsigned int primID)
+//         : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
+
+//     template<typename Hit>
+//     __forceinline bool operator() (Hit& hit) const
+//     {
+//         /* ray mask test */
+//         Scene* scene = context->scene;
+//         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+// #if defined(EMBREE_RAY_MASK)
+//         if ((geometry->mask & ray.mask[k]) == 0)
+//           return false;
+// #endif
+
+//         /* intersection filter test */
+// #if defined(EMBREE_FILTER_FUNCTION)
+//         if (filter) {
+//             if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter())) {
+//                 hit.finalize();
+//                 HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
+//                 const float old_t = ray.tfar[k];
+//                 ray.tfar[k] = hit.t;
+//                 const bool found =
+//                     any(runOcclusionFilter(vbool<K>(1<<k),geometry,ray,context,h));
+//                 if (!found) ray.tfar[k] = old_t;
+//                 return found;
+//             }
+//         }
+// #endif
+//         return true;
+//     }
+// };
+
+template<int M, int Mx, bool filter>
+struct Intersect1EpilogM
 {
     RayHit& ray;
     IntersectContext* context;
-    const unsigned int geomID;
-    const unsigned int primID;
+    const vuint<M>& geomIDs;
+    const vuint<M>& primIDs;
 
-    __forceinline Intersect1Epilog1(RayHit& ray,
+    __forceinline Intersect1EpilogM(RayHit& ray,
                                     IntersectContext* context,
-                                    const unsigned int geomID,
-                                    const unsigned int primID)
-        : ray(ray),
-          context(context),
-          geomID(geomID),
-          primID(primID) {}
-
-    template<typename Hit>
-    __forceinline bool operator() (Hit& hit) const
-    {
-        /* ray mask test */
-        Scene* scene = context->scene;
-        Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-#if defined(EMBREE_RAY_MASK)
-        if ((geometry->mask & ray.mask) == 0)
-            return false;
-#endif
-        hit.finalize();
-
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION)
-        if (filter)
-        {
-            if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter()))
-            {
-                HitK<1> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
-                const float old_t = ray.tfar;
-                ray.tfar = hit.t;
-                bool found = runIntersectionFilter1(geometry,ray,context,h);
-                if (!found) ray.tfar = old_t;
-                return found;
-            }
-        }
-#endif
-
-        /* update hit information */
-        ray.tfar = hit.t;
-        ray.Ng = hit.Ng;
-        ray.u = hit.u;
-        ray.v = hit.v;
-        ray.primID = primID;
-        ray.geomID = geomID;
-        ray.instID = context->instID;
-        return true;
-    }
-};
-
-template<bool filter>
-struct Occluded1Epilog1
-{
-      Ray& ray;
-      IntersectContext* context;
-      const unsigned int geomID;
-      const unsigned int primID;
-
-      __forceinline Occluded1Epilog1(Ray& ray,
-                                     IntersectContext* context,
-                                     const unsigned int geomID,
-                                     const unsigned int primID)
-        : ray(ray), context(context), geomID(geomID), primID(primID) {}
-
-      template<typename Hit>
-      __forceinline bool operator() (Hit& hit) const
-      {
-        /* ray mask test */
-        Scene* scene = context->scene;
-        Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-
-
-#if defined(EMBREE_RAY_MASK)
-        if ((geometry->mask & ray.mask) == 0) return false;
-#endif
-        hit.finalize();
-
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION)
-        if (filter) {
-          if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter())) {
-            HitK<1> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
-            const float old_t = ray.tfar;
-            ray.tfar = hit.t;
-            const bool found = runOcclusionFilter1(geometry,ray,context,h);
-            if (!found) ray.tfar = old_t;
-            return found;
-          }
-        }
-#endif
-        return true;
-      }
-    };
-
-template<int K, bool filter>
-struct Intersect1KEpilog1
-{
-    RayHitK<K>& ray;
-    size_t k;
-    IntersectContext* context;
-    const unsigned int geomID;
-    const unsigned int primID;
-
-    __forceinline Intersect1KEpilog1(RayHitK<K>& ray, size_t k,
-                                     IntersectContext* context,
-                                     const unsigned int geomID,
-                                     const unsigned int primID)
-        : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
-
-    template<typename Hit>
-    __forceinline bool operator() (Hit& hit) const
-    {
-        /* ray mask test */
-        Scene* scene = context->scene;
-        Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-#if defined(EMBREE_RAY_MASK)
-        if ((geometry->mask & ray.mask[k]) == 0)
-            return false;
-#endif
-        hit.finalize();
-
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION)
-        if (filter) {
-            if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
-                HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
-                const float old_t = ray.tfar[k];
-                ray.tfar[k] = hit.t;
-                const bool found = any(runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
-                if (!found) ray.tfar[k] = old_t;
-                return found;
-            }
-        }
-#endif
-
-        /* update hit information */
-        ray.tfar[k] = hit.t;
-        ray.Ng.x[k] = hit.Ng.x;
-        ray.Ng.y[k] = hit.Ng.y;
-        ray.Ng.z[k] = hit.Ng.z;
-        ray.u[k] = hit.u;
-        ray.v[k] = hit.v;
-        ray.primID[k] = primID;
-        ray.geomID[k] = geomID;
-        ray.instID[k] = context->instID;
-        return true;
-    }
-};
-
-template<int K, bool filter>
-struct Occluded1KEpilog1
-{
-    RayK<K>& ray;
-    size_t k;
-    IntersectContext* context;
-    const unsigned int geomID;
-    const unsigned int primID;
-
-    __forceinline Occluded1KEpilog1(RayK<K>& ray, size_t k,
-                                    IntersectContext* context,
-                                    const unsigned int geomID,
-                                    const unsigned int primID)
-        : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
-
-    template<typename Hit>
-    __forceinline bool operator() (Hit& hit) const
-    {
-        /* ray mask test */
-        Scene* scene = context->scene;
-        Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-#if defined(EMBREE_RAY_MASK)
-        if ((geometry->mask & ray.mask[k]) == 0)
-          return false;
-#endif
-
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION)
-        if (filter) {
-            if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter())) {
-                hit.finalize();
-                HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
-                const float old_t = ray.tfar[k];
-                ray.tfar[k] = hit.t;
-                const bool found =
-                    any(runOcclusionFilter(vbool<K>(1<<k),geometry,ray,context,h));
-                if (!found) ray.tfar[k] = old_t;
-                return found;
-            }
-        }
-#endif
-        return true;
-    }
-};
-
-    template<int M, int Mx, bool filter>
-    struct Intersect1EpilogM
-    {
-      RayHit& ray;
-      IntersectContext* context;
-      const vuint<M>& geomIDs;
-      const vuint<M>& primIDs;
-
-      __forceinline Intersect1EpilogM(RayHit& ray,
-                                      IntersectContext* context,
-                                      const vuint<M>& geomIDs,
-                                      const vuint<M>& primIDs)
+                                    const vuint<M>& geomIDs,
+                                    const vuint<M>& primIDs)
         : ray(ray), context(context), geomIDs(geomIDs), primIDs(primIDs) {}
 
-      template<typename Hit>
-      __forceinline bool operator() (const vbool<Mx>& valid_i, Hit& hit) const
-      {
+    template<typename Hit>
+    __forceinline bool operator() (const vbool<Mx>& valid_i, Hit& hit) const
+    {
         Scene* scene = context->scene;
         vbool<Mx> valid = valid_i;
         if (Mx > M) valid &= (1<<M)-1;
@@ -245,39 +245,39 @@ struct Occluded1KEpilog1
         goto entry;
         while (true)
         {
-          if (unlikely(none(valid))) return foundhit;
-          i = select_min(valid,hit.vt);
+            if (unlikely(none(valid))) return foundhit;
+            i = select_min(valid,hit.vt);
 
-          geomID = geomIDs[i];
+            geomID = geomIDs[i];
         entry:
-          Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+            Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
 #if defined(EMBREE_RAY_MASK)
-          /* goto next hit if mask test fails */
-          if ((geometry->mask & ray.mask) == 0) {
-            clear(valid,i);
-            continue;
-          }
+            /* goto next hit if mask test fails */
+            if ((geometry->mask & ray.mask) == 0) {
+                clear(valid,i);
+                continue;
+            }
 #endif
 
 #if defined(EMBREE_FILTER_FUNCTION)
-          /* call intersection filter function */
-          if (filter) {
-            if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
-              const Vec2f uv = hit.uv(i);
-              HitK<1> h(context->instID,geomID,primIDs[i],uv.x,uv.y,hit.Ng(i));
-              const float old_t = ray.tfar;
-              ray.tfar = hit.t(i);
-              const bool found = runIntersectionFilter1(geometry,ray,context,h);
-              if (!found) ray.tfar = old_t;
-              foundhit |= found;
-              clear(valid,i);
-              valid &= hit.vt <= ray.tfar; // intersection filters may modify tfar value
-              continue;
+            /* call intersection filter function */
+            if (filter) {
+                if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
+                    const Vec2f uv = hit.uv(i);
+                    HitK<1> h(context->instID,geomID,primIDs[i],uv.x,uv.y,hit.Ng(i));
+                    const float old_t = ray.tfar;
+                    ray.tfar = hit.t(i);
+                    const bool found = runIntersectionFilter1(geometry,ray,context,h);
+                    if (!found) ray.tfar = old_t;
+                    foundhit |= found;
+                    clear(valid,i);
+                    valid &= hit.vt <= ray.tfar; // intersection filters may modify tfar value
+                    continue;
+                }
             }
-          }
 #endif
-          break;
+            break;
         }
 #endif
 
@@ -297,82 +297,82 @@ struct Occluded1KEpilog1
       }
     };
 
-#if 0 && defined(__AVX512F__) // do not enable, this reduced frequency for BVH4
-    template<int M, bool filter>
-    struct Intersect1EpilogM<M,16,filter>
-    {
-      static const size_t Mx = 16;
-      RayHit& ray;
-      IntersectContext* context;
-      const vuint<M>& geomIDs;
-      const vuint<M>& primIDs;
+// #if 0 && defined(__AVX512F__) // do not enable, this reduced frequency for BVH4
+//     template<int M, bool filter>
+//     struct Intersect1EpilogM<M,16,filter>
+//     {
+//       static const size_t Mx = 16;
+//       RayHit& ray;
+//       IntersectContext* context;
+//       const vuint<M>& geomIDs;
+//       const vuint<M>& primIDs;
 
-      __forceinline Intersect1EpilogM(RayHit& ray,
-                                      IntersectContext* context,
-                                      const vuint<M>& geomIDs,
-                                      const vuint<M>& primIDs)
-        : ray(ray), context(context), geomIDs(geomIDs), primIDs(primIDs) {}
+//       __forceinline Intersect1EpilogM(RayHit& ray,
+//                                       IntersectContext* context,
+//                                       const vuint<M>& geomIDs,
+//                                       const vuint<M>& primIDs)
+//         : ray(ray), context(context), geomIDs(geomIDs), primIDs(primIDs) {}
 
-      template<typename Hit>
-      __forceinline bool operator() (const vbool<Mx>& valid_i, Hit& hit) const
-      {
-        Scene* scene = context->scene;
-        vbool<Mx> valid = valid_i;
-        if (Mx > M) valid &= (1<<M)-1;
-        hit.finalize();
-        size_t i = select_min(valid,hit.vt);
-        unsigned int geomID = geomIDs[i];
+//       template<typename Hit>
+//       __forceinline bool operator() (const vbool<Mx>& valid_i, Hit& hit) const
+//       {
+//         Scene* scene = context->scene;
+//         vbool<Mx> valid = valid_i;
+//         if (Mx > M) valid &= (1<<M)-1;
+//         hit.finalize();
+//         size_t i = select_min(valid,hit.vt);
+//         unsigned int geomID = geomIDs[i];
 
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
-        bool foundhit = false;
-        goto entry;
-        while (true)
-        {
-          if (unlikely(none(valid))) return foundhit;
-          i = select_min(valid,hit.vt);
+//         /* intersection filter test */
+// #if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+//         bool foundhit = false;
+//         goto entry;
+//         while (true)
+//         {
+//           if (unlikely(none(valid))) return foundhit;
+//           i = select_min(valid,hit.vt);
 
-          geomID = geomIDs[i];
-        entry:
-          Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+//           geomID = geomIDs[i];
+//         entry:
+//           Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
-#if defined(EMBREE_RAY_MASK)
-          /* goto next hit if mask test fails */
-          if ((geometry->mask & ray.mask) == 0) {
-            clear(valid,i);
-            continue;
-          }
-#endif
+// #if defined(EMBREE_RAY_MASK)
+//           /* goto next hit if mask test fails */
+//           if ((geometry->mask & ray.mask) == 0) {
+//             clear(valid,i);
+//             continue;
+//           }
+// #endif
 
-#if defined(EMBREE_FILTER_FUNCTION)
-          /* call intersection filter function */
-          if (filter) {
-            if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
-              const Vec2f uv = hit.uv(i);
-              HitK<1> h(context->instID,geomID,primIDs[i],uv.x,uv.y,hit.Ng(i));
-              const float old_t = ray.tfar;
-              ray.tfar = hit.t(i);
-              const bool found = runIntersectionFilter1(geometry,ray,context,h);
-              if (!found) ray.tfar = old_t;
-              foundhit |= found;
-              clear(valid,i);
-              valid &= hit.vt <= ray.tfar; // intersection filters may modify tfar value
-              continue;
-            }
-          }
-#endif
-          break;
-        }
-#endif
+// #if defined(EMBREE_FILTER_FUNCTION)
+//           /* call intersection filter function */
+//           if (filter) {
+//             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
+//               const Vec2f uv = hit.uv(i);
+//               HitK<1> h(context->instID,geomID,primIDs[i],uv.x,uv.y,hit.Ng(i));
+//               const float old_t = ray.tfar;
+//               ray.tfar = hit.t(i);
+//               const bool found = runIntersectionFilter1(geometry,ray,context,h);
+//               if (!found) ray.tfar = old_t;
+//               foundhit |= found;
+//               clear(valid,i);
+//               valid &= hit.vt <= ray.tfar; // intersection filters may modify tfar value
+//               continue;
+//             }
+//           }
+// #endif
+//           break;
+//         }
+// #endif
 
-        vbool<Mx> finalMask(((unsigned int)1 << i));
-        ray.update(finalMask,hit.vt,hit.vu,hit.vv,hit.vNg.x,hit.vNg.y,hit.vNg.z,geomID,primIDs);
-        ray.instID = context->instID;
-        return true;
+//         vbool<Mx> finalMask(((unsigned int)1 << i));
+//         ray.update(finalMask,hit.vt,hit.vu,hit.vv,hit.vNg.x,hit.vNg.y,hit.vNg.z,geomID,primIDs);
+//         ray.instID = context->instID;
+//         return true;
 
-      }
-    };
-#endif
+//       }
+//     };
+// #endif
 
 template<int M, int Mx, bool filter>
 struct Occluded1EpilogM
@@ -946,14 +946,14 @@ struct Occluded1EpilogM
       }
     };
 
-    template<int M, int K, bool filter>
-    struct Intersect1KEpilogMU
-    {
-      RayHitK<K>& ray;
-      size_t k;
-      IntersectContext* context;
-      const unsigned int geomID;
-      const unsigned int primID;
+template<int M, int K, bool filter>
+struct Intersect1KEpilogMU
+{
+    RayHitK<K>& ray;
+    size_t k;
+    IntersectContext* context;
+    const unsigned int geomID;
+    const unsigned int primID;
 
       __forceinline Intersect1KEpilogMU(RayHitK<K>& ray, size_t k,
                                         IntersectContext* context,

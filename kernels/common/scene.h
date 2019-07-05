@@ -143,11 +143,6 @@ private:
 
 public:
     void createTriangleAccel();
-    void createTriangleMBAccel();
-    void createQuadAccel();
-    void createSubdivAccel();
-    void createUserGeometryAccel();
-    void createInstanceAccel();
     void createGridAccel();
 
     /*! prints statistics about the scene */
@@ -237,7 +232,10 @@ public:
     {
         return scene_flags & RTC_SCENE_FLAG_COMPACT;
     }
-    __forceinline bool isRobustAccel()  const { return scene_flags & RTC_SCENE_FLAG_ROBUST; }
+    __forceinline bool isRobustAccel()  const
+    {
+        return scene_flags & RTC_SCENE_FLAG_ROBUST;
+    }
     __forceinline bool isStaticAccel()  const { return !(scene_flags & RTC_SCENE_FLAG_DYNAMIC); }
     __forceinline bool isDynamicAccel() const { return scene_flags & RTC_SCENE_FLAG_DYNAMIC; }
 

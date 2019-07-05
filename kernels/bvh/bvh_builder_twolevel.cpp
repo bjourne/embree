@@ -37,7 +37,7 @@ namespace embree
     template<int N, typename Mesh>
     BVHNBuilderTwoLevel<N,Mesh>::BVHNBuilderTwoLevel (BVH* bvh, Scene* scene, const createMeshAccelTy createMeshAccel, const size_t singleThreadThreshold)
       : bvh(bvh), objects(bvh->objects), scene(scene), createMeshAccel(createMeshAccel), refs(scene->device,0), prims(scene->device,0), singleThreadThreshold(singleThreadThreshold) {}
-    
+
     template<int N, typename Mesh>
     BVHNBuilderTwoLevel<N,Mesh>::~BVHNBuilderTwoLevel () {
     }
@@ -59,14 +59,14 @@ namespace embree
             }
           });
       }
-      
+
 #if PROFILE
-      while(1) 
+      while(1)
 #endif
       {
       /* reset memory allocator */
       bvh->alloc.reset();
-      
+
       /* skip build for empty scene */
       const size_t numPrimitives = scene->getNumPrimitives<Mesh,false>();
 
@@ -83,18 +83,18 @@ namespace embree
       if (builders.size() < num) builders.resize(num);
       if (refs.size()     < num) refs.resize(num);
       nextRef.store(0);
-      
+
       /* create acceleration structures */
       parallel_for(size_t(0), num, [&] (const range<size_t>& r)
       {
         for (size_t objectID=r.begin(); objectID<r.end(); objectID++)
         {
           Mesh* mesh = scene->getSafe<Mesh>(objectID);
-          
+
           /* ignore meshes we do not support */
           if (mesh == nullptr || mesh->numTimeSteps != 1)
             continue;
-          
+
           /* create BVH and builder for new meshes */
           if (objects[objectID] == nullptr) {
             Builder* builder = nullptr;
@@ -105,7 +105,7 @@ namespace embree
           /* re-create when build quality changed */
           else if (mesh->quality != builders[objectID].quality) {
             Builder* builder = nullptr;
-            delete objects[objectID]; 
+            delete objects[objectID];
             createMeshAccel(mesh,(AccelData*&)objects[objectID],builder);
             builders[objectID] = BuilderState(builder,mesh->quality);
           }
@@ -119,12 +119,12 @@ namespace embree
         {
           /* ignore if no triangle mesh or not enabled */
           Mesh* mesh = scene->getSafe<Mesh>(objectID);
-          if (mesh == nullptr || !mesh->isEnabled() || mesh->numTimeSteps != 1) 
+          if (mesh == nullptr || !mesh->isEnabled() || mesh->numTimeSteps != 1)
             continue;
-        
+
           BVH*     object  = objects [objectID]; assert(object);
           Ref<Builder>& builder = builders[objectID].builder; assert(builder);
-          
+
           /* build object if it got modified */
           if (mesh->isModified())
             builder->build();
@@ -146,23 +146,23 @@ namespace embree
       double d0 = getSeconds();
 #endif
       /* fast path for single geometry scenes */
-      if (nextRef == 1) { 
+      if (nextRef == 1) {
         bvh->set(refs[0].node,LBBox3fa(refs[0].bounds()),numPrimitives);
       }
 
       else
-      {     
+      {
         /* open all large nodes */
         refs.resize(nextRef);
 
         /* this probably needs some more tuning */
         const size_t extSize = max(max((size_t)SPLIT_MIN_EXT_SPACE,refs.size()*SPLIT_MEMORY_RESERVE_SCALE),size_t((float)numPrimitives / SPLIT_MEMORY_RESERVE_FACTOR));
         //PRINT(extSize);
- 
+
 #if !ENABLE_DIRECT_SAH_MERGE_BUILDER
 
 #if ENABLE_OPEN_SEQUENTIAL
-        open_sequential(extSize); 
+        open_sequential(extSize);
 #endif
         /* compute PrimRefs */
         prims.resize(refs.size());
@@ -171,7 +171,7 @@ namespace embree
         /* calculate the size of the entire BVH */
         const size_t node_bytes = numPrimitives*sizeof(typename BVH::AlignedNodeMB)/(4*N);
         const size_t leaf_bytes = size_t(1.2*44*numPrimitives); // assumes triangles
-        bvh->alloc.init_estimate(node_bytes+leaf_bytes); 
+        bvh->alloc.init_estimate(node_bytes+leaf_bytes);
 
 #if defined(TASKING_TBB) && defined(__AVX512ER__) && USE_TASK_ARENA // KNL
         tbb::task_arena limited(min(32,(int)TaskScheduler::threadCount()));
@@ -188,7 +188,7 @@ namespace embree
               }
               return pinfo;
             }, [] (const PrimInfo& a, const PrimInfo& b) { return PrimInfo::merge(a,b); });
-          
+
 #else
           const PrimInfo pinfo = parallel_reduce(size_t(0), refs.size(),  PrimInfo(empty), [&] (const range<size_t>& r) -> PrimInfo {
 
@@ -199,12 +199,12 @@ namespace embree
               }
               return pinfo;
             }, [] (const PrimInfo& a, const PrimInfo& b) { return PrimInfo::merge(a,b); });
-#endif   
-       
+#endif
+
           /* skip if all objects where empty */
           if (pinfo.size() == 0)
             bvh->set(BVH::emptyNode,empty,0);
-        
+
           /* otherwise build toplevel hierarchy */
           else
           {
@@ -218,22 +218,22 @@ namespace embree
             settings.travCost = 1.0f;
             settings.intCost = 1.0f;
             settings.singleThreadThreshold = singleThreadThreshold;
-      
+
 #if ENABLE_DIRECT_SAH_MERGE_BUILDER
-            refs.resize(extSize); 
-         
+            refs.resize(extSize);
+
             NodeRef root = BVHBuilderBinnedOpenMergeSAH::build<NodeRef,BuildRef>(
               typename BVH::CreateAlloc(bvh),
               typename BVH::AlignedNode::Create2(),
               typename BVH::AlignedNode::Set2(),
-              
+
               [&] (const BuildRef* refs, const range<size_t>& range, const FastAllocator::CachedAllocator& alloc) -> NodeRef  {
                 assert(range.size() == 1);
                 return (NodeRef) refs[range.begin()].node;
               },
-              [&] (BuildRef &bref, BuildRef *refs) -> size_t { 
+              [&] (BuildRef &bref, BuildRef *refs) -> size_t {
                 return openBuildRef(bref,refs);
-              },              
+              },
               [&] (size_t dn) { bvh->scene->progressMonitor(0); },
               refs.data(),extSize,pinfo,settings);
 #else
@@ -241,7 +241,7 @@ namespace embree
               typename BVH::CreateAlloc(bvh),
               typename BVH::AlignedNode::Create2(),
               typename BVH::AlignedNode::Set2(),
-              
+
               [&] (const PrimRef* pims, const range<size_t>& range, const FastAllocator::CachedAllocator& alloc) -> NodeRef {
                 assert(range.size() == 1);
                 return (NodeRef) prims[range.begin()].ID();
@@ -250,7 +250,7 @@ namespace embree
               prims.data(),pinfo,settings);
 #endif
 
-            
+
             bvh->set(root,LBBox3fa(pinfo.geomBounds),numPrimitives);
           }
         }
@@ -258,8 +258,8 @@ namespace embree
           );
 #endif
 
-      }  
-        
+      }
+
       bvh->alloc.cleanup();
       bvh->postBuild(t0);
 #if PROFILE
@@ -269,7 +269,7 @@ namespace embree
       }
 
     }
-    
+
     template<int N, typename Mesh>
     void BVHNBuilderTwoLevel<N,Mesh>::deleteGeometry(size_t geomID)
     {
@@ -281,10 +281,10 @@ namespace embree
     template<int N, typename Mesh>
     void BVHNBuilderTwoLevel<N,Mesh>::clear()
     {
-      for (size_t i=0; i<objects.size(); i++) 
+      for (size_t i=0; i<objects.size(); i++)
         if (objects[i]) objects[i]->clear();
 
-      for (size_t i=0; i<builders.size(); i++) 
+      for (size_t i=0; i<builders.size(); i++)
 	if (builders[i].builder) builders[i].builder->clear();
 
       refs.clear();
@@ -310,22 +310,22 @@ namespace embree
       std::make_heap(refs.begin(),refs.end());
       while (refs.size()+N-1 <= extSize)
       {
-        std::pop_heap (refs.begin(),refs.end()); 
+        std::pop_heap (refs.begin(),refs.end());
         NodeRef ref = refs.back().node;
         if (ref.isLeaf()) break;
-        refs.pop_back();    
-        
+        refs.pop_back();
+
         AlignedNode* node = ref.alignedNode();
         for (size_t i=0; i<N; i++) {
           if (node->child(i) == BVH::emptyNode) continue;
           refs.push_back(BuildRef(node->bounds(i),node->child(i)));
-         
+
 #if 1
           NodeRef ref_pre = node->child(i);
           if (ref_pre.isAlignedNode())
             ref_pre.prefetch();
 #endif
-          std::push_heap (refs.begin(),refs.end()); 
+          std::push_heap (refs.begin(),refs.end());
         }
       }
     }
@@ -342,13 +342,6 @@ namespace embree
     }
 #endif
 
-#if defined(EMBREE_GEOMETRY_USER)
-    Builder* BVH4BuilderTwoLevelVirtualSAH (void* bvh, Scene* scene, const createUserGeometryAccelTy createMeshAccel) {
-    return new BVHNBuilderTwoLevel<4,UserGeometry>((BVH4*)bvh,scene,createMeshAccel);
-    }
-#endif
-
-
 #if defined(__AVX__)
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
     Builder* BVH8BuilderTwoLevelTriangleMeshSAH (void* bvh, Scene* scene, const createTriangleMeshAccelTy createMeshAccel) {
@@ -362,11 +355,6 @@ namespace embree
     }
 #endif
 
-#if defined(EMBREE_GEOMETRY_USER)
-    Builder* BVH8BuilderTwoLevelVirtualSAH (void* bvh, Scene* scene, const createUserGeometryAccelTy createMeshAccel) {
-      return new BVHNBuilderTwoLevel<8,UserGeometry>((BVH8*)bvh,scene,createMeshAccel);
-    }
-#endif
 #endif
   }
 }

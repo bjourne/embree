@@ -30,11 +30,11 @@ namespace embree
     Accel* BVH8QuantizedTriangle4(Scene* scene);
     Accel* BVH8QuantizedQuad4i(Scene* scene);
 
-    Accel* BVH8UserGeometry(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC);
-    Accel* BVH8UserGeometryMB(Scene* scene);
+      //Accel* BVH8UserGeometry(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC);
+      //Accel* BVH8UserGeometryMB(Scene* scene);
 
     Accel* BVH8Instance(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC);
-    Accel* BVH8InstanceMB(Scene* scene);
+      //Accel* BVH8InstanceMB(Scene* scene);
 
     Accel* BVH8Grid(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH8GridMB(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
@@ -62,22 +62,22 @@ namespace embree
     Accel::Intersectors BVH8Triangle4Intersectors(BVH8* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH8Triangle4vIntersectors(BVH8* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH8Triangle4iIntersectors(BVH8* bvh, IntersectVariant ivariant);
-    Accel::Intersectors BVH8Triangle4iMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
-    Accel::Intersectors BVH8Triangle4vMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
+    // Accel::Intersectors BVH8Triangle4iMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
+    // Accel::Intersectors BVH8Triangle4vMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
 
     Accel::Intersectors BVH8Quad4vIntersectors(BVH8* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH8Quad4iIntersectors(BVH8* bvh, IntersectVariant ivariant);
-    Accel::Intersectors BVH8Quad4iMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
+      //Accel::Intersectors BVH8Quad4iMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
 
     Accel::Intersectors QBVH8Triangle4iIntersectors(BVH8* bvh);
     Accel::Intersectors QBVH8Triangle4Intersectors(BVH8* bvh);
     Accel::Intersectors QBVH8Quad4iIntersectors(BVH8* bvh);
 
-    Accel::Intersectors BVH8UserGeometryIntersectors(BVH8* bvh);
-    Accel::Intersectors BVH8UserGeometryMBIntersectors(BVH8* bvh);
+      //Accel::Intersectors BVH8UserGeometryIntersectors(BVH8* bvh);
+      //Accel::Intersectors BVH8UserGeometryMBIntersectors(BVH8* bvh);
 
     Accel::Intersectors BVH8InstanceIntersectors(BVH8* bvh);
-    Accel::Intersectors BVH8InstanceMBIntersectors(BVH8* bvh);
+      //Accel::Intersectors BVH8InstanceMBIntersectors(BVH8* bvh);
 
     Accel::Intersectors BVH8GridIntersectors(BVH8* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH8GridMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
@@ -255,7 +255,6 @@ namespace embree
   private:
     DEFINE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
     DEFINE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelQuadMeshSAH,void* COMMA Scene* COMMA const createQuadMeshAccelTy);
-    DEFINE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelVirtualSAH,void* COMMA Scene* COMMA const createUserGeometryAccelTy);
 
     // SAH mesh builders
   private:

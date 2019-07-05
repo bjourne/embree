@@ -75,7 +75,6 @@ DECLARE_SYMBOL2(Accel::Intersector8,BVH8InstanceIntersector8Chunk);
 
   DECLARE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
   DECLARE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelQuadMeshSAH,void* COMMA Scene* COMMA const createQuadMeshAccelTy);
-  DECLARE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelVirtualSAH,void* COMMA Scene* COMMA const createUserGeometryAccelTy);
 
   DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
   DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4vMeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
@@ -126,7 +125,7 @@ void BVH8Factory::selectBuilders(int features)
 
     IF_ENABLED_TRIS  (SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8BuilderTwoLevelTriangleMeshSAH));
     IF_ENABLED_QUADS (SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8BuilderTwoLevelQuadMeshSAH));
-    IF_ENABLED_USER  (SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8BuilderTwoLevelVirtualSAH));
+    //IF_ENABLED_USER  (SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8BuilderTwoLevelVirtualSAH));
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4MeshBuilderSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4vMeshBuilderSAH));
@@ -338,13 +337,13 @@ Accel::Intersectors BVH8Factory::BVH8Triangle4iIntersectors(BVH8* bvh, Intersect
   //   return intersectors;
   // }
 
-  Accel::Intersectors BVH8Factory::BVH8UserGeometryIntersectors(BVH8* bvh)
-  {
-    Accel::Intersectors intersectors;
-    intersectors.ptr = bvh;
-    intersectors.intersector1  = BVH8VirtualIntersector1();
-    return intersectors;
-  }
+  // Accel::Intersectors BVH8Factory::BVH8UserGeometryIntersectors(BVH8* bvh)
+  // {
+  //   Accel::Intersectors intersectors;
+  //   intersectors.ptr = bvh;
+  //   intersectors.intersector1  = BVH8VirtualIntersector1();
+  //   return intersectors;
+  // }
 
   Accel::Intersectors BVH8Factory::BVH8InstanceIntersectors(BVH8* bvh)
   {
@@ -427,25 +426,25 @@ Accel* BVH8Factory::BVH8QuantizedTriangle4i(Scene* scene)
     return new AccelInstance(accel,builder,intersectors);
   }
 
-  Accel* BVH8Factory::BVH8UserGeometry(Scene* scene, BuildVariant bvariant)
-  {
-    BVH8* accel = new BVH8(Object::type,scene);
-    Accel::Intersectors intersectors = BVH8UserGeometryIntersectors(accel);
+  // Accel* BVH8Factory::BVH8UserGeometry(Scene* scene, BuildVariant bvariant)
+  // {
+  //   BVH8* accel = new BVH8(Object::type,scene);
+  //   Accel::Intersectors intersectors = BVH8UserGeometryIntersectors(accel);
 
-    Builder* builder = nullptr;
-    if (scene->device->object_builder == "default") {
-      switch (bvariant) {
-      case BuildVariant::STATIC      : builder = BVH8VirtualSceneBuilderSAH(accel,scene,0); break;
-      case BuildVariant::DYNAMIC     : builder = BVH8BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh); break;
-      case BuildVariant::HIGH_QUALITY: assert(false); break;
-      }
-    }
-    else if (scene->device->object_builder == "sah") builder = BVH8VirtualSceneBuilderSAH(accel,scene,0);
-    else if (scene->device->object_builder == "dynamic") builder = BVH8BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh);
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->object_builder+" for BVH8<Object>");
+  //   Builder* builder = nullptr;
+  //   if (scene->device->object_builder == "default") {
+  //     switch (bvariant) {
+  //     case BuildVariant::STATIC      : builder = BVH8VirtualSceneBuilderSAH(accel,scene,0); break;
+  //         //case BuildVariant::DYNAMIC     : builder = BVH8BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh); break;
+  //     case BuildVariant::HIGH_QUALITY: assert(false); break;
+  //     }
+  //   }
+  //   else if (scene->device->object_builder == "sah") builder = BVH8VirtualSceneBuilderSAH(accel,scene,0);
+  //   //else if (scene->device->object_builder == "dynamic") builder = BVH8BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh);
+  //   else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->object_builder+" for BVH8<Object>");
 
-    return new AccelInstance(accel,builder,intersectors);
-  }
+  //   return new AccelInstance(accel,builder,intersectors);
+  // }
 
   Accel* BVH8Factory::BVH8Instance(Scene* scene, BuildVariant bvariant)
   {
