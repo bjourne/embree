@@ -8,6 +8,7 @@ namespace embree
 {
 namespace isa
 {
+
 template<int M>
 struct UVIdentity {
     __forceinline void operator() (vfloat<M>& u, vfloat<M>& v) const {}
@@ -169,24 +170,24 @@ struct Intersect1KEpilog1
     }
 };
 
-    template<int K, bool filter>
-    struct Occluded1KEpilog1
-    {
-      RayK<K>& ray;
-      size_t k;
-      IntersectContext* context;
-      const unsigned int geomID;
-      const unsigned int primID;
+template<int K, bool filter>
+struct Occluded1KEpilog1
+{
+    RayK<K>& ray;
+    size_t k;
+    IntersectContext* context;
+    const unsigned int geomID;
+    const unsigned int primID;
 
-      __forceinline Occluded1KEpilog1(RayK<K>& ray, size_t k,
-                                      IntersectContext* context,
-                                      const unsigned int geomID,
-                                      const unsigned int primID)
+    __forceinline Occluded1KEpilog1(RayK<K>& ray, size_t k,
+                                    IntersectContext* context,
+                                    const unsigned int geomID,
+                                    const unsigned int primID)
         : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
 
-      template<typename Hit>
-      __forceinline bool operator() (Hit& hit) const
-      {
+    template<typename Hit>
+    __forceinline bool operator() (Hit& hit) const
+    {
         /* ray mask test */
         Scene* scene = context->scene;
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
@@ -198,20 +199,21 @@ struct Intersect1KEpilog1
         /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
         if (filter) {
-          if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter())) {
-            hit.finalize();
-            HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
-            const float old_t = ray.tfar[k];
-            ray.tfar[k] = hit.t;
-            const bool found = any(runOcclusionFilter(vbool<K>(1<<k),geometry,ray,context,h));
-            if (!found) ray.tfar[k] = old_t;
-            return found;
-          }
+            if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter())) {
+                hit.finalize();
+                HitK<K> h(context->instID,geomID,primID,hit.u,hit.v,hit.Ng);
+                const float old_t = ray.tfar[k];
+                ray.tfar[k] = hit.t;
+                const bool found =
+                    any(runOcclusionFilter(vbool<K>(1<<k),geometry,ray,context,h));
+                if (!found) ray.tfar[k] = old_t;
+                return found;
+            }
         }
 #endif
         return true;
-      }
-    };
+    }
+};
 
     template<int M, int Mx, bool filter>
     struct Intersect1EpilogM
