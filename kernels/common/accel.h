@@ -286,28 +286,28 @@ public:
         /*! Intersects a single ray with the scene. */
         __forceinline void intersect (RTCRayHit& ray, IntersectContext* context)
         {
-            printf("accel.h::intersect\n");
+            //printf("accel.h::intersect\n");
             assert(intersector1.intersect);
             intersector1.intersect(this,ray,context);
         }
 
         /*! Intersects a packet of 4 rays with the scene. */
         __forceinline void intersect4 (const void* valid, RTCRayHit4& ray, IntersectContext* context) {
-            printf("accel.h::intersect4\n");
+            //printf("accel.h::intersect4\n");
             assert(intersector4.intersect);
             intersector4.intersect(valid,this,ray,context);
         }
 
         /*! Intersects a packet of 8 rays with the scene. */
         __forceinline void intersect8 (const void* valid, RTCRayHit8& ray, IntersectContext* context) {
-            printf("accel.h::intersect8\n");
+            //printf("accel.h::intersect8\n");
             assert(intersector8.intersect);
             intersector8.intersect(valid,this,ray,context);
         }
 
         /*! Intersects a packet of 16 rays with the scene. */
         __forceinline void intersect16 (const void* valid, RTCRayHit16& ray, IntersectContext* context) {
-            printf("accel.h::intersect16\n");
+            //printf("accel.h::intersect16\n");
             assert(intersector16.intersect);
             intersector16.intersect(valid,this,ray,context);
         }

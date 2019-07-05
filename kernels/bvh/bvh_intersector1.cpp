@@ -10,13 +10,11 @@
 #include "../geometry/quadi_intersector.h"
 #include "../geometry/curveNv_intersector.h"
 #include "../geometry/curveNi_intersector.h"
-//#include "../geometry/curveNi_mb_intersector.h"
 #include "../geometry/linei_intersector.h"
 #include "../geometry/subdivpatch1_intersector.h"
 #include "../geometry/object_intersector.h"
 #include "../geometry/instance_intersector.h"
 #include "../geometry/subgrid_intersector.h"
-//#include "../geometry/subgrid_mb_intersector.h"
 #include "../geometry/curve_intersector_virtual.h"
 
 namespace embree
@@ -30,7 +28,6 @@ BVHNIntersector1<N, types, robust, PrimitiveIntersector1>::intersect(
     RayHit& __restrict__ ray,
     IntersectContext* __restrict__ context)
 {
-    printf("bvh_intersector1.cpp::intersect\n");
     const BVH* __restrict__ bvh = (const BVH*)This->ptr;
 
     /* we may traverse an empty BVH in case all geometry was invalid */
