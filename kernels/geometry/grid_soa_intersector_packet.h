@@ -52,8 +52,8 @@ struct MapUV0
       }
     };
 
-    template<int K>
-      class GridSOAIntersectorK
+template<int K>
+class GridSOAIntersectorK
     {
     public:
       typedef void Primitive;
@@ -438,5 +438,5 @@ struct MapUV0
         return false;
       }
     };
-  }
+}
 }

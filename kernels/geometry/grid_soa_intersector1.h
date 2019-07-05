@@ -6,8 +6,8 @@
 
 namespace embree
 {
-  namespace isa
-  {
+namespace isa
+{
     class GridSOAIntersector1
     {
     public:
@@ -200,5 +200,6 @@ namespace embree
         return false;
       }
     };
+
   }
 }

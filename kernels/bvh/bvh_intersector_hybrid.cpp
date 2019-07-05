@@ -7,17 +7,11 @@
 #include "../geometry/triangle_intersector.h"
 #include "../geometry/trianglev_intersector.h"
 #include "../geometry/trianglei_intersector.h"
-// #include "../geometry/quadv_intersector.h"
-// #include "../geometry/quadi_intersector.h"
 #include "../geometry/curveNv_intersector.h"
 #include "../geometry/curveNi_intersector.h"
-//#include "../geometry/curveNi_mb_intersector.h"
-#include "../geometry/linei_intersector.h"
 #include "../geometry/subdivpatch1_intersector.h"
 #include "../geometry/object_intersector.h"
 #include "../geometry/instance_intersector.h"
-//#include "../geometry/subgrid_intersector.h"
-//#include "../geometry/subgrid_mb_intersector.h"
 #include "../geometry/curve_intersector_virtual.h"
 
 #define SWITCH_DURING_DOWN_TRAVERSAL 1

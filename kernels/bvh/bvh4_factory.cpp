@@ -35,7 +35,7 @@ DECLARE_SYMBOL2(Accel::Intersector1,BVH4InstanceIntersector1);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Moeller);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Pluecker);
 
-DECLARE_SYMBOL2(Accel::Intersector4,BVH4SubdivPatch1Intersector4);
+//DECLARE_SYMBOL2(Accel::Intersector4,BVH4SubdivPatch1Intersector4);
 
 DECLARE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
 
@@ -165,35 +165,17 @@ void BVH4Factory::selectIntersectors(int features)
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX512SKX(features,BVH4Triangle4vIntersector1Pluecker));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX512SKX(features,BVH4Triangle4iIntersector1Pluecker));
 
-    // IF_ENABLED_QUADS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4Quad4vIntersector1Moeller));
-    // IF_ENABLED_QUADS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4Quad4iIntersector1Moeller));
-    // IF_ENABLED_QUADS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4Quad4vIntersector1Pluecker));
-    // IF_ENABLED_QUADS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4Quad4iIntersector1Pluecker));
-
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX512SKX(features,QBVH4Triangle4iIntersector1Pluecker));
-    //    IF_ENABLED_QUADS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX512SKX(features,QBVH4Quad4iIntersector1Pluecker));
-
     IF_ENABLED_SUBDIV(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4SubdivPatch1Intersector1));
-
     IF_ENABLED_USER(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector1));
-
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector1));
-
-    // IF_ENABLED_GRIDS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4GridIntersector1Moeller));
-    // IF_ENABLED_GRIDS(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4GridIntersector1Pluecker));
 
 #if defined (EMBREE_RAY_PACKETS)
 
-    IF_ENABLED_SUBDIV(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4SubdivPatch1Intersector4));
-
     IF_ENABLED_USER(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector4Chunk));
-
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector4Chunk));
-
     IF_ENABLED_SUBDIV(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4SubdivPatch1Intersector8));
-
     IF_ENABLED_USER(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector8Chunk));
-
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector8Chunk));
 
 #endif
@@ -247,14 +229,6 @@ Accel::Intersectors BVH4Factory::BVH4Triangle4vIntersectors(BVH4* bvh, Intersect
     return intersectors;
   }
 
-  Accel::Intersectors BVH4Factory::BVH4UserGeometryIntersectors(BVH4* bvh)
-  {
-    Accel::Intersectors intersectors;
-    intersectors.ptr = bvh;
-    intersectors.intersector1  = BVH4VirtualIntersector1();
-    return intersectors;
-  }
-
   Accel::Intersectors BVH4Factory::BVH4InstanceIntersectors(BVH4* bvh)
   {
     Accel::Intersectors intersectors;
@@ -268,12 +242,6 @@ Accel::Intersectors BVH4Factory::BVH4Triangle4vIntersectors(BVH4* bvh, Intersect
     Accel::Intersectors intersectors;
     intersectors.ptr = bvh;
     intersectors.intersector1  = BVH4SubdivPatch1Intersector1();
-// #if defined (EMBREE_RAY_PACKETS)
-//     intersectors.intersector4  = BVH4SubdivPatch1Intersector4();
-//     intersectors.intersector8  = BVH4SubdivPatch1Intersector8();
-//     intersectors.intersector16 = BVH4SubdivPatch1Intersector16();
-//     intersectors.intersectorN  = BVH4IntersectorStreamPacketFallback();
-// #endif
     return intersectors;
   }
 
@@ -484,26 +452,6 @@ Accel* BVH4Factory::BVH4Triangle4i(Scene* scene, BuildVariant bvariant, Intersec
     Builder* builder = BVH4SubdivPatch1BuilderSAH(accel,scene,0);
     return new AccelInstance(accel,builder,intersectors);
   }
-
-Accel* BVH4Factory::BVH4UserGeometry(Scene* scene, BuildVariant bvariant)
-{
-    BVH4* accel = new BVH4(Object::type,scene);
-    Accel::Intersectors intersectors = BVH4UserGeometryIntersectors(accel);
-
-    Builder* builder = nullptr;
-    if (scene->device->object_builder == "default") {
-        switch (bvariant) {
-        case BuildVariant::STATIC      : builder = BVH4VirtualSceneBuilderSAH(accel,scene,0); break;
-            //case BuildVariant::DYNAMIC     : builder = BVH4BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh); break;
-        case BuildVariant::HIGH_QUALITY: assert(false); break;
-        }
-    }
-    else if (scene->device->object_builder == "sah") builder = BVH4VirtualSceneBuilderSAH(accel,scene,0);
-    //else if (scene->device->object_builder == "dynamic") builder = BVH4BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh);
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->object_builder+" for BVH4<Object>");
-
-    return new AccelInstance(accel,builder,intersectors);
-}
 
 Accel* BVH4Factory::BVH4Instance(Scene* scene, BuildVariant bvariant)
 {

@@ -32,11 +32,7 @@ public:
     Accel* BVH4SubdivPatch1(Scene* scene);
     Accel* BVH4SubdivPatch1MB(Scene* scene);
 
-    Accel* BVH4UserGeometry(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC);
-    Accel* BVH4UserGeometryMB(Scene* scene);
-
     Accel* BVH4Instance(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC);
-    Accel* BVH4InstanceMB(Scene* scene);
 
     Accel* BVH4Grid(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
 
@@ -55,7 +51,6 @@ private:
     Accel::Intersectors BVH4Quad4iIntersectors(BVH4* bvh, IntersectVariant ivariant);
     Accel::Intersectors QBVH4Quad4iIntersectors(BVH4* bvh);
     Accel::Intersectors QBVH4Triangle4iIntersectors(BVH4* bvh);
-    Accel::Intersectors BVH4UserGeometryIntersectors(BVH4* bvh);
     Accel::Intersectors BVH4InstanceIntersectors(BVH4* bvh);
     Accel::Intersectors BVH4SubdivPatch1Intersectors(BVH4* bvh);
     Accel::Intersectors BVH4GridIntersectors(BVH4* bvh, IntersectVariant ivariant);
@@ -82,16 +77,12 @@ private:
     DEFINE_SYMBOL2(Accel::Intersector1,QBVH4Quad4iIntersector1Pluecker);
 
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4SubdivPatch1Intersector1);
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH4SubdivPatch1MBIntersector1);
 
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4VirtualIntersector1);
-    //DEFINE_SYMBOL2(Accel::Intersector1,BVH4VirtualMBIntersector1);
 
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4InstanceIntersector1);
-    //DEFINE_SYMBOL2(Accel::Intersector1,BVH4InstanceMBIntersector1);
 
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Moeller);
-    //DEFINE_SYMBOL2(Accel::Intersector1,BVH4GridMBIntersector1Moeller);
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Pluecker);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4Intersector4HybridMoeller);
@@ -100,23 +91,13 @@ private:
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4vIntersector4HybridPluecker);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4iIntersector4HybridPluecker);
 
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4Quad4vIntersector4HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4Quad4vIntersector4HybridMoellerNoFilter);
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4Quad4iIntersector4HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4Quad4vIntersector4HybridPluecker);
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4Quad4iIntersector4HybridPluecker);
-
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4SubdivPatch1Intersector4);
-    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4SubdivPatch1MBIntersector4);
+    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4SubdivPatch1Intersector4);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
-    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4VirtualMBIntersector4Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4InstanceIntersector4Chunk);
-    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4InstanceMBIntersector4Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridIntersector4HybridMoeller);
-    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridMBIntersector4HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridIntersector4HybridPluecker);
 
     // ==============
@@ -130,31 +111,13 @@ private:
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4vIntersector8HybridPluecker);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4iIntersector8HybridPluecker);
 
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4vMBIntersector8HybridMoeller);
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4iMBIntersector8HybridMoeller);
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4vMBIntersector8HybridPluecker);
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4iMBIntersector8HybridPluecker);
-
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Quad4vIntersector8HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Quad4vIntersector8HybridMoellerNoFilter);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Quad4iIntersector8HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Quad4vIntersector8HybridPluecker);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Quad4iIntersector8HybridPluecker);
-
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Quad4iMBIntersector8HybridMoeller);
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Quad4iMBIntersector8HybridPluecker);
-
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4SubdivPatch1Intersector8);
-    //DEFINE_SYMBOL2(Accel::Intersector8,BVH4SubdivPatch1MBIntersector8);
-
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4VirtualIntersector8Chunk);
-    //DEFINE_SYMBOL2(Accel::Intersector8,BVH4VirtualMBIntersector8Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceIntersector8Chunk);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceMBIntersector8Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridMoeller);
-    //DEFINE_SYMBOL2(Accel::Intersector8,BVH4GridMBIntersector8HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridPluecker);
 
     // SAH scene builders
