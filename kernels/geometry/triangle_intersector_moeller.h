@@ -81,13 +81,14 @@ struct MoellerTrumboreIntersector1
     {
     }
 
-    __forceinline bool intersect(const vbool<M>& valid0,
-                                 Ray& ray,
-                                 const Vec3vf<M>& tri_v0,
-                                 const Vec3vf<M>& tri_e1,
-                                 const Vec3vf<M>& tri_e2,
-                                 const Vec3vf<M>& tri_Ng,
-                                 MoellerTrumboreHitM<M>& hit) const
+    __forceinline bool
+    intersect(const vbool<M>& valid0,
+              Ray& ray,
+              const Vec3vf<M>& tri_v0,
+              const Vec3vf<M>& tri_e1,
+              const Vec3vf<M>& tri_e2,
+              const Vec3vf<M>& tri_Ng,
+              MoellerTrumboreHitM<M>& hit) const
     {
         /* calculate denominator */
         vbool<M> valid = valid0;
@@ -196,34 +197,6 @@ struct MoellerTrumboreIntersector1
         if (likely(intersect(valid,ray,v0,v1,v2,hit))) return epilog(hit.valid,hit);
         return false;
     }
-};
-
-template<int K>
-struct MoellerTrumboreHitK
-{
-    __forceinline MoellerTrumboreHitK(const vfloat<K>& U,
-                                      const vfloat<K>& V,
-                                      const vfloat<K>& T,
-                                      const vfloat<K>& absDen,
-                                      const Vec3vf<K>& Ng)
-        : U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
-
-    __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>>
-    operator() () const
-    {
-        const vfloat<K> rcpAbsDen = rcp(absDen);
-        const vfloat<K> t = T * rcpAbsDen;
-        const vfloat<K> u = U * rcpAbsDen;
-        const vfloat<K> v = V * rcpAbsDen;
-        return std::make_tuple(u,v,t,Ng);
-    }
-
-private:
-    const vfloat<K> U;
-    const vfloat<K> V;
-    const vfloat<K> T;
-    const vfloat<K> absDen;
-    const Vec3vf<K> Ng;
 };
 
 
