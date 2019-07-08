@@ -33,11 +33,11 @@ DECLARE_SYMBOL2(Accel::Intersector1,BVH4InstanceIntersector1);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Moeller);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Pluecker);
 
-DECLARE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
+//DECLARE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
 
 DECLARE_SYMBOL2(Accel::Intersector4,BVH4InstanceIntersector4Chunk);
 
-DECLARE_SYMBOL2(Accel::Intersector8,BVH4SubdivPatch1Intersector8);
+//DECLARE_SYMBOL2(Accel::Intersector8,BVH4SubdivPatch1Intersector8);
 
 DECLARE_SYMBOL2(Accel::Intersector8,BVH4VirtualIntersector8Chunk);
 
@@ -160,7 +160,7 @@ void BVH4Factory::selectIntersectors(int features)
 
 #if defined (EMBREE_RAY_PACKETS)
 
-    IF_ENABLED_USER(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector4Chunk));
+    //IF_ENABLED_USER(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector4Chunk));
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_DEFAULT_SSE42_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector4Chunk));
     IF_ENABLED_USER(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4VirtualIntersector8Chunk));
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH4InstanceIntersector8Chunk));

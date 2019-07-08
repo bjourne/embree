@@ -132,43 +132,44 @@ void Scene::createTriangleAccel()
                 }
                 break;
 
-            case /*0b01*/ 1:
-#if defined (EMBREE_TARGET_SIMD8)
-                if (device->canUseAVX())
-                    accels_add(device->bvh8_factory->BVH8Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-                else
-#endif
-                    accels_add(device->bvh4_factory->BVH4Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
+//             case /*0b01*/ 1:
+// #if defined (EMBREE_TARGET_SIMD8)
+//                 if (device->canUseAVX())
+//                     accels_add(device->bvh8_factory->BVH8Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
+//                 else
+// #endif
+//                     accels_add(device->bvh4_factory->BVH4Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
 
-                break;
+//                 break;
             case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
             case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
             }
         }
         else /* dynamic */
         {
-#if defined (EMBREE_TARGET_SIMD8)
-            if (device->canUseAVX())
-            {
-                int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-                switch (mode) {
-                case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-                case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Triangle4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-                case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-                case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-                }
-            }
-            else
-#endif
-            {
-                int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-                switch (mode) {
-                case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-                case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Triangle4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-                case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-                case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-                }
-            }
+            printf("NOT HERE!!!\n");
+// #if defined (EMBREE_TARGET_SIMD8)
+//             if (device->canUseAVX())
+//             {
+//                 int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+//                 switch (mode) {
+//                 case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
+//                 case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Triangle4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//                 case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
+//                 case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//                 }
+//             }
+//             else
+// #endif
+//             {
+//                 int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
+//                 switch (mode) {
+//                 case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
+//                 case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Triangle4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//                 case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
+//                 case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
+//                 }
+//             }
         }
     }
     else if (device->tri_accel == "bvh4.triangle4")       accels_add(device->bvh4_factory->BVH4Triangle4 (this));
@@ -178,7 +179,7 @@ void Scene::createTriangleAccel()
 
 #if defined (EMBREE_TARGET_SIMD8)
     else if (device->tri_accel == "bvh8.triangle4")       accels_add(device->bvh8_factory->BVH8Triangle4 (this));
-    else if (device->tri_accel == "bvh8.triangle4v")      accels_add(device->bvh8_factory->BVH8Triangle4v(this));
+    //else if (device->tri_accel == "bvh8.triangle4v")      accels_add(device->bvh8_factory->BVH8Triangle4v(this));
     else if (device->tri_accel == "bvh8.triangle4i")      accels_add(device->bvh8_factory->BVH8Triangle4i(this));
     else if (device->tri_accel == "qbvh8.triangle4i")     accels_add(device->bvh8_factory->BVH8QuantizedTriangle4i(this));
     else if (device->tri_accel == "qbvh8.triangle4")      accels_add(device->bvh8_factory->BVH8QuantizedTriangle4(this));

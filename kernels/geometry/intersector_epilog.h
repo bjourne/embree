@@ -165,8 +165,8 @@ struct Occluded1EpilogM
 };
 
 
-    template<int M, bool filter>
-    struct Intersect1EpilogMU
+template<int M, bool filter>
+struct Intersect1EpilogMU
     {
       RayHit& ray;
       IntersectContext* context;
@@ -746,53 +746,53 @@ struct Intersect1KEpilogMU
       }
     };
 
-    template<int M, int K, bool filter>
-    struct Occluded1KEpilogMU
-    {
-      RayK<K>& ray;
-      size_t k;
-      IntersectContext* context;
-      const unsigned int geomID;
-      const unsigned int primID;
+// template<int M, int K, bool filter>
+// struct Occluded1KEpilogMU
+// {
+//       RayK<K>& ray;
+//       size_t k;
+//       IntersectContext* context;
+//       const unsigned int geomID;
+//       const unsigned int primID;
 
-      __forceinline Occluded1KEpilogMU(RayK<K>& ray, size_t k,
-                                       IntersectContext* context,
-                                       const unsigned int geomID,
-                                       const unsigned int primID)
-        : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
+//       __forceinline Occluded1KEpilogMU(RayK<K>& ray, size_t k,
+//                                        IntersectContext* context,
+//                                        const unsigned int geomID,
+//                                        const unsigned int primID)
+//         : ray(ray), k(k), context(context), geomID(geomID), primID(primID) {}
 
-      template<typename Hit>
-      __forceinline bool operator() (const vbool<M>& valid_i, Hit& hit) const
-      {
-        Scene* scene = context->scene;
-        Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-#if defined(EMBREE_RAY_MASK)
-        /* ray mask test */
-        if ((geometry->mask & ray.mask[k]) == 0)
-          return false;
-#endif
+//       template<typename Hit>
+//       __forceinline bool operator() (const vbool<M>& valid_i, Hit& hit) const
+//       {
+//         Scene* scene = context->scene;
+//         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+// #if defined(EMBREE_RAY_MASK)
+//         /* ray mask test */
+//         if ((geometry->mask & ray.mask[k]) == 0)
+//           return false;
+// #endif
 
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION)
-        if (filter) {
-          if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter()))
-          {
-            hit.finalize();
-            for (size_t m=movemask(valid_i), i=bsf(m); m!=0; m=btc(m,i), i=bsf(m))
-            {
-              const Vec2f uv = hit.uv(i);
-              const float old_t = ray.tfar[k];
-              ray.tfar[k] = hit.t(i);
-              HitK<K> h(context->instID,geomID,primID,uv.x,uv.y,hit.Ng(i));
-              if (any(runOcclusionFilter(vbool<K>(1<<k),geometry,ray,context,h))) return true;
-              ray.tfar[k] = old_t;
-            }
-            return false;
-          }
-        }
-#endif
-        return true;
-      }
-    };
+//         /* intersection filter test */
+// #if defined(EMBREE_FILTER_FUNCTION)
+//         if (filter) {
+//           if (unlikely(context->hasContextFilter() || geometry->hasOcclusionFilter()))
+//           {
+//             hit.finalize();
+//             for (size_t m=movemask(valid_i), i=bsf(m); m!=0; m=btc(m,i), i=bsf(m))
+//             {
+//               const Vec2f uv = hit.uv(i);
+//               const float old_t = ray.tfar[k];
+//               ray.tfar[k] = hit.t(i);
+//               HitK<K> h(context->instID,geomID,primID,uv.x,uv.y,hit.Ng(i));
+//               if (any(runOcclusionFilter(vbool<K>(1<<k),geometry,ray,context,h))) return true;
+//               ray.tfar[k] = old_t;
+//             }
+//             return false;
+//           }
+//         }
+// #endif
+//         return true;
+//       }
+//     };
   }
 }

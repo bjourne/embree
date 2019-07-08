@@ -87,9 +87,7 @@ private:
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4vIntersector4HybridPluecker);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4iIntersector4HybridPluecker);
 
-    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4SubdivPatch1Intersector4);
-
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
+    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4InstanceIntersector4Chunk);
 
@@ -107,7 +105,6 @@ private:
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4vIntersector8HybridPluecker);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4iIntersector8HybridPluecker);
 
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4SubdivPatch1Intersector8);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4VirtualIntersector8Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceIntersector8Chunk);
