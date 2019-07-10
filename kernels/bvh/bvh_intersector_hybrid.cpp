@@ -5,7 +5,6 @@
 
 #include "../geometry/intersector_iterators.h"
 #include "../geometry/triangle_intersector.h"
-#include "../geometry/trianglev_intersector.h"
 #include "../geometry/trianglei_intersector.h"
 #include "../geometry/curveNv_intersector.h"
 #include "../geometry/curveNi_intersector.h"
@@ -24,14 +23,16 @@ namespace embree
 namespace isa
 {
 template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
-void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::intersect1(Accel::Intersectors* This,
-                                                                                            const BVH* bvh,
-                                                                                            NodeRef root,
-                                                                                            size_t k,
-                                                                                            Precalculations& pre,
-                                                                                            RayHitK<K>& ray,
-                                                                                            const TravRayK<K, robust>& tray,
-                                                                                            IntersectContext* context)
+void
+BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::intersect1(
+    Accel::Intersectors* This,
+    const BVH* bvh,
+    NodeRef root,
+    size_t k,
+    Precalculations& pre,
+    RayHitK<K>& ray,
+    const TravRayK<K, robust>& tray,
+    IntersectContext* context)
 {
     /* stack state */
     StackItemT<NodeRef> stack[stackSizeSingle];  // stack of nodes

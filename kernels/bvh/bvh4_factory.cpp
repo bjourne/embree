@@ -363,15 +363,6 @@ Accel* BVH4Factory::BVH4Triangle4i(Scene* scene, BuildVariant bvariant, Intersec
     return new AccelInstance(accel,builder,intersectors);
   }
 
-// Accel* BVH4Factory::BVH4Instance(Scene* scene, BuildVariant bvariant)
-// {
-//     printf("Creating BVH4Instance\n");
-//     BVH4* accel = new BVH4(InstancePrimitive::type,scene);
-//     Accel::Intersectors intersectors = BVH4InstanceIntersectors(accel);
-//     Builder* builder = BVH4InstanceSceneBuilderSAH(accel,scene,0);
-//     return new AccelInstance(accel,builder,intersectors);
-// }
-
 Accel::Intersectors
 BVH4Factory::BVH4GridIntersectors(BVH4* bvh,
                                   IntersectVariant ivariant)

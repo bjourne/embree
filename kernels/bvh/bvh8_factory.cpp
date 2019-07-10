@@ -25,11 +25,10 @@ namespace embree
 {
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4Intersector1Moeller);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
-//DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4vIntersector1Pluecker);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Pluecker);
 
-DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4iIntersector1Pluecker);
-DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4Intersector1Moeller);
+//DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4iIntersector1Pluecker);
+//DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4Intersector1Moeller);
 DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Quad4iIntersector1Pluecker);
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8VirtualIntersector1);
@@ -151,13 +150,8 @@ void BVH8Factory::selectBuilders(int features)
   {
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4Intersector1Moeller));
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4iIntersector1Moeller));
-    //IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4vIntersector1Pluecker));
-    IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4iIntersector1Pluecker));
 
-
-    IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,QBVH8Triangle4iIntersector1Pluecker));
-    IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,QBVH8Triangle4Intersector1Moeller));
-    //IF_ENABLED_QUADS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,QBVH8Quad4iIntersector1Pluecker));
+    //IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,QBVH8Triangle4Intersector1Moeller));
 
     IF_ENABLED_USER(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8VirtualIntersector1));
 
@@ -267,32 +261,32 @@ Accel::Intersectors BVH8Factory::BVH8Triangle4iIntersectors(BVH8* bvh, Intersect
         intersectors.intersector1  = BVH8Triangle4iIntersector1Moeller();
         return intersectors;
     }
-    case IntersectVariant::ROBUST:
-    {
-        Accel::Intersectors intersectors;
-        intersectors.ptr = bvh;
-        intersectors.intersector1  = BVH8Triangle4iIntersector1Pluecker();
-        return intersectors;
-    }
+    // case IntersectVariant::ROBUST:
+    // {
+    //     Accel::Intersectors intersectors;
+    //     intersectors.ptr = bvh;
+    //     intersectors.intersector1  = BVH8Triangle4iIntersector1Pluecker();
+    //     return intersectors;
+    // }
     }
     return Accel::Intersectors();
 }
 
-  Accel::Intersectors BVH8Factory::QBVH8Triangle4iIntersectors(BVH8* bvh)
-  {
-    Accel::Intersectors intersectors;
-    intersectors.ptr = bvh;
-    intersectors.intersector1 = QBVH8Triangle4iIntersector1Pluecker();
-    return intersectors;
-  }
+  // Accel::Intersectors BVH8Factory::QBVH8Triangle4iIntersectors(BVH8* bvh)
+  // {
+  //   Accel::Intersectors intersectors;
+  //   intersectors.ptr = bvh;
+  //   intersectors.intersector1 = QBVH8Triangle4iIntersector1Pluecker();
+  //   return intersectors;
+  // }
 
-  Accel::Intersectors BVH8Factory::QBVH8Triangle4Intersectors(BVH8* bvh)
-  {
-    Accel::Intersectors intersectors;
-    intersectors.ptr = bvh;
-    intersectors.intersector1 = QBVH8Triangle4Intersector1Moeller();
-    return intersectors;
-  }
+  // Accel::Intersectors BVH8Factory::QBVH8Triangle4Intersectors(BVH8* bvh)
+  // {
+  //   Accel::Intersectors intersectors;
+  //   intersectors.ptr = bvh;
+  //   intersectors.intersector1 = QBVH8Triangle4Intersector1Moeller();
+  //   return intersectors;
+  // }
 
   // Accel::Intersectors BVH8Factory::QBVH8Quad4iIntersectors(BVH8* bvh)
   // {
@@ -357,42 +351,6 @@ Accel* BVH8Factory::BVH8Triangle4i(Scene* scene, BuildVariant bvariant, Intersec
 
     return new AccelInstance(accel,builder,intersectors);
 }
-
-Accel* BVH8Factory::BVH8QuantizedTriangle4i(Scene* scene)
-{
-    BVH8* accel = new BVH8(Triangle4i::type,scene);
-    Accel::Intersectors intersectors = QBVH8Triangle4iIntersectors(accel);
-    Builder* builder = BVH8QuantizedTriangle4iSceneBuilderSAH(accel,scene,0);
-    return new AccelInstance(accel,builder,intersectors);
-}
-
-  Accel* BVH8Factory::BVH8QuantizedTriangle4(Scene* scene)
-  {
-    BVH8* accel = new BVH8(Triangle4::type,scene);
-    Accel::Intersectors intersectors = QBVH8Triangle4Intersectors(accel);
-    Builder* builder = BVH8QuantizedTriangle4SceneBuilderSAH(accel,scene,0);
-    return new AccelInstance(accel,builder,intersectors);
-  }
-
-  // Accel* BVH8Factory::BVH8UserGeometry(Scene* scene, BuildVariant bvariant)
-  // {
-  //   BVH8* accel = new BVH8(Object::type,scene);
-  //   Accel::Intersectors intersectors = BVH8UserGeometryIntersectors(accel);
-
-  //   Builder* builder = nullptr;
-  //   if (scene->device->object_builder == "default") {
-  //     switch (bvariant) {
-  //     case BuildVariant::STATIC      : builder = BVH8VirtualSceneBuilderSAH(accel,scene,0); break;
-  //         //case BuildVariant::DYNAMIC     : builder = BVH8BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh); break;
-  //     case BuildVariant::HIGH_QUALITY: assert(false); break;
-  //     }
-  //   }
-  //   else if (scene->device->object_builder == "sah") builder = BVH8VirtualSceneBuilderSAH(accel,scene,0);
-  //   //else if (scene->device->object_builder == "dynamic") builder = BVH8BuilderTwoLevelVirtualSAH(accel,scene,&createUserGeometryMesh);
-  //   else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->object_builder+" for BVH8<Object>");
-
-  //   return new AccelInstance(accel,builder,intersectors);
-  // }
 
   Accel* BVH8Factory::BVH8Instance(Scene* scene, BuildVariant bvariant)
   {

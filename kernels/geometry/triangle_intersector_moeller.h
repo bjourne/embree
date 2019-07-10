@@ -82,6 +82,7 @@ struct MoellerTrumboreIntersector1
     {
     }
 
+    // what is valid0?
     __forceinline bool
     intersect(const vbool<M>& valid0,
               Ray& ray,
@@ -107,12 +108,8 @@ struct MoellerTrumboreIntersector1
         const vfloat<M> U = dot(R, Vec3vf<M>(tri_e2)) ^ sgnDen;
         const vfloat<M> V = dot(R, Vec3vf<M>(tri_e1)) ^ sgnDen;
 
-        /* perform backface culling */
-#if defined(EMBREE_BACKFACE_CULLING)
-        valid &= (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#else
+        // No backface culling
         valid &= (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#endif
         if (likely(none(valid)))
             return false;
 
@@ -173,8 +170,9 @@ struct MoellerTrumboreIntersector1
                   const Epilog& epilog) const
     {
         MoellerTrumboreHitM<M> hit;
-        if (likely(intersectEdge(ray,v0,e1,e2,hit)))
+        if (likely(intersectEdge(ray,v0,e1,e2,hit))) {
             return epilog(hit.valid, hit);
+        }
         return false;
     }
 

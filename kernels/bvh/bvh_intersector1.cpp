@@ -4,7 +4,6 @@
 
 #include "../geometry/intersector_iterators.h"
 #include "../geometry/triangle_intersector.h"
-#include "../geometry/trianglev_intersector.h"
 #include "../geometry/trianglei_intersector.h"
 #include "../geometry/curveNv_intersector.h"
 #include "../geometry/curveNi_intersector.h"
