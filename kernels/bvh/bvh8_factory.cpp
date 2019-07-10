@@ -24,11 +24,7 @@
 namespace embree
 {
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4Intersector1Moeller);
-//DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
-//DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Pluecker);
 
-//DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4iIntersector1Pluecker);
-//DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4Intersector1Moeller);
 DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Quad4iIntersector1Pluecker);
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8VirtualIntersector1);
