@@ -19,10 +19,10 @@ namespace embree
 {
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4Triangle4Intersector1Moeller);
-DECLARE_SYMBOL2(Accel::Intersector1,QBVH4Quad4iIntersector1Pluecker);
+//DECLARE_SYMBOL2(Accel::Intersector1,QBVH4Quad4iIntersector1Pluecker);
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Moeller);
-DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Pluecker);
+//DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Pluecker);
 
 //DECLARE_SYMBOL2(Accel::Intersector4,BVH4InstanceIntersector4Chunk);
 
@@ -59,13 +59,10 @@ DECLARE_ISA_FUNCTION(Builder*,BVH4SubdivPatch1BuilderSAH,void* COMMA Scene* COMM
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4vMeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4iMeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Quad4vMeshRefitSAH,void* COMMA QuadMesh    * COMMA size_t);
 
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshBuilderMortonGeneral,void* COMMA TriangleMesh* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4vMeshBuilderMortonGeneral,void* COMMA TriangleMesh* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4iMeshBuilderMortonGeneral,void* COMMA TriangleMesh* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Quad4vMeshBuilderMortonGeneral,void* COMMA QuadMesh    * COMMA size_t);
-// DECLARE_ISA_FUNCTION(Builder*,BVH4VirtualMeshBuilderMortonGeneral,void* COMMA UserGeometry    * COMMA size_t);
 
   BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
   {
@@ -235,36 +232,36 @@ Accel* BVH4Factory::BVH4Triangle4(Scene* scene,
     return new AccelInstance(accel,builder,intersectors);
 }
 
-Accel::Intersectors
-BVH4Factory::BVH4GridIntersectors(BVH4* bvh,
-                                  IntersectVariant ivariant)
-{
-    printf("BVH4Factory::BVH4GridIntersectors\n");
-    Accel::Intersectors intersectors;
-    intersectors.ptr = bvh;
-    if (ivariant == IntersectVariant::FAST)
-    {
-        intersectors.intersector1  = BVH4GridIntersector1Moeller();
-    }
-    else /* if (ivariant == IntersectVariant::ROBUST) */
-    {
-        intersectors.intersector1  = BVH4GridIntersector1Pluecker();
-    }
-    return intersectors;
-}
+// Accel::Intersectors
+// BVH4Factory::BVH4GridIntersectors(BVH4* bvh,
+//                                   IntersectVariant ivariant)
+// {
+//     printf("BVH4Factory::BVH4GridIntersectors\n");
+//     Accel::Intersectors intersectors;
+//     intersectors.ptr = bvh;
+//     if (ivariant == IntersectVariant::FAST)
+//     {
+//         intersectors.intersector1  = BVH4GridIntersector1Moeller();
+//     }
+//     else /* if (ivariant == IntersectVariant::ROBUST) */
+//     {
+//         intersectors.intersector1  = BVH4GridIntersector1Pluecker();
+//     }
+//     return intersectors;
+// }
 
-Accel* BVH4Factory::BVH4Grid(Scene* scene, BuildVariant bvariant, IntersectVariant ivariant)
-{
-    BVH4* accel = new BVH4(SubGridQBVH4::type,scene);
-    Accel::Intersectors intersectors = BVH4GridIntersectors(accel,ivariant);
+// Accel* BVH4Factory::BVH4Grid(Scene* scene, BuildVariant bvariant, IntersectVariant ivariant)
+// {
+//     BVH4* accel = new BVH4(SubGridQBVH4::type,scene);
+//     Accel::Intersectors intersectors = BVH4GridIntersectors(accel,ivariant);
 
-    Builder* builder = nullptr;
-    if (scene->device->object_builder == "default") {
-      builder = BVH4GridSceneBuilderSAH(accel,scene,0);
-    }
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->grid_builder+" for BVH4<GridMesh>");
+//     Builder* builder = nullptr;
+//     if (scene->device->object_builder == "default") {
+//       builder = BVH4GridSceneBuilderSAH(accel,scene,0);
+//     }
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->grid_builder+" for BVH4<GridMesh>");
 
-    return new AccelInstance(accel,builder,intersectors);
-}
+//     return new AccelInstance(accel,builder,intersectors);
+// }
 
 }

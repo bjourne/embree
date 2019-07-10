@@ -34,15 +34,12 @@ public:
 
     Accel* BVH4Instance(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC);
 
-    Accel* BVH4Grid(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
-
   private:
     void selectBuilders(int features);
     void selectIntersectors(int features);
 
 private:
     Accel::Intersectors BVH4OBBVirtualCurveIntersectors(BVH4* bvh, VirtualCurveIntersector* leafIntersector);
-      //Accel::Intersectors BVH4OBBVirtualCurveIntersectorsMB(BVH4* bvh, VirtualCurveIntersector* leafIntersector);
 
     Accel::Intersectors BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH4Triangle4vIntersectors(BVH4* bvh, IntersectVariant ivariant);
@@ -51,7 +48,6 @@ private:
     Accel::Intersectors BVH4Quad4iIntersectors(BVH4* bvh, IntersectVariant ivariant);
     Accel::Intersectors QBVH4Quad4iIntersectors(BVH4* bvh);
     Accel::Intersectors QBVH4Triangle4iIntersectors(BVH4* bvh);
-    //Accel::Intersectors BVH4InstanceIntersectors(BVH4* bvh);
     Accel::Intersectors BVH4SubdivPatch1Intersectors(BVH4* bvh);
     Accel::Intersectors BVH4GridIntersectors(BVH4* bvh, IntersectVariant ivariant);
 
@@ -67,14 +63,7 @@ private:
 
 private:
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4Triangle4Intersector1Moeller);
-    DEFINE_SYMBOL2(Accel::Intersector1,QBVH4Quad4iIntersector1Pluecker);
-
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH4VirtualIntersector1);
-
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH4InstanceIntersector1);
-
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Moeller);
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Pluecker);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4Intersector4HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4Intersector4HybridMoellerNoFilter);
@@ -82,25 +71,15 @@ private:
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4vIntersector4HybridPluecker);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4Triangle4iIntersector4HybridPluecker);
 
-    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
-
-    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4InstanceIntersector4Chunk);
-
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridIntersector4HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridIntersector4HybridPluecker);
-
-    // ==============
-
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4OBBVirtualCurveIntersector8Hybrid);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4OBBVirtualCurveIntersector8HybridMB);
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4Intersector8HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4Intersector8HybridMoellerNoFilter);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4iIntersector8HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4vIntersector8HybridPluecker);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4iIntersector8HybridPluecker);
+    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4vIntersector8HybridPluecker);
+    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4iIntersector8HybridPluecker);
 
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4VirtualIntersector8Chunk);
+    //DEFINE_SYMBOL2(Accel::Intersector8,BVH4VirtualIntersector8Chunk);
 
     //DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceIntersector8Chunk);
     //DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceMBIntersector8Chunk);

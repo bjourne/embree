@@ -435,20 +435,6 @@ public:
                                TOSTRING(isa) "::" TOSTRING(symbol));         \
   }
 
-#define DEFINE_INTERSECTOR4(symbol,intersector)                               \
-  Accel::Intersector4 symbol() {                                              \
-    return Accel::Intersector4((Accel::IntersectFunc4)intersector::intersect, \
-                               (Accel::OccludedFunc4)intersector::occluded,   \
-                               TOSTRING(isa) "::" TOSTRING(symbol));          \
-  }
-
-#define DEFINE_INTERSECTOR8(symbol,intersector)                               \
-  Accel::Intersector8 symbol() {                                              \
-    return Accel::Intersector8((Accel::IntersectFunc8)intersector::intersect, \
-                               (Accel::OccludedFunc8)intersector::occluded,   \
-                               TOSTRING(isa) "::" TOSTRING(symbol));          \
-  }
-
   /* ray stream filter interface */
   typedef void (*intersectStreamAOS_func)(Scene* scene, RTCRayHit*  _rayN, const size_t N, const size_t stride, IntersectContext* context);
   typedef void (*intersectStreamAOP_func)(Scene* scene, RTCRayHit** _rayN, const size_t N, IntersectContext* context);

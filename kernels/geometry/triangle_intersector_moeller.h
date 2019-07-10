@@ -123,20 +123,6 @@ struct MoellerTrumboreIntersector1
         new (&hit) MoellerTrumboreHitM<M>(valid, U, V, T, absDen, tri_Ng);
         return true;
     }
-
-    __forceinline bool
-    intersect(const vbool<M>& valid,
-              Ray& ray,
-              const Vec3vf<M>& v0,
-              const Vec3vf<M>& v1,
-              const Vec3vf<M>& v2,
-              MoellerTrumboreHitM<M>& hit) const
-    {
-        const Vec3vf<M> e1 = v0-v1;
-        const Vec3vf<M> e2 = v2-v0;
-        return intersectEdge(valid,ray,v0,e1,e2,hit);
-    }
-
     template<typename Epilog>
     __forceinline bool
     intersectEdge(Ray& ray,
