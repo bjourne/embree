@@ -58,27 +58,6 @@ struct Intersect1EpilogM
             }
 #endif
 
-#if defined(EMBREE_FILTER_FUNCTION)
-            //printf("defined(EMBREE_FILTER_FUNCTION)\n");
-            /* call intersection filter function */
-            if (filter) {
-                if (unlikely(context->hasContextFilter() ||
-                             geometry->hasIntersectionFilter()))
-                {
-                    const Vec2f uv = hit.uv(i);
-                    HitK<1> h(context->instID,geomID,primIDs[i],uv.x,uv.y,hit.Ng(i));
-                    const float old_t = ray.tfar;
-                    ray.tfar = hit.t(i);
-                    const bool found = runIntersectionFilter1(geometry,ray,context,h);
-                    if (!found) ray.tfar = old_t;
-                    foundhit |= found;
-                    clear(valid,i);
-                    // intersection filters may modify tfar value
-                    valid &= hit.vt <= ray.tfar;
-                    continue;
-                }
-            }
-#endif
             break;
         }
 #endif

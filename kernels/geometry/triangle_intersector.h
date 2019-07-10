@@ -21,8 +21,8 @@ struct TriangleMIntersector1Moeller
               IntersectContext* context,
               const TriangleM<M>& tri)
     {
-        //printf("TriangleMIntersector1Moeller::intersect\n");
         STAT3(normal.trav_prims,1,1,1);
+        // Ray and rayhit is the same thing??
         pre.intersectEdge(ray, tri.v0, tri.e1, tri.e2,
                            Intersect1EpilogM<M,Mx,filter>(ray,
                                                           context,
