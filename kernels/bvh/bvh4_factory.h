@@ -63,7 +63,7 @@ private:
     static void createTriangleMeshTriangle4i(TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
 
 
-    static void createUserGeometryMesh(UserGeometry* mesh, AccelData*& accel, Builder*& builder);
+    //static void createUserGeometryMesh(UserGeometry* mesh, AccelData*& accel, Builder*& builder);
 
 private:
     DEFINE_SYMBOL2(Accel::Intersector1,BVH4Triangle4Intersector1Moeller);
@@ -84,7 +84,7 @@ private:
 
     //DEFINE_SYMBOL2(Accel::Intersector4,BVH4VirtualIntersector4Chunk);
 
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH4InstanceIntersector4Chunk);
+    //DEFINE_SYMBOL2(Accel::Intersector4,BVH4InstanceIntersector4Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridIntersector4HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridIntersector4HybridPluecker);
@@ -102,8 +102,8 @@ private:
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4VirtualIntersector8Chunk);
 
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceIntersector8Chunk);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceMBIntersector8Chunk);
+    //DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceIntersector8Chunk);
+    //DEFINE_SYMBOL2(Accel::Intersector8,BVH4InstanceMBIntersector8Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridPluecker);

@@ -148,36 +148,11 @@ void Scene::createTriangleAccel()
 #endif
 }
 
-  void Scene::createGridAccel()
-  {
-    BVHFactory::IntersectVariant ivariant = isRobustAccel() ? BVHFactory::IntersectVariant::ROBUST : BVHFactory::IntersectVariant::FAST;
-#if defined(EMBREE_GEOMETRY_GRID)
-    if (device->grid_accel == "default")
-    {
-#if defined (EMBREE_TARGET_SIMD8)
-      if (device->canUseAVX() && !isCompactAccel())
-      {
-        accels_add(device->bvh8_factory->BVH8Grid(this,BVHFactory::BuildVariant::STATIC,ivariant));
-      }
-      else
-#endif
-      {
-        accels_add(device->bvh4_factory->BVH4Grid(this,BVHFactory::BuildVariant::STATIC,ivariant));
-      }
-    }
-    else if (device->grid_accel == "bvh4.grid") accels_add(device->bvh4_factory->BVH4Grid(this,BVHFactory::BuildVariant::STATIC,ivariant));
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->grid_accel == "bvh8.grid") accels_add(device->bvh8_factory->BVH8Grid(this,BVHFactory::BuildVariant::STATIC,ivariant));
-#endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown grid accel "+device->grid_accel);
-#endif
-
-  }
-
 void Scene::clear() {
 }
 
-unsigned Scene::bind(unsigned geomID, Ref<Geometry> geometry)
+unsigned
+Scene::bind(unsigned geomID, Ref<Geometry> geometry)
 {
     Lock<SpinLock> lock(geometriesMutex);
     if (geomID == RTC_INVALID_GEOMETRY_ID) {
@@ -248,7 +223,6 @@ void Scene::commit_task ()
                                         });
 
         if (getNumPrimitives<TriangleMesh,false>()) createTriangleAccel();
-        if (getNumPrimitives<GridMesh,false>()) createGridAccel();
 
         flags_modified = false;
         enabled_geometry_types = new_enabled_geometry_types;
