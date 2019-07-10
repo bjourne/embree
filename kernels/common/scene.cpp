@@ -105,12 +105,13 @@ void Scene::printStatistics()
 
 void Scene::createTriangleAccel()
 {
-    printf("accel %s\n", device->tri_accel.c_str());
+    printf("accel %s qual %d\n", device->tri_accel.c_str(), quality_flags);
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
     if (device->tri_accel == "default")
     {
         if (quality_flags != RTC_BUILD_QUALITY_LOW)
         {
+            printf("Medium or high build qual\n");
             int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
             switch (mode) {
             case /*0b00*/ 0:
@@ -132,15 +133,6 @@ void Scene::createTriangleAccel()
                 }
                 break;
 
-//             case /*0b01*/ 1:
-// #if defined (EMBREE_TARGET_SIMD8)
-//                 if (device->canUseAVX())
-//                     accels_add(device->bvh8_factory->BVH8Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-//                 else
-// #endif
-//                     accels_add(device->bvh4_factory->BVH4Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-
-//                 break;
             case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
             case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
             }
@@ -148,38 +140,14 @@ void Scene::createTriangleAccel()
         else /* dynamic */
         {
             printf("NOT HERE!!!\n");
-// #if defined (EMBREE_TARGET_SIMD8)
-//             if (device->canUseAVX())
-//             {
-//                 int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-//                 switch (mode) {
-//                 case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-//                 case /*0b01*/ 1: accels_add(device->bvh8_factory->BVH8Triangle4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//                 case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-//                 case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//                 }
-//             }
-//             else
-// #endif
-//             {
-//                 int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-//                 switch (mode) {
-//                 case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-//                 case /*0b01*/ 1: accels_add(device->bvh4_factory->BVH4Triangle4v(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//                 case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-//                 case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::ROBUST)); break;
-//                 }
-//             }
         }
     }
     else if (device->tri_accel == "bvh4.triangle4")       accels_add(device->bvh4_factory->BVH4Triangle4 (this));
-    else if (device->tri_accel == "bvh4.triangle4v")      accels_add(device->bvh4_factory->BVH4Triangle4v(this));
     else if (device->tri_accel == "bvh4.triangle4i")      accels_add(device->bvh4_factory->BVH4Triangle4i(this));
     else if (device->tri_accel == "qbvh4.triangle4i")     accels_add(device->bvh4_factory->BVH4QuantizedTriangle4i(this));
 
 #if defined (EMBREE_TARGET_SIMD8)
     else if (device->tri_accel == "bvh8.triangle4")       accels_add(device->bvh8_factory->BVH8Triangle4 (this));
-    //else if (device->tri_accel == "bvh8.triangle4v")      accels_add(device->bvh8_factory->BVH8Triangle4v(this));
     else if (device->tri_accel == "bvh8.triangle4i")      accels_add(device->bvh8_factory->BVH8Triangle4i(this));
     else if (device->tri_accel == "qbvh8.triangle4i")     accels_add(device->bvh8_factory->BVH8QuantizedTriangle4i(this));
     else if (device->tri_accel == "qbvh8.triangle4")      accels_add(device->bvh8_factory->BVH8QuantizedTriangle4(this));
@@ -187,22 +155,6 @@ void Scene::createTriangleAccel()
     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown triangle acceleration structure "+device->tri_accel);
 #endif
 }
-
-// void Scene::createInstanceAccel()
-// {
-// #if defined(EMBREE_GEOMETRY_INSTANCE)
-//     //if (device->object_accel == "default")
-//     {
-// #if defined (EMBREE_TARGET_SIMD8)
-//         if (device->canUseAVX() && !isCompactAccel())
-//             accels_add(device->bvh8_factory->BVH8Instance(this,BVHFactory::BuildVariant::STATIC));
-//         else
-// #endif
-//             accels_add(device->bvh4_factory->BVH4Instance(this,BVHFactory::BuildVariant::STATIC));
-//     }
-//     //else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown instance accel "+device->instance_accel);
-// #endif
-// }
 
   void Scene::createGridAccel()
   {

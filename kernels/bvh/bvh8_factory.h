@@ -124,7 +124,7 @@ namespace embree
     DEFINE_SYMBOL2(Accel::Intersector8,BVH8Triangle4vIntersector8HybridPluecker);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH8Triangle4iIntersector8HybridPluecker);
 
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH8VirtualIntersector8Chunk);
+      //DEFINE_SYMBOL2(Accel::Intersector8,BVH8VirtualIntersector8Chunk);
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH8InstanceIntersector8Chunk);
 

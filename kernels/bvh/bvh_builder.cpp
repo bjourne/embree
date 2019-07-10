@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "bvh_builder.h"
 
 namespace embree
@@ -26,7 +10,7 @@ namespace embree
       auto createLeafFunc = [&] (const PrimRef* prims, const range<size_t>& set, const Allocator& alloc) -> NodeRef {
         return createLeaf(prims,set,alloc);
       };
-      
+
       settings.branchingFactor = N;
       settings.maxDepth = BVH::maxBuildDepthLeaf;
       return BVHBuilderBinnedSAH::build<NodeRef>
@@ -40,7 +24,7 @@ namespace embree
       auto createLeafFunc = [&] (const PrimRef* prims, const range<size_t>& set, const Allocator& alloc) -> NodeRef {
         return createLeaf(prims,set,alloc);
       };
-            
+
       settings.branchingFactor = N;
       settings.maxDepth = BVH::maxBuildDepthLeaf;
       return BVHBuilderBinnedSAH::build<NodeRef>
@@ -62,7 +46,7 @@ namespace embree
 
     template struct BVHNBuilderVirtual<4>;
     template struct BVHNBuilderQuantizedVirtual<4>;
-    template struct BVHNBuilderMblurVirtual<4>;    
+    template struct BVHNBuilderMblurVirtual<4>;
 
 #if defined(__AVX__)
     template struct BVHNBuilderVirtual<8>;

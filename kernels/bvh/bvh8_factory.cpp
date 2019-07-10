@@ -25,7 +25,7 @@ namespace embree
 {
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4Intersector1Moeller);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
-DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4vIntersector1Pluecker);
+//DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4vIntersector1Pluecker);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Pluecker);
 
 DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4iIntersector1Pluecker);
@@ -46,7 +46,7 @@ DECLARE_SYMBOL2(Accel::Intersector4,BVH8InstanceIntersector4Chunk);
 DECLARE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridMoeller);
 DECLARE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridPluecker);
 
-DECLARE_SYMBOL2(Accel::Intersector8,BVH8VirtualIntersector8Chunk);
+//DECLARE_SYMBOL2(Accel::Intersector8,BVH8VirtualIntersector8Chunk);
 
 DECLARE_SYMBOL2(Accel::Intersector8,BVH8InstanceIntersector8Chunk);
 
@@ -151,7 +151,7 @@ void BVH8Factory::selectBuilders(int features)
   {
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4Intersector1Moeller));
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4iIntersector1Moeller));
-    IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4vIntersector1Pluecker));
+    //IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4vIntersector1Pluecker));
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4iIntersector1Pluecker));
 
 
@@ -170,7 +170,7 @@ void BVH8Factory::selectBuilders(int features)
 
     IF_ENABLED_USER(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH8VirtualIntersector4Chunk));
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH8InstanceIntersector4Chunk));
-    IF_ENABLED_USER(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH8VirtualIntersector8Chunk));
+    //IF_ENABLED_USER(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH8VirtualIntersector8Chunk));
     IF_ENABLED_INSTANCE(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512SKX(features,BVH8InstanceIntersector8Chunk));
 #endif
   }
@@ -256,22 +256,6 @@ Accel::Intersectors BVH8Factory::BVH8Triangle4Intersectors(BVH8* bvh, IntersectV
     intersectors.intersector1 = BVH8Triangle4Intersector1Moeller();
     return intersectors;
 }
-
-// Accel::Intersectors
-// BVH8Factory::BVH8Triangle4vIntersectors(BVH8* bvh, IntersectVariant ivariant)
-// {
-//     printf("BVH8Factory::BVH8Triangle4vIntersectors\n");
-//     Accel::Intersectors intersectors;
-//     intersectors.ptr = bvh;
-// #define ENABLE_WOOP_TEST 0
-// #if ENABLE_WOOP_TEST == 0
-//     //assert(ivariant == IntersectVariant::ROBUST);
-//     intersectors.intersector1    = BVH8Triangle4vIntersector1Pluecker();
-// #else
-//     //intersectors.intersector1    = BVH8Triangle4vIntersector1Woop();
-// #endif
-//     return intersectors;
-// }
 
 Accel::Intersectors BVH8Factory::BVH8Triangle4iIntersectors(BVH8* bvh, IntersectVariant ivariant)
 {
