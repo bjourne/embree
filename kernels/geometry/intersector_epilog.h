@@ -120,6 +120,7 @@ struct Occluded1EpilogM
     template<typename Hit>
     __forceinline bool operator() (const vbool<Mx>& valid_i, Hit& hit) const
     {
+        printf("occluded epilog\n");
         Scene* scene = context->scene;
         /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)

@@ -32,14 +32,14 @@ DECLARE_SYMBOL2(Accel::Intersector1,BVH8VirtualIntersector1);
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8InstanceIntersector1);
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8GridIntersector1Moeller);
-DECLARE_SYMBOL2(Accel::Intersector1,BVH8GridIntersector1Pluecker);
+//DECLARE_SYMBOL2(Accel::Intersector1,BVH8GridIntersector1Pluecker);
 
 DECLARE_SYMBOL2(Accel::Intersector4,BVH8VirtualIntersector4Chunk);
 
 DECLARE_SYMBOL2(Accel::Intersector4,BVH8InstanceIntersector4Chunk);
 
 DECLARE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridMoeller);
-DECLARE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridPluecker);
+//DECLARE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridPluecker);
 
 //DECLARE_SYMBOL2(Accel::Intersector8,BVH8VirtualIntersector8Chunk);
 

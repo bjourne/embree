@@ -190,35 +190,6 @@ struct MoellerTrumboreIntersector1
         }
         return false;
     }
-
-    template<typename Epilog>
-    __forceinline bool
-    intersect(Ray& ray,
-              const Vec3vf<M>& v0,
-              const Vec3vf<M>& v1,
-              const Vec3vf<M>& v2,
-              const Epilog& epilog) const
-    {
-        MoellerTrumboreHitM<M> hit;
-        if (likely(intersect(ray,v0,v1,v2,hit)))
-            return epilog(hit.valid,hit);
-        return false;
-    }
-
-    // template<typename Epilog>
-    // __forceinline bool
-    // intersect(const vbool<M>& valid,
-    //           Ray& ray,
-    //           const Vec3vf<M>& v0,
-    //           const Vec3vf<M>& v1,
-    //           const Vec3vf<M>& v2,
-    //           const Epilog& epilog) const
-    // {
-    //     MoellerTrumboreHitM<M> hit;
-    //     if (likely(intersect(valid, ray, v0, v1, v2, hit)))
-    //         return epilog(hit.valid,hit);
-    //     return false;
-    // }
 };
 
 

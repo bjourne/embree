@@ -37,6 +37,7 @@ struct TriangleMIntersector1Moeller
              IntersectContext* context,
              const TriangleM<M>& tri)
     {
+        printf("NOT HERE\n");
         STAT3(shadow.trav_prims,1,1,1);
         return pre.intersectEdge(
             ray,tri.v0,tri.e1,tri.e2,
