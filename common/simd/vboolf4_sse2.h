@@ -1,27 +1,11 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 namespace embree
 {
-  /* 4-wide SSE bool type */
-  template<>
-  struct vboolf<4>
-  {
+/* 4-wide SSE bool type */
+template<>
+struct vboolf<4>
+{
     typedef vboolf4 Bool;
     typedef vint4   Int;
     typedef vfloat4 Float;
@@ -32,7 +16,7 @@ namespace embree
     ////////////////////////////////////////////////////////////////////////////////
     /// Constructors, Assignment & Cast Operators
     ////////////////////////////////////////////////////////////////////////////////
-    
+
     __forceinline vboolf() {}
     __forceinline vboolf(const vboolf4& other) { v = other.v; }
     __forceinline vboolf4& operator =(const vboolf4& other) { v = other.v; return *this; }
@@ -41,7 +25,7 @@ namespace embree
     __forceinline operator const __m128&() const { return v; }
     __forceinline operator const __m128i() const { return _mm_castps_si128(v); }
     __forceinline operator const __m128d() const { return _mm_castps_pd(v); }
-    
+
     __forceinline vboolf(bool a)
       : v(mm_lookupmask_ps[(size_t(a) << 3) | (size_t(a) << 2) | (size_t(a) << 1) | size_t(a)]) {}
     __forceinline vboolf(bool a, bool b)
@@ -52,7 +36,7 @@ namespace embree
     __forceinline vboolf(unsigned int mask) { assert(mask < 16); v = mm_lookupmask_ps[mask]; }
 
     /* return int32 mask */
-    __forceinline __m128i mask32() const { 
+    __forceinline __m128i mask32() const {
       return _mm_castps_si128(v);
     }
 
@@ -74,46 +58,46 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
   /// Unary Operators
   ////////////////////////////////////////////////////////////////////////////////
-  
+
   __forceinline vboolf4 operator !(const vboolf4& a) { return _mm_xor_ps(a, vboolf4(embree::True)); }
-  
+
   ////////////////////////////////////////////////////////////////////////////////
   /// Binary Operators
   ////////////////////////////////////////////////////////////////////////////////
-  
+
   __forceinline vboolf4 operator &(const vboolf4& a, const vboolf4& b) { return _mm_and_ps(a, b); }
   __forceinline vboolf4 operator |(const vboolf4& a, const vboolf4& b) { return _mm_or_ps (a, b); }
   __forceinline vboolf4 operator ^(const vboolf4& a, const vboolf4& b) { return _mm_xor_ps(a, b); }
 
   __forceinline vboolf4 andn(const vboolf4& a, const vboolf4& b) { return _mm_andnot_ps(b, a); }
-  
+
   ////////////////////////////////////////////////////////////////////////////////
   /// Assignment Operators
   ////////////////////////////////////////////////////////////////////////////////
-  
+
   __forceinline vboolf4& operator &=(vboolf4& a, const vboolf4& b) { return a = a & b; }
   __forceinline vboolf4& operator |=(vboolf4& a, const vboolf4& b) { return a = a | b; }
   __forceinline vboolf4& operator ^=(vboolf4& a, const vboolf4& b) { return a = a ^ b; }
-  
+
   ////////////////////////////////////////////////////////////////////////////////
   /// Comparison Operators + Select
   ////////////////////////////////////////////////////////////////////////////////
-  
+
   __forceinline vboolf4 operator !=(const vboolf4& a, const vboolf4& b) { return _mm_xor_ps(a, b); }
   __forceinline vboolf4 operator ==(const vboolf4& a, const vboolf4& b) { return _mm_castsi128_ps(_mm_cmpeq_epi32(a, b)); }
-  
+
   __forceinline vboolf4 select(const vboolf4& m, const vboolf4& t, const vboolf4& f) {
 #if defined(__SSE4_1__)
-    return _mm_blendv_ps(f, t, m); 
+    return _mm_blendv_ps(f, t, m);
 #else
-    return _mm_or_ps(_mm_and_ps(m, t), _mm_andnot_ps(m, f)); 
+    return _mm_or_ps(_mm_and_ps(m, t), _mm_andnot_ps(m, f));
 #endif
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Movement/Shifting/Shuffling Functions
   ////////////////////////////////////////////////////////////////////////////////
-  
+
   __forceinline vboolf4 unpacklo(const vboolf4& a, const vboolf4& b) { return _mm_unpacklo_ps(a, b); }
   __forceinline vboolf4 unpackhi(const vboolf4& a, const vboolf4& b) { return _mm_unpackhi_ps(a, b); }
 
@@ -143,22 +127,19 @@ namespace embree
   template<int dst, int src> __forceinline vboolf4 insert(const vboolf4& a, const vboolf4& b) { return insert<dst, src, 0>(a, b); }
   template<int dst> __forceinline vboolf4 insert(const vboolf4& a, const bool b) { return insert<dst, 0>(a, vboolf4(b)); }
 #endif
-  
-  ////////////////////////////////////////////////////////////////////////////////
-  /// Reduction Operations
-  ////////////////////////////////////////////////////////////////////////////////
-    
-  __forceinline bool reduce_and(const vboolf4& a) { return _mm_movemask_ps(a) == 0xf; }
-  __forceinline bool reduce_or (const vboolf4& a) { return _mm_movemask_ps(a) != 0x0; }
 
-  __forceinline bool all (const vboolf4& b) { return _mm_movemask_ps(b) == 0xf; }
-  __forceinline bool any (const vboolf4& b) { return _mm_movemask_ps(b) != 0x0; }
-  __forceinline bool none(const vboolf4& b) { return _mm_movemask_ps(b) == 0x0; }
+/// Reduction Operations
+__forceinline bool reduce_and(const vboolf4& a) { return _mm_movemask_ps(a) == 0xf; }
+__forceinline bool reduce_or (const vboolf4& a) { return _mm_movemask_ps(a) != 0x0; }
+
+__forceinline bool all (const vboolf4& b) { return _mm_movemask_ps(b) == 0xf; }
+__forceinline bool any (const vboolf4& b) { return _mm_movemask_ps(b) != 0x0; }
+__forceinline bool none(const vboolf4& b) { return _mm_movemask_ps(b) == 0x0; }
 
   __forceinline bool all (const vboolf4& valid, const vboolf4& b) { return all((!valid) | b); }
   __forceinline bool any (const vboolf4& valid, const vboolf4& b) { return any(valid & b); }
   __forceinline bool none(const vboolf4& valid, const vboolf4& b) { return none(valid & b); }
-  
+
   __forceinline size_t movemask(const vboolf4& a) { return _mm_movemask_ps(a); }
 #if defined(__SSE4_2__)
   __forceinline size_t popcnt(const vboolf4& a) { return popcnt((size_t)_mm_movemask_ps(a)); }
@@ -177,7 +158,7 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
   /// Output Operators
   ////////////////////////////////////////////////////////////////////////////////
-  
+
   inline std::ostream& operator <<(std::ostream& cout, const vboolf4& a) {
     return cout << "<" << a[0] << ", " << a[1] << ", " << a[2] << ", " << a[3] << ">";
   }

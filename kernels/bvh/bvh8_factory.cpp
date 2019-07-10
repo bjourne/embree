@@ -24,8 +24,8 @@
 namespace embree
 {
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4Intersector1Moeller);
-DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
-DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Pluecker);
+//DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
+//DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Pluecker);
 
 //DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4iIntersector1Pluecker);
 //DECLARE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4Intersector1Moeller);
@@ -149,7 +149,7 @@ void BVH8Factory::selectBuilders(int features)
   void BVH8Factory::selectIntersectors(int features)
   {
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4Intersector1Moeller));
-    IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4iIntersector1Moeller));
+    //IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,BVH8Triangle4iIntersector1Moeller));
 
     //IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX2_AVX512KNL_AVX512SKX(features,QBVH8Triangle4Intersector1Moeller));
 
@@ -251,26 +251,26 @@ Accel::Intersectors BVH8Factory::BVH8Triangle4Intersectors(BVH8* bvh, IntersectV
     return intersectors;
 }
 
-Accel::Intersectors BVH8Factory::BVH8Triangle4iIntersectors(BVH8* bvh, IntersectVariant ivariant)
-{
-    switch (ivariant) {
-    case IntersectVariant::FAST:
-    {
-        Accel::Intersectors intersectors;
-        intersectors.ptr = bvh;
-        intersectors.intersector1  = BVH8Triangle4iIntersector1Moeller();
-        return intersectors;
-    }
-    // case IntersectVariant::ROBUST:
-    // {
-    //     Accel::Intersectors intersectors;
-    //     intersectors.ptr = bvh;
-    //     intersectors.intersector1  = BVH8Triangle4iIntersector1Pluecker();
-    //     return intersectors;
-    // }
-    }
-    return Accel::Intersectors();
-}
+// Accel::Intersectors BVH8Factory::BVH8Triangle4iIntersectors(BVH8* bvh, IntersectVariant ivariant)
+// {
+//     switch (ivariant) {
+//     case IntersectVariant::FAST:
+//     {
+//         Accel::Intersectors intersectors;
+//         intersectors.ptr = bvh;
+//         intersectors.intersector1  = BVH8Triangle4iIntersector1Moeller();
+//         return intersectors;
+//     }
+//     // case IntersectVariant::ROBUST:
+//     // {
+//     //     Accel::Intersectors intersectors;
+//     //     intersectors.ptr = bvh;
+//     //     intersectors.intersector1  = BVH8Triangle4iIntersector1Pluecker();
+//     //     return intersectors;
+//     // }
+//     }
+//     return Accel::Intersectors();
+// }
 
   // Accel::Intersectors BVH8Factory::QBVH8Triangle4iIntersectors(BVH8* bvh)
   // {
@@ -334,23 +334,23 @@ Accel::Intersectors BVH8Factory::BVH8Triangle4iIntersectors(BVH8* bvh, Intersect
     return new AccelInstance(accel,builder,intersectors);
   }
 
-Accel* BVH8Factory::BVH8Triangle4i(Scene* scene, BuildVariant bvariant, IntersectVariant ivariant)
-{
-    BVH8* accel = new BVH8(Triangle4i::type,scene);
-    Accel::Intersectors intersectors = BVH8Triangle4iIntersectors(accel,ivariant);
+// Accel* BVH8Factory::BVH8Triangle4i(Scene* scene, BuildVariant bvariant, IntersectVariant ivariant)
+// {
+//     BVH8* accel = new BVH8(Triangle4i::type,scene);
+//     Accel::Intersectors intersectors = BVH8Triangle4iIntersectors(accel,ivariant);
 
-    Builder* builder = nullptr;
-    if (scene->device->tri_builder == "default") {
-        switch (bvariant) {
-        case BuildVariant::STATIC      : builder = BVH8Triangle4iSceneBuilderSAH(accel,scene,0); break;
-        case BuildVariant::DYNAMIC     : builder = BVH8BuilderTwoLevelTriangleMeshSAH(accel,scene,&createTriangleMeshTriangle4i); break;
-        case BuildVariant::HIGH_QUALITY: assert(false); break; // FIXME: implement
-        }
-    }
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->tri_builder+" for BVH8<Triangle4i>");
+//     Builder* builder = nullptr;
+//     if (scene->device->tri_builder == "default") {
+//         switch (bvariant) {
+//         case BuildVariant::STATIC      : builder = BVH8Triangle4iSceneBuilderSAH(accel,scene,0); break;
+//         case BuildVariant::DYNAMIC     : builder = BVH8BuilderTwoLevelTriangleMeshSAH(accel,scene,&createTriangleMeshTriangle4i); break;
+//         case BuildVariant::HIGH_QUALITY: assert(false); break; // FIXME: implement
+//         }
+//     }
+//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->tri_builder+" for BVH8<Triangle4i>");
 
-    return new AccelInstance(accel,builder,intersectors);
-}
+//     return new AccelInstance(accel,builder,intersectors);
+// }
 
   Accel* BVH8Factory::BVH8Instance(Scene* scene, BuildVariant bvariant)
   {

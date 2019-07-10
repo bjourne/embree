@@ -1,27 +1,11 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 namespace embree
 {
-  /* 4-wide AVX bool type for 64bit data types*/
-  template<>
-  struct vboold<4>
-  {
+/* 4-wide AVX bool type for 64bit data types*/
+template<>
+struct vboold<4>
+{
     typedef vboold4 Bool;
 
     enum  { size = 4 };       // number of SIMD elements
@@ -59,7 +43,7 @@ namespace embree
       vh = mm_lookupmask_pd[a >> 2];
 #endif
     }
-    
+
     __forceinline vboold(__m128d a, __m128d b) : vl(a), vh(b) {}
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +89,7 @@ namespace embree
   __forceinline vboold4 operator ==(const vboold4& a, const vboold4& b) { return _mm256_xor_pd(_mm256_xor_pd(a,b),vboold4(embree::True)); }
 
   __forceinline vboold4 select(const vboold4& mask, const vboold4& t, const vboold4& f) {
-    return _mm256_blendv_pd(f, t, mask); 
+    return _mm256_blendv_pd(f, t, mask);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -147,18 +131,12 @@ namespace embree
   __forceinline unsigned int movemask(const vboold4& a) { return _mm256_movemask_pd(a); }
   __forceinline size_t       popcnt  (const vboold4& a) { return popcnt((size_t)_mm256_movemask_pd(a)); }
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// Get/Set Functions
-  ////////////////////////////////////////////////////////////////////////////////
-
   __forceinline bool get(const vboold4& a, size_t index) { return a[index]; }
   __forceinline void set  (vboold4& a, size_t index)     { a[index] = -1; }
   __forceinline void clear(vboold4& a, size_t index)     { a[index] =  0; }
 
-  ////////////////////////////////////////////////////////////////////////////////
   /// Output Operators
-  ////////////////////////////////////////////////////////////////////////////////
-
   inline std::ostream& operator <<(std::ostream& cout, const vboold4& a) {
     return cout << "<" << a[0] << ", " << a[1] << ", " << a[2] << ", " << a[3] << ", "
                        << a[4] << ", " << a[5] << ", " << a[6] << ", " << a[7] << ">";

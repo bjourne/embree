@@ -82,6 +82,21 @@ struct MoellerTrumboreIntersector1
     {
     }
 
+    // __forceinline bool
+    // intersect(const vbool<M>& valid0,
+    //           Ray& ray,
+    //           const Vec3vf<M>& tri_v0,
+    //           const Vec3vf<M>& tri_e1,
+    //           const Vec3vf<M>& tri_e2,
+    //           const Vec3vf<M>& tri_Ng,
+    //           MoellerTrumboreHitM<M>& hit) const
+    // {
+    //     const Vec3vf<M> v0o = Vec3vf<M>(tri_v0) - O;
+    //     const vfloat<M> a = dot(Vec3vf<M>(tri_Ng), v0o);
+    //     const vfloat<M> b = dot(Vec3vf<M>(tri_Ng), D);
+    //     const vfloat<M> T = a / b;
+    // }
+
     // what is valid0?
     __forceinline bool
     intersect(const vbool<M>& valid0,
@@ -190,20 +205,20 @@ struct MoellerTrumboreIntersector1
         return false;
     }
 
-    template<typename Epilog>
-    __forceinline bool
-    intersect(const vbool<M>& valid,
-              Ray& ray,
-              const Vec3vf<M>& v0,
-              const Vec3vf<M>& v1,
-              const Vec3vf<M>& v2,
-              const Epilog& epilog) const
-    {
-        MoellerTrumboreHitM<M> hit;
-        if (likely(intersect(valid,ray,v0,v1,v2,hit)))
-            return epilog(hit.valid,hit);
-        return false;
-    }
+    // template<typename Epilog>
+    // __forceinline bool
+    // intersect(const vbool<M>& valid,
+    //           Ray& ray,
+    //           const Vec3vf<M>& v0,
+    //           const Vec3vf<M>& v1,
+    //           const Vec3vf<M>& v2,
+    //           const Epilog& epilog) const
+    // {
+    //     MoellerTrumboreHitM<M> hit;
+    //     if (likely(intersect(valid, ray, v0, v1, v2, hit)))
+    //         return epilog(hit.valid,hit);
+    //     return false;
+    // }
 };
 
 

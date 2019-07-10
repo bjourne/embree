@@ -67,7 +67,7 @@ namespace embree
 
   private:
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8Triangle4Intersector1Moeller);
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
+      //DEFINE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
 
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8Triangle4vIntersector1Woop);
 

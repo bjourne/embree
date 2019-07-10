@@ -132,9 +132,6 @@ void Scene::createTriangleAccel()
                         accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
                 }
                 break;
-
-            case /*0b10*/ 2: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST  )); break;
-            case /*0b11*/ 3: accels_add(device->bvh4_factory->BVH4Triangle4i(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST)); break;
             }
         }
         else /* dynamic */
@@ -143,12 +140,9 @@ void Scene::createTriangleAccel()
         }
     }
     else if (device->tri_accel == "bvh4.triangle4")       accels_add(device->bvh4_factory->BVH4Triangle4 (this));
-    else if (device->tri_accel == "bvh4.triangle4i")      accels_add(device->bvh4_factory->BVH4Triangle4i(this));
-    else if (device->tri_accel == "qbvh4.triangle4i")     accels_add(device->bvh4_factory->BVH4QuantizedTriangle4i(this));
 
 #if defined (EMBREE_TARGET_SIMD8)
     else if (device->tri_accel == "bvh8.triangle4")       accels_add(device->bvh8_factory->BVH8Triangle4 (this));
-    else if (device->tri_accel == "bvh8.triangle4i")      accels_add(device->bvh8_factory->BVH8Triangle4i(this));
 #endif
     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown triangle acceleration structure "+device->tri_accel);
 #endif

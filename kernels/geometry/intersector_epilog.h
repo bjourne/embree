@@ -34,7 +34,8 @@ struct Intersect1EpilogM
     {
         Scene* scene = context->scene;
         vbool<Mx> valid = valid_i;
-        if (Mx > M) valid &= (1 << M)-1;
+        if (Mx > M)
+            valid &= (1 << M)-1;
         hit.finalize();
         size_t i = select_min(valid,hit.vt);
         unsigned int geomID = geomIDs[i];
