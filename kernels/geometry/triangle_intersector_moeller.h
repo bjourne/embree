@@ -82,24 +82,9 @@ struct MoellerTrumboreIntersector1
     {
     }
 
-    // __forceinline bool
-    // intersect(const vbool<M>& valid0,
-    //           Ray& ray,
-    //           const Vec3vf<M>& tri_v0,
-    //           const Vec3vf<M>& tri_e1,
-    //           const Vec3vf<M>& tri_e2,
-    //           const Vec3vf<M>& tri_Ng,
-    //           MoellerTrumboreHitM<M>& hit) const
-    // {
-    //     const Vec3vf<M> v0o = Vec3vf<M>(tri_v0) - O;
-    //     const vfloat<M> a = dot(Vec3vf<M>(tri_Ng), v0o);
-    //     const vfloat<M> b = dot(Vec3vf<M>(tri_Ng), D);
-    //     const vfloat<M> T = a / b;
-    // }
-
     // what is valid0?
     __forceinline bool
-    intersect(const vbool<M>& valid0,
+    intersectInternal(const vbool<M>& valid0,
               Ray& ray,
               const Vec3vf<M>& tri_v0,
               const Vec3vf<M>& tri_e1,
@@ -140,30 +125,6 @@ struct MoellerTrumboreIntersector1
     }
 
     __forceinline bool
-    intersectEdge(Ray& ray,
-                  const Vec3vf<M>& tri_v0,
-                  const Vec3vf<M>& tri_e1,
-                  const Vec3vf<M>& tri_e2,
-                  MoellerTrumboreHitM<M>& hit) const
-    {
-          vbool<M> valid = true;
-          const Vec3<vfloat<M>> tri_Ng = cross(tri_e2,tri_e1);
-          return intersect(valid, ray, tri_v0, tri_e1, tri_e2, tri_Ng, hit);
-    }
-
-    __forceinline bool
-    intersect(Ray& ray,
-              const Vec3vf<M>& v0,
-              const Vec3vf<M>& v1,
-              const Vec3vf<M>& v2,
-              MoellerTrumboreHitM<M>& hit) const
-    {
-        const Vec3vf<M> e1 = v0-v1;
-        const Vec3vf<M> e2 = v2-v0;
-        return intersectEdge(ray,v0,e1,e2,hit);
-    }
-
-    __forceinline bool
     intersect(const vbool<M>& valid,
               Ray& ray,
               const Vec3vf<M>& v0,
@@ -185,7 +146,10 @@ struct MoellerTrumboreIntersector1
                   const Epilog& epilog) const
     {
         MoellerTrumboreHitM<M> hit;
-        if (likely(intersectEdge(ray,v0,e1,e2,hit))) {
+
+        vbool<M> valid = true;
+        const Vec3<vfloat<M>> tri_Ng = cross(e2, e1);
+        if (likely(intersectInternal(valid, ray, v0, e1, e2, tri_Ng, hit))) {
             return epilog(hit.valid, hit);
         }
         return false;

@@ -47,8 +47,9 @@ struct Intersect1EpilogM
         goto entry;
         while (true)
         {
-            if (unlikely(none(valid))) return foundhit;
-            i = select_min(valid,hit.vt);
+            if (unlikely(none(valid)))
+                return foundhit;
+            i = select_min(valid, hit.vt);
 
             geomID = geomIDs[i];
         entry:
