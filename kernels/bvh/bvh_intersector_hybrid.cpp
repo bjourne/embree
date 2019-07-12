@@ -5,12 +5,12 @@
 
 #include "../geometry/intersector_iterators.h"
 #include "../geometry/triangle_intersector.h"
-#include "../geometry/curveNv_intersector.h"
-#include "../geometry/curveNi_intersector.h"
+//#include "../geometry/curveNv_intersector.h"
+//#include "../geometry/curveNi_intersector.h"
 #include "../geometry/subdivpatch1_intersector.h"
 #include "../geometry/object_intersector.h"
 #include "../geometry/instance_intersector.h"
-#include "../geometry/curve_intersector_virtual.h"
+//#include "../geometry/curve_intersector_virtual.h"
 
 #define SWITCH_DURING_DOWN_TRAVERSAL 1
 #define FORCE_SINGLE_MODE 0

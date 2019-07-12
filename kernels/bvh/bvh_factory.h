@@ -4,7 +4,6 @@
 #include "../common/isa.h"
 #include "../common/accel.h"
 #include "../common/scene.h"
-#include "../geometry/curve_intersector_virtual.h"
 
 namespace embree
 {

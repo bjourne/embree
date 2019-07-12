@@ -11,9 +11,9 @@ namespace embree
     BVH8Factory(int bfeatures, int ifeatures);
 
   public:
-    Accel* BVH8OBBVirtualCurve8v(Scene* scene);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8v);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8iMB);
+    // Accel* BVH8OBBVirtualCurve8v(Scene* scene);
+    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8v);
+    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8iMB);
 
     Accel* BVH8Triangle4   (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH8Triangle4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
@@ -45,8 +45,8 @@ namespace embree
     void selectIntersectors(int features);
 
   private:
-    Accel::Intersectors BVH8OBBVirtualCurveIntersectors(BVH8* bvh, VirtualCurveIntersector* leafIntersector);
-    Accel::Intersectors BVH8OBBVirtualCurveIntersectorsMB(BVH8* bvh, VirtualCurveIntersector* leafIntersector);
+    // Accel::Intersectors BVH8OBBVirtualCurveIntersectors(BVH8* bvh, VirtualCurveIntersector* leafIntersector);
+    // Accel::Intersectors BVH8OBBVirtualCurveIntersectorsMB(BVH8* bvh, VirtualCurveIntersector* leafIntersector);
 
     Accel::Intersectors BVH8Triangle4Intersectors(BVH8* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH8Triangle4iIntersectors(BVH8* bvh, IntersectVariant ivariant);
@@ -87,7 +87,7 @@ namespace embree
 
     // SAH scene builders
   private:
-    DEFINE_ISA_FUNCTION(Builder*,BVH8Curve8vBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
+    // // DEFINE_ISA_FUNCTION(Builder*,BVH8Curve8vBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
 
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4vSceneBuilderSAH,void* COMMA Scene* COMMA size_t);

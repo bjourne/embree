@@ -29,8 +29,8 @@ struct TriangleMIntersector1Moeller
         const vuint<M>& geomIDs = tri.geomID();
         const vuint<M>& primIDs = tri.primID();
         if (likely(pre.intersectInternal(valid, ray,
-                                         tri.v0, tri.e1, tri.e2,
-                                         tri_Ng, hit))) {
+                                     tri.v0, tri.e1, tri.e2,
+                                     tri_Ng, hit))) {
 
             Scene* scene = context->scene;
             vbool<Mx> valid = hit.valid;

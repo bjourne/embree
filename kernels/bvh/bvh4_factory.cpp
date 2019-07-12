@@ -1,8 +1,8 @@
 #include "bvh4_factory.h"
 #include "../bvh/bvh.h"
 
-#include "../geometry/curveNv.h"
-#include "../geometry/curveNi.h"
+// #include "../geometry/curveNv.h"
+// #include "../geometry/curveNi.h"
 #include "../geometry/linei.h"
 #include "../geometry/triangle.h"
 #include "../geometry/trianglev.h"

@@ -11,13 +11,13 @@ public:
     BVH4Factory(int bfeatures, int ifeatures);
 
 public:
-    Accel* BVH4OBBVirtualCurve4i(Scene* scene);
-    Accel* BVH4OBBVirtualCurve4v(Scene* scene);
-    Accel* BVH4OBBVirtualCurve8i(Scene* scene);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector4i);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8i);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector4v);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8v);
+    // Accel* BVH4OBBVirtualCurve4i(Scene* scene);
+    // Accel* BVH4OBBVirtualCurve4v(Scene* scene);
+    // Accel* BVH4OBBVirtualCurve8i(Scene* scene);
+    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector4i);
+    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8i);
+    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector4v);
+    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8v);
 
     Accel* BVH4Triangle4   (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH4Triangle4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::ROBUST);
@@ -39,7 +39,7 @@ public:
     void selectIntersectors(int features);
 
 private:
-    Accel::Intersectors BVH4OBBVirtualCurveIntersectors(BVH4* bvh, VirtualCurveIntersector* leafIntersector);
+    // Accel::Intersectors BVH4OBBVirtualCurveIntersectors(BVH4* bvh, VirtualCurveIntersector* leafIntersector);
 
     Accel::Intersectors BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH4Triangle4vIntersectors(BVH4* bvh, IntersectVariant ivariant);
@@ -89,9 +89,9 @@ private:
 
     // SAH scene builders
 private:
-    DEFINE_ISA_FUNCTION(Builder*,BVH4Curve4vBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
-    DEFINE_ISA_FUNCTION(Builder*,BVH4Curve4iBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
-    DEFINE_ISA_FUNCTION(Builder*,BVH4Curve8iBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
+    // DEFINE_ISA_FUNCTION(Builder*,BVH4Curve4vBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
+    // DEFINE_ISA_FUNCTION(Builder*,BVH4Curve4iBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
+    // DEFINE_ISA_FUNCTION(Builder*,BVH4Curve8iBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
 
     DEFINE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     //DEFINE_ISA_FUNCTION(Builder*,BVH4Triangle4vSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
