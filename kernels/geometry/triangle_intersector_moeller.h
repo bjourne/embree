@@ -1,7 +1,6 @@
 #pragma once
 
 #include "triangle.h"
-#include "intersector_epilog.h"
 
 /*! This intersector implements a modified version of the Moeller
  *  Trumbore intersector from the paper "Fast, Minimum Storage
@@ -122,23 +121,6 @@ struct MoellerTrumboreIntersector1
         /* update hit information */
         new (&hit) MoellerTrumboreHitM<M>(valid, U, V, T, absDen, tri_Ng);
         return true;
-    }
-    template<typename Epilog>
-    __forceinline bool
-    intersectEdge(Ray& ray,
-                  const Vec3vf<M>& v0,
-                  const Vec3vf<M>& e1,
-                  const Vec3vf<M>& e2,
-                  const Epilog& epilog) const
-    {
-        MoellerTrumboreHitM<M> hit;
-
-        vbool<M> valid = true;
-        const Vec3<vfloat<M>> tri_Ng = cross(e2, e1);
-        if (likely(intersectInternal(valid, ray, v0, e1, e2, tri_Ng, hit))) {
-            return epilog(hit.valid, hit);
-        }
-        return false;
     }
 };
 
