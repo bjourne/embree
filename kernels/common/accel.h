@@ -115,18 +115,6 @@ public:
                                    RTCRay4& ray,       /*!< ray packet to test occlusion. */
                                    IntersectContext* context);
 
-    /*! Type of occlusion function pointer for ray packets of size 8. */
-    typedef void (*OccludedFunc8) (const void* valid,  /*!< pointer to valid mask */
-                                   Intersectors* This, /*!< this pointer to accel */
-                                   RTCRay8& ray,       /*!< ray packet to test occlusion. */
-                                   IntersectContext* context);
-
-    /*! Type of occlusion function pointer for ray packets of size 16. */
-    typedef void (*OccludedFunc16) (const void* valid,  /*!< pointer to valid mask */
-                                    Intersectors* This, /*!< this pointer to accel */
-                                    RTCRay16& ray,      /*!< ray packet to test occlusion. */
-                                    IntersectContext* context);
-
     /*! Type of intersect function pointer for ray packets of size N. */
     typedef void (*OccludedFuncN)(Intersectors* This, /*!< this pointer to accel */
                                   RTCRayN** ray,      /*!< ray stream to test occlusion */
@@ -168,31 +156,13 @@ public:
         const char* name;
     };
 
-    struct Intersector8
-    {
-        Intersector8 (ErrorFunc error = nullptr)
-            : intersect((IntersectFunc8)error), occluded((OccludedFunc8)error), name(nullptr) {}
-
-        Intersector8 (IntersectFunc8 intersect, OccludedFunc8 occluded, const char* name)
-            : intersect(intersect), occluded(occluded), name(name) {}
-
-        operator bool() const { return name; }
-
-    public:
-        static const char* type;
-        IntersectFunc8 intersect;
-        OccludedFunc8 occluded;
-        const char* name;
-    };
-
     struct Intersectors
     {
         Intersectors()
             : ptr(nullptr),
               leafIntersector(nullptr),
               intersector1(nullptr),
-              intersector4(nullptr),
-              intersector8(nullptr)
+              intersector4(nullptr)
         {
         }
               //intersector16(nullptr),
@@ -202,8 +172,7 @@ public:
             : ptr(nullptr),
               leafIntersector(nullptr),
               intersector1(error),
-              intersector4(error),
-              intersector8(error)
+              intersector4(error)
         {
         }
               //intersector16(error),
@@ -219,18 +188,6 @@ public:
                 for (size_t i=0; i<ident; i++) std::cout << " ";
                 std::cout << "intersector4  = " << intersector4.name << std::endl;
             }
-            if (intersector8.name) {
-                for (size_t i=0; i<ident; i++) std::cout << " ";
-                std::cout << "intersector8  = " << intersector8.name << std::endl;
-            }
-            // if (intersector16.name) {
-            //     for (size_t i=0; i<ident; i++) std::cout << " ";
-            //     std::cout << "intersector16 = " << intersector16.name << std::endl;
-            // }
-            // if (intersectorN.name) {
-            //     for (size_t i=0; i<ident; i++) std::cout << " ";
-            //     std::cout << "intersectorN = " << intersectorN.name << std::endl;
-            // }
         }
 
         void select(bool filter)
@@ -239,18 +196,6 @@ public:
                 if (filter) intersector4 = intersector4_filter;
                 else        intersector4 = intersector4_nofilter;
             }
-            if (intersector8_filter) {
-                if (filter) intersector8 = intersector8_filter;
-                else        intersector8 = intersector8_nofilter;
-            }
-            // if (intersector16_filter) {
-            //     if (filter) intersector16 = intersector16_filter;
-            //     else         intersector16 = intersector16_nofilter;
-            // }
-            // if (intersectorN_filter) {
-            //     if (filter) intersectorN = intersectorN_filter;
-            //     else        intersectorN = intersectorN_nofilter;
-            // }
         }
 
         /*! Intersects a single ray with the scene. */
@@ -268,23 +213,11 @@ public:
             intersector4.intersect(valid,this,ray,context);
         }
 
-        /*! Intersects a packet of 8 rays with the scene. */
-        __forceinline void intersect8 (const void* valid, RTCRayHit8& ray, IntersectContext* context) {
-            assert(intersector8.intersect);
-            intersector8.intersect(valid,this,ray,context);
-        }
-
 #if defined(__SSE__)
         __forceinline void intersect(const vbool4& valid, RayHitK<4>& ray, IntersectContext* context) {
             const vint<4> mask = valid.mask32();
             intersect4(&mask,(RTCRayHit4&)ray,context);
         }
-#endif
-#if defined(__AVX__)
-      __forceinline void intersect(const vbool8& valid, RayHitK<8>& ray, IntersectContext* context) {
-        const vint<8> mask = valid.mask32();
-        intersect8(&mask,(RTCRayHit8&)ray,context);
-      }
 #endif
 #if defined(__AVX512F__)
       __forceinline void intersect(const vbool16& valid, RayHitK<16>& ray, IntersectContext* context) {
@@ -293,17 +226,11 @@ public:
       }
 #endif
 
-      // template<int K>
-      // __forceinline void intersectN (RayHitK<K>** rayN, const size_t N, IntersectContext* context)
-      // {
-      //   intersectN((RTCRayHitN**)rayN,N,context);
-      // }
-
-      /*! Tests if single ray is occluded by the scene. */
-      __forceinline void occluded (RTCRay& ray, IntersectContext* context) {
-        assert(intersector1.occluded);
-        intersector1.occluded(this,ray,context);
-      }
+        /*! Tests if single ray is occluded by the scene. */
+        __forceinline void occluded (RTCRay& ray, IntersectContext* context) {
+            assert(intersector1.occluded);
+            intersector1.occluded(this,ray,context);
+        }
 
       /*! Tests if a packet of 4 rays is occluded by the scene. */
       __forceinline void occluded4 (const void* valid, RTCRay4& ray, IntersectContext* context) {
@@ -311,22 +238,10 @@ public:
         intersector4.occluded(valid,this,ray,context);
       }
 
-      /*! Tests if a packet of 8 rays is occluded by the scene. */
-      __forceinline void occluded8 (const void* valid, RTCRay8& ray, IntersectContext* context) {
-        assert(intersector8.occluded);
-        intersector8.occluded(valid,this,ray,context);
-      }
-
 #if defined(__SSE__)
       __forceinline void occluded(const vbool4& valid, RayK<4>& ray, IntersectContext* context) {
         const vint<4> mask = valid.mask32();
         occluded4(&mask,(RTCRay4&)ray,context);
-      }
-#endif
-#if defined(__AVX__)
-      __forceinline void occluded(const vbool8& valid, RayK<8>& ray, IntersectContext* context) {
-        const vint<8> mask = valid.mask32();
-        occluded8(&mask,(RTCRay8&)ray,context);
       }
 #endif
 #if defined(__AVX512F__)
@@ -346,12 +261,6 @@ public:
             occluded(valid, ray, context);
         }
 
-        // /*! Tests if a packet of N rays in SOA layout is occluded by the scene. */
-        // template<int K>
-        // __forceinline void intersectN(RayK<K>** rayN, const size_t N, IntersectContext* context) {
-        //     occludedN(rayN, N, context);
-        // }
-
     public:
         AccelData* ptr;
         void* leafIntersector;
@@ -359,15 +268,6 @@ public:
         Intersector4 intersector4;
         Intersector4 intersector4_filter;
         Intersector4 intersector4_nofilter;
-        Intersector8 intersector8;
-        Intersector8 intersector8_filter;
-        Intersector8 intersector8_nofilter;
-        // Intersector16 intersector16;
-        // Intersector16 intersector16_filter;
-        // Intersector16 intersector16_nofilter;
-        // IntersectorN intersectorN;
-        // IntersectorN intersectorN_filter;
-        // IntersectorN intersectorN_nofilter;
     };
 
 public:

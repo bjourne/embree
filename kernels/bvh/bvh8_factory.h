@@ -12,8 +12,6 @@ namespace embree
 
   public:
     // Accel* BVH8OBBVirtualCurve8v(Scene* scene);
-    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8v);
-    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8iMB);
 
     Accel* BVH8Triangle4   (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH8Triangle4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
@@ -71,14 +69,6 @@ namespace embree
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridMoeller);
 
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH8Triangle4Intersector8HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH8Triangle4Intersector8HybridMoellerNoFilter);
-
-      //DEFINE_SYMBOL2(Accel::Intersector8,BVH8VirtualIntersector8Chunk);
-
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH8InstanceIntersector8Chunk);
-
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH8GridIntersector8HybridMoeller);
 
     // SAH scene builders
   private:

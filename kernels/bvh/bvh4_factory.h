@@ -58,12 +58,6 @@ private:
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH4GridIntersector4HybridMoeller);
 
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4Intersector8HybridMoeller);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH4Triangle4Intersector8HybridMoellerNoFilter);
-
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridMoeller);
-    // DEFINE_SYMBOL2(Accel::Intersector8,BVH4GridIntersector8HybridPluecker);
-
     // SAH scene builders
 private:
     DEFINE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);

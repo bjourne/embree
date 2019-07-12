@@ -50,33 +50,6 @@ void AccelN::intersect4 (const void* valid,
             This->accels[i]->intersectors.intersect4(valid,ray,context);
 }
 
-void AccelN::intersect8(const void* valid,
-                        Accel::Intersectors* This_in,
-                        RTCRayHit8& ray,
-                        IntersectContext* context)
-{
-    AccelN* This = (AccelN*)This_in->ptr;
-    for (size_t i=0; i<This->accels.size(); i++)
-        if (!This->accels[i]->isEmpty())
-            This->accels[i]->intersectors.intersect8(valid,ray,context);
-}
-
-  // void AccelN::intersect16 (const void* valid, Accel::Intersectors* This_in, RTCRayHit16& ray, IntersectContext* context)
-  // {
-  //   AccelN* This = (AccelN*)This_in->ptr;
-  //   for (size_t i=0; i<This->accels.size(); i++)
-  //     if (!This->accels[i]->isEmpty())
-  //       This->accels[i]->intersectors.intersect16(valid,ray,context);
-  // }
-
-  // void AccelN::intersectN (Accel::Intersectors* This_in, RTCRayHitN** ray, const size_t N, IntersectContext* context)
-  // {
-  //   AccelN* This = (AccelN*)This_in->ptr;
-  //   for (size_t i=0; i<This->accels.size(); i++)
-  //     if (!This->accels[i]->isEmpty())
-  //       This->accels[i]->intersectors.intersectN(ray,N,context);
-  // }
-
 void AccelN::occluded (Accel::Intersectors* This_in, RTCRay& ray, IntersectContext* context)
 {
     AccelN* This = (AccelN*)This_in->ptr;
@@ -105,22 +78,6 @@ void AccelN::occluded4(const void* valid,
 #endif
     }
 }
-
-  void AccelN::occluded8 (const void* valid, Accel::Intersectors* This_in, RTCRay8& ray, IntersectContext* context)
-  {
-    AccelN* This = (AccelN*)This_in->ptr;
-    for (size_t i=0; i<This->accels.size(); i++) {
-      if (This->accels[i]->isEmpty()) continue;
-      This->accels[i]->intersectors.occluded8(valid,ray,context);
-#if defined(__SSE2__) // FIXME: use higher ISA
-      vbool4 valid0 = asBool(((vint4*)valid)[0]);
-      vbool4 hit0   = ((vfloat4*)ray.tfar)[0] >= vfloat4(zero);
-      vbool4 valid1 = asBool(((vint4*)valid)[1]);
-      vbool4 hit1   = ((vfloat4*)ray.tfar)[1] >= vfloat4(zero);
-      if (unlikely((none((valid0 & hit0) | (valid1 & hit1))))) break;
-#endif
-    }
-  }
 
   void AccelN::accels_print(size_t ident)
   {
@@ -151,12 +108,12 @@ void AccelN::accels_build ()
     /* create list of non-empty acceleration structures */
     bool valid1 = true;
     bool valid4 = true;
-    bool valid8 = true;
+    //bool valid8 = true;
     //bool valid16 = true;
     for (size_t i=0; i<accels.size(); i++) {
         valid1 &= (bool) accels[i]->intersectors.intersector1;
         valid4 &= (bool) accels[i]->intersectors.intersector4;
-        valid8 &= (bool) accels[i]->intersectors.intersector8;
+        //valid8 &= (bool) accels[i]->intersectors.intersector8;
         //valid16 &= (bool) accels[i]->intersectors.intersector16;
     }
 
@@ -171,7 +128,6 @@ void AccelN::accels_build ()
         intersectors.ptr = this;
         intersectors.intersector1  = Intersector1(&intersect,&occluded,valid1 ? "AccelN::intersector1": nullptr);
         intersectors.intersector4  = Intersector4(&intersect4,&occluded4,valid4 ? "AccelN::intersector4" : nullptr);
-        intersectors.intersector8  = Intersector8(&intersect8,&occluded8,valid8 ? "AccelN::intersector8" : nullptr);
 
         /*! calculate bounds */
         bounds = empty;
