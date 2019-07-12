@@ -6,14 +6,10 @@
 namespace embree
 {
 /* error raising rtcIntersect and rtcOccluded functions */
-void missing_rtcCommit() {
+void missing_rtcCommit()
+{
     throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
 }
-void invalid_rtcIntersect1()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect and rtcOccluded not enabled"); }
-void invalid_rtcIntersect4()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect4 and rtcOccluded4 not enabled"); }
-void invalid_rtcIntersect8()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect8 and rtcOccluded8 not enabled"); }
-void invalid_rtcIntersect16() { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect16 and rtcOccluded16 not enabled"); }
-void invalid_rtcIntersectN()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersectN and rtcOccludedN not enabled"); }
 
   Scene::Scene (Device* device)
     : device(device),

@@ -31,9 +31,9 @@ struct TriangleMIntersector1Moeller
         STAT3(normal.trav_prims,1,1,1);
 
         vbool<M> valid = true;
-        const Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
-        const vuint<M>& geomIDs = tri.geomID();
-        const vuint<M>& primIDs = tri.primID();
+        Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
+        //vuint<M>& geomIDs = tri.geomID();
+        //vuint<M>& primIDs = tri.primIDs;
 
         Vec3<vfloat<M>> O = Vec3<vfloat<M>>(ray.org);
         Vec3<vfloat<M>> D = Vec3<vfloat<M>>(ray.dir);
@@ -45,8 +45,8 @@ struct TriangleMIntersector1Moeller
         vfloat<M> sgnDen = signmsk(den);
 
         /* perform edge tests */
-        const vfloat<M> U = dot(R, tri.e2) ^ sgnDen;
-        const vfloat<M> V = dot(R, tri.e1) ^ sgnDen;
+        vfloat<M> U = dot(R, tri.e2) ^ sgnDen;
+        vfloat<M> V = dot(R, tri.e1) ^ sgnDen;
 
         // No backface culling
         valid &= (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
@@ -54,7 +54,7 @@ struct TriangleMIntersector1Moeller
             return;
 
         /* perform depth test */
-        const vfloat<M> T = dot(Vec3vf<M>(tri_Ng), C) ^ sgnDen;
+        vfloat<M> T = dot(Vec3vf<M>(tri_Ng), C) ^ sgnDen;
         valid &= (absDen*vfloat<M>(ray.tnear()) < T) & (T <= absDen*vfloat<M>(ray.tfar));
         if (likely(none(valid)))
             return;
@@ -65,13 +65,13 @@ struct TriangleMIntersector1Moeller
             valid2 &= (1 << M) - 1;
 
         // Trick to avoid dividing to early.
-        const vfloat<M> rcpAbsDen = rcp(absDen);
-        const vfloat<M> vt = T * rcpAbsDen;
-        const vfloat<M> vu = U * rcpAbsDen;
-        const vfloat<M> vv = V * rcpAbsDen;
+        vfloat<M> rcpAbsDen = rcp(absDen);
+        vfloat<M> vt = T * rcpAbsDen;
+        vfloat<M> vu = U * rcpAbsDen;
+        vfloat<M> vv = V * rcpAbsDen;
 
         size_t i = select_min(valid2, vt);
-        unsigned int geomID = geomIDs[i];
+        unsigned int geomID = tri.geomIDs[i];
 
         /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
@@ -82,7 +82,7 @@ struct TriangleMIntersector1Moeller
                 return;
             i = select_min(valid2, vt);
 
-            geomID = geomIDs[i];
+            geomID = tri.geomIDs[i];
         entry:
             Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
@@ -105,7 +105,7 @@ struct TriangleMIntersector1Moeller
         ray.u = vu[i];
         ray.v = vv[i];
 
-        ray.primID = primIDs[i];
+        ray.primID = tri.primIDs[i];
         ray.geomID = geomID;
         ray.instID = context->instID;
     }

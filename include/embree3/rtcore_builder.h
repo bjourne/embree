@@ -19,14 +19,14 @@
 #include "rtcore_scene.h"
 
 RTC_NAMESPACE_BEGIN
-  
+
 /* Opaque BVH type */
 typedef struct RTCBVHTy* RTCBVH;
 
 /* Input build primitives for the builder */
 struct RTC_ALIGN(32) RTCBuildPrimitive
 {
-  float lower_x, lower_y, lower_z; 
+  float lower_x, lower_y, lower_z;
   unsigned int geomID;
   float upper_x, upper_y, upper_z;
   unsigned int primID;
@@ -56,12 +56,12 @@ enum RTCBuildFlags
   RTC_BUILD_FLAG_NONE    = 0,
   RTC_BUILD_FLAG_DYNAMIC = (1 << 0),
 };
-  
+
 /* Input for builders */
 struct RTCBuildArguments
 {
   size_t byteSize;
-  
+
   enum RTCBuildQuality buildQuality;
   enum RTCBuildFlags buildFlags;
   unsigned int maxBranchingFactor;
@@ -71,12 +71,12 @@ struct RTCBuildArguments
   unsigned int maxLeafSize;
   float traversalCost;
   float intersectionCost;
-  
+
   RTCBVH bvh;
   struct RTCBuildPrimitive* primitives;
   size_t primitiveCount;
   size_t primitiveArrayCapacity;
-  
+
   RTCCreateNodeFunction createNode;
   RTCSetNodeChildrenFunction setNodeChildren;
   RTCSetNodeBoundsFunction setNodeBounds;
@@ -124,10 +124,9 @@ RTC_API void* rtcBuildBVH(const struct RTCBuildArguments* args);
 RTC_API void* rtcThreadLocalAlloc(RTCThreadLocalAllocator allocator, size_t bytes, size_t align);
 
 /* Retains the BVH (increments reference count). */
-RTC_API void rtcRetainBVH(RTCBVH bvh);
+//RTC_API void rtcRetainBVH(RTCBVH bvh);
 
 /* Releases the BVH (decrements reference count). */
-RTC_API void rtcReleaseBVH(RTCBVH bvh);
+//RTC_API void rtcReleaseBVH(RTCBVH bvh);
 
 RTC_NAMESPACE_END
-

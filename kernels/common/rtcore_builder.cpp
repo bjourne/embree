@@ -380,6 +380,7 @@ RTC_API void* rtcBuildBVH(const RTCBuildArguments* arguments)
     bvh->allocator.reset();
 
     /* switch between differnet builders based on quality level */
+    printf("build qual %d\n", arguments->buildQuality);
     if (arguments->buildQuality == RTC_BUILD_QUALITY_LOW)
         return rtcBuildBVHMorton(arguments);
     else if (arguments->buildQuality == RTC_BUILD_QUALITY_MEDIUM)
@@ -425,26 +426,26 @@ RTC_API void* rtcBuildBVH(const RTCBuildArguments* arguments)
       RTC_CATCH_END(bvh->device);
     }
 
-    RTC_API void rtcRetainBVH(RTCBVH hbvh)
-    {
-      BVH* bvh = (BVH*) hbvh;
-      Device* device = bvh ? bvh->device : nullptr;
-      RTC_CATCH_BEGIN;
-      RTC_TRACE(rtcRetainBVH);
-      RTC_VERIFY_HANDLE(hbvh);
-      bvh->refInc();
-      RTC_CATCH_END(device);
-    }
+    // RTC_API void rtcRetainBVH(RTCBVH hbvh)
+    // {
+    //   BVH* bvh = (BVH*) hbvh;
+    //   Device* device = bvh ? bvh->device : nullptr;
+    //   RTC_CATCH_BEGIN;
+    //   RTC_TRACE(rtcRetainBVH);
+    //   RTC_VERIFY_HANDLE(hbvh);
+    //   bvh->refInc();
+    //   RTC_CATCH_END(device);
+    // }
 
-    RTC_API void rtcReleaseBVH(RTCBVH hbvh)
-    {
-      BVH* bvh = (BVH*) hbvh;
-      Device* device = bvh ? bvh->device : nullptr;
-      RTC_CATCH_BEGIN;
-      RTC_TRACE(rtcReleaseBVH);
-      RTC_VERIFY_HANDLE(hbvh);
-      bvh->refDec();
-      RTC_CATCH_END(device);
-    }
+    // RTC_API void rtcReleaseBVH(RTCBVH hbvh)
+    // {
+    //   BVH* bvh = (BVH*) hbvh;
+    //   Device* device = bvh ? bvh->device : nullptr;
+    //   RTC_CATCH_BEGIN;
+    //   RTC_TRACE(rtcReleaseBVH);
+    //   RTC_VERIFY_HANDLE(hbvh);
+    //   bvh->refDec();
+    //   RTC_CATCH_END(device);
+    // }
 
 RTC_NAMESPACE_END

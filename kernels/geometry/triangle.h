@@ -74,7 +74,8 @@ public:
     }
 
     /* Returns the geometry IDs */
-    __forceinline       vuint<M>& geomID()       {
+    __forceinline vuint<M>& geomID()
+    {
         return geomIDs;
     }
     __forceinline const vuint<M>& geomID() const {
@@ -86,12 +87,13 @@ public:
     }
 
     /* Returns the primitive IDs */
-    __forceinline       vuint<M>& primID()
+    __forceinline vuint<M>& primID()
     {
         return primIDs;
     }
     __forceinline const vuint<M>& primID() const
-    { return primIDs;
+    {
+        return primIDs;
     }
     __forceinline unsigned int primID(const size_t i) const
     {
@@ -204,9 +206,10 @@ public:
     Vec3vf<M> v0;      // base vertex of the triangles
     Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
-private:
     vuint<M> geomIDs; // geometry IDs
     vuint<M> primIDs; // primitive IDs
+private:
+
 };
 
 template<int M>
