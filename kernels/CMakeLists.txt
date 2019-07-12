@@ -42,7 +42,6 @@ SET(EMBREE_LIBRARY_FILES
   subdiv/bspline_curve.cpp
 
   geometry/primitive4.cpp
-  geometry/instance_intersector.cpp
   builders/primrefgen.cpp
 
   bvh/bvh.cpp
@@ -81,7 +80,6 @@ ENDIF()
 MACRO(embree_files TARGET ISA)
 
   SET(${TARGET}
-    geometry/instance_intersector.cpp
     bvh/bvh_intersector1_bvh4.cpp)
 
   IF (${ISA} EQUAL ${ISA_LOWEST_AVX})

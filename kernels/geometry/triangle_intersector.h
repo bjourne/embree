@@ -31,13 +31,11 @@ struct TriangleMIntersector1Moeller
     {
         STAT3(normal.trav_prims,1,1,1);
 
-        //MoellerTrumboreHitM<M> hit;
         vbool<M> valid = true;
         const Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
         const vuint<M>& geomIDs = tri.geomID();
         const vuint<M>& primIDs = tri.primID();
 
-        // Inlined
         const Vec3vf<M> O = Vec3vf<M>(ray.org);
         const Vec3vf<M> D = Vec3vf<M>(ray.dir);
         const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
@@ -57,7 +55,7 @@ struct TriangleMIntersector1Moeller
             return;
 
         /* perform depth test */
-        const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
+        const vfloat<M> T = dot(Vec3vf<M>(tri_Ng), C) ^ sgnDen;
         valid &= (absDen*vfloat<M>(ray.tnear()) < T) & (T <= absDen*vfloat<M>(ray.tfar));
         if (likely(none(valid)))
             return;

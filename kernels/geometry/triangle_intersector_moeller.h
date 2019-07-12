@@ -19,7 +19,5 @@ struct MoellerTrumboreIntersector1
     {
     }
 };
-
-
 }
 }
