@@ -270,7 +270,6 @@ public:
 
         /*! Intersects a packet of 8 rays with the scene. */
         __forceinline void intersect8 (const void* valid, RTCRayHit8& ray, IntersectContext* context) {
-            //printf("accel.h::intersect8\n");
             assert(intersector8.intersect);
             intersector8.intersect(valid,this,ray,context);
         }

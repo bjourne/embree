@@ -122,38 +122,6 @@ void AccelN::occluded4(const void* valid,
     }
   }
 
-//   void AccelN::occluded16 (const void* valid, Accel::Intersectors* This_in, RTCRay16& ray, IntersectContext* context)
-//   {
-//     AccelN* This = (AccelN*)This_in->ptr;
-//     for (size_t i=0; i<This->accels.size(); i++) {
-//       if (This->accels[i]->isEmpty()) continue;
-//       This->accels[i]->intersectors.occluded16(valid,ray,context);
-// #if defined(__SSE2__) // FIXME: use higher ISA
-//       vbool4 valid0 = asBool(((vint4*)valid)[0]);
-//       vbool4 hit0   = ((vfloat4*)ray.tfar)[0] >= vfloat4(zero);
-//       vbool4 valid1 = asBool(((vint4*)valid)[1]);
-//       vbool4 hit1   = ((vfloat4*)ray.tfar)[1] >= vfloat4(zero);
-//       vbool4 valid2 = asBool(((vint4*)valid)[2]);
-//       vbool4 hit2   = ((vfloat4*)ray.tfar)[2] >= vfloat4(zero);
-//       vbool4 valid3 = asBool(((vint4*)valid)[3]);
-//       vbool4 hit3   = ((vfloat4*)ray.tfar)[3] >= vfloat4(zero);
-//       if (unlikely((none((valid0 & hit0) | (valid1 & hit1) | (valid2 & hit2) | (valid3 & hit3))))) break;
-// #endif
-//     }
-//   }
-
-// void AccelN::occludedN (Accel::Intersectors* This_in,
-//                         RTCRayN** ray,
-//                         const size_t N,
-//                         IntersectContext* context)
-// {
-//     AccelN* This = (AccelN*)This_in->ptr;
-//     size_t M = N;
-//     for (size_t i=0; i<This->accels.size(); i++)
-//         if (!This->accels[i]->isEmpty())
-//             This->accels[i]->intersectors.occludedN(ray,M,context);
-// }
-
   void AccelN::accels_print(size_t ident)
   {
     for (size_t i=0; i<accels.size(); i++)
@@ -204,8 +172,6 @@ void AccelN::accels_build ()
         intersectors.intersector1  = Intersector1(&intersect,&occluded,valid1 ? "AccelN::intersector1": nullptr);
         intersectors.intersector4  = Intersector4(&intersect4,&occluded4,valid4 ? "AccelN::intersector4" : nullptr);
         intersectors.intersector8  = Intersector8(&intersect8,&occluded8,valid8 ? "AccelN::intersector8" : nullptr);
-        //intersectors.intersector16 = Intersector16(&intersect16,&occluded16,valid16 ? "AccelN::intersector16": nullptr);
-        //intersectors.intersectorN  = IntersectorN(&intersectN,&occludedN,"AccelN::intersectorN");
 
         /*! calculate bounds */
         bounds = empty;

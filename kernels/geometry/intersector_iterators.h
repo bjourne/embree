@@ -27,7 +27,7 @@ struct ArrayIntersector1
               size_t& lazy_node)
     {
         for (size_t i=0; i<num; i++)
-            Intersector::intersect(pre,ray,context,prim[i]);
+            Intersector::intersect(ray,context,prim[i]);
     }
 
     template<int N, int Nx, bool robust>
@@ -42,7 +42,7 @@ struct ArrayIntersector1
              size_t& lazy_node)
     {
         for (size_t i=0; i<num; i++) {
-            if (Intersector::occluded(pre,ray,context,prim[i]))
+            if (Intersector::occluded(ray,context,prim[i]))
                 return true;
         }
         return false;

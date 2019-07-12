@@ -115,7 +115,7 @@ namespace embree
           /* all rays traced? */
           if (unlikely(curOctant == -1))
             break;
-        
+
           unsigned int* const rayIDs = &octants[curOctant][0];
           const unsigned int numOctantRays = raysInOctant[curOctant];
           assert(numOctantRays);
@@ -462,7 +462,7 @@ namespace embree
 
     template<int K, bool intersect>
     __noinline void RayStreamFilter::filterSOP(Scene* scene, const void* _rayN, size_t N, IntersectContext* context)
-    { 
+    {
       RayStreamSOP& rayN = *(RayStreamSOP*)_rayN;
 
       /* use fast path for coherent ray mode */
@@ -647,12 +647,12 @@ namespace embree
         filterSOA<VSIZEX, false>(scene, rayData, N, numPackets, stride, context);
     }
 
-    void RayStreamFilter::intersectSOP(Scene* scene, const RTCRayHitNp* _rayN, size_t N, IntersectContext* context) {
-      if (unlikely(context->isCoherent()))
-        filterSOP<VSIZEL, true>(scene, _rayN, N, context);
-      else
-        filterSOP<VSIZEX, true>(scene, _rayN, N, context);
-    }
+    // void RayStreamFilter::intersectSOP(Scene* scene, const RTCRayHitNp* _rayN, size_t N, IntersectContext* context) {
+    //   if (unlikely(context->isCoherent()))
+    //     filterSOP<VSIZEL, true>(scene, _rayN, N, context);
+    //   else
+    //     filterSOP<VSIZEX, true>(scene, _rayN, N, context);
+    // }
 
     void RayStreamFilter::occludedSOP(Scene* scene, const RTCRayNp* _rayN, size_t N, IntersectContext* context) {
       if (unlikely(context->isCoherent()))

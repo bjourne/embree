@@ -24,8 +24,7 @@ struct TriangleMIntersector1Moeller
 
     /*! Intersect a ray with the M triangles and updates the hit. */
     static __forceinline void
-    intersect(const MoellerTrumboreIntersector1<Mx>& pre,
-              RayHit& ray,
+    intersect(RayHit& ray,
               IntersectContext* context,
               const TriangleM<M>& tri)
     {
@@ -36,18 +35,18 @@ struct TriangleMIntersector1Moeller
         const vuint<M>& geomIDs = tri.geomID();
         const vuint<M>& primIDs = tri.primID();
 
-        const Vec3vf<M> O = Vec3vf<M>(ray.org);
-        const Vec3vf<M> D = Vec3vf<M>(ray.dir);
-        const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
-        const Vec3<vfloat<M>> R = cross(C, D);
+        Vec3<vfloat<M>> O = Vec3<vfloat<M>>(ray.org);
+        Vec3<vfloat<M>> D = Vec3<vfloat<M>>(ray.dir);
+        Vec3<vfloat<M>> C = Vec3<vfloat<M>>(tri.v0) - O;
+        Vec3<vfloat<M>> R = cross(C, D);
 
-        const vfloat<M> den = dot(Vec3vf<M>(tri_Ng), D);
-        const vfloat<M> absDen = abs(den);
-        const vfloat<M> sgnDen = signmsk(den);
+        vfloat<M> den = dot(tri_Ng, D);
+        vfloat<M> absDen = abs(den);
+        vfloat<M> sgnDen = signmsk(den);
 
         /* perform edge tests */
-        const vfloat<M> U = dot(R, Vec3vf<M>(tri.e2)) ^ sgnDen;
-        const vfloat<M> V = dot(R, Vec3vf<M>(tri.e1)) ^ sgnDen;
+        const vfloat<M> U = dot(R, tri.e2) ^ sgnDen;
+        const vfloat<M> V = dot(R, tri.e1) ^ sgnDen;
 
         // No backface culling
         valid &= (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
@@ -94,7 +93,6 @@ struct TriangleMIntersector1Moeller
                 continue;
             }
 #endif
-
             break;
         }
 #endif
@@ -114,8 +112,7 @@ struct TriangleMIntersector1Moeller
 
     /*! Test if the ray is occluded by one of M triangles. */
     static __forceinline bool
-    occluded(const MoellerTrumboreIntersector1<Mx>& pre,
-             Ray& ray,
+    occluded(Ray& ray,
              IntersectContext* context,
              const TriangleM<M>& tri)
     {

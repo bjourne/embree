@@ -218,13 +218,6 @@ struct RTCHitNp
   unsigned int* instID[RTC_MAX_INSTANCE_LEVEL_COUNT];
 };
 
-/* Combined ray/hit structure for a packet/stream of N rays in pointer SOA layout */
-struct RTCRayHitNp
-{
-  struct RTCRayNp ray;
-  struct RTCHitNp hit;
-};
-
 struct RTCRayN;
 struct RTCHitN;
 struct RTCRayHitN;
@@ -388,4 +381,3 @@ RTC_FORCEINLINE RTCRayHit rtcGetRayHitFromRayHitN(RTCRayHitN* rayhitN, unsigned 
 #endif
 
 RTC_NAMESPACE_END
-

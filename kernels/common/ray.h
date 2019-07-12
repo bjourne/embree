@@ -303,52 +303,56 @@ struct RayHitK : RayK<K>
 
   };
 
-  template<>
-  struct RayHitK<1> : RayK<1>
-  {
+template<>
+struct RayHitK<1> : RayK<1>
+{
     /* Default construction does nothing */
     __forceinline RayHitK() {}
 
     /* Constructs a ray from origin, direction, and ray segment. Near
      *  has to be smaller than far */
-    __forceinline RayHitK(const Vec3fa& org, const Vec3fa& dir, float tnear = zero, float tfar = inf, float time = zero, int mask = -1, int id = 0, int flags = 0)
-      : RayK<1>(org, dir, tnear, tfar, time, mask, id, flags),
+    __forceinline RayHitK(const Vec3fa& org,
+                          const Vec3fa& dir,
+                          float tnear = zero, float tfar = inf,
+                          float time = zero, int mask = -1,
+                          int id = 0, int flags = 0)
+        : RayK<1>(org, dir, tnear, tfar, time, mask, id, flags),
         geomID(RTC_INVALID_GEOMETRY_ID) {}
 
     __forceinline RayHitK(const RayK<1>& ray)
-      : RayK<1>(ray),
+        : RayK<1>(ray),
         geomID(RTC_INVALID_GEOMETRY_ID) {}
 
     __forceinline RayHitK<1>& operator =(const RayK<1>& ray)
     {
-      org    = ray.org;
-      dir    = ray.dir;
-      tfar   = ray.tfar;
-      mask   = ray.mask;
-      id     = ray.id;
-      flags  = ray.flags;
+        org    = ray.org;
+        dir    = ray.dir;
+        tfar   = ray.tfar;
+        mask   = ray.mask;
+        id     = ray.id;
+        flags  = ray.flags;
 
-      geomID = RTC_INVALID_GEOMETRY_ID;
+        geomID = RTC_INVALID_GEOMETRY_ID;
 
-      return *this;
+        return *this;
     }
 
     /* Calculates if the hit is valid */
     __forceinline void verifyHit() const
     {
-      if (geomID == RTC_INVALID_GEOMETRY_ID) return;
-      const bool vt = (abs(tfar) <= FLT_LARGE) || (tfar == float(neg_inf));
-      const bool vu = (abs(u) <= FLT_LARGE);
-      const bool vv = (abs(u) <= FLT_LARGE);
-      const bool vnx = abs(Ng.x) <= FLT_LARGE;
-      const bool vny = abs(Ng.y) <= FLT_LARGE;
-      const bool vnz = abs(Ng.z) <= FLT_LARGE;
-      if (!vt) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid t");
-      if (!vu) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid u");
-      if (!vv) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid v");
-      if (!vnx) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid Ng.x");
-      if (!vny) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid Ng.y");
-      if (!vnz) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid Ng.z");
+        if (geomID == RTC_INVALID_GEOMETRY_ID) return;
+        const bool vt = (abs(tfar) <= FLT_LARGE) || (tfar == float(neg_inf));
+        const bool vu = (abs(u) <= FLT_LARGE);
+        const bool vv = (abs(u) <= FLT_LARGE);
+        const bool vnx = abs(Ng.x) <= FLT_LARGE;
+        const bool vny = abs(Ng.y) <= FLT_LARGE;
+        const bool vnz = abs(Ng.z) <= FLT_LARGE;
+        if (!vt) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid t");
+        if (!vu) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid u");
+        if (!vv) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid v");
+        if (!vnx) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid Ng.x");
+        if (!vny) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid Ng.y");
+        if (!vnz) throw_RTCError(RTC_ERROR_UNKNOWN, "invalid Ng.z");
     }
 
 #if defined(__AVX512F__)
