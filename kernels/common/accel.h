@@ -185,40 +185,6 @@ public:
         const char* name;
     };
 
-    // struct Intersector16
-    // {
-    //     Intersector16 (ErrorFunc error = nullptr)
-    //         : intersect((IntersectFunc16)error), occluded((OccludedFunc16)error), name(nullptr) {}
-
-    //     Intersector16 (IntersectFunc16 intersect, OccludedFunc16 occluded, const char* name)
-    //         : intersect(intersect), occluded(occluded), name(name) {}
-
-    //     operator bool() const { return name; }
-
-    // public:
-    //     static const char* type;
-    //     IntersectFunc16 intersect;
-    //     OccludedFunc16 occluded;
-    //     const char* name;
-    // };
-
-    // struct IntersectorN
-    // {
-    //     IntersectorN (ErrorFunc error = nullptr)
-    //         : intersect((IntersectFuncN)error), occluded((OccludedFuncN)error), name(nullptr) {}
-
-    //     IntersectorN (IntersectFuncN intersect, OccludedFuncN occluded, const char* name)
-    //         : intersect(intersect), occluded(occluded), name(name) {}
-
-    //     operator bool() const { return name; }
-
-    // public:
-    //     static const char* type;
-    //     IntersectFuncN intersect;
-    //     OccludedFuncN occluded;
-    //     const char* name;
-    // };
-
     struct Intersectors
     {
         Intersectors()

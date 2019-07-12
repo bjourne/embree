@@ -11,14 +11,6 @@ public:
     BVH4Factory(int bfeatures, int ifeatures);
 
 public:
-    // Accel* BVH4OBBVirtualCurve4i(Scene* scene);
-    // Accel* BVH4OBBVirtualCurve4v(Scene* scene);
-    // Accel* BVH4OBBVirtualCurve8i(Scene* scene);
-    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector4i);
-    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8i);
-    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector4v);
-    // DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8v);
-
     Accel* BVH4Triangle4   (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH4Triangle4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::ROBUST);
     Accel* BVH4Triangle4i  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
@@ -39,15 +31,9 @@ public:
     void selectIntersectors(int features);
 
 private:
-    // Accel::Intersectors BVH4OBBVirtualCurveIntersectors(BVH4* bvh, VirtualCurveIntersector* leafIntersector);
-
     Accel::Intersectors BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH4Triangle4vIntersectors(BVH4* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH4Triangle4iIntersectors(BVH4* bvh, IntersectVariant ivariant);
-    Accel::Intersectors BVH4Quad4vIntersectors(BVH4* bvh, IntersectVariant ivariant);
-    Accel::Intersectors BVH4Quad4iIntersectors(BVH4* bvh, IntersectVariant ivariant);
-    Accel::Intersectors QBVH4Quad4iIntersectors(BVH4* bvh);
-    Accel::Intersectors QBVH4Triangle4iIntersectors(BVH4* bvh);
     Accel::Intersectors BVH4SubdivPatch1Intersectors(BVH4* bvh);
     Accel::Intersectors BVH4GridIntersectors(BVH4* bvh, IntersectVariant ivariant);
 
