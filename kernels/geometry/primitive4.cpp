@@ -3,7 +3,7 @@
 #include "triangle.h"
 #include "trianglev.h"
 //#include "trianglev_mb.h"
-#include "trianglei.h"
+//#include "trianglei.h"
 #include "quadv.h"
 #include "quadi.h"
 #include "subdivpatch1.h"
@@ -181,27 +181,27 @@ const char* Triangle4::Type::name () const {
     return sizeof(Triangle4v);
   }
 
-  /********************** Triangle4i **************************/
+  // /********************** Triangle4i **************************/
 
-  template<>
-  const char* Triangle4i::Type::name () const {
-    return "triangle4i";
-  }
+  // template<>
+  // const char* Triangle4i::Type::name () const {
+  //   return "triangle4i";
+  // }
 
-  template<>
-  size_t Triangle4i::Type::sizeActive(const char* This) const {
-    return ((Triangle4i*)This)->size();
-  }
+  // template<>
+  // size_t Triangle4i::Type::sizeActive(const char* This) const {
+  //   return ((Triangle4i*)This)->size();
+  // }
 
-  template<>
-  size_t Triangle4i::Type::sizeTotal(const char* This) const {
-    return 4;
-  }
+  // template<>
+  // size_t Triangle4i::Type::sizeTotal(const char* This) const {
+  //   return 4;
+  // }
 
-  template<>
-  size_t Triangle4i::Type::getBytes(const char* This) const {
-    return sizeof(Triangle4i);
-  }
+  // template<>
+  // size_t Triangle4i::Type::getBytes(const char* This) const {
+  //   return sizeof(Triangle4i);
+  // }
 
   /********************** Quad4v **************************/
 

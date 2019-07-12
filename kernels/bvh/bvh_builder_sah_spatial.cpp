@@ -23,8 +23,8 @@
 #include "../geometry/linei.h"
 #include "../geometry/triangle.h"
 #include "../geometry/trianglev.h"
-#include "../geometry/trianglev_mb.h"
-#include "../geometry/trianglei.h"
+//#include "../geometry/trianglev_mb.h"
+//#include "../geometry/trianglei.h"
 #include "../geometry/quadv.h"
 #include "../geometry/quadi.h"
 #include "../geometry/object.h"
@@ -154,15 +154,15 @@ namespace embree
           const float inv_lattice_size_per_dim = 1.0f / (float)LATTICE_SIZE_PER_DIM;
           const Vec3fa min_diag_threshold = diag * (Vec3fa)(inv_lattice_size_per_dim * 0.5f);
 
-          struct PreSplitProbEntry{ 
-            unsigned int index; float prob; 
+          struct PreSplitProbEntry{
+            unsigned int index; float prob;
             __forceinline bool operator<(PreSplitProbEntry const &b) const { return prob > b.prob; }
           };
 
           avector<PreSplitProbEntry> presplit_prio;
           presplit_prio.resize(pinfo.size());
 
-          /* =========================================== */                   
+          /* =========================================== */
           /* == compute split probability per primref == */
           /* =========================================== */
 
@@ -189,7 +189,7 @@ namespace embree
             presplit_prio[i].prob  = prob;
           }
 
-          /* ============================================================ */                   
+          /* ============================================================ */
           /* == sort split probabilities to ensure being deterministic == */
           /* ============================================================ */
 
@@ -198,7 +198,7 @@ namespace embree
           std::atomic<size_t> ext_elements;
           ext_elements.store(pinfo.size());
 
-          /* =================================== */                   
+          /* =================================== */
           /* == split selected primrefs once  == */
           /* =================================== */
 
@@ -235,13 +235,13 @@ namespace embree
                 prims0[ID     ] = PrimRef(  left,lower.u,upper.u);
                 prims0[rightID] = PrimRef( right,lower.u,upper.u);
               }
-            }            
+            }
           }
 
           pinfo.end = ext_elements.load();
           assert(numSplitPrimitives >= pinfo.end);
 
-          /* ================================ */                   
+          /* ================================ */
           /* == recompute centroid bounds  == */
           /* ================================ */
 
@@ -284,7 +284,7 @@ namespace embree
 
     Builder* BVH4Triangle4SceneBuilderFastSpatialSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderFastSpatialSAH<4,TriangleMesh,Triangle4,TriangleSplitterFactory>((BVH4*)bvh,scene,4,1.0f,4,inf,mode); }
     Builder* BVH4Triangle4vSceneBuilderFastSpatialSAH (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderFastSpatialSAH<4,TriangleMesh,Triangle4v,TriangleSplitterFactory>((BVH4*)bvh,scene,4,1.0f,4,inf,mode); }
-    Builder* BVH4Triangle4iSceneBuilderFastSpatialSAH (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderFastSpatialSAH<4,TriangleMesh,Triangle4i,TriangleSplitterFactory>((BVH4*)bvh,scene,4,1.0f,4,inf,mode); }
+//Builder* BVH4Triangle4iSceneBuilderFastSpatialSAH (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderFastSpatialSAH<4,TriangleMesh,Triangle4i,TriangleSplitterFactory>((BVH4*)bvh,scene,4,1.0f,4,inf,mode); }
 
 #if defined(__AVX__)
     Builder* BVH8Triangle4SceneBuilderFastSpatialSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderFastSpatialSAH<8,TriangleMesh,Triangle4,TriangleSplitterFactory>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
