@@ -22,18 +22,102 @@ struct TriangleMIntersector1Moeller
     typedef TriangleM<M> Primitive;
     typedef MoellerTrumboreIntersector1<Mx> Precalculations;
 
+    static __forceinline void
+    intersect_sf01(RayHit& ray,
+                   IntersectContext* context,
+                   const TriangleM<M>& tri)
+    {
+        vbool<M> valid = true;
+        Vec3<vfloat<M>> O = Vec3<vfloat<M>>(ray.org);
+        Vec3<vfloat<M>> D = Vec3<vfloat<M>>(ray.dir);
+
+        Vec3<vfloat<M>> v1 = tri.v0 - tri.e1;
+        Vec3<vfloat<M>> v2 = tri.e2 + tri.v0;
+
+        Vec3<vfloat<M>> v0o = tri.v0 - O;
+        Vec3<vfloat<M>> v1o = v1 - O;
+        Vec3<vfloat<M>> v2o = v2 - O;
+
+        vfloat<M> w2 = dot(D, cross(v1o, v0o));
+        vfloat<M> w0 = dot(D, cross(v2o, v1o));
+        vbool<M> s2 = w2 >= vfloat<M>(zero);
+        vbool<M> s0 = w0 >= vfloat<M>(zero);
+
+        valid &= s0 == s2;
+        if (likely(none(valid))) {
+            return;
+        }
+        vfloat<M> w1 = dot(D, cross(v0o, v2o));
+        vbool<M> s1 = w1 >= vfloat<M>(zero);
+        valid &= s2 == s1;
+        if (likely(none(valid))) {
+            return;
+        }
+
+        Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
+        vfloat<M> den = dot(tri_Ng, D);
+        vfloat<M> T = dot(tri_Ng, v0o) * rcp(den);
+        valid &= (vfloat<M>(ray.tnear()) < T) & (T <= vfloat<M>(ray.tfar));
+        if (likely(none(valid)))
+            return;
+
+        // Epilog
+        Scene* scene = context->scene;
+        vbool<Mx> valid2 = valid;
+        if (Mx > M)
+            valid2 &= (1 << M) - 1;
+
+        vfloat<M> vt = T;
+        vfloat<M> vu = w1 * rcp(w0 + w1 + w2);
+        vfloat<M> vv = w2 * rcp(w0 + w1 + w2);
+
+        size_t i = select_min(valid2, vt);
+        unsigned int geomID = tri.geomIDs[i];
+        /* intersection filter test */
+#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+        goto entry;
+        while (true)
+        {
+            if (unlikely(none(valid2)))
+                return;
+            i = select_min(valid2, vt);
+
+            geomID = tri.geomIDs[i];
+        entry:
+            Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+
+#if defined(EMBREE_RAY_MASK)
+            /* goto next hit if mask test fails */
+            if ((geometry->mask & ray.mask) == 0) {
+                clear(valid2,i);
+                continue;
+            }
+#endif
+            break;
+        }
+#endif
+        /* update hit information */
+        ray.tfar = vt[i];
+        ray.Ng.x = tri_Ng.x[i];
+        ray.Ng.y = tri_Ng.y[i];
+        ray.Ng.z = tri_Ng.z[i];
+
+        ray.u = vu[i];
+        ray.v = vv[i];
+
+        ray.primID = tri.primIDs[i];
+        ray.geomID = geomID;
+        ray.instID = context->instID;
+    }
+
     /*! Intersect a ray with the M triangles and updates the hit. */
     static __forceinline void
-    intersect(RayHit& ray,
-              IntersectContext* context,
-              const TriangleM<M>& tri)
+    intersect_orig(RayHit& ray,
+                   IntersectContext* context,
+                   const TriangleM<M>& tri)
     {
-        STAT3(normal.trav_prims,1,1,1);
-
         vbool<M> valid = true;
         Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
-        //vuint<M>& geomIDs = tri.geomID();
-        //vuint<M>& primIDs = tri.primIDs;
 
         Vec3<vfloat<M>> O = Vec3<vfloat<M>>(ray.org);
         Vec3<vfloat<M>> D = Vec3<vfloat<M>>(ray.dir);
@@ -108,6 +192,15 @@ struct TriangleMIntersector1Moeller
         ray.primID = tri.primIDs[i];
         ray.geomID = geomID;
         ray.instID = context->instID;
+    }
+
+    static __forceinline void
+    intersect(RayHit& ray,
+              IntersectContext* context,
+              const TriangleM<M>& tri)
+    {
+        STAT3(normal.trav_prims,1,1,1);
+        intersect_sf01(ray, context, tri);
     }
 
     /*! Test if the ray is occluded by one of M triangles. */

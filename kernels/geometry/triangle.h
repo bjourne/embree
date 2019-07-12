@@ -50,7 +50,7 @@ public:
                             const Vec3vf<M>& v2,
                             const vuint<M>& geomIDs,
                             const vuint<M>& primIDs)
-      : v0(v0), e1(v0-v1), e2(v2-v0),
+      : v0(v0), e1(v0 - v1), e2(v2 - v0),
         geomIDs(geomIDs), primIDs(primIDs)
     {
     }
@@ -204,6 +204,7 @@ public:
 
 public:
     Vec3vf<M> v0;      // base vertex of the triangles
+    // Are these comments right?
     Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
     vuint<M> geomIDs; // geometry IDs

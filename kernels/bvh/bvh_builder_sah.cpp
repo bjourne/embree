@@ -6,8 +6,6 @@
 #include "../geometry/linei.h"
 #include "../geometry/triangle.h"
 #include "../geometry/trianglev.h"
-//#include "../geometry/trianglev_mb.h"
-//#include "../geometry/trianglei.h"
 #include "../geometry/quadv.h"
 #include "../geometry/quadi.h"
 #include "../geometry/object.h"
@@ -552,26 +550,21 @@ namespace embree
 
     Builder* BVH8Triangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<8,TriangleMesh,Triangle4>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
     Builder* BVH8Triangle4vSceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<8,TriangleMesh,Triangle4v>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
-//Builder* BVH8Triangle4iSceneBuilderSAH     (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<8,TriangleMesh,Triangle4i>((BVH8*)bvh,scene,4,1.0f,4,inf,mode,true); }
-//Builder* BVH8QuantizedTriangle4iSceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAHQuantized<8,TriangleMesh,Triangle4i>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
-    Builder* BVH8QuantizedTriangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAHQuantized<8,TriangleMesh,Triangle4>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
 
 #endif
 #endif
 
-#if defined(EMBREE_GEOMETRY_INSTANCE)
-    Builder* BVH4InstanceSceneBuilderSAH (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<4,Instance,InstancePrimitive>((BVH4*)bvh,scene,4,1.0f,1,1,mode); }
-#if defined(__AVX__)
-    Builder* BVH8InstanceSceneBuilderSAH (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<8,Instance,InstancePrimitive>((BVH8*)bvh,scene,8,1.0f,1,1,mode); }
-#endif
-#endif
+// #if defined(EMBREE_GEOMETRY_INSTANCE)
+//     Builder* BVH4InstanceSceneBuilderSAH (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<4,Instance,InstancePrimitive>((BVH4*)bvh,scene,4,1.0f,1,1,mode); }
+// #if defined(__AVX__)
+//     Builder* BVH8InstanceSceneBuilderSAH (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<8,Instance,InstancePrimitive>((BVH8*)bvh,scene,8,1.0f,1,1,mode); }
+// #endif
+// #endif
 
 #if defined(EMBREE_GEOMETRY_GRID)
-    Builder* BVH4GridMeshBuilderSAH  (void* bvh, GridMesh* mesh, size_t mode) { return new BVHNBuilderSAHGrid<4>((BVH4*)bvh,mesh,4,1.0f,4,4,mode); }
     Builder* BVH4GridSceneBuilderSAH (void* bvh, Scene* scene, size_t mode)   { return new BVHNBuilderSAHGrid<4>((BVH4*)bvh,scene,4,1.0f,4,4,mode); } // FIXME: check whether cost factors are correct
 
 #if defined(__AVX__)
-    Builder* BVH8GridMeshBuilderSAH  (void* bvh, GridMesh* mesh, size_t mode) { return new BVHNBuilderSAHGrid<8>((BVH8*)bvh,mesh,8,1.0f,8,8,mode); }
     Builder* BVH8GridSceneBuilderSAH (void* bvh, Scene* scene, size_t mode)   { return new BVHNBuilderSAHGrid<8>((BVH8*)bvh,scene,8,1.0f,8,8,mode); } // FIXME: check whether cost factors are correct
 #endif
 #endif

@@ -5,8 +5,8 @@
 #include "../geometry/triangle.h"
 #include "../geometry/trianglev.h"
 //#include "../geometry/trianglei.h"
-#include "../geometry/quadv.h"
-#include "../geometry/quadi.h"
+// #include "../geometry/quadv.h"
+// #include "../geometry/quadi.h"
 #include "../geometry/subdivpatch1.h"
 #include "../geometry/object.h"
 #include "../geometry/instance.h"
@@ -17,76 +17,40 @@ namespace embree
 {
 
 DECLARE_SYMBOL2(Accel::Intersector1,BVH4Triangle4Intersector1Moeller);
-DECLARE_SYMBOL2(Accel::Intersector1,BVH4GridIntersector1Moeller);
 
 DECLARE_ISA_FUNCTION(Builder*,BVH4BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
-DECLARE_ISA_FUNCTION(Builder*,BVH4BuilderTwoLevelQuadMeshSAH,void* COMMA Scene* COMMA const createQuadMeshAccelTy);
 
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4iSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4QuantizedTriangle4iSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
 
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderFastSpatialSAH,void* COMMA Scene* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4vSceneBuilderFastSpatialSAH,void* COMMA Scene* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4iSceneBuilderFastSpatialSAH,void* COMMA Scene* COMMA size_t);
-
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Quad4vSceneBuilderFastSpatialSAH,void* COMMA Scene* COMMA size_t);
 
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4vMeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4iMeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
-DECLARE_ISA_FUNCTION(Builder*,BVH4GridMeshBuilderSAH,void* COMMA GridMesh* COMMA size_t);
-
-
-DECLARE_ISA_FUNCTION(Builder*,BVH4InstanceSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
-
-DECLARE_ISA_FUNCTION(Builder*,BVH4GridSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
-
-DECLARE_ISA_FUNCTION(Builder*,BVH4SubdivPatch1BuilderSAH,void* COMMA Scene* COMMA size_t);
 
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4vMeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4iMeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
 
-// DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshBuilderMortonGeneral,void* COMMA TriangleMesh* COMMA size_t);
-// DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4vMeshBuilderMortonGeneral,void* COMMA TriangleMesh* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4iMeshBuilderMortonGeneral,void* COMMA TriangleMesh* COMMA size_t);
-
-  BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
-  {
+BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
+{
     selectBuilders(bfeatures);
     selectIntersectors(ifeatures);
-  }
+}
 
 void BVH4Factory::selectBuilders(int features)
 {
     IF_ENABLED_TRIS (SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4BuilderTwoLevelTriangleMeshSAH));
-    IF_ENABLED_QUADS (SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4BuilderTwoLevelQuadMeshSAH));
-
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4SceneBuilderSAH));
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4SceneBuilderFastSpatialSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4vSceneBuilderFastSpatialSAH));
-    //IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4iSceneBuilderFastSpatialSAH));
-
-    //IF_ENABLED_QUADS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Quad4vSceneBuilderFastSpatialSAH));
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshBuilderSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4vMeshBuilderSAH));
-    IF_ENABLED_GRIDS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4GridMeshBuilderSAH));
-
-
-    IF_ENABLED_INSTANCE(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4InstanceSceneBuilderSAH));
-
-    IF_ENABLED_GRIDS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4GridSceneBuilderSAH));
-
-    IF_ENABLED_SUBDIV(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4SubdivPatch1BuilderSAH));
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshRefitSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4vMeshRefitSAH));
 
-    // IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshBuilderMortonGeneral));
-    // IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4vMeshBuilderMortonGeneral));
 }
 
 void BVH4Factory::selectIntersectors(int features)
@@ -128,26 +92,12 @@ BVH4Factory::BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant)
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
     accel = new BVH4(Triangle4::type,mesh->scene);
     switch (mesh->quality) {
-        //case RTC_BUILD_QUALITY_LOW:    builder = factory->BVH4Triangle4MeshBuilderMortonGeneral(accel,mesh,0); break;
     case RTC_BUILD_QUALITY_MEDIUM:
     case RTC_BUILD_QUALITY_HIGH:   builder = factory->BVH4Triangle4MeshBuilderSAH(accel,mesh,0); break;
     case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH4Triangle4MeshRefitSAH(accel,mesh,0); break;
     default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
     }
   }
-
-  // void BVH4Factory::createTriangleMeshTriangle4v(TriangleMesh* mesh, AccelData*& accel, Builder*& builder)
-  // {
-  //   BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
-  //   accel = new BVH4(Triangle4v::type,mesh->scene);
-  //   switch (mesh->quality) {
-  //   case RTC_BUILD_QUALITY_LOW:    builder = factory->BVH4Triangle4vMeshBuilderMortonGeneral(accel,mesh,0); break;
-  //   case RTC_BUILD_QUALITY_MEDIUM:
-  //   case RTC_BUILD_QUALITY_HIGH:   builder = factory->BVH4Triangle4vMeshBuilderSAH(accel,mesh,0); break;
-  //   case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH4Triangle4vMeshRefitSAH(accel,mesh,0); break;
-  //   default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
-  //   }
-  // }
 
 Accel* BVH4Factory::BVH4Triangle4(Scene* scene,
                                   BuildVariant bvariant,
@@ -187,37 +137,5 @@ Accel* BVH4Factory::BVH4Triangle4(Scene* scene,
 
     return new AccelInstance(accel,builder,intersectors);
 }
-
-// Accel::Intersectors
-// BVH4Factory::BVH4GridIntersectors(BVH4* bvh,
-//                                   IntersectVariant ivariant)
-// {
-//     printf("BVH4Factory::BVH4GridIntersectors\n");
-//     Accel::Intersectors intersectors;
-//     intersectors.ptr = bvh;
-//     if (ivariant == IntersectVariant::FAST)
-//     {
-//         intersectors.intersector1  = BVH4GridIntersector1Moeller();
-//     }
-//     else /* if (ivariant == IntersectVariant::ROBUST) */
-//     {
-//         intersectors.intersector1  = BVH4GridIntersector1Pluecker();
-//     }
-//     return intersectors;
-// }
-
-// Accel* BVH4Factory::BVH4Grid(Scene* scene, BuildVariant bvariant, IntersectVariant ivariant)
-// {
-//     BVH4* accel = new BVH4(SubGridQBVH4::type,scene);
-//     Accel::Intersectors intersectors = BVH4GridIntersectors(accel,ivariant);
-
-//     Builder* builder = nullptr;
-//     if (scene->device->object_builder == "default") {
-//       builder = BVH4GridSceneBuilderSAH(accel,scene,0);
-//     }
-//     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->grid_builder+" for BVH4<GridMesh>");
-
-//     return new AccelInstance(accel,builder,intersectors);
-// }
 
 }
