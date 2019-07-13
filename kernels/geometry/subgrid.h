@@ -83,9 +83,9 @@ namespace embree
 
           /* deltaX => vtx02, vtx12 */
           const size_t deltaX  = invalid3x3X() ? 0 : 1;
-          const size_t vtxID02 = vtxID01 + deltaX;       
+          const size_t vtxID02 = vtxID01 + deltaX;
           const vfloat4 vtx02  = vfloat4::loadu(mesh->vertexPtr(vtxID02));
-          const size_t vtxID12 = vtxID11 + deltaX;       
+          const size_t vtxID12 = vtxID11 + deltaX;
           const vfloat4 vtx12  = vfloat4::loadu(mesh->vertexPtr(vtxID12));
 
           /* deltaY => vtx20, vtx21 */
@@ -96,13 +96,13 @@ namespace embree
           const vfloat4 vtx21  = vfloat4::loadu(mesh->vertexPtr(vtxID21));
 
           /* deltaX/deltaY => vtx22 */
-          const size_t vtxID22 = vtxID11 + deltaX + deltaY;       
+          const size_t vtxID22 = vtxID11 + deltaX + deltaY;
           const vfloat4 vtx22  = vfloat4::loadu(mesh->vertexPtr(vtxID22));
 
           transpose(vtx00,vtx01,vtx11,vtx10,p0.x,p0.y,p0.z);
           transpose(vtx01,vtx02,vtx12,vtx11,p1.x,p1.y,p1.z);
           transpose(vtx11,vtx12,vtx22,vtx21,p2.x,p2.y,p2.z);
-          transpose(vtx10,vtx11,vtx21,vtx20,p3.x,p3.y,p3.z);                    
+          transpose(vtx10,vtx11,vtx21,vtx20,p3.x,p3.y,p3.z);
         }
 
         template<typename T>
@@ -120,7 +120,7 @@ namespace embree
                                     Vec3vf4& p3,
                                     const GridMesh* const mesh,
                                     const GridMesh::Grid &g,
-                                    const size_t itime, 
+                                    const size_t itime,
                                     const float ftime) const
         {
           /* first quad always valid */
@@ -135,9 +135,9 @@ namespace embree
 
           /* deltaX => vtx02, vtx12 */
           const size_t deltaX  = invalid3x3X() ? 0 : 1;
-          const size_t vtxID02 = vtxID01 + deltaX;       
+          const size_t vtxID02 = vtxID01 + deltaX;
           const vfloat4 vtx02  = getVertexMB<vfloat4>(mesh,vtxID02,itime,ftime);
-          const size_t vtxID12 = vtxID11 + deltaX;       
+          const size_t vtxID12 = vtxID11 + deltaX;
           const vfloat4 vtx12  = getVertexMB<vfloat4>(mesh,vtxID12,itime,ftime);
 
           /* deltaY => vtx20, vtx21 */
@@ -148,13 +148,13 @@ namespace embree
           const vfloat4 vtx21  = getVertexMB<vfloat4>(mesh,vtxID21,itime,ftime);
 
           /* deltaX/deltaY => vtx22 */
-          const size_t vtxID22 = vtxID11 + deltaX + deltaY;       
+          const size_t vtxID22 = vtxID11 + deltaX + deltaY;
           const vfloat4 vtx22  = getVertexMB<vfloat4>(mesh,vtxID22,itime,ftime);
 
           transpose(vtx00,vtx01,vtx11,vtx10,p0.x,p0.y,p0.z);
           transpose(vtx01,vtx02,vtx12,vtx11,p1.x,p1.y,p1.z);
           transpose(vtx11,vtx12,vtx22,vtx21,p2.x,p2.y,p2.z);
-          transpose(vtx10,vtx11,vtx21,vtx20,p3.x,p3.y,p3.z);                    
+          transpose(vtx10,vtx11,vtx21,vtx20,p3.x,p3.y,p3.z);
         }
 
 
@@ -177,7 +177,7 @@ namespace embree
                                     Vec3vf4& p2,
                                     Vec3vf4& p3,
                                     const Scene *const scene,
-                                    const size_t itime, 
+                                    const size_t itime,
                                     const float ftime) const
         {
           const GridMesh* const mesh = scene->get<GridMesh>(geomID());
@@ -203,9 +203,9 @@ namespace embree
 
           /* deltaX => vtx02, vtx12 */
           const size_t deltaX  = invalid3x3X() ? 0 : 1;
-          const size_t vtxID02 = vtxID01 + deltaX;       
+          const size_t vtxID02 = vtxID01 + deltaX;
           const Vec3fa vtx02  = Vec3fa::loadu(mesh->vertexPtr(vtxID02));
-          const size_t vtxID12 = vtxID11 + deltaX;       
+          const size_t vtxID12 = vtxID11 + deltaX;
           const Vec3fa vtx12  = Vec3fa::loadu(mesh->vertexPtr(vtxID12));
 
           /* deltaY => vtx20, vtx21 */
@@ -216,7 +216,7 @@ namespace embree
           const Vec3fa vtx21  = Vec3fa::loadu(mesh->vertexPtr(vtxID21));
 
           /* deltaX/deltaY => vtx22 */
-          const size_t vtxID22 = vtxID11 + deltaX + deltaY;       
+          const size_t vtxID22 = vtxID11 + deltaX + deltaY;
           const Vec3fa vtx22  = Vec3fa::loadu(mesh->vertexPtr(vtxID22));
 
           vtx[ 0] = vtx00; vtx[ 1] = vtx01; vtx[ 2] = vtx11; vtx[ 3] = vtx10;
@@ -243,9 +243,9 @@ namespace embree
 
           /* deltaX => vtx02, vtx12 */
           const size_t deltaX  = invalid3x3X() ? 0 : 1;
-          const size_t vtxID02 = vtxID01 + deltaX;       
+          const size_t vtxID02 = vtxID01 + deltaX;
           const vfloat4 vtx02  = getVertexMB<vfloat4>(mesh,vtxID02,itime,ftime);
-          const size_t vtxID12 = vtxID11 + deltaX;       
+          const size_t vtxID12 = vtxID11 + deltaX;
           const vfloat4 vtx12  = getVertexMB<vfloat4>(mesh,vtxID12,itime,ftime);
 
           /* deltaY => vtx20, vtx21 */
@@ -256,15 +256,15 @@ namespace embree
           const vfloat4 vtx21  = getVertexMB<vfloat4>(mesh,vtxID21,itime,ftime);
 
           /* deltaX/deltaY => vtx22 */
-          const size_t vtxID22 = vtxID11 + deltaX + deltaY;       
+          const size_t vtxID22 = vtxID11 + deltaX + deltaY;
           const vfloat4 vtx22  = getVertexMB<vfloat4>(mesh,vtxID22,itime,ftime);
 
           vtx[ 0] = vtx00; vtx[ 1] = vtx01; vtx[ 2] = vtx11; vtx[ 3] = vtx10;
           vtx[ 4] = vtx01; vtx[ 5] = vtx02; vtx[ 6] = vtx12; vtx[ 7] = vtx11;
           vtx[ 8] = vtx10; vtx[ 9] = vtx11; vtx[10] = vtx21; vtx[11] = vtx20;
           vtx[12] = vtx11; vtx[13] = vtx12; vtx[14] = vtx22; vtx[15] = vtx21;
-        }        
-          
+        }
+
 
         /* Calculate the bounds of the subgrid */
         __forceinline const BBox3fa bounds(const Scene *const scene, const size_t itime=0) const
@@ -315,10 +315,10 @@ namespace embree
         unsigned short x;
         unsigned short y;
         unsigned int primID;
-        
+
         __forceinline SubGridID() {}
         __forceinline SubGridID(const unsigned int x, const unsigned int y, const unsigned int primID) :
-        x(x), y(y), primID(primID) {}        
+        x(x), y(y), primID(primID) {}
       };
 
       /* QuantizedBaseNode as large subgrid leaf */
@@ -365,7 +365,7 @@ namespace embree
           _geomID = geomID;
 
           __aligned(64) typename BVHN<N>::AlignedNode node;
-          node.clear();          
+          node.clear();
           for (size_t i=0;i<items;i++)
           {
             subgridIDs[i] = SubGridID(x[i],y[i],primID[i]);
@@ -412,8 +412,8 @@ namespace embree
       template<int N>
         typename SubGridQBVHN<N>::Type SubGridQBVHN<N>::type;
 
-      typedef SubGridQBVHN<4> SubGridQBVH4;
-      typedef SubGridQBVHN<8> SubGridQBVH8;
+      // typedef SubGridQBVHN<4> SubGridQBVH4;
+      // typedef SubGridQBVHN<8> SubGridQBVH8;
 
 
       /* QuantizedBaseNode as large subgrid leaf */
@@ -465,8 +465,8 @@ namespace embree
           time_scale  = tscale;
 
           __aligned(64) typename BVHN<N>::AlignedNode node0,node1;
-          node0.clear();          
-          node1.clear();          
+          node0.clear();
+          node1.clear();
           for (size_t i=0;i<items;i++)
           {
             subgridIDs[i] = SubGridID(x[i],y[i],primID[i]);
@@ -509,7 +509,7 @@ namespace embree
             cout << i << " ( x = " << sg.subgridIDs[i].x << ", y = " << sg.subgridIDs[i].y << ", primID = " << sg.subgridIDs[i].primID << " )" << std::endl;
           cout << "geomID      " << sg._geomID << std::endl;
           cout << "time_offset " << sg.time_offset << std::endl;
-          cout << "time_scale  " << sg.time_scale << std::endl;         
+          cout << "time_scale  " << sg.time_scale << std::endl;
           cout << "lowerX " << sg.qnode.node0.dequantizeLowerX() << std::endl;
           cout << "upperX " << sg.qnode.node0.dequantizeUpperX() << std::endl;
           cout << "lowerY " << sg.qnode.node0.dequantizeLowerY() << std::endl;

@@ -2,7 +2,6 @@
 #include "../bvh/bvh.h"
 
 #include "../geometry/triangle.h"
-#include "../geometry/trianglev.h"
 #include "../geometry/subdivpatch1.h"
 #include "../geometry/object.h"
 #include "../geometry/instance.h"
@@ -17,7 +16,6 @@ DECLARE_ISA_FUNCTION(Builder*,BVH4BuilderTwoLevelTriangleMeshSAH,void* COMMA Sce
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderFastSpatialSAH,void* COMMA Scene* COMMA size_t);
 DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
 
 BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
 {
@@ -31,7 +29,6 @@ void BVH4Factory::selectBuilders(int features)
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4SceneBuilderSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4SceneBuilderFastSpatialSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshBuilderSAH));
-    //IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshRefitSAH));
 }
 
 void BVH4Factory::selectIntersectors(int features)
@@ -62,7 +59,6 @@ BVH4Factory::createTriangleMeshTriangle4(TriangleMesh* mesh,
     switch (mesh->quality) {
     case RTC_BUILD_QUALITY_MEDIUM:
     case RTC_BUILD_QUALITY_HIGH:   builder = factory->BVH4Triangle4MeshBuilderSAH(accel,mesh,0); break;
-        //case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH4Triangle4MeshRefitSAH(accel,mesh,0); break;
     default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
     }
 }
@@ -77,7 +73,7 @@ Accel* BVH4Factory::BVH4Triangle4(Scene* scene,
 
     Accel::Intersectors intersectors;
     if (scene->device->tri_traverser == "default")
-        intersectors = BVH4Triangle4Intersectors(accel,ivariant);
+        intersectors = BVH4Triangle4Intersectors(accel, ivariant);
     else if (scene->device->tri_traverser == "fast"   )
         intersectors = BVH4Triangle4Intersectors(accel,IntersectVariant::FAST);
     else

@@ -349,12 +349,6 @@ namespace embree
     }
 #endif
 
-#if defined(EMBREE_GEOMETRY_QUAD)
-    Builder* BVH8BuilderTwoLevelQuadMeshSAH (void* bvh, Scene* scene, const createQuadMeshAccelTy createMeshAccel) {
-      return new BVHNBuilderTwoLevel<8,QuadMesh>((BVH8*)bvh,scene,createMeshAccel);
-    }
-#endif
-
 #endif
   }
 }

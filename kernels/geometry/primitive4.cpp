@@ -1,6 +1,5 @@
 #include "primitive.h"
 #include "triangle.h"
-#include "trianglev.h"
 #include "subdivpatch1.h"
 #include "object.h"
 #include "instance.h"
@@ -28,28 +27,6 @@ const char* Triangle4::Type::name () const {
   template<>
   size_t Triangle4::Type::getBytes(const char* This) const {
     return sizeof(Triangle4);
-  }
-
-  /********************** Triangle4v **************************/
-
-  template<>
-  const char* Triangle4v::Type::name () const {
-    return "triangle4v";
-  }
-
-  template<>
-  size_t Triangle4v::Type::sizeActive(const char* This) const {
-    return ((Triangle4v*)This)->size();
-  }
-
-  template<>
-  size_t Triangle4v::Type::sizeTotal(const char* This) const {
-    return 4;
-  }
-
-  template<>
-  size_t Triangle4v::Type::getBytes(const char* This) const {
-    return sizeof(Triangle4v);
   }
 
   /********************** SubdivPatch1 **************************/
@@ -134,23 +111,23 @@ const char* Triangle4::Type::name () const {
 
   /********************** SubGridQBVH4 **************************/
 
-template<>
-const char* SubGridQBVH4::Type::name () const {
-    return "SubGridQBVH4";
-}
+// template<>
+// const char* SubGridQBVH4::Type::name () const {
+//     return "SubGridQBVH4";
+// }
 
-template<>
-size_t SubGridQBVH4::Type::sizeActive(const char* This) const {
-    return 1;
-}
+// template<>
+// size_t SubGridQBVH4::Type::sizeActive(const char* This) const {
+//     return 1;
+// }
 
-template<>
-size_t SubGridQBVH4::Type::sizeTotal(const char* This) const {
-    return 1;
-}
+// template<>
+// size_t SubGridQBVH4::Type::sizeTotal(const char* This) const {
+//     return 1;
+// }
 
-template<>
-size_t SubGridQBVH4::Type::getBytes(const char* This) const {
-    return sizeof(SubGridQBVH4);
-}
+// template<>
+// size_t SubGridQBVH4::Type::getBytes(const char* This) const {
+//     return sizeof(SubGridQBVH4);
+// }
 }

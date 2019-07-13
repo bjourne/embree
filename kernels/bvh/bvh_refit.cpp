@@ -2,7 +2,6 @@
 #include "bvh_statistics.h"
 
 #include "../geometry/triangle.h"
-#include "../geometry/trianglev.h"
 #include "../geometry/object.h"
 
 namespace embree
@@ -190,7 +189,6 @@ Builder* BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mod
 #if  defined(__AVX__)
 Builder* BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
 
-    // Builder* BVH8Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4> ((BVH8*)accel,BVH8Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
 #endif
 #endif
 
