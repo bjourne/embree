@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "../bvh/bvh.h"
@@ -37,7 +21,7 @@ namespace embree
       };
 
     public:
-    
+
       /*! Constructor. */
       BVHNRefitter (BVH* bvh, const LeafBoundsInterface& leafBounds);
 
@@ -46,7 +30,7 @@ namespace embree
 
     private:
       /* single-threaded subtree extraction based on BVH depth */
-      void gather_subtree_refs(NodeRef& ref, 
+      void gather_subtree_refs(NodeRef& ref,
                                size_t &subtrees,
                                const size_t depth = 0);
 
@@ -58,7 +42,7 @@ namespace embree
 
       /* single-threaded subtree refit */
       BBox3fa recurse_bottom(NodeRef& ref);
-      
+
     public:
       BVH* bvh;                              //!< BVH to refit
       const LeafBoundsInterface& leafBounds; //!< calculates bounds of leaves
@@ -73,17 +57,17 @@ namespace embree
     class BVHNRefitT : public Builder, public BVHNRefitter<N>::LeafBoundsInterface
     {
     public:
-      
+
       /*! Type shortcuts */
       typedef BVHN<N> BVH;
       typedef typename BVH::AlignedNode AlignedNode;
       typedef typename BVH::NodeRef NodeRef;
-      
+
     public:
       BVHNRefitT (BVH* bvh, Builder* builder, Mesh* mesh, size_t mode);
 
       virtual void build();
-      
+
       virtual void clear();
 
       virtual const BBox3fa leafBounds (NodeRef& ref) const
@@ -96,7 +80,7 @@ namespace embree
             bounds.extend(((Primitive*)prim)[i].update(mesh));
         return bounds;
       }
-      
+
     private:
       BVH* bvh;
       std::unique_ptr<Builder> builder;

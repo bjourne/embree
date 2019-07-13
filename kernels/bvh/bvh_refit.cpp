@@ -1,26 +1,23 @@
 #include "bvh_refit.h"
 #include "bvh_statistics.h"
 
-#include "../geometry/linei.h"
 #include "../geometry/triangle.h"
 #include "../geometry/trianglev.h"
-//#include "../geometry/trianglei.h"
-#include "../geometry/quadv.h"
 #include "../geometry/object.h"
 
 namespace embree
 {
-  namespace isa
-  {
-    static const size_t SINGLE_THREAD_THRESHOLD = 4*1024;
+namespace isa
+{
+static const size_t SINGLE_THREAD_THRESHOLD = 4*1024;
 
-    template<int N>
-    __forceinline bool compare(const typename BVHN<N>::NodeRef* a, const typename BVHN<N>::NodeRef* b)
-    {
-      size_t sa = *(size_t*)&a->node()->lower_x;
-      size_t sb = *(size_t*)&b->node()->lower_x;
-      return sa < sb;
-    }
+template<int N>
+__forceinline bool compare(const typename BVHN<N>::NodeRef* a, const typename BVHN<N>::NodeRef* b)
+{
+    size_t sa = *(size_t*)&a->node()->lower_x;
+    size_t sb = *(size_t*)&b->node()->lower_x;
+    return sa < sb;
+}
 
     template<int N>
     BVHNRefitter<N>::BVHNRefitter (BVH* bvh, const LeafBoundsInterface& leafBounds)
@@ -194,7 +191,7 @@ namespace embree
     Builder* BVH4Triangle4iMeshBuilderSAH (void* bvh, TriangleMesh* mesh, size_t mode);
 
     Builder* BVH4Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4> ((BVH4*)accel,BVH4Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
-    Builder* BVH4Triangle4vMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4v>((BVH4*)accel,BVH4Triangle4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
+    // Builder* BVH4Triangle4vMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4v>((BVH4*)accel,BVH4Triangle4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
 //Builder* BVH4Triangle4iMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4i>((BVH4*)accel,BVH4Triangle4iMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
 #if  defined(__AVX__)
     Builder* BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
@@ -203,19 +200,9 @@ namespace embree
 
     Builder* BVH8Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4> ((BVH8*)accel,BVH8Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
     Builder* BVH8Triangle4vMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4v>((BVH8*)accel,BVH8Triangle4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
-//Builder* BVH8Triangle4iMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4i>((BVH8*)accel,BVH8Triangle4iMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
 #endif
 #endif
 
-#if defined(EMBREE_GEOMETRY_QUAD)
-    // Builder* BVH4Quad4vMeshBuilderSAH (void* bvh, QuadMesh* mesh, size_t mode);
-    // Builder* BVH4Quad4vMeshRefitSAH (void* accel, QuadMesh* mesh, size_t mode) { return new BVHNRefitT<4,QuadMesh,Quad4v>((BVH4*)accel,BVH4Quad4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
-
-#if  defined(__AVX__)
-//Builder* BVH8Quad4vMeshBuilderSAH (void* bvh, QuadMesh* mesh, size_t mode);
-#endif
-
-#endif
 
   }
 }
