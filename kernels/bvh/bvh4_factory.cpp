@@ -39,7 +39,6 @@ void BVH4Factory::selectBuilders(int features)
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4SceneBuilderSAH));
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4SceneBuilderFastSpatialSAH));
-    //IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4vSceneBuilderFastSpatialSAH));
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshBuilderSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4vMeshBuilderSAH));
@@ -71,6 +70,7 @@ BVH4Factory::createTriangleMeshTriangle4(TriangleMesh* mesh,
                                          AccelData*& accel,
                                          Builder*& builder)
 {
+    printf("BVH4Factory::createTriangleMeshTriangle4 qual %d\n", mesh->quality);
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
     accel = new BVH4(Triangle4::type,mesh->scene);
     switch (mesh->quality) {
