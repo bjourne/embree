@@ -20,17 +20,17 @@
 
 namespace embree
 {
-  /* Stores the vertices of M triangles in struct of array layout */
-  template <int M>
-  struct TriangleMv
-  { 
-  public:
-    struct Type : public PrimitiveType 
+/* Stores the vertices of M triangles in struct of array layout */
+template <int M>
+struct TriangleMv
+{
+public:
+    struct Type : public PrimitiveType
     {
-      const char* name() const;
-      size_t sizeActive(const char* This) const;
-      size_t sizeTotal(const char* This) const;
-      size_t getBytes(const char* This) const;
+        const char* name() const;
+        size_t sizeActive(const char* This) const;
+        size_t sizeTotal(const char* This) const;
+        size_t getBytes(const char* This) const;
     };
     static Type type;
 
@@ -38,10 +38,10 @@ namespace embree
 
     /* Returns maximum number of stored triangles */
     static __forceinline size_t max_size() { return M; }
-    
+
     /* Returns required number of primitive blocks for N primitives */
     static __forceinline size_t blocks(size_t N) { return (N+max_size()-1)/max_size(); }
-   
+
   public:
 
     /* Default constructor */
@@ -50,7 +50,7 @@ namespace embree
     /* Construction from vertices and IDs */
     __forceinline TriangleMv(const Vec3vf<M>& v0, const Vec3vf<M>& v1, const Vec3vf<M>& v2, const vuint<M>& geomIDs, const vuint<M>& primIDs)
       : v0(v0), v1(v1), v2(v2), geomIDs(geomIDs), primIDs(primIDs) {}
-    
+
     /* Returns a mask that tells which triangles are valid */
     __forceinline vbool<M> valid() const { return geomIDs != vuint<M>(-1); }
 
@@ -71,7 +71,7 @@ namespace embree
     __forceinline unsigned int primID(const size_t i) const { assert(i<M); return primIDs[i]; }
 
     /* Calculate the bounds of the triangles */
-    __forceinline BBox3fa bounds() const 
+    __forceinline BBox3fa bounds() const
     {
       Vec3vf<M> lower = min(v0,v1,v2);
       Vec3vf<M> upper = max(v0,v1,v2);
@@ -85,7 +85,7 @@ namespace embree
       return BBox3fa(Vec3fa(reduce_min(lower.x),reduce_min(lower.y),reduce_min(lower.z)),
                      Vec3fa(reduce_max(upper.x),reduce_max(upper.y),reduce_max(upper.z)));
     }
-    
+
     /* Non temporal store */
     __forceinline static void store_nt(TriangleMv* dst, const TriangleMv& src)
     {
@@ -107,7 +107,7 @@ namespace embree
     {
       vuint<M> vgeomID = -1, vprimID = -1;
       Vec3vf<M> v0 = zero, v1 = zero, v2 = zero;
-      
+
       for (size_t i=0; i<M && begin<end; i++, begin++)
       {
 	const PrimRef& prim = prims[begin];
@@ -133,7 +133,7 @@ namespace embree
       BBox3fa bounds = empty;
       vuint<M> vgeomID = -1, vprimID = -1;
       Vec3vf<M> v0 = zero, v1 = zero, v2 = zero;
-      
+
       for (size_t i=0; i<M; i++)
       {
         if (primID(i) == -1) break;
@@ -153,7 +153,7 @@ namespace embree
       new (this) TriangleMv(v0,v1,v2,vgeomID,vprimID);
       return bounds;
     }
-   
+
   public:
     Vec3vf<M> v0;      // 1st vertex of the triangles
     Vec3vf<M> v1;      // 2nd vertex of the triangles
