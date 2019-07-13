@@ -68,28 +68,19 @@ public:
         return bsf(~movemask(valid()));
     }
 
-    /* Returns the geometry IDs */
-    __forceinline vuint<M>& geomID()
-    {
-        return geomIDs;
-    }
-    __forceinline const vuint<M>& geomID() const {
-        return geomIDs;
-    }
+    // /* Returns the geometry IDs */
+    // __forceinline vuint<M>& geomID()
+    // {
+    //     return geomIDs;
+    // }
+    // __forceinline const vuint<M>& geomID() const {
+    //     return geomIDs;
+    // }
     __forceinline unsigned int geomID(const size_t i) const
     {
         assert(i<M); return geomIDs[i];
     }
 
-    /* Returns the primitive IDs */
-    __forceinline vuint<M>& primID()
-    {
-        return primIDs;
-    }
-    __forceinline const vuint<M>& primID() const
-    {
-        return primIDs;
-    }
     __forceinline unsigned int primID(const size_t i) const
     {
         assert(i<M); return primIDs[i];
@@ -203,8 +194,6 @@ public:
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
     vuint<M> geomIDs; // geometry IDs
     vuint<M> primIDs; // primitive IDs
-
-
 };
 
 template<int M>

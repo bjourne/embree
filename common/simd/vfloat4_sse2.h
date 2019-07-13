@@ -285,9 +285,15 @@ __forceinline vfloat4 operator +(const vfloat4& a)
 }
 __forceinline vfloat4 operator -(const vfloat4& a) { return _mm_xor_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
 
-  __forceinline vfloat4 abs(const vfloat4& a) { return _mm_and_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff))); }
+__forceinline vfloat4 abs(const vfloat4& a)
+{
+    return _mm_and_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff)));
+}
 #if defined(__AVX512VL__)
-  __forceinline vfloat4 sign(const vfloat4& a) { return _mm_mask_blend_ps(_mm_cmp_ps_mask(a, vfloat4(zero), _CMP_LT_OQ), vfloat4(one), -vfloat4(one)); }
+__forceinline vfloat4 sign(const vfloat4& a)
+{
+    return _mm_mask_blend_ps(_mm_cmp_ps_mask(a, vfloat4(zero), _CMP_LT_OQ), vfloat4(one), -vfloat4(one));
+}
 #else
   __forceinline vfloat4 sign(const vfloat4& a) { return blendv_ps(vfloat4(one), -vfloat4(one), _mm_cmplt_ps(a, vfloat4(zero))); }
 #endif
@@ -371,10 +377,22 @@ __forceinline vfloat4 operator *(const vfloat4& a, float          b)
   __forceinline vfloat4 operator /(const vfloat4& a, float          b) { return a/vfloat4(b); }
   __forceinline vfloat4 operator /(float          a, const vfloat4& b) { return vfloat4(a)/b; }
 
-  __forceinline vfloat4 operator ^(const vfloat4& a, const vfloat4& b) { return _mm_xor_ps(a,b); }
-  __forceinline vfloat4 operator ^(const vfloat4& a, const vint4&   b) { return _mm_xor_ps(a,_mm_castsi128_ps(b)); }
+__forceinline vfloat4
+operator ^(const vfloat4& a, const vfloat4& b)
+{
+    return _mm_xor_ps(a, b);
+}
+__forceinline vfloat4
+operator ^(const vfloat4& a, const vint4&   b)
+{
+    return _mm_xor_ps(a,_mm_castsi128_ps(b));
+}
 
-  __forceinline vfloat4 min(const vfloat4& a, const vfloat4& b) { return _mm_min_ps(a,b); }
+__forceinline vfloat4
+min(const vfloat4& a, const vfloat4& b)
+{
+    return _mm_min_ps(a,b);
+}
   __forceinline vfloat4 min(const vfloat4& a, float          b) { return _mm_min_ps(a,vfloat4(b)); }
   __forceinline vfloat4 min(float          a, const vfloat4& b) { return _mm_min_ps(vfloat4(a),b); }
 

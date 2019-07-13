@@ -228,9 +228,11 @@ namespace embree
   __forceinline vfloat16 operator /(const vfloat16& a, float           b) { return a/vfloat16(b); }
   __forceinline vfloat16 operator /(float           a, const vfloat16& b) { return vfloat16(a)/b; }
 
-  __forceinline vfloat16 operator ^(const vfloat16& a, const vfloat16& b) {
+__forceinline vfloat16
+operator ^(const vfloat16& a, const vfloat16& b)
+{
     return  _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(a),_mm512_castps_si512(b)));
-  }
+}
 
   __forceinline vfloat16 min(const vfloat16& a, const vfloat16& b) {
     return _mm512_min_ps(a,b);
@@ -342,7 +344,11 @@ namespace embree
   __forceinline vfloat16& operator *=(vfloat16& a, float           b) { return a = a * b; }
 
   __forceinline vfloat16& operator /=(vfloat16& a, const vfloat16& b) { return a = a / b; }
-  __forceinline vfloat16& operator /=(vfloat16& a, float           b) { return a = a / b; }
+__forceinline vfloat16&
+operator /=(vfloat16& a, float           b)
+{
+    return a = a / b;
+}
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Comparison Operators + Select
