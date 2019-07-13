@@ -39,11 +39,6 @@ public:
 
 public:
 
-    /* Default constructor */
-    __forceinline TriangleM()
-    {
-    }
-
     /* Construction from vertices and IDs */
     __forceinline TriangleM(const Vec3vf<M>& v0,
                             const Vec3vf<M>& v1,
@@ -204,12 +199,11 @@ public:
 
 public:
     Vec3vf<M> v0;      // base vertex of the triangles
-    // Are these comments right?
     Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
     vuint<M> geomIDs; // geometry IDs
     vuint<M> primIDs; // primitive IDs
-private:
+
 
 };
 

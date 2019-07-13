@@ -186,17 +186,23 @@ TutorialApplication::TutorialApplication (const std::string& tutorialName,
         rtcore += ",benchmark=1,start_threads=1";
       }, "--benchmark <N> <M>: enabled benchmark mode, builds scene, skips N frames, renders M frames");
 
-    registerOption("nodisplay", [this] (Ref<ParseStream> cin, const FileName& path) {
-        skipBenchmarkFrames = 0;
-        numBenchmarkFrames  = 2048;
-        interactive = false;
-      }, "--nodisplay: enabled benchmark mode, continously renders frames");
+    registerOption(
+        "nodisplay",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            skipBenchmarkFrames = 0;
+            numBenchmarkFrames  = 2048;
+            interactive = false;
+        },
+        "--nodisplay: enabled benchmark mode, continously renders frames");
 
-    registerOption("print-frame-rate", [this] (Ref<ParseStream> cin, const FileName& path) {
-        print_frame_rate = true;
-      }, "--print-frame-rate: prints framerate for each frame on console");
+    registerOption(
+        "print-frame-rate",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            print_frame_rate = true;
+        },
+        "--print-frame-rate: prints framerate for each frame on console");
 
-     registerOption("print-camera", [this] (Ref<ParseStream> cin, const FileName& path) {
+    registerOption("print-camera", [this] (Ref<ParseStream> cin, const FileName& path) {
          print_camera = true;
       }, "--print-camera: prints camera for each frame on console");
 
@@ -300,38 +306,43 @@ SceneLoadingTutorialApplication::SceneLoadingTutorialApplication (
       sceneFilename(""),
       instancing_mode(SceneGraph::INSTANCING_NONE),
       print_scene_cameras(false)
-  {
-      registerOption("i", [this] (Ref<ParseStream> cin, const FileName& path) {
-              sceneFilename = path + cin->getFileName();
-          }, "-i <filename>: parses scene from <filename>");
+{
+    registerOption(
+        "i",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            sceneFilename = path + cin->getFileName();
+        }, "-i <filename>: parses scene from <filename>");
 
-      registerOption(
-          "animlist",
-          [this] (Ref<ParseStream> cin, const FileName& path) {
-              FileName listFilename = path + cin->getFileName();
+    registerOption(
+        "animlist",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            FileName listFilename = path + cin->getFileName();
 
-              std::ifstream listFile;
-              listFile.open(listFilename.c_str());
-              if (!listFile.is_open()) {
-                  THROW_RUNTIME_ERROR("cannot open " + listFilename.str());
-              }
-              else
-              {
-                  while (!listFile.eof())
-                  {
-                      std::string line;
-                      listFile >> line;
-                      if (line != "")
-                          keyFramesFilenames.push_back(listFilename.path() + line);
-                  }
-              }
-          },
-          "-animlist <filename>: parses a sequence of .obj/.xml files listed in <filename> and adds them to the scene");
+            std::ifstream listFile;
+            listFile.open(listFilename.c_str());
+            if (!listFile.is_open()) {
+                THROW_RUNTIME_ERROR("cannot open " + listFilename.str());
+            }
+            else
+            {
+                while (!listFile.eof())
+                {
+                    std::string line;
+                    listFile >> line;
+                    if (line != "")
+                        keyFramesFilenames.push_back(listFilename.path() + line);
+                }
+            }
+        },
+        "-animlist <filename>: parses a sequence of .obj/.xml files listed in <filename> and adds them to the scene");
 
-    registerOption("convert-triangles-to-quads", [this] (Ref<ParseStream> cin, const FileName& path) {
-        sgop.push_back(CONVERT_TRIANGLES_TO_QUADS);
-        convert_tris_to_quads_prop = inf;
-      }, "--convert-triangles-to-quads: converts all triangles to quads when loading");
+    registerOption(
+        "convert-triangles-to-quads",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            sgop.push_back(CONVERT_TRIANGLES_TO_QUADS);
+            convert_tris_to_quads_prop = inf;
+        },
+        "--convert-triangles-to-quads: converts all triangles to quads when loading");
 
     registerOption("convert-triangles-to-triangles-and-quads", [this] (Ref<ParseStream> cin, const FileName& path) {
         sgop.push_back(CONVERT_TRIANGLES_TO_QUADS);
@@ -408,26 +419,32 @@ SceneLoadingTutorialApplication::SceneLoadingTutorialApplication (
          remove_non_mblur = true;
       }, "--remove-non-mblur: removes all non-motion blur geometry");
 
-    registerOption("instancing", [this] (Ref<ParseStream> cin, const FileName& path) {
-        std::string mode = cin->getString();
-        if      (mode == "none"    ) instancing_mode = SceneGraph::INSTANCING_NONE;
-        else if (mode == "scene_geometry") instancing_mode = SceneGraph::INSTANCING_GEOMETRY; // for compatibility
-        else if (mode == "scene_group"   ) instancing_mode = SceneGraph::INSTANCING_GROUP; // for compatibility
-        else if (mode == "geometry") instancing_mode = SceneGraph::INSTANCING_GEOMETRY;
-        else if (mode == "group"   ) instancing_mode = SceneGraph::INSTANCING_GROUP;
-        else if (mode == "flattened") instancing_mode = SceneGraph::INSTANCING_FLATTENED;
-        else throw std::runtime_error("unknown instancing mode: "+mode);
-        g_instancing_mode = instancing_mode;
-      }, "--instancing: set instancing mode\n"
-      "  none: no instancing\n"
-      "  geometry: instance individual geometries as scenes\n"
-      "  group: instance geometry groups as scenes\n"
-      "  flattened: assume flattened scene graph");
+    registerOption(
+        "instancing",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            std::string mode = cin->getString();
+            if      (mode == "none"    ) instancing_mode = SceneGraph::INSTANCING_NONE;
+            else if (mode == "scene_geometry") instancing_mode = SceneGraph::INSTANCING_GEOMETRY; // for compatibility
+            else if (mode == "scene_group"   ) instancing_mode = SceneGraph::INSTANCING_GROUP; // for compatibility
+            else if (mode == "geometry") instancing_mode = SceneGraph::INSTANCING_GEOMETRY;
+            else if (mode == "group"   ) instancing_mode = SceneGraph::INSTANCING_GROUP;
+            else if (mode == "flattened") instancing_mode = SceneGraph::INSTANCING_FLATTENED;
+            else throw std::runtime_error("unknown instancing mode: "+mode);
+            g_instancing_mode = instancing_mode;
+        },
+        "--instancing: set instancing mode\n"
+        "  none: no instancing\n"
+        "  geometry: instance individual geometries as scenes\n"
+        "  group: instance geometry groups as scenes\n"
+        "  flattened: assume flattened scene graph");
 
-    registerOption("ambientlight", [this] (Ref<ParseStream> cin, const FileName& path) {
-        const Vec3fa L = cin->getVec3fa();
-        scene->add(new SceneGraph::LightNode(new SceneGraph::AmbientLight(L)));
-      }, "--ambientlight r g b: adds an ambient light with intensity rgb");
+    registerOption(
+        "ambientlight",
+        [this] (Ref<ParseStream> cin, const FileName& path) {
+            const Vec3fa L = cin->getVec3fa();
+            scene->add(new SceneGraph::LightNode(new SceneGraph::AmbientLight(L)));
+        },
+        "--ambientlight r g b: adds an ambient light with intensity rgb");
     registerOptionAlias("ambientlight","ambient");
 
     registerOption("pointlight", [this] (Ref<ParseStream> cin, const FileName& path) {
@@ -606,7 +623,8 @@ int64_t TutorialApplication::getNumRays()
     return numRays;
 }
 
-void TutorialApplication::renderBenchmark()
+void
+TutorialApplication::renderBenchmark()
 {
     IOStreamStateRestorer cout_state(std::cout);
     std::cout.setf(std::ios::fixed, std::ios::floatfield);

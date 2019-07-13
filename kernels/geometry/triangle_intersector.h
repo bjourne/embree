@@ -1,3 +1,14 @@
+// Benchmark #1:
+//     -i ~/Alucy.obj --vp 0.1194648743 16.96469498 3.015714645
+//         --vi 0.1176664829 19.96464157 3.024817467
+//         --vu 0 1 0 --fov 90 --righthanded
+//
+// Results:
+//
+// NAME  BENCHMARK SKIP RUN   MAX
+// orig         #1   40 400 25.37
+// sf01         #1   40 400 24.11
+// mt           #1   40 400 24.51 (change e1 sign)
 #pragma once
 
 #include "triangle.h"
@@ -23,6 +34,59 @@ struct TriangleMIntersector1Moeller
     typedef MoellerTrumboreIntersector1<Mx> Precalculations;
 
     static __forceinline void
+    runEpilog(RayHit& ray,
+              IntersectContext* context,
+              const TriangleM<M>& tri,
+              const vbool<M>& valid,
+              const Vec3<vfloat<M>> n,
+              const vfloat<M>& t,
+              const vfloat<M>& u,
+              const vfloat<M>& v) {
+        Scene* scene = context->scene;
+        vbool<Mx> valid2 = valid;
+        if (Mx > M)
+            valid2 &= (1 << M) - 1;
+        size_t i = select_min(valid2, t);
+        unsigned int geomID = tri.geomIDs[i];
+
+        /* intersection filter test */
+#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+        goto entry;
+        while (true)
+        {
+            if (unlikely(none(valid2)))
+                return;
+            i = select_min(valid2, t);
+
+            geomID = tri.geomIDs[i];
+        entry:
+            Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+
+#if defined(EMBREE_RAY_MASK)
+            /* goto next hit if mask test fails */
+            if ((geometry->mask & ray.mask) == 0) {
+                clear(valid2,i);
+                continue;
+            }
+#endif
+            break;
+        }
+#endif
+        /* update hit information */
+        ray.tfar = t[i];
+        ray.Ng.x = n.x[i];
+        ray.Ng.y = n.y[i];
+        ray.Ng.z = n.z[i];
+
+        ray.u = u[i];
+        ray.v = v[i];
+
+        ray.primID = tri.primIDs[i];
+        ray.geomID = geomID;
+        ray.instID = context->instID;
+    }
+
+    static __forceinline void
     intersect_mt(RayHit& ray,
                  IntersectContext* context,
                  const TriangleM<M>& tri)
@@ -33,7 +97,7 @@ struct TriangleMIntersector1Moeller
         Vec3<vfloat<M>> d = Vec3<vfloat<M>>(ray.dir);
 
         Vec3<vfloat<M>> v0 = tri.v0;
-        Vec3<vfloat<M>> e1 = -tri.e1;
+        Vec3<vfloat<M>> e1 = tri.e1;
         Vec3<vfloat<M>> e2 = tri.e2;
 
         Vec3<vfloat<M>> pvec = cross(d, e2);
@@ -58,51 +122,9 @@ struct TriangleMIntersector1Moeller
         valid &= (tnear < vt) & (vt <= tfar);
         if (likely(none(valid)))
             return;
-
-        Scene* scene = context->scene;
-        vbool<Mx> valid2 = valid;
-        if (Mx > M)
-            valid2 &= (1 << M) - 1;
-
-        size_t i = select_min(valid2, vt);
-        unsigned int geomID = tri.geomIDs[i];
-
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
-        goto entry;
-        while (true)
-        {
-            if (unlikely(none(valid2)))
-                return;
-            i = select_min(valid2, vt);
-
-            geomID = tri.geomIDs[i];
-        entry:
-            Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-
-#if defined(EMBREE_RAY_MASK)
-            /* goto next hit if mask test fails */
-            if ((geometry->mask & ray.mask) == 0) {
-                clear(valid2,i);
-                continue;
-            }
-#endif
-            break;
-        }
-#endif
-        /* update hit information */
         Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
-        ray.tfar = vt[i];
-        ray.Ng.x = tri_Ng.x[i];
-        ray.Ng.y = tri_Ng.y[i];
-        ray.Ng.z = tri_Ng.z[i];
 
-        ray.u = vu[i];
-        ray.v = vv[i];
-
-        ray.primID = tri.primIDs[i];
-        ray.geomID = geomID;
-        ray.instID = context->instID;
+        runEpilog(ray, context, tri, valid, tri_Ng, vt, vu, vv);
     }
 
     static __forceinline void
@@ -126,16 +148,9 @@ struct TriangleMIntersector1Moeller
         vbool<M> s2 = w2 >= vfloat<M>(zero);
         vbool<M> s0 = w0 >= vfloat<M>(zero);
 
-        valid &= s0 == s2;
-        if (likely(none(valid))) {
-            return;
-        }
         vfloat<M> w1 = dot(D, cross(v0o, v2o));
         vbool<M> s1 = w1 >= vfloat<M>(zero);
-        valid &= s2 == s1;
-        if (likely(none(valid))) {
-            return;
-        }
+        valid &= (s2 == s1) & (s0 == s2);
 
         Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
         vfloat<M> den = dot(tri_Ng, D);
@@ -144,53 +159,11 @@ struct TriangleMIntersector1Moeller
         if (likely(none(valid)))
             return;
 
-        // Epilog
-        Scene* scene = context->scene;
-        vbool<Mx> valid2 = valid;
-        if (Mx > M)
-            valid2 &= (1 << M) - 1;
-
         vfloat<M> vt = T;
         vfloat<M> vu = w1 * rcp(w0 + w1 + w2);
         vfloat<M> vv = w2 * rcp(w0 + w1 + w2);
 
-        size_t i = select_min(valid2, vt);
-        unsigned int geomID = tri.geomIDs[i];
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
-        goto entry;
-        while (true)
-        {
-            if (unlikely(none(valid2)))
-                return;
-            i = select_min(valid2, vt);
-
-            geomID = tri.geomIDs[i];
-        entry:
-            Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-
-#if defined(EMBREE_RAY_MASK)
-            /* goto next hit if mask test fails */
-            if ((geometry->mask & ray.mask) == 0) {
-                clear(valid2,i);
-                continue;
-            }
-#endif
-            break;
-        }
-#endif
-        /* update hit information */
-        ray.tfar = vt[i];
-        ray.Ng.x = tri_Ng.x[i];
-        ray.Ng.y = tri_Ng.y[i];
-        ray.Ng.z = tri_Ng.z[i];
-
-        ray.u = vu[i];
-        ray.v = vv[i];
-
-        ray.primID = tri.primIDs[i];
-        ray.geomID = geomID;
-        ray.instID = context->instID;
+        runEpilog(ray, context, tri, valid, tri_Ng, vt, vu, vv);
     }
 
     /*! Intersect a ray with the M triangles and updates the hit. */
@@ -226,55 +199,13 @@ struct TriangleMIntersector1Moeller
         if (likely(none(valid)))
             return;
 
-        Scene* scene = context->scene;
-        vbool<Mx> valid2 = valid;
-        if (Mx > M)
-            valid2 &= (1 << M) - 1;
-
         // Trick to avoid dividing to early.
         vfloat<M> rcpAbsDen = rcp(absDen);
         vfloat<M> vt = T * rcpAbsDen;
         vfloat<M> vu = U * rcpAbsDen;
         vfloat<M> vv = V * rcpAbsDen;
 
-        size_t i = select_min(valid2, vt);
-        unsigned int geomID = tri.geomIDs[i];
-
-        /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
-        goto entry;
-        while (true)
-        {
-            if (unlikely(none(valid2)))
-                return;
-            i = select_min(valid2, vt);
-
-            geomID = tri.geomIDs[i];
-        entry:
-            Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-
-#if defined(EMBREE_RAY_MASK)
-            /* goto next hit if mask test fails */
-            if ((geometry->mask & ray.mask) == 0) {
-                clear(valid2,i);
-                continue;
-            }
-#endif
-            break;
-        }
-#endif
-        /* update hit information */
-        ray.tfar = vt[i];
-        ray.Ng.x = tri_Ng.x[i];
-        ray.Ng.y = tri_Ng.y[i];
-        ray.Ng.z = tri_Ng.z[i];
-
-        ray.u = vu[i];
-        ray.v = vv[i];
-
-        ray.primID = tri.primIDs[i];
-        ray.geomID = geomID;
-        ray.instID = context->instID;
+        runEpilog(ray, context, tri, valid, tri_Ng, vt, vu, vv);
     }
 
     static __forceinline void
