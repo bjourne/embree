@@ -159,9 +159,9 @@ __forceinline bool compare(const typename BVHN<N>::NodeRef* a, const typename BV
       return merge<N>(bounds);
     }
 
-    template<int N, typename Mesh, typename Primitive>
-    BVHNRefitT<N,Mesh,Primitive>::BVHNRefitT (BVH* bvh, Builder* builder, Mesh* mesh, size_t mode)
-      : bvh(bvh), builder(builder), refitter(new BVHNRefitter<N>(bvh,*(typename BVHNRefitter<N>::LeafBoundsInterface*)this)), mesh(mesh) {}
+template<int N, typename Mesh, typename Primitive>
+BVHNRefitT<N,Mesh,Primitive>::BVHNRefitT (BVH* bvh, Builder* builder, Mesh* mesh, size_t mode)
+    : bvh(bvh), builder(builder), refitter(new BVHNRefitter<N>(bvh,*(typename BVHNRefitter<N>::LeafBoundsInterface*)this)), mesh(mesh) {}
 
     template<int N, typename Mesh, typename Primitive>
     void BVHNRefitT<N,Mesh,Primitive>::clear()
@@ -186,12 +186,11 @@ __forceinline bool compare(const typename BVHN<N>::NodeRef* a, const typename BV
 #endif
 
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
-    Builder* BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
-    Builder* BVH4Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4> ((BVH4*)accel,BVH4Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
+Builder* BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
 #if  defined(__AVX__)
-    Builder* BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
+Builder* BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
 
-    Builder* BVH8Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4> ((BVH8*)accel,BVH8Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
+    // Builder* BVH8Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4> ((BVH8*)accel,BVH8Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
 #endif
 #endif
 
