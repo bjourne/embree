@@ -102,6 +102,7 @@ void Scene::printStatistics()
 void Scene::createTriangleAccel()
 {
     printf("accel %s qual %d\n", device->tri_accel.c_str(), quality_flags);
+    assert(device->tri_accel == "default");
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
     if (device->tri_accel == "default")
     {
@@ -114,6 +115,7 @@ void Scene::createTriangleAccel()
 #if defined (EMBREE_TARGET_SIMD8)
                 if (device->canUseAVX())
                 {
+                    printf("yes avx\n");
                     if (quality_flags == RTC_BUILD_QUALITY_HIGH)
                         accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
                     else
@@ -122,6 +124,7 @@ void Scene::createTriangleAccel()
                 else
 #endif
                 {
+                    printf("no avx\n");
                     if (quality_flags == RTC_BUILD_QUALITY_HIGH)
                         accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
                     else

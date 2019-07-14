@@ -22,9 +22,9 @@ RTC_NAMESPACE_OPEN
 #include "../math/random_sampler.h"
 
 namespace embree
-{  
+{
   struct Material;
-  
+
   namespace SceneGraph
   {
     struct Node;
@@ -51,7 +51,7 @@ namespace embree
     Ref<Node> convert_bezier_to_hermite(Ref<Node> node);
     Ref<Node> convert_bspline_to_bezier(Ref<Node> node);
     Ref<Node> convert_flat_to_round_curves(Ref<Node> node);
-    Ref<Node> convert_round_to_flat_curves(Ref<Node> node);
+//Ref<Node> convert_round_to_flat_curves(Ref<Node> node);
     Ref<Node> convert_quads_to_grids( Ref<QuadMeshNode> qmesh,  const unsigned resX, const unsigned resY );
     Ref<Node> convert_quads_to_grids( Ref<Node> node, const unsigned resX, const unsigned resY );
     Ref<Node> convert_grids_to_quads( Ref<GridMeshNode> gmesh);
@@ -76,45 +76,45 @@ namespace embree
         numMaterials(0) {}
 
       void print();
-      
+
       size_t numTriangleMeshes;
       size_t numTriangles;
       size_t numTriangleBytes;
-      
+
       size_t numQuadMeshes;
       size_t numQuads;
       size_t numQuadBytes;
-      
+
       size_t numSubdivMeshes;
       size_t numPatches;
       size_t numSubdivBytes;
-      
+
       size_t numCurveSets;
       size_t numCurves;
       size_t numCurveBytes;
-      
+
       size_t numGridMeshNodes;
       size_t numGrids;
       size_t numGridBytes;
-      
+
       size_t numPointSets;
       size_t numPoints;
       size_t numPointBytes;
 
       size_t numTransformNodes;
       size_t numTransformedObjects;
-      
+
       size_t numLights;
       size_t numCameras;
       size_t numMaterials;
     };
-    
+
     struct Node : public RefCount
     {
       Node (bool closed = false)
         : indegree(0), closed(closed), hasLightOrCamera(false), id(-1), geometry(nullptr) {}
 
-      Node (const std::string& name) 
+      Node (const std::string& name)
         : name(name), indegree(0), closed(false), id(-1), geometry(nullptr) {}
 
       /* sets material */
@@ -178,9 +178,9 @@ namespace embree
         spaces.push_back(one);
       }
 
-      __forceinline Transformations( const BBox1f& time_range, size_t N ) 
+      __forceinline Transformations( const BBox1f& time_range, size_t N )
         : time_range(time_range), spaces(N) {}
-      
+
       __forceinline Transformations(const AffineSpace3fa& space)
         : time_range(0.0f,1.0f)
       {
@@ -204,7 +204,7 @@ namespace embree
       __forceinline       AffineSpace3fa& operator[] ( const size_t i )       { return spaces[i]; }
       __forceinline const AffineSpace3fa& operator[] ( const size_t i ) const { return spaces[i]; }
 
-      BBox3fa bounds ( const BBox3fa& cbounds ) const 
+      BBox3fa bounds ( const BBox3fa& cbounds ) const
       {
         BBox3fa r = empty;
         for (size_t i=0; i<spaces.size(); i++)
@@ -212,10 +212,10 @@ namespace embree
         return r;
       }
 
-      LBBox3fa lbounds ( const LBBox3fa& cbounds ) const 
+      LBBox3fa lbounds ( const LBBox3fa& cbounds ) const
       {
         assert(spaces.size());
-        if (spaces.size() == 1) 
+        if (spaces.size() == 1)
         {
           return LBBox3fa(xfmBounds(spaces[0],cbounds.bounds0),
                           xfmBounds(spaces[0],cbounds.bounds1));
@@ -235,15 +235,15 @@ namespace embree
         for (size_t i=0; i<other.size(); i++) spaces.push_back(other[i]);
       }
 
-      friend __forceinline Transformations operator* ( const Transformations& a, const Transformations& b ) 
+      friend __forceinline Transformations operator* ( const Transformations& a, const Transformations& b )
       {
-        if (a.size() == 1) 
+        if (a.size() == 1)
         {
           Transformations c(intersect(a.time_range,b.time_range),b.size());
           for (size_t i=0; i<b.size(); i++) c[i] = a[0] * b[i];
           return c;
-        } 
-        else if (b.size() == 1) 
+        }
+        else if (b.size() == 1)
         {
           Transformations c(intersect(a.time_range,b.time_range),a.size());
           for (size_t i=0; i<a.size(); i++) c[i] = a[i] * b[0];
@@ -256,7 +256,7 @@ namespace embree
           return c;
         }
         else
-          THROW_RUNTIME_ERROR("number of transformations does not match");        
+          THROW_RUNTIME_ERROR("number of transformations does not match");
       }
 
       AffineSpace3fa interpolate (const float gtime) const
@@ -287,7 +287,7 @@ namespace embree
       /* if we have only one set of vertices, use transformation to generate more vertex sets */
       if (num_time_steps == 1)
       {
-        for (size_t i=0; i<spaces.size(); i++) 
+        for (size_t i=0; i<spaces.size(); i++)
         {
           avector<Vertex> verts(num_vertices);
           for (size_t j=0; j<num_vertices; j++) {
@@ -296,11 +296,11 @@ namespace embree
           }
           positions_out.push_back(std::move(verts));
         }
-      } 
+      }
       /* otherwise transform all vertex sets with interpolated transformation */
       else
       {
-        for (size_t t=0; t<num_time_steps; t++) 
+        for (size_t t=0; t<num_time_steps; t++)
         {
           float time = num_time_steps > 1 ? float(t)/float(num_time_steps-1) : 0.0f;
           const AffineSpace3fa space = spaces.interpolate(time);
@@ -320,7 +320,7 @@ namespace embree
     {
       if (vectors_in.size() == 0)
         return vectors_in;
-      
+
       std::vector<avector<Vertex>> vectors_out;
       const size_t num_time_steps = vectors_in.size();
       const size_t num_vertices = vectors_in[0].size();
@@ -328,7 +328,7 @@ namespace embree
       /* if we have only one set of vertices, use transformation to generate more vertex sets */
       if (num_time_steps == 1)
       {
-        for (size_t i=0; i<spaces.size(); i++) 
+        for (size_t i=0; i<spaces.size(); i++)
         {
           avector<Vertex> vecs(num_vertices);
           for (size_t j=0; j<num_vertices; j++) {
@@ -337,11 +337,11 @@ namespace embree
           }
           vectors_out.push_back(std::move(vecs));
         }
-      } 
+      }
       /* otherwise transform all vertex sets with interpolated transformation */
       else
       {
-        for (size_t t=0; t<num_time_steps; t++) 
+        for (size_t t=0; t<num_time_steps; t++)
         {
           float time = num_time_steps > 1 ? float(t)/float(num_time_steps-1) : 0.0f;
           const AffineSpace3fa space = spaces.interpolate(time);
@@ -361,7 +361,7 @@ namespace embree
     {
       if (normals_in.size() == 0)
         return normals_in;
-      
+
       std::vector<avector<Vertex>> normals_out;
       const size_t num_time_steps = normals_in.size();
       const size_t num_vertices = normals_in[0].size();
@@ -369,7 +369,7 @@ namespace embree
       /* if we have only one set of vertices, use transformation to generate more vertex sets */
       if (num_time_steps == 1)
       {
-        for (size_t i=0; i<spaces.size(); i++) 
+        for (size_t i=0; i<spaces.size(); i++)
         {
           avector<Vertex> norms(num_vertices);
           for (size_t j=0; j<num_vertices; j++) {
@@ -377,11 +377,11 @@ namespace embree
           }
           normals_out.push_back(std::move(norms));
         }
-      } 
+      }
       /* otherwise transform all vertex sets with interpolated transformation */
       else
       {
-        for (size_t t=0; t<num_time_steps; t++) 
+        for (size_t t=0; t<num_time_steps; t++)
         {
           float time = num_time_steps > 1 ? float(t)/float(num_time_steps-1) : 0.0f;
           const AffineSpace3fa space = spaces.interpolate(time);
@@ -407,7 +407,7 @@ namespace embree
 
       virtual void calculateStatistics(Statistics& stat);
       virtual bool calculateClosed(bool group_instancing);
-            
+
     public:
       Vec3fa from;   //!< position of camera
       Vec3fa to;     //!< look at point
@@ -439,7 +439,7 @@ namespace embree
       virtual void calculateInDegree();
       virtual bool calculateClosed(bool group_instancing);
       virtual void resetInDegree();
-      
+
       virtual BBox3fa bounds() const {
         return spaces.bounds(child->bounds());
       }
@@ -456,11 +456,11 @@ namespace embree
       Transformations spaces;
       Ref<Node> child;
     };
-    
+
     struct GroupNode : public Node
-    { 
-      GroupNode (const size_t N = 0) { 
-        children.resize(N); 
+    {
+      GroupNode (const size_t N = 0) {
+        children.resize(N);
       }
 
       GroupNode (std::vector<Ref<Node>>& children)
@@ -469,15 +469,15 @@ namespace embree
       size_t size() const {
         return children.size();
       }
-      
+
       void add(const Ref<Node>& node) {
         if (node) children.push_back(node);
       }
-      
+
       void set(const size_t i, const Ref<Node>& node) {
         children[i] = node;
       }
- 
+
       Ref<Node> child ( size_t i ) const {
         return children[i];
       }
@@ -496,7 +496,7 @@ namespace embree
         return b;
       }
 
-      virtual size_t numPrimitives() const 
+      virtual size_t numPrimitives() const
       {
         size_t n = 0;
         for (auto child : children) n += child->numPrimitives();
@@ -526,7 +526,7 @@ namespace embree
         for (size_t i=0; i<children.size(); i++)
           children[i] = convert_quads_to_subdivs(children[i]);
       }
-      
+
       void bezier_to_lines()
       {
         for (size_t i=0; i<children.size(); i++)
@@ -539,11 +539,11 @@ namespace embree
           children[i] = convert_flat_to_round_curves(children[i]);
       }
 
-      void round_to_flat_curves()
-      {
-        for (size_t i=0; i<children.size(); i++)
-          children[i] = convert_round_to_flat_curves(children[i]);
-      }
+      // void round_to_flat_curves()
+      // {
+      //   for (size_t i=0; i<children.size(); i++)
+      //     children[i] = convert_round_to_flat_curves(children[i]);
+      // }
 
       void bezier_to_bspline()
       {
@@ -583,11 +583,11 @@ namespace embree
       virtual void calculateInDegree();
       virtual bool calculateClosed(bool group_instancing);
       virtual void resetInDegree();
-      
+
     public:
       std::vector<Ref<Node> > children;
     };
-    
+
     struct LightNode : public Node
     {
       LightNode (Ref<Light> light)
@@ -595,10 +595,10 @@ namespace embree
 
       virtual void calculateStatistics(Statistics& stat);
       virtual bool calculateClosed(bool group_instancing);
-      
+
       Ref<Light> light;
     };
-    
+
     struct MaterialNode : public Node
     {
       ALIGNED_STRUCT_(16);
@@ -616,30 +616,30 @@ namespace embree
     {
       typedef Vec3fa Vertex;
 
-      struct Triangle 
+      struct Triangle
       {
       public:
         Triangle() {}
-        Triangle (unsigned v0, unsigned v1, unsigned v2) 
+        Triangle (unsigned v0, unsigned v1, unsigned v2)
         : v0(v0), v1(v1), v2(v2) {}
       public:
         unsigned v0, v1, v2;
       };
-      
+
     public:
-      TriangleMeshNode (const avector<Vertex>& positions_in, 
-                        const avector<Vertex>& normals_in, 
+      TriangleMeshNode (const avector<Vertex>& positions_in,
+                        const avector<Vertex>& normals_in,
                         const std::vector<Vec2f>& texcoords,
                         const std::vector<Triangle>& triangles,
-                        Ref<MaterialNode> material) 
-        : Node(true), time_range(0.0f,1.0f), texcoords(texcoords), triangles(triangles), material(material) 
+                        Ref<MaterialNode> material)
+        : Node(true), time_range(0.0f,1.0f), texcoords(texcoords), triangles(triangles), material(material)
       {
         positions.push_back(positions_in);
         normals.push_back(normals_in);
       }
 
-      TriangleMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0) 
-        : Node(true), time_range(time_range), material(material) 
+      TriangleMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0)
+        : Node(true), time_range(time_range), material(material)
       {
         for (size_t i=0; i<numTimeSteps; i++)
           positions.push_back(avector<Vertex>());
@@ -651,7 +651,7 @@ namespace embree
           positions(transformMSMBlurBuffer(imesh->positions,spaces)),
           normals(transformMSMBlurNormalBuffer(imesh->normals,spaces)),
           texcoords(imesh->texcoords), triangles(imesh->triangles), material(imesh->material) {}
-      
+
       virtual void setMaterial(Ref<MaterialNode> material) {
         this->material = material;
       }
@@ -698,7 +698,7 @@ namespace embree
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();
-      
+
     public:
       BBox1f time_range;
       std::vector<avector<Vertex>> positions;
@@ -717,15 +717,15 @@ namespace embree
       {
       public:
         Quad() {}
-        Quad (unsigned int v0, unsigned int v1, unsigned int v2, unsigned int v3) 
+        Quad (unsigned int v0, unsigned int v1, unsigned int v2, unsigned int v3)
         : v0(v0), v1(v1), v2(v2), v3(v3) {}
       public:
         unsigned int v0, v1, v2, v3;
       };
-      
+
     public:
-      QuadMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0 ) 
-        : Node(true), time_range(time_range), material(material) 
+      QuadMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0 )
+        : Node(true), time_range(time_range), material(material)
       {
         for (size_t i=0; i<numTimeSteps; i++)
           positions.push_back(avector<Vertex>());
@@ -737,7 +737,7 @@ namespace embree
           positions(transformMSMBlurBuffer(imesh->positions,spaces)),
           normals(transformMSMBlurNormalBuffer(imesh->normals,spaces)),
           texcoords(imesh->texcoords), quads(imesh->quads), material(imesh->material) {}
-   
+
       virtual void setMaterial(Ref<MaterialNode> material) {
         this->material = material;
       }
@@ -761,7 +761,7 @@ namespace embree
         }
         return LBBox3fa(bboxes);
       }
-      
+
       virtual size_t numPrimitives() const {
         return quads.size();
       }
@@ -778,13 +778,13 @@ namespace embree
       size_t numBytes() const {
         return numPrimitives()*sizeof(Quad) + numVertices()*numTimeSteps()*sizeof(Vertex);
       }
-      
+
       void verify() const;
 
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();
-            
+
     public:
       BBox1f time_range;
       std::vector<avector<Vertex>> positions;
@@ -799,13 +799,13 @@ namespace embree
     {
       typedef Vec3fa Vertex;
 
-      SubdivMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0) 
+      SubdivMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0)
         : Node(true),
           time_range(time_range),
-          position_subdiv_mode(RTC_SUBDIVISION_MODE_SMOOTH_BOUNDARY), 
+          position_subdiv_mode(RTC_SUBDIVISION_MODE_SMOOTH_BOUNDARY),
           normal_subdiv_mode(RTC_SUBDIVISION_MODE_SMOOTH_BOUNDARY),
           texcoord_subdiv_mode(RTC_SUBDIVISION_MODE_SMOOTH_BOUNDARY),
-          material(material), tessellationRate(2.0f) 
+          material(material), tessellationRate(2.0f)
       {
         for (size_t i=0; i<numTimeSteps; i++)
           positions.push_back(avector<Vertex>());
@@ -821,7 +821,7 @@ namespace embree
         position_indices(imesh->position_indices),
         normal_indices(imesh->normal_indices),
         texcoord_indices(imesh->texcoord_indices),
-        position_subdiv_mode(imesh->position_subdiv_mode), 
+        position_subdiv_mode(imesh->position_subdiv_mode),
         normal_subdiv_mode(imesh->normal_subdiv_mode),
         texcoord_subdiv_mode(imesh->texcoord_subdiv_mode),
         verticesPerFace(imesh->verticesPerFace),
@@ -830,7 +830,7 @@ namespace embree
         edge_crease_weights(imesh->edge_crease_weights),
         vertex_creases(imesh->vertex_creases),
         vertex_crease_weights(imesh->vertex_crease_weights),
-        material(imesh->material), 
+        material(imesh->material),
         tessellationRate(imesh->tessellationRate)
       {
         zero_pad_arrays();
@@ -843,7 +843,7 @@ namespace embree
           texcoords.data()[texcoords.size()] = zero;
         }
       }
-      
+
       virtual void setMaterial(Ref<MaterialNode> material) {
         this->material = material;
       }
@@ -893,7 +893,7 @@ namespace embree
       size_t numBytes() const {
         return numPrimitives()*sizeof(unsigned) + numEdges()*sizeof(unsigned) + numPositions()*numTimeSteps()*sizeof(Vertex);
       }
-      
+
       void verify() const;
 
       virtual void calculateStatistics(Statistics& stat);
@@ -908,12 +908,12 @@ namespace embree
       std::vector<unsigned> position_indices;        //!< position indices for all faces
       std::vector<unsigned> normal_indices;          //!< normal indices for all faces
       std::vector<unsigned> texcoord_indices;        //!< texcoord indices for all faces
-      RTCSubdivisionMode position_subdiv_mode;  
+      RTCSubdivisionMode position_subdiv_mode;
       RTCSubdivisionMode normal_subdiv_mode;
       RTCSubdivisionMode texcoord_subdiv_mode;
       std::vector<unsigned> verticesPerFace;         //!< number of indices of each face
       std::vector<unsigned> holes;                   //!< face ID of holes
-      std::vector<Vec2i> edge_creases;          //!< index pairs for edge crease 
+      std::vector<Vec2i> edge_creases;          //!< index pairs for edge crease
       std::vector<float> edge_crease_weights;   //!< weight for each edge crease
       std::vector<unsigned> vertex_creases;          //!< indices of vertex creases
       std::vector<float> vertex_crease_weights; //!< weight for each vertex crease
@@ -930,12 +930,12 @@ namespace embree
       {
       public:
         Hair () {}
-        Hair (unsigned vertex, unsigned id) 
+        Hair (unsigned vertex, unsigned id)
         : vertex(vertex), id(id) {}
       public:
         unsigned vertex, id;  //!< index of first control point and hair ID
       };
-      
+
     public:
       HairSetNode (RTCGeometryType type, Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0)
         : Node(true), time_range(time_range), type(type), material(material), tessellation_rate(4)
@@ -949,7 +949,7 @@ namespace embree
       {
         positions.push_back(positions_in);
       }
-   
+
       HairSetNode (Ref<SceneGraph::HairSetNode> imesh, const Transformations& spaces)
         : Node(true),
         time_range(imesh->time_range),
@@ -1128,10 +1128,10 @@ namespace embree
         unsigned int lineStride;
         unsigned short resX,resY;
       };
-      
+
     public:
-      GridMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0) 
-        : Node(true), time_range(time_range), material(material) 
+      GridMeshNode (Ref<MaterialNode> material, const BBox1f time_range = BBox1f(0,1), size_t numTimeSteps = 0)
+        : Node(true), time_range(time_range), material(material)
       {
         for (size_t i=0; i<numTimeSteps; i++)
           positions.push_back(avector<Vertex>());
@@ -1142,7 +1142,7 @@ namespace embree
          time_range(imesh->time_range),
           positions(transformMSMBlurBuffer(imesh->positions,spaces)),
         grids(imesh->grids), material(imesh->material) {}
-   
+
       virtual void setMaterial(Ref<MaterialNode> material) {
         this->material = material;
       }
@@ -1166,7 +1166,7 @@ namespace embree
         }
         return LBBox3fa(bboxes);
       }
-      
+
       virtual size_t numPrimitives() const {
         return grids.size();
       }
@@ -1192,12 +1192,12 @@ namespace embree
 
     public:
       BBox1f time_range;
-      std::vector<avector<Vertex>> positions; 
+      std::vector<avector<Vertex>> positions;
       std::vector<Grid> grids;
       Ref<MaterialNode> material;
     };
 
-    
+
     enum InstancingMode { INSTANCING_NONE, INSTANCING_GEOMETRY, INSTANCING_GROUP, INSTANCING_FLATTENED };
     Ref<Node> flatten(Ref<Node> node, InstancingMode mode);
     Ref<GroupNode> flatten(Ref<GroupNode> node, InstancingMode mode);
@@ -1220,4 +1220,3 @@ namespace embree
 }
 
 #include "materials.h"
-

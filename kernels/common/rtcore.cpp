@@ -578,17 +578,17 @@ rtcSetGeometryTransform(RTCGeometry hgeometry,
     RTC_CATCH_END2(geometry);
   }
 
-  RTC_API void rtcFilterIntersection(const struct RTCIntersectFunctionNArguments* const args_i, const struct RTCFilterFunctionNArguments* filter_args)
-  {
-    IntersectFunctionNArguments* args = (IntersectFunctionNArguments*) args_i;
-    args->report(args,filter_args);
-  }
+// RTC_API void rtcFilterIntersection(const struct RTCIntersectFunctionNArguments* const args_i, const struct RTCFilterFunctionNArguments* filter_args)
+// {
+//     IntersectFunctionNArguments* args = (IntersectFunctionNArguments*) args_i;
+//     args->report(args,filter_args);
+// }
 
-  RTC_API void rtcFilterOcclusion(const struct RTCOccludedFunctionNArguments* const args_i, const struct RTCFilterFunctionNArguments* filter_args)
-  {
-    OccludedFunctionNArguments* args = (OccludedFunctionNArguments*) args_i;
-    args->report(args,filter_args);
-  }
+  // RTC_API void rtcFilterOcclusion(const struct RTCOccludedFunctionNArguments* const args_i, const struct RTCFilterFunctionNArguments* filter_args)
+  // {
+  //   OccludedFunctionNArguments* args = (OccludedFunctionNArguments*) args_i;
+  //   args->report(args,filter_args);
+  // }
 
 RTC_API RTCGeometry
 rtcNewGeometry(RTCDevice hdevice, RTCGeometryType type)
@@ -655,54 +655,6 @@ rtcNewGeometry(RTCDevice hdevice, RTCGeometryType type)
         throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_POINT is not supported");
 #endif
     }
-
-    case RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE:
-
-    case RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE:
-    case RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE:
-    case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BEZIER_CURVE:
-
-    case RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE:
-    case RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE:
-    case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BSPLINE_CURVE:
-
-    case RTC_GEOMETRY_TYPE_ROUND_HERMITE_CURVE:
-    case RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE:
-    case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE:
-    {
-#if defined(EMBREE_GEOMETRY_CURVE)
-        createLineSegmentsTy createLineSegments = nullptr;
-        SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(
-            device->enabled_cpu_features,createLineSegments);
-        createCurvesTy createCurves = nullptr;
-        SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(
-            device->enabled_cpu_features,createCurves);
-
-      Geometry* geom;
-      switch (type) {
-      //case RTC_GEOMETRY_TYPE_ROUND_LINEAR_CURVE            : geom = createLineSegments (device,Geometry::GTY_ROUND_LINEAR_CURVE); break;
-      case RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE             : geom = createLineSegments (device,Geometry::GTY_FLAT_LINEAR_CURVE); break;
-      //case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_LINEAR_CURVE  : geom = createLineSegments (device,Geometry::GTY_ORIENTED_LINEAR_CURVE); break;
-
-      case RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE            : geom = createCurves(device,Geometry::GTY_ROUND_BEZIER_CURVE); break;
-      case RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE             : geom = createCurves(device,Geometry::GTY_FLAT_BEZIER_CURVE); break;
-      case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BEZIER_CURVE  : geom = createCurves(device,Geometry::GTY_ORIENTED_BEZIER_CURVE); break;
-
-      case RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE           : geom = createCurves(device,Geometry::GTY_ROUND_BSPLINE_CURVE); break;
-      case RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE            : geom = createCurves(device,Geometry::GTY_FLAT_BSPLINE_CURVE); break;
-      case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BSPLINE_CURVE : geom = createCurves(device,Geometry::GTY_ORIENTED_BSPLINE_CURVE); break;
-
-      case RTC_GEOMETRY_TYPE_ROUND_HERMITE_CURVE           : geom = createCurves(device,Geometry::GTY_ROUND_HERMITE_CURVE); break;
-      case RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE            : geom = createCurves(device,Geometry::GTY_FLAT_HERMITE_CURVE); break;
-      case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE : geom = createCurves(device,Geometry::GTY_ORIENTED_HERMITE_CURVE); break;
-      default:                                    geom = nullptr; break;
-      }
-      return (RTCGeometry) geom->refInc();
-#else
-      throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_CURVE is not supported");
-#endif
-    }
-
     case RTC_GEOMETRY_TYPE_SUBDIVISION:
     {
 #if defined(EMBREE_GEOMETRY_SUBDIVISION)

@@ -504,26 +504,6 @@ SceneLoadingTutorialApplication::SceneLoadingTutorialApplication (
         scene->add(SceneGraph::createSubdivPlane(p0,dx,dy,width,height,tessellationRate,new OBJMaterial));
       }, "--subdiv-plane p.x p.y p.z dx.x dx.y dx.z dy.x dy.y dy.z width height tessellationRate: adds a plane build as a Catmull Clark subdivision surface originated at p0 and spanned by the vectors dx and dy. The plane consists of widt x height many patches, and each patch has the specified tesselation rate.");
 
-    registerOption("hair-plane", [this] (Ref<ParseStream> cin, const FileName& path) {
-        const Vec3fa p0 = cin->getVec3fa();
-        const Vec3fa dx = cin->getVec3fa();
-        const Vec3fa dy = cin->getVec3fa();
-        const float len = cin->getFloat();
-        const float r = cin->getFloat();
-        const size_t N = cin->getInt();
-        scene->add(SceneGraph::createHairyPlane(0,p0,dx,dy,len,r,N,SceneGraph::FLAT_CURVE,new OBJMaterial));
-      }, "--hair-plane p.x p.y p.z dx.x dx.y dx.z dy.x dy.y dy.z length radius num: adds a hair plane originated at p0 and spanned by the vectors dx and dy. num hairs are generated with speficied length and radius.");
-
-    registerOption("curve-plane", [this] (Ref<ParseStream> cin, const FileName& path) {
-        const Vec3fa p0 = cin->getVec3fa();
-        const Vec3fa dx = cin->getVec3fa();
-        const Vec3fa dy = cin->getVec3fa();
-        const float len = cin->getFloat();
-        const float r = cin->getFloat();
-        const size_t N = cin->getInt();
-        scene->add(SceneGraph::createHairyPlane(0,p0,dx,dy,len,r,N,SceneGraph::ROUND_CURVE,new OBJMaterial));
-      }, "--curve-plane p.x p.y p.z dx.x dx.y dx.z dy.x dy.y dy.z length radius: adds a plane build of bezier curves originated at p0 and spanned by the vectors dx and dy. num curves are generated with speficied length and radius.");
-
     registerOption("triangle-sphere", [this] (Ref<ParseStream> cin, const FileName& path) {
         const Vec3fa p = cin->getVec3fa();
         const float  r = cin->getFloat();
@@ -1195,12 +1175,6 @@ int SceneLoadingTutorialApplication::main(int argc, char** argv)
     {
         switch (op) {
         case CONVERT_TRIANGLES_TO_QUADS   : scene->triangles_to_quads(convert_tris_to_quads_prop); break;
-        case CONVERT_BEZIER_TO_LINES      : scene->bezier_to_lines(); break;
-        case CONVERT_BEZIER_TO_BSPLINE    : scene->bezier_to_bspline(); break;
-        case CONVERT_BSPLINE_TO_BEZIER    : scene->bspline_to_bezier(); break;
-        case CONVERT_BEZIER_TO_HERMITE    : scene->bezier_to_hermite(); break;
-        case CONVERT_FLAT_TO_ROUND_CURVES : scene->flat_to_round_curves(); break;
-        case CONVERT_ROUND_TO_FLAT_CURVES : scene->round_to_flat_curves(); break;
         case MERGE_QUADS_TO_GRIDS         : scene->merge_quads_to_grids(); break;
         case CONVERT_QUADS_TO_GRIDS       : scene->quads_to_grids(grid_resX,grid_resY); break;
         case CONVERT_GRIDS_TO_QUADS       : scene->grids_to_quads(); break;

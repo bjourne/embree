@@ -19,20 +19,6 @@ enum RTCGeometryType
 
     RTC_GEOMETRY_TYPE_SUBDIVISION = 8, // Catmull-Clark subdivision surface
 
-    RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE   = 17, // flat (ribbon-like) linear curves
-
-    RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE  = 24, // round (tube-like) Bezier curves
-    RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE   = 25, // flat (ribbon-like) Bezier curves
-    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BEZIER_CURVE  = 26, // flat normal-oriented Bezier curves
-
-    RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE = 32, // round (tube-like) B-spline curves
-    RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE  = 33, // flat (ribbon-like) B-spline curves
-    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BSPLINE_CURVE  = 34, // flat normal-oriented B-spline curves
-
-    RTC_GEOMETRY_TYPE_ROUND_HERMITE_CURVE = 40, // round (tube-like) Hermite curves
-    RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE  = 41, // flat (ribbon-like) Hermite curves
-    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE  = 42, // flat normal-oriented Hermite curves
-
     RTC_GEOMETRY_TYPE_SPHERE_POINT = 50,
     RTC_GEOMETRY_TYPE_DISC_POINT = 51,
     RTC_GEOMETRY_TYPE_ORIENTED_DISC_POINT = 52,
@@ -196,17 +182,17 @@ rtcSetGeometryIntersectFunction(RTCGeometry geometry,
                                 RTCIntersectFunctionN intersect);
 
 /* Set the occlusion callback function of a user geometry. */
-RTC_API void rtcSetGeometryOccludedFunction(RTCGeometry geometry, RTCOccludedFunctionN occluded);
+RTC_API void
+rtcSetGeometryOccludedFunction(RTCGeometry geometry,
+                               RTCOccludedFunctionN occluded);
 
-/* Invokes the intersection filter from the intersection callback function. */
-RTC_API void rtcFilterIntersection(const struct RTCIntersectFunctionNArguments* args, const struct RTCFilterFunctionNArguments* filterArgs);
-
-/* Invokes the occlusion filter from the occlusion callback function. */
-RTC_API void rtcFilterOcclusion(const struct RTCOccludedFunctionNArguments* args, const struct RTCFilterFunctionNArguments* filterArgs);
+// /* Invokes the occlusion filter from the occlusion callback function. */
+// RTC_API void rtcFilterOcclusion(const struct RTCOccludedFunctionNArguments* args, const struct RTCFilterFunctionNArguments* filterArgs);
 
 
 /* Sets the instanced scene of an instance geometry. */
-RTC_API void rtcSetGeometryInstancedScene(RTCGeometry geometry, RTCScene scene);
+RTC_API void
+rtcSetGeometryInstancedScene(RTCGeometry geometry, RTCScene scene);
 
 /* Sets the transformation of an instance for the specified time step. */
 RTC_API void rtcSetGeometryTransform(RTCGeometry geometry, unsigned int timeStep, enum RTCFormat format, const void* xfm);

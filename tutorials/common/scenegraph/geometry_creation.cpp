@@ -69,9 +69,9 @@ namespace embree
         size_t p01 = (y+0)*(width+1)+(x+1);
         size_t p10 = (y+1)*(width+1)+(x+0);
         size_t p11 = (y+1)*(width+1)+(x+1);
-        mesh->quads[i].v0 = unsigned(p00); 
-        mesh->quads[i].v1 = unsigned(p01); 
-        mesh->quads[i].v2 = unsigned(p11); 
+        mesh->quads[i].v0 = unsigned(p00);
+        mesh->quads[i].v1 = unsigned(p01);
+        mesh->quads[i].v2 = unsigned(p11);
         mesh->quads[i].v3 = unsigned(p10);
       }
     }
@@ -120,9 +120,9 @@ namespace embree
         size_t p01 = (y+0)*(width+1)+(x+1);
         size_t p10 = (y+1)*(width+1)+(x+0);
         size_t p11 = (y+1)*(width+1)+(x+1);
-        mesh->position_indices[4*i+0] = unsigned(p00); 
-        mesh->position_indices[4*i+1] = unsigned(p01); 
-        mesh->position_indices[4*i+2] = unsigned(p11); 
+        mesh->position_indices[4*i+0] = unsigned(p00);
+        mesh->position_indices[4*i+1] = unsigned(p01);
+        mesh->position_indices[4*i+2] = unsigned(p11);
         mesh->position_indices[4*i+3] = unsigned(p10);
         mesh->verticesPerFace[i] = 4;
       }
@@ -153,10 +153,10 @@ namespace embree
 	mesh->positions[0][phi*numTheta+theta].z = center.z + radius*sin(phif)*cos(thetaf);
       }
       if (phi == 0) continue;
-      
+
       if (phi == 1)
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = numTheta-1;
 	  unsigned int p10 = phi*numTheta+theta-1;
@@ -166,7 +166,7 @@ namespace embree
       }
       else if (phi == numPhi)
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = (phi-1)*numTheta+theta-1;
 	  unsigned int p01 = (phi-1)*numTheta+theta%numTheta;
@@ -176,7 +176,7 @@ namespace embree
       }
       else
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = (phi-1)*numTheta+theta-1;
 	  unsigned int p01 = (phi-1)*numTheta+theta%numTheta;
@@ -212,10 +212,10 @@ namespace embree
 	mesh->positions[0][phi*numTheta+theta].z = center.z + radius*sin(phif)*cos(thetaf);
       }
       if (phi == 0) continue;
-      
+
       if (phi == 1)
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = numTheta-1;
 	  unsigned int p10 = phi*numTheta+theta-1;
@@ -225,7 +225,7 @@ namespace embree
       }
       else if (phi == numPhi)
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = (phi-1)*numTheta+theta-1;
 	  unsigned int p01 = (phi-1)*numTheta+theta%numTheta;
@@ -235,7 +235,7 @@ namespace embree
       }
       else
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = (phi-1)*numTheta+theta-1;
 	  unsigned int p01 = (phi-1)*numTheta+theta%numTheta;
@@ -267,7 +267,7 @@ namespace embree
       case 5: p0 = Vec3fa(-0.5f,+0.5f,-0.5f); dx = Vec3fa( 1,0, 0); dy = Vec3fa(0,0,1); break;
       default: assert(false);
       }
-      
+
       for (size_t y=0; y<=N; y++) {
         for (size_t x=0; x<=N; x++) {
           size_t j = i*grid_size + y*(N+1) + x;
@@ -302,10 +302,10 @@ namespace embree
 	mesh->positions[0][phi*numTheta+theta].z = center.z + radius*sin(phif)*cos(thetaf);
       }
       if (phi == 0) continue;
-      
+
       if (phi == 1)
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = numTheta-1;
 	  unsigned int p10 = phi*numTheta+theta-1;
@@ -318,7 +318,7 @@ namespace embree
       }
       else if (phi == numPhi)
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = (phi-1)*numTheta+theta-1;
 	  unsigned int p01 = (phi-1)*numTheta+theta%numTheta;
@@ -331,7 +331,7 @@ namespace embree
       }
       else
       {
-	for (unsigned int theta=1; theta<=numTheta; theta++) 
+	for (unsigned int theta=1; theta<=numTheta; theta++)
 	{
 	  unsigned int p00 = (phi-1)*numTheta+theta-1;
 	  unsigned int p01 = (phi-1)*numTheta+theta%numTheta;
@@ -345,17 +345,6 @@ namespace embree
 	}
       }
     }
-    return mesh.dynamicCast<SceneGraph::Node>();
-  }
-
-  Ref<SceneGraph::Node> SceneGraph::createSphereShapedHair(const Vec3fa& center, const float radius, Ref<MaterialNode> material)
-  {
-    Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE,material,BBox1f(0,1),1);
-    mesh->hairs.push_back(SceneGraph::HairSetNode::Hair(0,0));
-    mesh->positions[0].push_back(Vec3fa(center+Vec3fa(-radius,0,0),radius));
-    mesh->positions[0].push_back(Vec3fa(center+Vec3fa(0,0,0),radius));
-    mesh->positions[0].push_back(Vec3fa(center+Vec3fa(0,0,0),radius));
-    mesh->positions[0].push_back(Vec3fa(center+Vec3fa(+radius,0,0),radius));
     return mesh.dynamicCast<SceneGraph::Node>();
   }
 
@@ -407,42 +396,42 @@ namespace embree
     return mesh.dynamicCast<SceneGraph::Node>();
   }
 
-  Ref<SceneGraph::Node> SceneGraph::createHairyPlane (int hash, const Vec3fa& pos, const Vec3fa& dx, const Vec3fa& dy, const float len, const float r, size_t numHairs, CurveSubtype subtype, Ref<MaterialNode> material)
-  {
-    RandomSampler sampler;
-    RandomSampler_init(sampler,hash);
+  // Ref<SceneGraph::Node> SceneGraph::createHairyPlane (int hash, const Vec3fa& pos, const Vec3fa& dx, const Vec3fa& dy, const float len, const float r, size_t numHairs, CurveSubtype subtype, Ref<MaterialNode> material)
+  // {
+  //   RandomSampler sampler;
+  //   RandomSampler_init(sampler,hash);
 
-    RTCGeometryType type = (subtype == ROUND_CURVE) ? RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE : RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE;
-    Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(type,material,BBox1f(0,1),1);
+  //   RTCGeometryType type = (subtype == ROUND_CURVE) ? RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE : RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE;
+  //   Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(type,material,BBox1f(0,1),1);
 
-    if (numHairs == 1) {
-      const Vec3fa p0 = pos;
-      const Vec3fa p1 = p0 + len*Vec3fa(1,0,0);
-      const Vec3fa p2 = p0 + len*Vec3fa(0,1,1);
-      const Vec3fa p3 = p0 + len*Vec3fa(0,1,0);
-      mesh->hairs.push_back(HairSetNode::Hair(0,0));
-      mesh->positions[0].push_back(Vec3fa(p0,r));
-      mesh->positions[0].push_back(Vec3fa(p1,r));
-      mesh->positions[0].push_back(Vec3fa(p2,r));
-      mesh->positions[0].push_back(Vec3fa(p3,r));
-      return mesh.dynamicCast<SceneGraph::Node>();
-    }
+  //   if (numHairs == 1) {
+  //     const Vec3fa p0 = pos;
+  //     const Vec3fa p1 = p0 + len*Vec3fa(1,0,0);
+  //     const Vec3fa p2 = p0 + len*Vec3fa(0,1,1);
+  //     const Vec3fa p3 = p0 + len*Vec3fa(0,1,0);
+  //     mesh->hairs.push_back(HairSetNode::Hair(0,0));
+  //     mesh->positions[0].push_back(Vec3fa(p0,r));
+  //     mesh->positions[0].push_back(Vec3fa(p1,r));
+  //     mesh->positions[0].push_back(Vec3fa(p2,r));
+  //     mesh->positions[0].push_back(Vec3fa(p3,r));
+  //     return mesh.dynamicCast<SceneGraph::Node>();
+  //   }
 
-    Vec3fa dz = cross(dx,dy);
-    for (size_t i=0; i<numHairs; i++) 
-    {
-      const Vec3fa p0 = pos + RandomSampler_getFloat(sampler)*dx + RandomSampler_getFloat(sampler)*dy;
-      const Vec3fa p1 = p0 + len*normalize(dx);
-      const Vec3fa p2 = p0 + len*(normalize(dz)+normalize(dy));
-      const Vec3fa p3 = p0 + len*normalize(dz);
-      mesh->hairs.push_back(HairSetNode::Hair(unsigned(4*i),unsigned(i)));
-      mesh->positions[0].push_back(Vec3fa(p0,r));
-      mesh->positions[0].push_back(Vec3fa(p1,r));
-      mesh->positions[0].push_back(Vec3fa(p2,r));
-      mesh->positions[0].push_back(Vec3fa(p3,r));
-    }
-    return mesh.dynamicCast<SceneGraph::Node>();
-  }
+  //   Vec3fa dz = cross(dx,dy);
+  //   for (size_t i=0; i<numHairs; i++)
+  //   {
+  //     const Vec3fa p0 = pos + RandomSampler_getFloat(sampler)*dx + RandomSampler_getFloat(sampler)*dy;
+  //     const Vec3fa p1 = p0 + len*normalize(dx);
+  //     const Vec3fa p2 = p0 + len*(normalize(dz)+normalize(dy));
+  //     const Vec3fa p3 = p0 + len*normalize(dz);
+  //     mesh->hairs.push_back(HairSetNode::Hair(unsigned(4*i),unsigned(i)));
+  //     mesh->positions[0].push_back(Vec3fa(p0,r));
+  //     mesh->positions[0].push_back(Vec3fa(p1,r));
+  //     mesh->positions[0].push_back(Vec3fa(p2,r));
+  //     mesh->positions[0].push_back(Vec3fa(p3,r));
+  //   }
+  //   return mesh.dynamicCast<SceneGraph::Node>();
+  // }
 
   Ref<SceneGraph::Node> SceneGraph::createGarbageTriangleMesh (int hash, size_t numTriangles, bool mblur, Ref<MaterialNode> material)
   {
@@ -467,7 +456,7 @@ namespace embree
       mesh->positions[0][i] = Vec3fa(x,y,z,w);
     }
 
-    if (mblur) 
+    if (mblur)
     {
       mesh->positions[1].resize(3*numTriangles);
       for (size_t i=0; i<3*numTriangles; i++) {
@@ -506,7 +495,7 @@ namespace embree
       mesh->positions[0][i] = Vec3fa(x,y,z,w);
     }
 
-    if (mblur) 
+    if (mblur)
     {
       mesh->positions[1].resize(4*numQuads);
       for (size_t i=0; i<4*numQuads; i++) {
@@ -542,7 +531,7 @@ namespace embree
       mesh->positions[0][i] = Vec3fa(x,y,z,w);
     }
 
-    if (mblur) 
+    if (mblur)
     {
       mesh->positions[1].resize(4*numGrids);
       for (size_t i=0; i<4*numGrids; i++) {
@@ -557,77 +546,77 @@ namespace embree
     return mesh.dynamicCast<SceneGraph::Node>();
   }
 
-  Ref<SceneGraph::Node> SceneGraph::createGarbageLineSegments (int hash, size_t numLineSegments, bool mblur, Ref<MaterialNode> material)
-  {
-    RandomSampler sampler;
-    RandomSampler_init(sampler,hash);
-    Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE,material,BBox1f(0,1),mblur?2:1);
+  // Ref<SceneGraph::Node> SceneGraph::createGarbageLineSegments (int hash, size_t numLineSegments, bool mblur, Ref<MaterialNode> material)
+  // {
+  //   RandomSampler sampler;
+  //   RandomSampler_init(sampler,hash);
+  //   Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE,material,BBox1f(0,1),mblur?2:1);
 
-    mesh->hairs.resize(numLineSegments);
-    for (size_t i=0; i<numLineSegments; i++) {
-      mesh->hairs[i].vertex = (RandomSampler_getInt(sampler) % 32 == 0) ? RandomSampler_getUInt(sampler) : unsigned(2*i);
-      mesh->hairs[i].id = 0;
-    }
+  //   mesh->hairs.resize(numLineSegments);
+  //   for (size_t i=0; i<numLineSegments; i++) {
+  //     mesh->hairs[i].vertex = (RandomSampler_getInt(sampler) % 32 == 0) ? RandomSampler_getUInt(sampler) : unsigned(2*i);
+  //     mesh->hairs[i].id = 0;
+  //   }
 
-    mesh->positions[0].resize(2*numLineSegments);
-    for (size_t i=0; i<2*numLineSegments; i++) {
-      const float x = cast_i2f(RandomSampler_getUInt(sampler));
-      const float y = cast_i2f(RandomSampler_getUInt(sampler));
-      const float z = cast_i2f(RandomSampler_getUInt(sampler));
-      const float r = cast_i2f(RandomSampler_getUInt(sampler));
-      mesh->positions[0][i] = Vec3fa(x,y,z,r);
-    }
+  //   mesh->positions[0].resize(2*numLineSegments);
+  //   for (size_t i=0; i<2*numLineSegments; i++) {
+  //     const float x = cast_i2f(RandomSampler_getUInt(sampler));
+  //     const float y = cast_i2f(RandomSampler_getUInt(sampler));
+  //     const float z = cast_i2f(RandomSampler_getUInt(sampler));
+  //     const float r = cast_i2f(RandomSampler_getUInt(sampler));
+  //     mesh->positions[0][i] = Vec3fa(x,y,z,r);
+  //   }
 
-    if (mblur) 
-    {
-      mesh->positions[1].resize(2*numLineSegments);
-      for (size_t i=0; i<2*numLineSegments; i++) {
-        const float x = cast_i2f(RandomSampler_getUInt(sampler));
-        const float y = cast_i2f(RandomSampler_getUInt(sampler));
-        const float z = cast_i2f(RandomSampler_getUInt(sampler));
-        const float r = cast_i2f(RandomSampler_getUInt(sampler));
-        mesh->positions[1][i] = Vec3fa(x,y,z,r);
-      }
-    }
+  //   if (mblur)
+  //   {
+  //     mesh->positions[1].resize(2*numLineSegments);
+  //     for (size_t i=0; i<2*numLineSegments; i++) {
+  //       const float x = cast_i2f(RandomSampler_getUInt(sampler));
+  //       const float y = cast_i2f(RandomSampler_getUInt(sampler));
+  //       const float z = cast_i2f(RandomSampler_getUInt(sampler));
+  //       const float r = cast_i2f(RandomSampler_getUInt(sampler));
+  //       mesh->positions[1][i] = Vec3fa(x,y,z,r);
+  //     }
+  //   }
 
-    return mesh.dynamicCast<SceneGraph::Node>();
-  }
+  //   return mesh.dynamicCast<SceneGraph::Node>();
+  // }
 
-  Ref<SceneGraph::Node> SceneGraph::createGarbageHair (int hash, size_t numHairs, bool mblur, Ref<MaterialNode> material)
-  {
-    RandomSampler sampler;
-    RandomSampler_init(sampler,hash);
-    Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE,material,BBox1f(0,1),mblur?2:1);
+  // Ref<SceneGraph::Node> SceneGraph::createGarbageHair (int hash, size_t numHairs, bool mblur, Ref<MaterialNode> material)
+  // {
+  //   RandomSampler sampler;
+  //   RandomSampler_init(sampler,hash);
+  //   Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE,material,BBox1f(0,1),mblur?2:1);
 
-    mesh->hairs.resize(numHairs);
-    for (size_t i=0; i<numHairs; i++) {
-      const unsigned v0 = (RandomSampler_getInt(sampler) % 32 == 0) ? RandomSampler_getUInt(sampler) : unsigned(4*i);
-      mesh->hairs[i] = HairSetNode::Hair(v0,0);
-    }
+  //   mesh->hairs.resize(numHairs);
+  //   for (size_t i=0; i<numHairs; i++) {
+  //     const unsigned v0 = (RandomSampler_getInt(sampler) % 32 == 0) ? RandomSampler_getUInt(sampler) : unsigned(4*i);
+  //     mesh->hairs[i] = HairSetNode::Hair(v0,0);
+  //   }
 
-    mesh->positions[0].resize(4*numHairs);
-    for (size_t i=0; i<4*numHairs; i++) {
-      const float x = cast_i2f(RandomSampler_getUInt(sampler));
-      const float y = cast_i2f(RandomSampler_getUInt(sampler));
-      const float z = cast_i2f(RandomSampler_getUInt(sampler));
-      const float r = cast_i2f(RandomSampler_getUInt(sampler));
-      mesh->positions[0][i] = Vec3fa(x,y,z,r);
-    }
+  //   mesh->positions[0].resize(4*numHairs);
+  //   for (size_t i=0; i<4*numHairs; i++) {
+  //     const float x = cast_i2f(RandomSampler_getUInt(sampler));
+  //     const float y = cast_i2f(RandomSampler_getUInt(sampler));
+  //     const float z = cast_i2f(RandomSampler_getUInt(sampler));
+  //     const float r = cast_i2f(RandomSampler_getUInt(sampler));
+  //     mesh->positions[0][i] = Vec3fa(x,y,z,r);
+  //   }
 
-    if (mblur) 
-    {
-      mesh->positions[1].resize(4*numHairs);
-      for (size_t i=0; i<4*numHairs; i++) {
-        const float x = cast_i2f(RandomSampler_getUInt(sampler));
-        const float y = cast_i2f(RandomSampler_getUInt(sampler));
-        const float z = cast_i2f(RandomSampler_getUInt(sampler));
-        const float r = cast_i2f(RandomSampler_getUInt(sampler));
-        mesh->positions[1][i] = Vec3fa(x,y,z,r);
-      }
-    }
+  //   if (mblur)
+  //   {
+  //     mesh->positions[1].resize(4*numHairs);
+  //     for (size_t i=0; i<4*numHairs; i++) {
+  //       const float x = cast_i2f(RandomSampler_getUInt(sampler));
+  //       const float y = cast_i2f(RandomSampler_getUInt(sampler));
+  //       const float z = cast_i2f(RandomSampler_getUInt(sampler));
+  //       const float r = cast_i2f(RandomSampler_getUInt(sampler));
+  //       mesh->positions[1][i] = Vec3fa(x,y,z,r);
+  //     }
+  //   }
 
-    return mesh.dynamicCast<SceneGraph::Node>();
-  }
+  //   return mesh.dynamicCast<SceneGraph::Node>();
+  // }
 
   Ref<SceneGraph::Node> SceneGraph::createGarbageSubdivMesh (int hash, size_t numFaces, bool mblur, Ref<MaterialNode> material)
   {
@@ -635,11 +624,11 @@ namespace embree
     RandomSampler_init(sampler,hash);
     Ref<SceneGraph::SubdivMeshNode> mesh = new SceneGraph::SubdivMeshNode(material,BBox1f(0,1),mblur?2:1);
 
-    for (size_t i=0; i<numFaces; i++) 
+    for (size_t i=0; i<numFaces; i++)
     {
       const unsigned f = RandomSampler_getInt(sampler) % 20;
       mesh->verticesPerFace.push_back(f);
-      for (size_t j=0; j<f; j++) 
+      for (size_t j=0; j<f; j++)
       {
         mesh->position_indices.push_back((RandomSampler_getInt(sampler) % 32 == 0) ? RandomSampler_getUInt(sampler) : unsigned(mesh->numPositions()));
 
@@ -649,7 +638,7 @@ namespace embree
         const float w = cast_i2f(RandomSampler_getUInt(sampler));
         mesh->positions[0].push_back(Vec3fa(x,y,z,w));
 
-        if (mblur) 
+        if (mblur)
         {
           const float x = cast_i2f(RandomSampler_getUInt(sampler));
           const float y = cast_i2f(RandomSampler_getUInt(sampler));

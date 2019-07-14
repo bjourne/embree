@@ -68,22 +68,22 @@ convertTriangleMesh(ISPCTriangleMesh* mesh,
     rtcReleaseGeometry(geom);
   }
 
-  void convertCurveGeometry(ISPCHairSet* hair, RTCScene scene_out, RTCBuildQuality quality)
-  {
-    RTCGeometry geom = rtcNewGeometry (g_device, hair->type);
-    rtcSetGeometryTimeStepCount(geom, hair->numTimeSteps);
-    rtcSetGeometryBuildQuality(geom, quality);
+  // void convertCurveGeometry(ISPCHairSet* hair, RTCScene scene_out, RTCBuildQuality quality)
+  // {
+  //   RTCGeometry geom = rtcNewGeometry (g_device, hair->type);
+  //   rtcSetGeometryTimeStepCount(geom, hair->numTimeSteps);
+  //   rtcSetGeometryBuildQuality(geom, quality);
 
-    for (size_t t=0; t<hair->numTimeSteps; t++) {
-      rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, (unsigned int)t, RTC_FORMAT_FLOAT4, hair->positions[t], 0, sizeof(Vertex), hair->numVertices);
-    }
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT, hair->hairs, 0, sizeof(ISPCHair), hair->numHairs);
-    if (hair->type != RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE)
-      rtcSetGeometryTessellationRate(geom,(float)hair->tessellation_rate);
-    rtcCommitGeometry(geom);
-    hair->geom.geomID = rtcAttachGeometry(scene_out,geom);
-    rtcReleaseGeometry(geom);
-  }
+  //   for (size_t t=0; t<hair->numTimeSteps; t++) {
+  //     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, (unsigned int)t, RTC_FORMAT_FLOAT4, hair->positions[t], 0, sizeof(Vertex), hair->numVertices);
+  //   }
+  //   rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT, hair->hairs, 0, sizeof(ISPCHair), hair->numHairs);
+  //   if (hair->type != RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE)
+  //     rtcSetGeometryTessellationRate(geom,(float)hair->tessellation_rate);
+  //   rtcCommitGeometry(geom);
+  //   hair->geom.geomID = rtcAttachGeometry(scene_out,geom);
+  //   rtcReleaseGeometry(geom);
+  // }
 
   RTCScene createScene(RTCSceneFlags sflags, RTCBuildQuality qflags)
   {
@@ -93,29 +93,26 @@ convertTriangleMesh(ISPCTriangleMesh* mesh,
     return scene_out;
   }
 
-  void convertScene(RTCScene scene_out, ISPCScene* scene_in, RTCBuildQuality quality)
-  {
+void convertScene(RTCScene scene_out, ISPCScene* scene_in, RTCBuildQuality quality)
+{
     size_t numGeometries = scene_in->numGeometries;
 
     for (size_t i=0; i<numGeometries; i++)
     {
-      ISPCGeometry* geometry = scene_in->geometries[i];
-      if (geometry->type == SUBDIV_MESH) {
-        convertSubdivMesh((ISPCSubdivMesh*) geometry, scene_out, quality);
-      }
-      else if (geometry->type == TRIANGLE_MESH) {
-        convertTriangleMesh((ISPCTriangleMesh*) geometry, scene_out, quality);
-      }
-      else if (geometry->type == QUAD_MESH) {
-        convertQuadMesh((ISPCQuadMesh*) geometry, scene_out, quality);
-      }
-      else if (geometry->type == CURVES) {
-        convertCurveGeometry((ISPCHairSet*) geometry, scene_out, quality);
-      }
-      else
-        assert(false);
+        ISPCGeometry* geometry = scene_in->geometries[i];
+        if (geometry->type == SUBDIV_MESH) {
+            convertSubdivMesh((ISPCSubdivMesh*) geometry, scene_out, quality);
+        }
+        else if (geometry->type == TRIANGLE_MESH) {
+            convertTriangleMesh((ISPCTriangleMesh*) geometry, scene_out, quality);
+        }
+        else if (geometry->type == QUAD_MESH) {
+            convertQuadMesh((ISPCQuadMesh*) geometry, scene_out, quality);
+        }
+        else
+            assert(false);
     }
-  }
+}
 
   size_t getNumPrimitives(ISPCScene* scene_in)
   {

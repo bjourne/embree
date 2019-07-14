@@ -1,9 +1,7 @@
 #include "device.h"
 #include "../hash.h"
 #include "scene_triangle_mesh.h"
-#include "scene_user_geometry.h"
 #include "scene_instance.h"
-#include "scene_curves.h"
 #include "scene_subdiv_mesh.h"
 
 #include "../subdiv/tessellation_cache.h"
@@ -19,7 +17,9 @@
 
 namespace embree
 {
-/*! some global variables that can be set via rtcSetParameter1i for debugging purposes */
+
+/*! some global variables that can be set via rtcSetParameter1i for
+    debugging purposes */
 ssize_t Device::debug_int0 = 0;
 ssize_t Device::debug_int1 = 0;
 ssize_t Device::debug_int2 = 0;
@@ -101,8 +101,8 @@ Device::Device (const char* cfg)
     exitTaskingSystem();
   }
 
-  std::string getEnabledTargets()
-  {
+std::string getEnabledTargets()
+{
     std::string v;
 #if defined(EMBREE_TARGET_SSE2)
     v += "SSE2 ";
@@ -123,7 +123,7 @@ Device::Device (const char* cfg)
     v += "AVX512SKX ";
 #endif
     return v;
-  }
+}
 
   std::string getEmbreeFeatures()
   {

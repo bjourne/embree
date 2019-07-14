@@ -32,7 +32,6 @@ SET(EMBREE_LIBRARY_FILES
   common/scene_instance.cpp
   common/scene_triangle_mesh.cpp
   common/scene_quad_mesh.cpp
-  common/scene_curves.cpp
   common/scene_line_segments.cpp
   common/scene_grid_mesh.cpp
   common/scene_points.cpp
@@ -88,7 +87,6 @@ MACRO(embree_files TARGET ISA)
       common/scene_instance.cpp
       common/scene_triangle_mesh.cpp
       common/scene_quad_mesh.cpp
-      common/scene_curves.cpp
       common/scene_line_segments.cpp
       common/scene_grid_mesh.cpp
       common/scene_points.cpp

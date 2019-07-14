@@ -42,7 +42,7 @@ namespace embree
   }
 
   /*! Fill space at the end of the token with 0s. */
-  static inline const char* trimEnd(const char* token) 
+  static inline const char* trimEnd(const char* token)
   {
     if (*token == 0) return token;
     char* pe = (char*) token;
@@ -118,15 +118,15 @@ namespace embree
 
     /*! Constructor. */
     OBJLoader(const FileName& fileName, const bool subdivMode, const bool combineIntoSingleObject);
- 
+
     /*! output model */
     Ref<SceneGraph::GroupNode> group;
-  
+
   private:
 
     /*! file to load */
     FileName path;
-  
+
     /*! load only quads and ignore triangles */
     bool subdivMode;
 
@@ -143,7 +143,7 @@ namespace embree
     std::string curMaterialName;
     Ref<SceneGraph::MaterialNode> curMaterial;
     std::map<std::string, Ref<SceneGraph::MaterialNode> > material;
-    std::map<std::string, std::shared_ptr<Texture>> textureMap; 
+    std::map<std::string, std::shared_ptr<Texture>> textureMap;
 
   private:
     void loadMTL(const FileName& fileName);
@@ -152,13 +152,13 @@ namespace embree
     unsigned int fix_vn(int index);
     void flushFaceGroup();
     void flushTriGroup();
-    void flushHairGroup();
+      //void flushHairGroup();
     Vertex getUInt3(const char*& token);
     uint32_t getVertex(std::map<Vertex,uint32_t>& vertexMap, Ref<SceneGraph::TriangleMeshNode> mesh, const Vertex& i);
     std::shared_ptr<Texture> loadTexture(const FileName& fname);
   };
 
-  OBJLoader::OBJLoader(const FileName &fileName, const bool subdivMode, const bool combineIntoSingleObject) 
+  OBJLoader::OBJLoader(const FileName &fileName, const bool subdivMode, const bool combineIntoSingleObject)
     : group(new SceneGraph::GroupNode), path(fileName.path()), subdivMode(subdivMode)
   {
     /* open file */
@@ -188,14 +188,14 @@ namespace embree
       if (token[0] == 0) continue;
 
       /*! parse position */
-      if (token[0] == 'v' && isSep(token[1])) { 
+      if (token[0] == 'v' && isSep(token[1])) {
         v.push_back(getVec3f(token += 2)); continue;
       }
 
       /* parse normal */
-      if (token[0] == 'v' && token[1] == 'n' && isSep(token[2])) { 
-        vn.push_back(getVec3f(token += 3)); 
-        continue; 
+      if (token[0] == 'v' && token[1] == 'n' && isSep(token[2])) {
+        vn.push_back(getVec3f(token += 3));
+        continue;
       }
 
       /* parse texcoord */
@@ -234,7 +234,7 @@ namespace embree
         for (unsigned int i=0; i<3*N+1; i++) {
           hair.push_back(getVec3fa(token));
         }
-        
+
         for (unsigned int i=0; i<N+1; i++)
         {
           float r = getFloat(token);
@@ -245,7 +245,7 @@ namespace embree
         }
         curGroupHair.push_back(hair);
       }
-      
+
       /*! parse edge crease */
       if (token[0] == 'e' && token[1] == 'c' && isSep(token[2]))
       {
@@ -299,7 +299,7 @@ namespace embree
       : type(NONE), illum(0), d(1.f), Ns(1.f), Ni(1.f), Ka(0.f), Kd(1.f), Ks(0.f), Kt(1.0f),
         roughness(0.0f), coat_eta(1.0f), coat_roughness(0.0f), bump(0.0f), eta(1.4f), k(3.0f) {}
 
-    Ref<SceneGraph::MaterialNode> select() const 
+    Ref<SceneGraph::MaterialNode> select() const
     {
       std::shared_ptr<Texture> nulltex;
       if (type == NONE) {
@@ -354,7 +354,7 @@ namespace embree
   {
     if (textureMap.find(fname.str()) != textureMap.end())
       return textureMap[fname.str()];
-    
+
     return std::shared_ptr<Texture>(Texture::load(path+fname));
   }
 
@@ -386,28 +386,28 @@ namespace embree
       if (token[0] == 0  ) continue; // ignore empty lines
       if (token[0] == '#') continue; // ignore comments
 
-      if (!strncmp(token, "newmtl", 6)) 
+      if (!strncmp(token, "newmtl", 6))
       {
         if (name != "") {
           material[name] = cur.select();
           material[name]->name = name;
         }
-        
+
         parseSep(token+=6);
         name = token;
         cur = ExtObjMaterial();
         continue;
       }
       if (name == "") THROW_RUNTIME_ERROR("invalid material file: newmtl expected first");
-      
-      try 
+
+      try
       {
         if (!strncmp(token, "illum", 5)) { parseSep(token += 5);  continue; }
-        
+
         if (!strncmp(token, "d",  1)) { parseSep(token += 1);  cur.d  = getFloat(token); continue; }
         if (!strncmp(token, "Ns", 2)) { parseSep(token += 2);  cur.Ns = getFloat(token); continue; }
         if (!strncmp(token, "Ni", 2)) { parseSep(token += 2);  cur.Ni = getFloat(token); continue; }
-        
+
         if (!strncmp(token, "map_d", 5) || !strncmp(token, "d_map", 5)) {
           parseSep(token += 5);
           cur.map_d = loadTexture(FileName(token));
@@ -419,7 +419,7 @@ namespace embree
           cur.map_Kd = loadTexture(FileName(token));
           continue;
         }
-        
+
         if (!strncmp(token, "map_Ks", 6) || !strncmp(token, "Ks_map", 6)) { continue; }
         if (!strncmp(token, "map_Tf", 6) || !strncmp(token, "Tf_map", 6)) { continue; }
         if (!strncmp(token, "map_Displ", 9) || !strncmp(token, "Displ_map", 9)) {
@@ -427,12 +427,12 @@ namespace embree
           cur.map_Displ = loadTexture(FileName(token));
           continue;
         }
-        
+
         if (!strncmp(token, "Ka", 2)) { parseSep(token += 2);  cur.Ka = getVec3f(token); continue; }
         if (!strncmp(token, "Kd", 2)) { parseSep(token += 2);  cur.Kd = getVec3f(token); continue; }
         if (!strncmp(token, "Ks", 2)) { parseSep(token += 2);  cur.Ks = getVec3f(token); continue; }
         if (!strncmp(token, "Tf", 2)) { parseSep(token += 2);  cur.Kt = getVec3f(token); continue; }
-        
+
         /* extended OBJ */
         if (!strncmp(token, "type", 4)) {
           parseSep(token += 4); std::string type = token;
@@ -453,7 +453,7 @@ namespace embree
         if (!strncmp(token, "bump",              4)) { parseSep(token +=  4); cur.bump   = getFloat(token); }
         if (!strncmp(token, "eta",               3)) { parseSep(token +=  3); cur.eta = getVec3f(token); }
         if (!strncmp(token, "k",                 1)) { parseSep(token +=  1); cur.k = getVec3f(token); }
-      } 
+      }
       catch (const std::runtime_error e) {
         std::cerr << "Error: " << e.what() << std::endl;
       }
@@ -506,10 +506,10 @@ namespace embree
   {
     const std::map<Vertex, uint32_t>::iterator& entry = vertexMap.find(i);
     if (entry != vertexMap.end()) return(entry->second);
-    
+
     if (i.v >= v.size()) std::cout << "WARNING: corrupted OBJ file" << std::endl;
     else mesh->positions[0].push_back(v[i.v]);
-      
+
     if (i.vn != -1) {
       while (mesh->normals[0].size() < mesh->positions[0].size()) mesh->normals[0].push_back(zero); // some vertices might not had a normal
 
@@ -528,7 +528,7 @@ namespace embree
   void OBJLoader::flushFaceGroup()
   {
     flushTriGroup();
-    flushHairGroup();
+    //flushHairGroup();
   }
 
   /*! end current facegroup and append to mesh */
@@ -545,13 +545,13 @@ namespace embree
       for (size_t i=0; i<v.size();  i++) mesh->positions[0].push_back(v[i]);
       for (size_t i=0; i<vn.size(); i++) mesh->normals[0].push_back(vn[i]);
       for (size_t i=0; i<vt.size(); i++) mesh->texcoords.push_back(vt[i]);
-      
+
       for (size_t i=0; i<ec.size(); ++i) {
         assert(((size_t)ec[i].a < v.size()) && ((size_t)ec[i].b < v.size()));
         mesh->edge_creases.push_back(Vec2i(ec[i].a, ec[i].b));
         mesh->edge_crease_weights.push_back(ec[i].w);
       }
-      
+
       for (size_t j=0; j<curGroup.size(); j++)
       {
         const std::vector<Vertex>& face = curGroup[j];
@@ -574,10 +574,10 @@ namespace embree
       {
         /* iterate over all faces */
         const std::vector<Vertex>& face = curGroup[j];
-        
+
         /* triangulate the face with a triangle fan */
         Vertex i0 = face[0], i1 = Vertex(-1), i2 = face[1];
-        for (size_t k=2; k < face.size(); k++) 
+        for (size_t k=2; k < face.size(); k++)
         {
           i1 = i2; i2 = face[k];
           uint32_t v0,v1,v2;
@@ -598,34 +598,33 @@ namespace embree
         mesh->normals.clear();
       mesh->verify();
     }
-    
+
     curGroup.clear();
     ec.clear();
   }
 
-   void OBJLoader::flushHairGroup()
-   {
-     if (curGroupHair.empty()) return;
+   // void OBJLoader::flushHairGroup()
+   // {
+   //   if (curGroupHair.empty()) return;
 
-     avector<Vec3fa> vertices;
-     std::vector<SceneGraph::HairSetNode::Hair> curves;
-     
-     for (size_t i=0; i<curGroupHair.size(); i++) {
-       for (size_t j=0; j<curGroupHair[i].size(); j++) {
-         if (j%3 == 0) curves.push_back(SceneGraph::HairSetNode::Hair((unsigned int)vertices.size(),(unsigned int)i));
-         vertices.push_back(curGroupHair[i][j]);
-       }
-     }
-       
-     Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(vertices,curves,curMaterial,RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE);
-     group->add(mesh.cast<SceneGraph::Node>());
-     mesh->verify();
-     curGroupHair.clear();
-   }
-   
+   //   avector<Vec3fa> vertices;
+   //   std::vector<SceneGraph::HairSetNode::Hair> curves;
+
+   //   for (size_t i=0; i<curGroupHair.size(); i++) {
+   //     for (size_t j=0; j<curGroupHair[i].size(); j++) {
+   //       if (j%3 == 0) curves.push_back(SceneGraph::HairSetNode::Hair((unsigned int)vertices.size(),(unsigned int)i));
+   //       vertices.push_back(curGroupHair[i][j]);
+   //     }
+   //   }
+
+   //   Ref<SceneGraph::HairSetNode> mesh = new SceneGraph::HairSetNode(vertices,curves,curMaterial,RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE);
+   //   group->add(mesh.cast<SceneGraph::Node>());
+   //   mesh->verify();
+   //   curGroupHair.clear();
+   // }
+
   Ref<SceneGraph::Node> loadOBJ(const FileName& fileName, const bool subdivMode, const bool combineIntoSingleObject) {
-    OBJLoader loader(fileName,subdivMode,combineIntoSingleObject); 
+    OBJLoader loader(fileName,subdivMode,combineIntoSingleObject);
     return loader.group.cast<SceneGraph::Node>();
   }
 }
-

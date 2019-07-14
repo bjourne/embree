@@ -47,25 +47,25 @@ __forceinline bool runIntersectionFilter1Helper(RTCFilterFunctionNArguments* arg
       return runIntersectionFilter1Helper(&args,geometry,context);
     }
 
-    __forceinline void reportIntersection1(IntersectFunctionNArguments* args, const RTCFilterFunctionNArguments* filter_args)
-    {
-#if defined(EMBREE_FILTER_FUNCTION)
-      IntersectContext* MAYBE_UNUSED context = args->internal_context;
-      const Geometry* const geometry = args->geometry;
-      if (geometry->intersectionFilterN) {
-        assert(context->scene->hasGeometryFilterFunction());
-        geometry->intersectionFilterN(filter_args);
-      }
+//     __forceinline void reportIntersection1(IntersectFunctionNArguments* args, const RTCFilterFunctionNArguments* filter_args)
+//     {
+// #if defined(EMBREE_FILTER_FUNCTION)
+//       IntersectContext* MAYBE_UNUSED context = args->internal_context;
+//       const Geometry* const geometry = args->geometry;
+//       if (geometry->intersectionFilterN) {
+//         assert(context->scene->hasGeometryFilterFunction());
+//         geometry->intersectionFilterN(filter_args);
+//       }
 
-      //if (args->valid[0] == 0)
-      //  return;
+//       //if (args->valid[0] == 0)
+//       //  return;
 
-      if (context->user->filter) {
-        assert(context->scene->hasContextFilterFunction());
-        context->user->filter(filter_args);
-      }
-#endif
-    }
+//       if (context->user->filter) {
+//         assert(context->scene->hasContextFilterFunction());
+//         context->user->filter(filter_args);
+//       }
+// #endif
+//     }
 
     __forceinline bool runOcclusionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
     {

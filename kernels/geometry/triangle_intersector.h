@@ -173,14 +173,14 @@ struct TriangleMIntersector1Moeller
                    const TriangleM<M>& tri)
     {
         vbool<M> valid = true;
-        Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
+        Vec3<vfloat<M>> n = cross(tri.e2, tri.e1);
 
         Vec3<vfloat<M>> O = Vec3<vfloat<M>>(ray.org);
         Vec3<vfloat<M>> D = Vec3<vfloat<M>>(ray.dir);
         Vec3<vfloat<M>> C = Vec3<vfloat<M>>(tri.v0) - O;
         Vec3<vfloat<M>> R = cross(C, D);
 
-        vfloat<M> den = dot(tri_Ng, D);
+        vfloat<M> den = dot(n, D);
         vfloat<M> absDen = abs(den);
         vfloat<M> sgnDen = signmsk(den);
 
@@ -194,18 +194,18 @@ struct TriangleMIntersector1Moeller
             return;
 
         /* perform depth test */
-        vfloat<M> T = dot(Vec3vf<M>(tri_Ng), C) ^ sgnDen;
+        vfloat<M> T = dot(Vec3vf<M>(n), C) ^ sgnDen;
         valid &= (absDen*vfloat<M>(ray.tnear()) < T) & (T <= absDen*vfloat<M>(ray.tfar));
         if (likely(none(valid)))
             return;
 
         // Trick to avoid dividing to early.
         vfloat<M> rcpAbsDen = rcp(absDen);
-        vfloat<M> vt = T * rcpAbsDen;
-        vfloat<M> vu = U * rcpAbsDen;
-        vfloat<M> vv = V * rcpAbsDen;
+        vfloat<M> t = T * rcpAbsDen;
+        vfloat<M> u = U * rcpAbsDen;
+        vfloat<M> v = V * rcpAbsDen;
 
-        runEpilog(ray, context, tri, valid, tri_Ng, vt, vu, vv);
+        runEpilog(ray, context, tri, valid, n, t, u, v);
     }
 
     static __forceinline void

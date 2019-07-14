@@ -57,7 +57,7 @@ namespace embree
     std::string tri_accel;                 //!< acceleration structure to use for triangles
     std::string tri_builder;               //!< builder to use for triangles
     std::string tri_traverser;             //!< traverser to use for triangles
-    
+
   public:
     std::string tri_accel_mb;              //!< acceleration structure to use for motion blur triangles
     std::string tri_builder_mb;            //!< builder to use for motion blur triangles
@@ -118,7 +118,7 @@ namespace embree
   public:
     float max_spatial_split_replications;  //!< maximally replications*N many primitives in accel for spatial splits
     bool useSpatialPreSplits;              //!< use spatial pre-splits instead of the full spatial split builder
-    size_t tessellation_cache_size;        //!< size of the shared tessellation cache 
+    size_t tessellation_cache_size;        //!< size of the shared tessellation cache
 
   public:
     size_t instancing_open_min;            //!< instancing opens tree to minimally that number of subtrees
@@ -134,7 +134,7 @@ namespace embree
     int scene_flags;
     size_t verbose;                        //!< verbosity of output
     size_t benchmark;                      //!< true
-    
+
   public:
     size_t numThreads;                     //!< number of threads to use in builders
     bool set_affinity;                     //!< sets affinity for worker threads
@@ -159,15 +159,16 @@ namespace embree
   public:
 
     /*! checks if we can use AVX */
-    bool canUseAVX() {
-      return hasISA(AVX) && frequency_level != FREQUENCY_SIMD128;
-    }
+      bool canUseAVX()
+      {
+          return hasISA(AVX) && frequency_level != FREQUENCY_SIMD128;
+      }
 
     /*! checks if we can use AVX2 */
     bool canUseAVX2() {
       return hasISA(AVX2) && frequency_level != FREQUENCY_SIMD128;
     }
-    
+
     struct ErrorHandler
     {
     public:
@@ -184,7 +185,7 @@ namespace embree
     static ErrorHandler g_errorHandler;
 
   public:
-    void setErrorFunction(RTCErrorFunction fptr, void* uptr) 
+    void setErrorFunction(RTCErrorFunction fptr, void* uptr)
     {
       error_function = fptr;
       error_function_userptr = uptr;
@@ -194,12 +195,12 @@ namespace embree
     void* error_function_userptr;
 
   public:
-    void setMemoryMonitorFunction(RTCMemoryMonitorFunction fptr, void* uptr) 
+    void setMemoryMonitorFunction(RTCMemoryMonitorFunction fptr, void* uptr)
     {
       memory_monitor_function = fptr;
       memory_monitor_userptr = uptr;
     }
-      
+
     RTCMemoryMonitorFunction memory_monitor_function;
     void* memory_monitor_userptr;
   };

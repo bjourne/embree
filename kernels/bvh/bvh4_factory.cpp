@@ -27,7 +27,6 @@ void BVH4Factory::selectBuilders(int features)
 {
     IF_ENABLED_TRIS (SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4BuilderTwoLevelTriangleMeshSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4SceneBuilderSAH));
-    //IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4SceneBuilderFastSpatialSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshBuilderSAH));
 }
 
@@ -67,7 +66,7 @@ Accel* BVH4Factory::BVH4Triangle4(Scene* scene,
                                   BuildVariant bvariant,
                                   IntersectVariant ivariant)
 {
-    printf("BVH4Factory::BVH4Triangle4\n");
+    printf("BVH4Factory::BVH4Triangle4 %d\n", bvariant);
     BVH4* accel = new BVH4(Triangle4::type,scene);
 
     Accel::Intersectors intersectors;
@@ -89,7 +88,7 @@ Accel* BVH4Factory::BVH4Triangle4(Scene* scene,
         builder = BVH4Triangle4SceneBuilderSAH(accel,scene,0);
     else if (scene->device->tri_builder == "sah_presplit")
         builder = BVH4Triangle4SceneBuilderSAH(accel,scene,MODE_HIGH_QUALITY);
-    else if (scene->device->tri_builder == "dynamic"     )
+    else if (scene->device->tri_builder == "dynamic")
         builder = BVH4BuilderTwoLevelTriangleMeshSAH(accel,scene,&createTriangleMeshTriangle4);
     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->tri_builder+" for BVH4<Triangle4>");
 

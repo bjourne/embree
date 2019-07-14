@@ -494,49 +494,6 @@ namespace embree
     return geomID;
   }
 
-  unsigned int ConvertCurveGeometry(RTCDevice device, ISPCHairSet* mesh, RTCBuildQuality quality, RTCScene scene_out, unsigned int geomID)
-  {
-    RTCGeometry geom = rtcNewGeometry(device, mesh->type);
-    rtcSetGeometryTimeStepCount(geom,mesh->numTimeSteps);
-    rtcSetGeometryTimeRange(geom,mesh->startTime,mesh->endTime);
-    rtcSetGeometryBuildQuality(geom, quality);
-
-    for (unsigned int t=0; t<mesh->numTimeSteps; t++) {
-      rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, t, RTC_FORMAT_FLOAT4, mesh->positions[t], 0, sizeof(Vec3fa), mesh->numVertices);
-    }
-
-    if (mesh->normals) {
-      for (unsigned int t=0; t<mesh->numTimeSteps; t++) {
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_NORMAL, t, RTC_FORMAT_FLOAT3, mesh->normals[t], 0, sizeof(Vec3fa), mesh->numVertices);
-      }
-    }
-
-    if (mesh->tangents) {
-      for (unsigned int t=0; t<mesh->numTimeSteps; t++) {
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_TANGENT, t, RTC_FORMAT_FLOAT4, mesh->tangents[t], 0, sizeof(Vec3fa), mesh->numVertices);
-      }
-    }
-
-    if (mesh->dnormals) {
-      for (unsigned int t=0; t<mesh->numTimeSteps; t++) {
-        rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_NORMAL_DERIVATIVE, t, RTC_FORMAT_FLOAT3, mesh->dnormals[t], 0, sizeof(Vec3fa), mesh->numVertices);
-      }
-    }
-
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT, mesh->hairs, 0, sizeof(ISPCHair), mesh->numHairs);
-    if (mesh->type != RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE)
-      rtcSetGeometryTessellationRate(geom,(float)mesh->tessellation_rate);
-
-    rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_FLAGS, 0, RTC_FORMAT_UCHAR, mesh->flags, 0, sizeof(unsigned char), mesh->numHairs);
-    rtcCommitGeometry(geom);
-
-    rtcAttachGeometryByID(scene_out,geom,geomID);
-    mesh->geom.geometry = geom;
-    mesh->geom.scene = scene_out;
-    mesh->geom.geomID = geomID;
-    return geomID;
-  }
-
   unsigned int ConvertPoints(RTCDevice device, ISPCPointSet* mesh, RTCBuildQuality quality, RTCScene scene_out, unsigned int geomID)
   {
     RTCGeometry geom = rtcNewGeometry(device, mesh->type);
@@ -571,8 +528,8 @@ namespace embree
         ConvertTriangleMesh(device,(ISPCTriangleMesh*) geometry, quality, scene_out, i);
       else if (geometry->type == QUAD_MESH)
         ConvertQuadMesh(device,(ISPCQuadMesh*) geometry, quality, scene_out, i);
-      else if (geometry->type == CURVES)
-        ConvertCurveGeometry(device,(ISPCHairSet*) geometry, quality, scene_out, i);
+      // else if (geometry->type == CURVES)
+      //   ConvertCurveGeometry(device,(ISPCHairSet*) geometry, quality, scene_out, i);
       else if (geometry->type == GRID_MESH)
         ConvertGridMesh(device,(ISPCGridMesh*) geometry, quality, scene_out, i);
       else if (geometry->type == POINTS)
@@ -680,8 +637,8 @@ extern "C" RTCScene ConvertScene(RTCDevice g_device,
                                 (ISPCQuadMesh*) geometry,
                                 quality,
                                 scene_out, i);
-            else if (geometry->type == CURVES)
-                ConvertCurveGeometry(g_device,(ISPCHairSet*) geometry, quality, scene_out, i);
+            // else if (geometry->type == CURVES)
+            //     ConvertCurveGeometry(g_device,(ISPCHairSet*) geometry, quality, scene_out, i);
             else if (geometry->type == GRID_MESH)
                 ConvertGridMesh(g_device,(ISPCGridMesh*) geometry, quality, scene_out, i);
             else if (geometry->type == POINTS)
