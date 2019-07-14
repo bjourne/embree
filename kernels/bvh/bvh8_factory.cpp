@@ -16,8 +16,7 @@ namespace embree
 {
 DECLARE_SYMBOL2(Accel::Intersector1,BVH8Triangle4Intersector1Moeller);
 DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
-//DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4SceneBuilderFastSpatialSAH,void* COMMA Scene* COMMA size_t);
-DECLARE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
+//DECLARE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
 DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
 
 BVH8Factory::BVH8Factory(int bfeatures, int ifeatures)
@@ -29,8 +28,7 @@ BVH8Factory::BVH8Factory(int bfeatures, int ifeatures)
 void BVH8Factory::selectBuilders(int features)
 {
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4SceneBuilderSAH));
-    //IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4SceneBuilderFastSpatialSAH));
-    IF_ENABLED_TRIS  (SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8BuilderTwoLevelTriangleMeshSAH));
+    //IF_ENABLED_TRIS  (SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8BuilderTwoLevelTriangleMeshSAH));
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4MeshBuilderSAH));
 }
 
@@ -80,8 +78,8 @@ BVH8Factory::BVH8Triangle4(Scene* scene,
         case BuildVariant::STATIC:
             builder = BVH8Triangle4SceneBuilderSAH(accel,scene,0);
             break;
-        case BuildVariant::DYNAMIC:
-            builder = BVH8BuilderTwoLevelTriangleMeshSAH(accel,scene,&createTriangleMeshTriangle4);
+        // case BuildVariant::DYNAMIC:
+        //     builder = BVH8BuilderTwoLevelTriangleMeshSAH(accel,scene,&createTriangleMeshTriangle4);
             break;
         }
     }

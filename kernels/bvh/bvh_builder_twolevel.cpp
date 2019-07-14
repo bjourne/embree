@@ -330,25 +330,11 @@ namespace embree
       }
     }
 
-#if defined(EMBREE_GEOMETRY_TRIANGLE)
-    Builder* BVH4BuilderTwoLevelTriangleMeshSAH (void* bvh, Scene* scene, const createTriangleMeshAccelTy createMeshAccel) {
-      return new BVHNBuilderTwoLevel<4,TriangleMesh>((BVH4*)bvh,scene,createMeshAccel);
-    }
-#endif
+// #if defined(EMBREE_GEOMETRY_TRIANGLE)
+//     Builder* BVH4BuilderTwoLevelTriangleMeshSAH (void* bvh, Scene* scene, const createTriangleMeshAccelTy createMeshAccel) {
+//       return new BVHNBuilderTwoLevel<4,TriangleMesh>((BVH4*)bvh,scene,createMeshAccel);
+//     }
+// #endif
 
-#if defined(EMBREE_GEOMETRY_QUAD)
-    Builder* BVH4BuilderTwoLevelQuadMeshSAH (void* bvh, Scene* scene, const createQuadMeshAccelTy createMeshAccel) {
-    return new BVHNBuilderTwoLevel<4,QuadMesh>((BVH4*)bvh,scene,createMeshAccel);
-    }
-#endif
-
-#if defined(__AVX__)
-#if defined(EMBREE_GEOMETRY_TRIANGLE)
-    Builder* BVH8BuilderTwoLevelTriangleMeshSAH (void* bvh, Scene* scene, const createTriangleMeshAccelTy createMeshAccel) {
-      return new BVHNBuilderTwoLevel<8,TriangleMesh>((BVH8*)bvh,scene,createMeshAccel);
-    }
-#endif
-
-#endif
   }
 }

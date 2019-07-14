@@ -529,7 +529,11 @@ namespace embree
 #if defined(__AVX__)
     Builder* BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode) { return new BVHNBuilderSAH<8,TriangleMesh,Triangle4>((BVH8*)bvh,mesh,4,1.0f,4,inf,mode); }
 
-    Builder* BVH8Triangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<8,TriangleMesh,Triangle4>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
+Builder* BVH8Triangle4SceneBuilderSAH(void* bvh, Scene* scene, size_t mode) {
+    printf("BVH8Triangle4SceneBuilderSAH\n");
+    return new BVHNBuilderSAH<8,TriangleMesh,Triangle4>(
+        (BVH8*)bvh, scene, 4, 1.0f, 4, inf, mode);
+}
 
 #endif
 #endif
