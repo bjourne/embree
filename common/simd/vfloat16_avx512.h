@@ -2,19 +2,19 @@
 
 namespace embree
 {
-  /* 16-wide AVX-512 float type */
-  template<>
-  struct vfloat<16>
-  {
+/* 16-wide AVX-512 float type */
+template<>
+struct vfloat<16>
+{
     typedef vboolf16 Bool;
     typedef vint16   Int;
     typedef vfloat16 Float;
 
     enum  { size = 16 }; // number of SIMD elements
     union {              // data
-      __m512 v;
-      float f[16];
-      int i[16];
+        __m512 v;
+        float f[16];
+        int i[16];
     };
 
     ////////////////////////////////////////////////////////////////////////////////

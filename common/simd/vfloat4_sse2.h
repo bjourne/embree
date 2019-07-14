@@ -302,8 +302,8 @@ __forceinline vfloat4 signmsk(const vfloat4& a)
     return _mm_and_ps(a,_mm_castsi128_ps(_mm_set1_epi32(0x80000000)));
 }
 
-  __forceinline vfloat4 rcp(const vfloat4& a)
-  {
+__forceinline vfloat4 rcp(const vfloat4& a)
+{
 #if defined(__AVX512VL__)
     const vfloat4 r = _mm_rcp14_ps(a);
 #else
@@ -315,15 +315,15 @@ __forceinline vfloat4 signmsk(const vfloat4& a)
 #else
     return _mm_mul_ps(r,_mm_sub_ps(vfloat4(2.0f), _mm_mul_ps(r, a)));
 #endif
-  }
-  __forceinline vfloat4 sqr (const vfloat4& a) { return _mm_mul_ps(a,a); }
-  __forceinline vfloat4 sqrt(const vfloat4& a)
-  {
-      return _mm_sqrt_ps(a);
-  }
+}
+__forceinline vfloat4 sqr (const vfloat4& a) { return _mm_mul_ps(a,a); }
+__forceinline vfloat4 sqrt(const vfloat4& a)
+{
+    return _mm_sqrt_ps(a);
+}
 
-  __forceinline vfloat4 rsqrt(const vfloat4& a)
-  {
+__forceinline vfloat4 rsqrt(const vfloat4& a)
+{
 #if defined(__AVX512VL__)
     const vfloat4 r = _mm_rsqrt14_ps(a);
 #else
@@ -383,7 +383,7 @@ operator ^(const vfloat4& a, const vfloat4& b)
     return _mm_xor_ps(a, b);
 }
 __forceinline vfloat4
-operator ^(const vfloat4& a, const vint4&   b)
+operator ^(const vfloat4& a, const vint4& b)
 {
     return _mm_xor_ps(a,_mm_castsi128_ps(b));
 }
@@ -529,9 +529,18 @@ __forceinline vfloat4& operator /=(vfloat4& a, float          b) { return a = a 
   ////////////////////////////////////////////////////////////////////////////////
 
 #if defined(__AVX512VL__)
-  __forceinline vboolf4 operator ==(const vfloat4& a, const vfloat4& b) { return _mm_cmp_ps_mask(a, b, _MM_CMPINT_EQ); }
-  __forceinline vboolf4 operator !=(const vfloat4& a, const vfloat4& b) { return _mm_cmp_ps_mask(a, b, _MM_CMPINT_NE); }
-  __forceinline vboolf4 operator < (const vfloat4& a, const vfloat4& b) { return _mm_cmp_ps_mask(a, b, _MM_CMPINT_LT); }
+__forceinline vboolf4 operator ==(const vfloat4& a, const vfloat4& b)
+{
+    return _mm_cmp_ps_mask(a, b, _MM_CMPINT_EQ);
+}
+__forceinline vboolf4 operator !=(const vfloat4& a, const vfloat4& b)
+{
+    return _mm_cmp_ps_mask(a, b, _MM_CMPINT_NE);
+}
+__forceinline vboolf4 operator < (const vfloat4& a, const vfloat4& b)
+{
+    return _mm_cmp_ps_mask(a, b, _MM_CMPINT_LT);
+}
   __forceinline vboolf4 operator >=(const vfloat4& a, const vfloat4& b) { return _mm_cmp_ps_mask(a, b, _MM_CMPINT_GE); }
   __forceinline vboolf4 operator > (const vfloat4& a, const vfloat4& b) { return _mm_cmp_ps_mask(a, b, _MM_CMPINT_GT); }
   __forceinline vboolf4 operator <=(const vfloat4& a, const vfloat4& b) { return _mm_cmp_ps_mask(a, b, _MM_CMPINT_LE); }
@@ -547,7 +556,7 @@ __forceinline vfloat4& operator /=(vfloat4& a, float          b) { return a = a 
   __forceinline vboolf4 operator ==(const vfloat4& a, float          b) { return a == vfloat4(b); }
   __forceinline vboolf4 operator ==(float          a, const vfloat4& b) { return vfloat4(a) == b; }
 
-  __forceinline vboolf4 operator !=(const vfloat4& a, float          b) { return a != vfloat4(b); }
+__forceinline vboolf4 operator !=(const vfloat4& a, float          b) { return a != vfloat4(b); }
   __forceinline vboolf4 operator !=(float          a, const vfloat4& b) { return vfloat4(a) != b; }
 
   __forceinline vboolf4 operator < (const vfloat4& a, float          b) { return a <  vfloat4(b); }
@@ -585,15 +594,15 @@ __forceinline vfloat4& operator /=(vfloat4& a, float          b) { return a = a 
   __forceinline vboolf4 le(const vboolf4& mask, const vfloat4& a, const vfloat4& b) { return mask & (a <= b); }
 #endif
 
-  template<int mask>
-    __forceinline vfloat4 select(const vfloat4& t, const vfloat4& f)
-  {
+template<int mask>
+__forceinline vfloat4 select(const vfloat4& t, const vfloat4& f)
+{
 #if defined(__SSE4_1__)
     return _mm_blend_ps(f, t, mask);
 #else
     return select(vboolf4(mask), t, f);
 #endif
-  }
+}
 
   __forceinline vfloat4 lerp(const vfloat4& a, const vfloat4& b, const vfloat4& t) {
     return madd(t,b-a,a);

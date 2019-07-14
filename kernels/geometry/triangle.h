@@ -48,6 +48,14 @@ public:
       : v0(v0), e1(v0 - v1), e2(v2 - v0),
         geomIDs(geomIDs), primIDs(primIDs)
     {
+        Vec3<vfloat<M>> e1p = v1 - v0;
+        n0 = cross(e1p, e2);
+        d0 = dot(n0, v0);
+        vfloat<M> inv_denom = rcp(dot(n0, n0));
+        n1 = cross(e2, n0) * inv_denom;
+        d1 = -dot(n1, v0);
+        n2 = cross(n0, e1p) * inv_denom;
+        d2 = -dot(n2, v0);
     }
 
     /* Returns a mask that tells which triangles are valid */
@@ -117,6 +125,21 @@ public:
         vfloat<M>::store_nt(&dst->e2.z,src.e2.z);
         vuint<M>::store_nt(&dst->geomIDs,src.geomIDs);
         vuint<M>::store_nt(&dst->primIDs,src.primIDs);
+
+        // HH
+        vfloat<M>::store_nt(&dst->n0.x, src.n0.x);
+        vfloat<M>::store_nt(&dst->n0.y, src.n0.y);
+        vfloat<M>::store_nt(&dst->n0.z, src.n0.z);
+        vfloat<M>::store_nt(&dst->n1.x, src.n1.x);
+        vfloat<M>::store_nt(&dst->n1.y, src.n1.y);
+        vfloat<M>::store_nt(&dst->n1.z, src.n1.z);
+        vfloat<M>::store_nt(&dst->n2.x, src.n2.x);
+        vfloat<M>::store_nt(&dst->n2.y, src.n2.y);
+        vfloat<M>::store_nt(&dst->n2.z, src.n2.z);
+
+        vfloat<M>::store_nt(&dst->d0, src.d0);
+        vfloat<M>::store_nt(&dst->d1, src.d1);
+        vfloat<M>::store_nt(&dst->d2, src.d2);
     }
 
     /* Fill triangle from triangle list */
@@ -172,9 +195,15 @@ public:
             bounds.extend(merge(BBox3fa(p0),BBox3fa(p1),BBox3fa(p2)));
             vgeomID [i] = geomId;
             vprimID [i] = primId;
-            v0.x[i] = p0.x; v0.y[i] = p0.y; v0.z[i] = p0.z;
-            v1.x[i] = p1.x; v1.y[i] = p1.y; v1.z[i] = p1.z;
-            v2.x[i] = p2.x; v2.y[i] = p2.y; v2.z[i] = p2.z;
+            v0.x[i] = p0.x;
+            v0.y[i] = p0.y;
+            v0.z[i] = p0.z;
+            v1.x[i] = p1.x;
+            v1.y[i] = p1.y;
+            v1.z[i] = p1.z;
+            v2.x[i] = p2.x;
+            v2.y[i] = p2.y;
+            v2.z[i] = p2.z;
         }
         TriangleM::store_nt(this,TriangleM(v0,v1,v2,vgeomID,vprimID));
         return bounds;
@@ -186,6 +215,9 @@ public:
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
     vuint<M> geomIDs; // geometry IDs
     vuint<M> primIDs; // primitive IDs
+
+    Vec3vf<M> n0, n1, n2;
+    vfloat<M> d0, d1, d2;
 };
 
 template<int M>

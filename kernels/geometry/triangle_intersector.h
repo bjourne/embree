@@ -86,40 +86,37 @@ struct TriangleMIntersector1Moeller
         ray.instID = context->instID;
     }
 
-    // static __forceinline void
-    // intersect_hh(RayHit& ray,
-    //              IntersectContext* context,
-    //              const TriangleM<M>& tri)
-    // {
-    //     vbool<M> valid = true;
-    //     Vec3<vfloat<M>> o = Vec3<vfloat<M>>(ray.org);
-    //     Vec3<vfloat<M>> d = Vec3<vfloat<M>>(ray.dir);
+    static __forceinline void
+    intersect_hh(RayHit& ray,
+                 IntersectContext* context,
+                 const TriangleM<M>& tri)
+    {
+        vbool<M> valid = true;
+        Vec3<vfloat<M>> o = Vec3<vfloat<M>>(ray.org);
+        Vec3<vfloat<M>> d = Vec3<vfloat<M>>(ray.dir);
 
-    //     vfloat<M> det = dot(tri.n0, d);
-    //     vfloat<M> dett = tri.d0 - dot(o, tri.n0);
-    //     Vec3<vfloat<M>> wr = o * det + d * dett;
+        vfloat<M> det = dot(tri.n0, d);
+        vfloat<M> dett = tri.d0 - dot(o, tri.n0);
+        Vec3<vfloat<M>> wr = o * det + d * dett;
 
-    //     vfloat<M> u = dot(wr, tri.n1) + det * tri.d1;
-    //     vfloat<M> v = dot(wr, tri.n2) + det * tri.d2;
-    //     vfloat<M> tmpdet0 = det - u - v;
+        vfloat<M> u = dot(wr, tri.n1) + det * tri.d1;
+        vfloat<M> v = dot(wr, tri.n2) + det * tri.d2;
+        vfloat<M> tmpdet0 = det - u - v;
 
-    //     vfloat<M> pdet0 = (tmpdet0 ^ u) | (u ^ v);
-    //     valid &= pdet0 != 0x80000000;
+        vfloat<M> pdet0 = _mm_or_ps((tmpdet0 ^ u), (u ^ v));
 
-    //     vfloat<M> rdet = rcp(det);
-    //     u *= rdet;
-    //     v *= rdet;
-    //     vfloat<M> t = dett * rdet;
+        vfloat<M> rdet = rcp(det);
+        u = u * rdet;
+        v = v * rdet;
+        vfloat<M> t = _mm_or_ps(dett * rdet, signmsk(pdet0));
 
-    //     vfloat<M> tnear = vfloat<M>(ray.tnear());
-    //     vfloat<M> tfar = vfloat<M>(ray.tfar);
-    //     valid &= (tnear < t) & (t <= tfar);
-    //     if (likely(none(valid)))
-    //         return;
-
-    //     Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
-    //     runEpilog(ray, context, tri, valid, tri_Ng, t, u, v);
-    // }
+        vfloat<M> tnear = vfloat<M>(ray.tnear());
+        vfloat<M> tfar = vfloat<M>(ray.tfar);
+        valid &= (tnear < t) & (t <= tfar);
+        if (likely(none(valid)))
+            return;
+        runEpilog(ray, context, tri, valid, tri.n0, t, u, v);
+    }
 
 
     static __forceinline void
@@ -159,7 +156,6 @@ struct TriangleMIntersector1Moeller
         if (likely(none(valid)))
             return;
         Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
-
         runEpilog(ray, context, tri, valid, tri_Ng, t, u, v);
     }
 
@@ -195,11 +191,11 @@ struct TriangleMIntersector1Moeller
         if (likely(none(valid)))
             return;
 
-        vfloat<M> vt = T;
-        vfloat<M> vu = w1 * rcp(w0 + w1 + w2);
-        vfloat<M> vv = w2 * rcp(w0 + w1 + w2);
+        vfloat<M> t = T;
+        vfloat<M> u = w1 * rcp(w0 + w1 + w2);
+        vfloat<M> v = w2 * rcp(w0 + w1 + w2);
 
-        runEpilog(ray, context, tri, valid, tri_Ng, vt, vu, vv);
+        runEpilog(ray, context, tri, valid, tri_Ng, t, u, v);
     }
 
     /*! Intersect a ray with the M triangles and updates the hit. */
@@ -250,7 +246,7 @@ struct TriangleMIntersector1Moeller
               const TriangleM<M>& tri)
     {
         STAT3(normal.trav_prims,1,1,1);
-        intersect_sf01(ray, context, tri);
+        intersect_hh(ray, context, tri);
     }
 
     /*! Test if the ray is occluded by one of M triangles. */

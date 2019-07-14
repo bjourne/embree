@@ -12,7 +12,7 @@ void missing_rtcCommit()
     throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
 }
 
-  Scene::Scene (Device* device)
+Scene::Scene (Device* device)
     : device(device),
       flags_modified(true), enabled_geometry_types(0),
       scene_flags(RTC_SCENE_FLAG_NONE),
@@ -20,7 +20,7 @@ void missing_rtcCommit()
       is_build(false), modified(true),
       progressInterface(this), progress_monitor_function(nullptr), progress_monitor_ptr(nullptr), progress_monitor_counter(0),
       numIntersectionFiltersN(0)
-  {
+{
     device->refInc();
 
 #if defined(TASKING_INTERNAL)
@@ -38,7 +38,7 @@ void missing_rtcCommit()
       quality_flags = (RTCBuildQuality) device->quality_flags;
     if (device->scene_flags != -1)
       scene_flags = (RTCSceneFlags) device->scene_flags;
-  }
+}
 
   Scene::~Scene ()
   {
@@ -117,19 +117,19 @@ void Scene::createTriangleAccel()
                 if (device->canUseAVX())
                 {
                     printf("yes avx\n");
-                    if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-                        accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-                    else
-                        accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+                    accels_add(device->bvh8_factory->BVH8Triangle4(
+                                   this,
+                                   BVHFactory::BuildVariant::STATIC,
+                                   BVHFactory::IntersectVariant::FAST));
                 }
                 else
 #endif
                 {
                     printf("no avx\n");
-                    if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-                        accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-                    else
-                        accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+                    accels_add(device->bvh4_factory->BVH4Triangle4(
+                                   this,
+                                   BVHFactory::BuildVariant::STATIC,
+                                   BVHFactory::IntersectVariant::FAST));
                 }
                 break;
             }
