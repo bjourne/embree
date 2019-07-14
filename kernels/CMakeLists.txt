@@ -51,7 +51,6 @@ SET(EMBREE_LIBRARY_FILES
   bvh/bvh_refit.cpp
   bvh/bvh_builder.cpp
   bvh/bvh_builder_sah.cpp
-  bvh/bvh_builder_twolevel.cpp
 
   bvh/bvh_intersector1_bvh4.cpp
   )
@@ -93,8 +92,7 @@ MACRO(embree_files TARGET ISA)
 
       bvh/bvh_refit.cpp
       bvh/bvh_builder.cpp
-      bvh/bvh_builder_sah.cpp
-      bvh/bvh_builder_twolevel.cpp)
+      bvh/bvh_builder_sah.cpp)
 
     IF (EMBREE_GEOMETRY_SUBDIVISION)
       LIST(APPEND ${TARGET} bvh/bvh_builder_subdiv.cpp)
