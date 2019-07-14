@@ -28,28 +28,6 @@ struct vfloat
 };
 
 template<int N>
-struct vdouble
-{
-    union
-    {
-        double f[N];
-        long long i[N];
-    };
-    __forceinline const double&
-    operator [](size_t index) const
-    {
-        assert(index < N);
-        return f[index];
-    }
-    __forceinline double&
-    operator [](size_t index)
-    {
-        assert(index < N);
-        return f[index];
-    }
-};
-
-template<int N>
 struct vint
 {
     int i[N];
@@ -144,7 +122,6 @@ struct vextend
 
 /* 4-wide shortcuts */
 typedef vfloat<4>  vfloat4;
-typedef vdouble<4> vdouble4;
 typedef vreal<4>   vreal4;
 typedef vint<4>    vint4;
 typedef vuint<4>  vuint4;
@@ -155,7 +132,6 @@ typedef vboold<4>  vboold4;
 
 /* 8-wide shortcuts */
 typedef vfloat<8>  vfloat8;
-typedef vdouble<8> vdouble8;
 typedef vreal<8>   vreal8;
 typedef vint<8>    vint8;
 typedef vuint<8>    vuint8;
@@ -166,7 +142,6 @@ typedef vboold<8>  vboold8;
 
 /* 16-wide shortcuts */
 typedef vfloat<16>  vfloat16;
-typedef vdouble<16> vdouble16;
 typedef vreal<16>   vreal16;
 typedef vint<16>    vint16;
 typedef vuint<16>   vuint16;
@@ -177,7 +152,6 @@ typedef vboold<16>  vboold16;
 
 /* Default shortcuts */
 typedef vfloat<VSIZEX>  vfloatx;
-typedef vdouble<VSIZEX> vdoublex;
 typedef vreal<VSIZEX>   vrealx;
 typedef vint<VSIZEX>    vintx;
 typedef vuint<VSIZEX>   vuintx;

@@ -12,20 +12,13 @@ public:
 
 public:
     Accel* BVH4Triangle4   (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
-    Accel* BVH4Triangle4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::ROBUST);
-
-    Accel* BVH4Quad4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
-
-    Accel* BVH4SubdivPatch1(Scene* scene);
-
-    Accel* BVH4Instance(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC);
-
-  private:
+private:
     void selectBuilders(int features);
     void selectIntersectors(int features);
 
 private:
-    Accel::Intersectors BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant);
+    Accel::Intersectors
+    BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant);
 
     static void
     createTriangleMeshTriangle4(TriangleMesh* mesh,
@@ -44,7 +37,6 @@ private:
 
     // twolevel scene builders
 private:
-    DEFINE_ISA_FUNCTION(Builder*,BVH4BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
 
     // SAH mesh builders
   private:

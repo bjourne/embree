@@ -4,27 +4,19 @@
 
 namespace embree
 {
-  /*! BVH8 instantiations */
-  class BVH8Factory : public BVHFactory
-  {
-  public:
+/*! BVH8 instantiations */
+class BVH8Factory : public BVHFactory
+{
+public:
     BVH8Factory(int bfeatures, int ifeatures);
 
-  public:
+public:
     Accel* BVH8Triangle4   (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
-    Accel* BVH8Triangle4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
-    Accel* BVH8Triangle4i  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
 
-    Accel* BVH8QuantizedTriangle4i(Scene* scene);
-    Accel* BVH8QuantizedTriangle4(Scene* scene);
-
-    Accel* BVH8Grid(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
-
-      //static void createTriangleMeshTriangle4Morton (TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
     static void createTriangleMeshTriangle4 (TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
 
 
-  private:
+private:
     void selectBuilders(int features);
     void selectIntersectors(int features);
 
@@ -39,19 +31,8 @@ namespace embree
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
   private:
 
-    // twolevel scene builders
-  private:
-    // DEFINE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
-
     // SAH mesh builders
   private:
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
-
-    // mesh refitters
-  private:
-
-    // morton mesh builders
-  private:
-    DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshBuilderMortonGeneral,void* COMMA TriangleMesh* COMMA size_t);
-  };
+};
 }

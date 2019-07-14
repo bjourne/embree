@@ -37,11 +37,7 @@
 #include "vuint8_avx.h"
 #endif
 #include "vfloat8_avx.h"
-#if defined(__X86_64__)
-#include "vdouble4_avx.h"
-#endif
 
 #if defined(__AVX512F__)
 #include "avx512.h"
 #endif
-

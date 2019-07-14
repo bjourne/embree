@@ -62,8 +62,7 @@ IF (EMBREE_GEOMETRY_SUBDIVISION)
   subdiv/subdivpatch1base.cpp
   subdiv/catmullclark_coefficients.cpp
   geometry/grid_soa.cpp
-  subdiv/subdivpatch1base_eval.cpp
-  bvh/bvh_builder_subdiv.cpp)
+  subdiv/subdivpatch1base_eval.cpp)
 ENDIF()
 
 IF (EMBREE_RAY_PACKETS)
@@ -94,9 +93,6 @@ MACRO(embree_files TARGET ISA)
       bvh/bvh_builder.cpp
       bvh/bvh_builder_sah.cpp)
 
-    IF (EMBREE_GEOMETRY_SUBDIVISION)
-      LIST(APPEND ${TARGET} bvh/bvh_builder_subdiv.cpp)
-    ENDIF()
   ENDIF()
 
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA_LOWEST} EQUAL ${ISA})

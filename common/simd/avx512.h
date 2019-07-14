@@ -28,7 +28,6 @@
 
 #include "vboold8_avx512.h"
 #include "vllong8_avx512.h"
-#include "vdouble8_avx512.h"
 
 namespace embree
 {
@@ -44,10 +43,10 @@ namespace embree
     __forceinline void prefetch(const void * __restrict__ const m)
   {
     if (mode == PFHINT_L1)
-      _mm_prefetch((const char*)m,_MM_HINT_T0); 
-    else if (mode == PFHINT_L2) 
-      _mm_prefetch((const char*)m,_MM_HINT_T1); 
-    else if (mode == PFHINT_NT) 
-      _mm_prefetch((const char*)m,_MM_HINT_NTA); 
+      _mm_prefetch((const char*)m,_MM_HINT_T0);
+    else if (mode == PFHINT_L2)
+      _mm_prefetch((const char*)m,_MM_HINT_T1);
+    else if (mode == PFHINT_NT)
+      _mm_prefetch((const char*)m,_MM_HINT_NTA);
   }
 }
