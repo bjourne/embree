@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "scene_triangle_mesh.h"
 #include "scene.h"
 
@@ -21,29 +5,27 @@ namespace embree
 {
 #if defined(EMBREE_LOWEST_ISA)
 
-  TriangleMesh::TriangleMesh (Device* device)
+TriangleMesh::TriangleMesh (Device* device)
     : Geometry(device,GTY_TRIANGLE_MESH,0,1)
-  {
+{
     vertices.resize(numTimeSteps);
-  }
+}
 
-  void TriangleMesh::enabling() 
-  { 
+void TriangleMesh::enabling()
+{
     if (numTimeSteps == 1) scene->world.numTriangles += numPrimitives;
-    else                   scene->worldMB.numTriangles += numPrimitives;
-  }
-  
-  void TriangleMesh::disabling() 
-  { 
-    if (numTimeSteps == 1) scene->world.numTriangles -= numPrimitives;
-    else                   scene->worldMB.numTriangles -= numPrimitives;
-  }
+}
 
-  void TriangleMesh::setMask (unsigned mask) 
-  {
-    this->mask = mask; 
+void TriangleMesh::disabling()
+{
+    if (numTimeSteps == 1) scene->world.numTriangles -= numPrimitives;
+}
+
+void TriangleMesh::setMask (unsigned mask)
+{
+    this->mask = mask;
     Geometry::update();
-  }
+}
 
   void TriangleMesh::setNumTimeSteps (unsigned int numTimeSteps)
   {
@@ -56,11 +38,11 @@ namespace embree
     vertexAttribs.resize(N);
     Geometry::update();
   }
-  
+
   void TriangleMesh::setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num)
   {
     /* verify that all accesses are 4 bytes aligned */
-    if (((size_t(buffer->getPtr()) + offset) & 0x3) || (stride & 0x3)) 
+    if (((size_t(buffer->getPtr()) + offset) & 0x3) || (stride & 0x3))
       throw_RTCError(RTC_ERROR_INVALID_OPERATION, "data must be 4 bytes aligned");
 
     if (type == RTC_BUFFER_TYPE_VERTEX)
@@ -86,7 +68,7 @@ namespace embree
 
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid vertex attribute buffer slot");
-      
+
       vertexAttribs[slot].set(buffer, offset, stride, num, format);
       vertexAttribs[slot].checkPadding16();
     }
@@ -100,7 +82,7 @@ namespace embree
       triangles.set(buffer, offset, stride, num, format);
       setNumPrimitives(num);
     }
-    else 
+    else
       throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
   }
 
@@ -159,7 +141,7 @@ namespace embree
     Geometry::update();
   }
 
-  void TriangleMesh::preCommit() 
+  void TriangleMesh::preCommit()
   {
     /* verify that stride of all time steps are identical */
     for (unsigned int t=0; t<numTimeSteps; t++)
@@ -169,7 +151,7 @@ namespace embree
     Geometry::preCommit();
   }
 
-  void TriangleMesh::postCommit() 
+  void TriangleMesh::postCommit()
   {
     scene->vertices[geomID] = (float*) vertices0.getPtr();
 
@@ -178,11 +160,11 @@ namespace embree
       buf.setModified(false);
     for (auto& attrib : vertexAttribs)
       attrib.setModified(false);
-    
+
     Geometry::postCommit();
   }
 
-  bool TriangleMesh::verify() 
+  bool TriangleMesh::verify()
   {
     /*! verify size of vertex arrays */
     if (vertices.size() == 0) return false;
@@ -196,21 +178,21 @@ namespace embree
         return false;
 
     /*! verify triangle indices */
-    for (size_t i=0; i<size(); i++) {     
-      if (triangles[i].v[0] >= numVertices()) return false; 
-      if (triangles[i].v[1] >= numVertices()) return false; 
-      if (triangles[i].v[2] >= numVertices()) return false; 
+    for (size_t i=0; i<size(); i++) {
+      if (triangles[i].v[0] >= numVertices()) return false;
+      if (triangles[i].v[1] >= numVertices()) return false;
+      if (triangles[i].v[2] >= numVertices()) return false;
     }
 
     /*! verify vertices */
     for (const auto& buffer : vertices)
       for (size_t i=0; i<buffer.size(); i++)
-	if (!isvalid(buffer[i])) 
+	if (!isvalid(buffer[i]))
 	  return false;
 
     return true;
   }
-  
+
   void TriangleMesh::interpolate(const RTCInterpolateArguments* const args)
   {
     unsigned int primID = args->primID;
@@ -229,7 +211,7 @@ namespace embree
     /* calculate base pointer and stride */
     assert((bufferType == RTC_BUFFER_TYPE_VERTEX && bufferSlot < numTimeSteps) ||
            (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE && bufferSlot <= vertexAttribs.size()));
-    const char* src = nullptr; 
+    const char* src = nullptr;
     size_t stride = 0;
     if (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE) {
       src    = vertexAttribs[bufferSlot].getPtr();
@@ -238,7 +220,7 @@ namespace embree
       src    = vertices[bufferSlot].getPtr();
       stride = vertices[bufferSlot].getStride();
     }
-    
+
     for (unsigned int i=0; i<valueCount; i+=4)
     {
       size_t ofs = i*sizeof(float);
@@ -248,7 +230,7 @@ namespace embree
       const vfloat4 p0 = vfloat4::loadu(valid,(float*)&src[tri.v[0]*stride+ofs]);
       const vfloat4 p1 = vfloat4::loadu(valid,(float*)&src[tri.v[1]*stride+ofs]);
       const vfloat4 p2 = vfloat4::loadu(valid,(float*)&src[tri.v[2]*stride+ofs]);
-      
+
       if (P) {
         vfloat4::storeu(valid,P+i,madd(w,p0,madd(u,p1,v*p2)));
       }
@@ -263,9 +245,9 @@ namespace embree
       }
     }
   }
-  
+
 #endif
-  
+
   namespace isa
   {
     TriangleMesh* createTriangleMesh(Device* device) {

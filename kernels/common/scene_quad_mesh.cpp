@@ -27,21 +27,19 @@ namespace embree
     vertices.resize(numTimeSteps);
   }
 
-  void QuadMesh::enabling() 
-  { 
+void QuadMesh::enabling()
+{
     if (numTimeSteps == 1) scene->world.numQuads += numPrimitives;
-    else                   scene->worldMB.numQuads += numPrimitives;
-  }
-  
-  void QuadMesh::disabling() 
-  { 
-    if (numTimeSteps == 1) scene->world.numQuads -= numPrimitives;
-    else                   scene->worldMB.numQuads -= numPrimitives;
-  }
+}
 
-  void QuadMesh::setMask (unsigned mask) 
+void QuadMesh::disabling()
+{
+    if (numTimeSteps == 1) scene->world.numQuads -= numPrimitives;
+}
+
+  void QuadMesh::setMask (unsigned mask)
   {
-    this->mask = mask; 
+    this->mask = mask;
     Geometry::update();
   }
 
@@ -56,14 +54,14 @@ namespace embree
     vertexAttribs.resize(N);
     Geometry::update();
   }
-  
+
   void QuadMesh::setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num)
-  { 
+  {
     /* verify that all accesses are 4 bytes aligned */
-    if (((size_t(buffer->getPtr()) + offset) & 0x3) || (stride & 0x3)) 
+    if (((size_t(buffer->getPtr()) + offset) & 0x3) || (stride & 0x3))
       throw_RTCError(RTC_ERROR_INVALID_OPERATION, "data must be 4 bytes aligned");
 
-    if (type == RTC_BUFFER_TYPE_VERTEX) 
+    if (type == RTC_BUFFER_TYPE_VERTEX)
     {
       if (format != RTC_FORMAT_FLOAT3)
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid vertex buffer format");
@@ -78,7 +76,7 @@ namespace embree
       vertices[slot].set(buffer, offset, stride, num, format);
       vertices[slot].checkPadding16();
       vertices0 = vertices[0];
-    } 
+    }
     else if (type >= RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE)
     {
       if (format < RTC_FORMAT_FLOAT || format > RTC_FORMAT_FLOAT16)
@@ -86,7 +84,7 @@ namespace embree
 
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid vertex attribute buffer slot");
-      
+
       vertexAttribs[slot].set(buffer, offset, stride, num, format);
       vertexAttribs[slot].checkPadding16();
     }
@@ -159,7 +157,7 @@ namespace embree
     Geometry::update();
   }
 
-  void QuadMesh::preCommit() 
+  void QuadMesh::preCommit()
   {
     /* verify that stride of all time steps are identical */
     for (unsigned int t=0; t<numTimeSteps; t++)
@@ -169,7 +167,7 @@ namespace embree
     Geometry::preCommit();
   }
 
-  void QuadMesh::postCommit() 
+  void QuadMesh::postCommit()
   {
     scene->vertices[geomID] = (float*) vertices0.getPtr();
 
@@ -182,7 +180,7 @@ namespace embree
     Geometry::postCommit();
   }
 
-  bool QuadMesh::verify() 
+  bool QuadMesh::verify()
   {
     /*! verify consistent size of vertex arrays */
     if (vertices.size() == 0) return false;
@@ -191,17 +189,17 @@ namespace embree
         return false;
 
     /*! verify quad indices */
-    for (size_t i=0; i<size(); i++) {     
-      if (quads[i].v[0] >= numVertices()) return false; 
-      if (quads[i].v[1] >= numVertices()) return false; 
-      if (quads[i].v[2] >= numVertices()) return false; 
-      if (quads[i].v[3] >= numVertices()) return false; 
+    for (size_t i=0; i<size(); i++) {
+      if (quads[i].v[0] >= numVertices()) return false;
+      if (quads[i].v[1] >= numVertices()) return false;
+      if (quads[i].v[2] >= numVertices()) return false;
+      if (quads[i].v[3] >= numVertices()) return false;
     }
 
     /*! verify vertices */
     for (const auto& buffer : vertices)
       for (size_t i=0; i<buffer.size(); i++)
-	if (!isvalid(buffer[i])) 
+	if (!isvalid(buffer[i]))
 	  return false;
 
     return true;
@@ -225,7 +223,7 @@ namespace embree
     /* calculate base pointer and stride */
     assert((bufferType == RTC_BUFFER_TYPE_VERTEX && bufferSlot < numTimeSteps) ||
            (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE && bufferSlot <= vertexAttribs.size()));
-    const char* src = nullptr; 
+    const char* src = nullptr;
     size_t stride = 0;
     if (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE) {
       src    = vertexAttribs[bufferSlot].getPtr();
@@ -243,7 +241,7 @@ namespace embree
       const vfloat4 p0 = vfloat4::loadu(valid,(float*)&src[tri.v[0]*stride+ofs]);
       const vfloat4 p1 = vfloat4::loadu(valid,(float*)&src[tri.v[1]*stride+ofs]);
       const vfloat4 p2 = vfloat4::loadu(valid,(float*)&src[tri.v[2]*stride+ofs]);
-      const vfloat4 p3 = vfloat4::loadu(valid,(float*)&src[tri.v[3]*stride+ofs]);      
+      const vfloat4 p3 = vfloat4::loadu(valid,(float*)&src[tri.v[3]*stride+ofs]);
       const vbool4 left = u+v <= 1.0f;
       const vfloat4 Q0 = select(left,p0,p2);
       const vfloat4 Q1 = select(left,p1,p3);
@@ -254,18 +252,18 @@ namespace embree
       if (P) {
         vfloat4::storeu(valid,P+i,madd(W,Q0,madd(U,Q1,V*Q2)));
       }
-      if (dPdu) { 
+      if (dPdu) {
         assert(dPdu); vfloat4::storeu(valid,dPdu+i,select(left,Q1-Q0,Q0-Q1));
         assert(dPdv); vfloat4::storeu(valid,dPdv+i,select(left,Q2-Q0,Q0-Q2));
       }
-      if (ddPdudu) { 
+      if (ddPdudu) {
         assert(ddPdudu); vfloat4::storeu(valid,ddPdudu+i,vfloat4(zero));
         assert(ddPdvdv); vfloat4::storeu(valid,ddPdvdv+i,vfloat4(zero));
         assert(ddPdudv); vfloat4::storeu(valid,ddPdudv+i,vfloat4(zero));
       }
     }
   }
-  
+
 #endif
 
   namespace isa

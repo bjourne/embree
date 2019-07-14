@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "scene_curves.h"
 #include "scene.h"
 
@@ -32,41 +16,39 @@ namespace embree
     vertices.resize(numTimeSteps);
   }
 
-  void CurveGeometry::enabling() 
+void CurveGeometry::enabling()
+{
+    if (numTimeSteps == 1) scene->world.numBezierCurves += numPrimitives;
+}
+
+void CurveGeometry::disabling()
+{
+    if (numTimeSteps == 1) scene->world.numBezierCurves -= numPrimitives;
+}
+
+  void CurveGeometry::setMask (unsigned mask)
   {
-    if (numTimeSteps == 1) scene->world.numBezierCurves += numPrimitives; 
-    else                   scene->worldMB.numBezierCurves += numPrimitives; 
-  }
-  
-  void CurveGeometry::disabling() 
-  {
-    if (numTimeSteps == 1) scene->world.numBezierCurves -= numPrimitives; 
-    else                   scene->worldMB.numBezierCurves -= numPrimitives;
-  }
-  
-  void CurveGeometry::setMask (unsigned mask) 
-  {
-    this->mask = mask; 
+    this->mask = mask;
     Geometry::update();
   }
 
   void CurveGeometry::setNumTimeSteps (unsigned int numTimeSteps)
   {
     vertices.resize(numTimeSteps);
-    
+
     if (getCurveType() == GTY_SUBTYPE_ORIENTED_CURVE)
     {
       normals.resize(numTimeSteps);
-      
+
       if (getCurveBasis() == GTY_BASIS_HERMITE)
         dnormals.resize(numTimeSteps);
     }
     if (getCurveBasis() == GTY_BASIS_HERMITE)
       tangents.resize(numTimeSteps);
-    
+
     Geometry::setNumTimeSteps(numTimeSteps);
   }
-  
+
   void CurveGeometry::setVertexAttributeCount (unsigned int N)
   {
     vertexAttribs.resize(N);
@@ -74,7 +56,7 @@ namespace embree
   }
 
   void CurveGeometry::setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num)
-  { 
+  {
     /* verify that all accesses are 4 bytes aligned */
     if ((type != RTC_BUFFER_TYPE_FLAGS) && (((size_t(buffer->getPtr()) + offset) & 0x3) || (stride & 0x3)))
       throw_RTCError(RTC_ERROR_INVALID_OPERATION, "data must be 4 bytes aligned");
@@ -86,7 +68,7 @@ namespace embree
 
       if (slot >= vertices.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid vertex buffer slot");
-      
+
       vertices[slot].set(buffer, offset, stride, num, format);
       vertices[slot].checkPadding16();
     }
@@ -94,13 +76,13 @@ namespace embree
     {
       if (getCurveType() != GTY_SUBTYPE_ORIENTED_CURVE)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
-        
+
       if (format != RTC_FORMAT_FLOAT3)
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid normal buffer format");
 
       if (slot >= normals.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid normal buffer slot");
-      
+
       normals[slot].set(buffer, offset, stride, num, format);
       normals[slot].checkPadding16();
     }
@@ -108,13 +90,13 @@ namespace embree
     {
       if (getCurveBasis() != GTY_BASIS_HERMITE)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
-        
+
       if (format != RTC_FORMAT_FLOAT4)
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid tangent buffer format");
 
       if (slot >= tangents.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid tangent buffer slot");
-      
+
       tangents[slot].set(buffer, offset, stride, num, format);
       tangents[slot].checkPadding16();
     }
@@ -122,13 +104,13 @@ namespace embree
     {
       if (getCurveType() != GTY_SUBTYPE_ORIENTED_CURVE)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
-        
+
       if (format != RTC_FORMAT_FLOAT3)
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid normal derivative buffer format");
 
       if (slot >= dnormals.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid normal derivative buffer slot");
-      
+
       dnormals[slot].set(buffer, offset, stride, num, format);
       dnormals[slot].checkPadding16();
     }
@@ -139,7 +121,7 @@ namespace embree
 
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid vertex attribute buffer slot");
-      
+
       vertexAttribs[slot].set(buffer, offset, stride, num, format);
       vertexAttribs[slot].checkPadding16();
     }
@@ -162,7 +144,7 @@ namespace embree
 
       flags.set(buffer, offset, stride, num, format);
     }
-    else 
+    else
       throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
   }
 
@@ -255,7 +237,7 @@ namespace embree
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
       vertexAttribs[slot].setModified(true);
     }
-    else if (type == RTC_BUFFER_TYPE_FLAGS) 
+    else if (type == RTC_BUFFER_TYPE_FLAGS)
     {
       if (slot != 0)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
@@ -274,12 +256,12 @@ namespace embree
     tessellationRate = clamp((int)N,1,16);
   }
 
-  bool CurveGeometry::verify () 
+  bool CurveGeometry::verify ()
   {
     /*! verify consistent size of vertex arrays */
     if (vertices.size() == 0)
       return false;
-    
+
     for (const auto& buffer : vertices)
       if (vertices[0].size() != buffer.size())
         return false;
@@ -288,7 +270,7 @@ namespace embree
     {
       if (!normals.size())
         return false;
-        
+
       for (const auto& buffer : normals)
         if (vertices[0].size() != buffer.size())
           return false;
@@ -297,7 +279,7 @@ namespace embree
       {
         if (!dnormals.size())
           return false;
-        
+
         for (const auto& buffer : dnormals)
           if (vertices[0].size() != buffer.size())
             return false;
@@ -318,7 +300,7 @@ namespace embree
     {
       if (!tangents.size())
         return false;
-      
+
       for (const auto& buffer : tangents)
         if (vertices[0].size() != buffer.size())
           return false;
@@ -328,7 +310,7 @@ namespace embree
       if (tangents.size())
         return false;
     }
-    
+
     /*! verify indices */
     if (getCurveBasis() == GTY_BASIS_HERMITE)
     {
@@ -342,7 +324,7 @@ namespace embree
         if (curves[i]+3 >= numVertices()) return false;
       }
     }
-    
+
     /*! verify vertices */
     for (const auto& buffer : vertices) {
       for (size_t i=0; i<buffer.size(); i++) {
@@ -373,7 +355,7 @@ namespace embree
     for (const auto& buffer : dnormals)
       if (buffer.getStride() != dnormals[0].getStride())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION,"stride of normal derivative buffers have to be identical for each time step");
-    
+
     vertices0 = vertices[0];
     if (getCurveType() == GTY_SUBTYPE_ORIENTED_CURVE)
     {
@@ -387,7 +369,7 @@ namespace embree
     Geometry::preCommit();
   }
 
-  void CurveGeometry::postCommit() 
+  void CurveGeometry::postCommit()
   {
     curves.setModified(false);
     for (auto& buf : vertices) buf.setModified(false);
@@ -409,8 +391,8 @@ namespace embree
     {
       CurveGeometryInterface (Device* device, Geometry::GType gtype)
         : CurveGeometry(device,gtype) {}
-      
-      __forceinline const Curve3fa getCurve(size_t i, size_t itime = 0) const 
+
+      __forceinline const Curve3fa getCurve(size_t i, size_t itime = 0) const
       {
         const unsigned int index = curve(i);
         const Vec3fa v0 = vertex(index+0,itime);
@@ -420,7 +402,7 @@ namespace embree
         return Curve3fa (v0,v1,v2,v3);
       }
 
-      __forceinline const Curve3fa getCurve(const LinearSpace3fa& space, size_t i, size_t itime = 0) const 
+      __forceinline const Curve3fa getCurve(const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
         const unsigned int index = curve(i);
         const Vec3fa v0 = vertex(index+0,itime);
@@ -434,7 +416,7 @@ namespace embree
         return Curve3fa(w0,w1,w2,w3);
       }
 
-       __forceinline const Curve3fa getCurve(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t i, size_t itime = 0) const 
+       __forceinline const Curve3fa getCurve(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
         const float r_scale = r_scale0*scale;
         const unsigned int index = curve(i);
@@ -449,7 +431,7 @@ namespace embree
         return Curve3fa(w0,w1,w2,w3);
       }
 
-      __forceinline const Curve3fa getNormalCurve(size_t i, size_t itime = 0) const 
+      __forceinline const Curve3fa getNormalCurve(size_t i, size_t itime = 0) const
       {
         const unsigned int index = curve(i);
         const Vec3fa n0 = normal(index+0,itime);
@@ -459,7 +441,7 @@ namespace embree
         return Curve3fa (n0,n1,n2,n3);
       }
 
-      __forceinline const TensorLinearCubicBezierSurface3fa getOrientedCurve(size_t i, size_t itime = 0) const 
+      __forceinline const TensorLinearCubicBezierSurface3fa getOrientedCurve(size_t i, size_t itime = 0) const
       {
         const Curve3fa center = getCurve(i,itime);
         const Curve3fa normal = getNormalCurve(i,itime);
@@ -480,7 +462,7 @@ namespace embree
       {
         const unsigned int index = curve(i);
         if (index+3 >= numVertices()) return false;
-        
+
         for (size_t itime = itime_range.begin(); itime <= itime_range.end(); itime++)
         {
           const float r0 = radius(index+0,itime);
@@ -489,7 +471,7 @@ namespace embree
           const float r3 = radius(index+3,itime);
           if (!isvalid(r0) || !isvalid(r1) || !isvalid(r2) || !isvalid(r3))
             return false;
-          
+
           const Vec3fa v0 = vertex(index+0,itime);
           const Vec3fa v1 = vertex(index+1,itime);
           const Vec3fa v2 = vertex(index+2,itime);
@@ -505,7 +487,7 @@ namespace embree
               return false;
           }
         }
-        
+
         return true;
       }
 
@@ -519,11 +501,11 @@ namespace embree
         float* dPdu = args->dPdu;
         float* ddPdudu = args->ddPdudu;
         unsigned int valueCount = args->valueCount;
-        
+
         /* calculate base pointer and stride */
         assert((bufferType == RTC_BUFFER_TYPE_VERTEX && bufferSlot < numTimeSteps) ||
                (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE && bufferSlot <= vertexAttribs.size()));
-        const char* src = nullptr; 
+        const char* src = nullptr;
         size_t stride = 0;
         if (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE) {
           src    = vertexAttribs[bufferSlot].getPtr();
@@ -532,7 +514,7 @@ namespace embree
           src    = vertices[bufferSlot].getPtr();
           stride = vertices[bufferSlot].getStride();
         }
-        
+
         for (unsigned int i=0; i<valueCount; i+=4)
         {
           size_t ofs = i*sizeof(float);
@@ -542,7 +524,7 @@ namespace embree
           const vfloat4 p1 = vfloat4::loadu(valid,(float*)&src[(index+1)*stride+ofs]);
           const vfloat4 p2 = vfloat4::loadu(valid,(float*)&src[(index+2)*stride+ofs]);
           const vfloat4 p3 = vfloat4::loadu(valid,(float*)&src[(index+3)*stride+ofs]);
-          
+
           const Curve4f curve(p0,p1,p2,p3);
           if (P      ) vfloat4::storeu(valid,P+i,      curve.eval(u));
           if (dPdu   ) vfloat4::storeu(valid,dPdu+i,   curve.eval_du(u));
@@ -555,8 +537,8 @@ namespace embree
     {
       HermiteCurveGeometryInterface (Device* device, Geometry::GType gtype)
         : CurveGeometry(device,gtype) {}
-      
-      __forceinline const HermiteCurve3fa getCurve(size_t i, size_t itime = 0) const 
+
+      __forceinline const HermiteCurve3fa getCurve(size_t i, size_t itime = 0) const
       {
         const unsigned int index = curve(i);
         const Vec3fa v0 = vertex(index+0,itime);
@@ -566,7 +548,7 @@ namespace embree
         return HermiteCurve3fa (v0,t0,v1,t1);
       }
 
-      __forceinline const HermiteCurve3fa getCurve(const LinearSpace3fa& space, size_t i, size_t itime = 0) const 
+      __forceinline const HermiteCurve3fa getCurve(const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
         const unsigned int index = curve(i);
         const Vec3fa v0 = vertex(index+0,itime);
@@ -580,7 +562,7 @@ namespace embree
         return HermiteCurve3fa(V0,T0,V1,T1);
       }
 
-      __forceinline const HermiteCurve3fa getCurve(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t i, size_t itime = 0) const 
+      __forceinline const HermiteCurve3fa getCurve(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
         const float r_scale = r_scale0*scale;
         const unsigned int index = curve(i);
@@ -595,7 +577,7 @@ namespace embree
         return HermiteCurve3fa(V0,T0,V1,T1);
       }
 
-      __forceinline const HermiteCurve3fa getNormalCurve(size_t i, size_t itime = 0) const 
+      __forceinline const HermiteCurve3fa getNormalCurve(size_t i, size_t itime = 0) const
       {
         const unsigned int index = curve(i);
         const Vec3fa n0 = normal(index+0,itime);
@@ -605,7 +587,7 @@ namespace embree
         return HermiteCurve3fa (n0,dn0,n1,dn1);
       }
 
-      __forceinline const TensorLinearCubicBezierSurface3fa getOrientedCurve(size_t i, size_t itime = 0) const 
+      __forceinline const TensorLinearCubicBezierSurface3fa getOrientedCurve(size_t i, size_t itime = 0) const
       {
         const HermiteCurve3fa center = getCurve(i,itime);
         const HermiteCurve3fa normal = getNormalCurve(i,itime);
@@ -626,7 +608,7 @@ namespace embree
       {
         const unsigned int index = curve(i);
         if (index+1 >= numVertices()) return false;
-        
+
         for (size_t itime = itime_range.begin(); itime <= itime_range.end(); itime++)
         {
           const vfloat4 v0(vertex(index+0,itime));
@@ -652,7 +634,7 @@ namespace embree
               return false;
           }
         }
-        
+
         return true;
       }
 
@@ -666,14 +648,14 @@ namespace embree
         float* dPdu = args->dPdu;
         float* ddPdudu = args->ddPdudu;
         unsigned int valueCount = args->valueCount;
-        
+
         /* we interpolate vertex attributes linearly for hermite basis */
         if (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE)
         {
           assert(bufferSlot <= vertexAttribs.size());
           const char* vsrc = vertexAttribs[bufferSlot].getPtr();
           const size_t vstride = vertexAttribs[bufferSlot].getStride();
-          
+
           for (unsigned int i=0; i<valueCount; i+=4)
           {
             const size_t ofs = i*sizeof(float);
@@ -681,7 +663,7 @@ namespace embree
             const vbool4 valid = vint4((int)i)+vint4(step) < vint4((int)valueCount);
             const vfloat4 p0 = vfloat4::loadu(valid,(float*)&vsrc[(index+0)*vstride+ofs]);
             const vfloat4 p1 = vfloat4::loadu(valid,(float*)&vsrc[(index+1)*vstride+ofs]);
-            
+
             if (P      ) vfloat4::storeu(valid,P+i,      madd(1.0f-u,p0,u*p1));
             if (dPdu   ) vfloat4::storeu(valid,dPdu+i,   p1-p0);
             if (ddPdudu) vfloat4::storeu(valid,ddPdudu+i,vfloat4(zero));
@@ -696,7 +678,7 @@ namespace embree
           const char* tsrc = tangents[bufferSlot].getPtr();
           const size_t vstride = vertices[bufferSlot].getStride();
           const size_t tstride = vertices[bufferSlot].getStride();
-          
+
           for (unsigned int i=0; i<valueCount; i+=4)
           {
             const size_t ofs = i*sizeof(float);
@@ -706,7 +688,7 @@ namespace embree
             const vfloat4 p1 = vfloat4::loadu(valid,(float*)&vsrc[(index+1)*vstride+ofs]);
             const vfloat4 t0 = vfloat4::loadu(valid,(float*)&tsrc[(index+0)*tstride+ofs]);
             const vfloat4 t1 = vfloat4::loadu(valid,(float*)&tsrc[(index+1)*tstride+ofs]);
-            
+
             const HermiteCurveT<vfloat4> curve(p0,t0,p1,t1);
             if (P      ) vfloat4::storeu(valid,P+i,      curve.eval(u));
             if (dPdu   ) vfloat4::storeu(valid,dPdu+i,   curve.eval_du(u));
@@ -715,7 +697,7 @@ namespace embree
         }
       }
     };
-    
+
     template<Geometry::GType ctype, typename CurveInterface, typename Curve3fa, typename Curve4f>
     struct CurveGeometryISA : public CurveInterface
     {
@@ -735,7 +717,7 @@ namespace embree
       using CurveInterface::radius;
       using CurveInterface::vertex;
       using CurveInterface::normal;
-      
+
       CurveGeometryISA (Device* device, Geometry::GType gtype)
         : CurveInterface(device,gtype) {}
 
@@ -743,7 +725,7 @@ namespace embree
       {
         Vec3fa axisz(0,0,1);
         Vec3fa axisy(0,1,0);
-        
+
         const Curve3fa curve = getCurve(primID);
         const Vec3fa p0 = curve.begin();
         const Vec3fa p3 = curve.end();
@@ -755,7 +737,7 @@ namespace embree
           axisz = axisz_;
           axisy = axisy_;
         }
-        
+
         if (sqr_length(axisy) > 1E-18) {
           axisy = normalize(axisy);
           Vec3fa axisx = normalize(cross(axisy,axisz));
@@ -771,7 +753,7 @@ namespace embree
 
         const range<int> tbounds = this->timeSegmentRange(time_range);
         if (tbounds.size() == 0) return frame(axisz);
-        
+
         const size_t t = (tbounds.begin()+tbounds.end())/2;
         const Curve3fa curve = getCurve(primID,t);
         const Vec3fa p0 = curve.begin();
@@ -784,7 +766,7 @@ namespace embree
           axisz = axisz_;
           axisy = axisy_;
         }
-        
+
         if (sqr_length(axisy) > 1E-18) {
           axisy = normalize(axisy);
           Vec3fa axisx = normalize(cross(axisy,axisz));
@@ -792,7 +774,7 @@ namespace embree
         }
         return frame(axisz);
       }
-      
+
       Vec3fa computeDirection(unsigned int primID) const
       {
         const Curve3fa c = getCurve(primID);
@@ -821,7 +803,7 @@ namespace embree
         default: return empty;
         }
       }
-      
+
       /*! calculates bounding box of i'th bezier curve */
       __forceinline BBox3fa bounds(const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
@@ -832,7 +814,7 @@ namespace embree
         default: return empty;
         }
       }
-      
+
       /*! calculates bounding box of i'th bezier curve */
       __forceinline BBox3fa bounds(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
@@ -848,17 +830,17 @@ namespace embree
       __forceinline LBBox3fa linearBounds(size_t primID, const BBox1f& dt) const {
         return LBBox3fa([&] (size_t itime) { return bounds(primID, itime); }, dt, this->time_range, fnumTimeSegments);
       }
-      
+
       /*! calculates the linear bounds of the i'th primitive for the specified time range */
       __forceinline LBBox3fa linearBounds(const LinearSpace3fa& space, size_t primID, const BBox1f& dt) const {
         return LBBox3fa([&] (size_t itime) { return bounds(space, primID, itime); }, dt, this->time_range, fnumTimeSegments);
       }
-      
+
       /*! calculates the linear bounds of the i'th primitive for the specified time range */
       __forceinline LBBox3fa linearBounds(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t primID, const BBox1f& dt) const {
         return LBBox3fa([&] (size_t itime) { return bounds(ofs, scale, r_scale0, space, primID, itime); }, dt, this->time_range, fnumTimeSegments);
       }
-      
+
       PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k) const
       {
         PrimInfo pinfo(empty);
@@ -888,11 +870,11 @@ namespace embree
         }
         return pinfo;
       }
-     
+
       BBox3fa vbounds(size_t i) const {
         return bounds(i);
       }
-      
+
       BBox3fa vbounds(const LinearSpace3fa& space, size_t i) const {
         return bounds(space,i);
       }
@@ -904,7 +886,7 @@ namespace embree
       LBBox3fa vlinearBounds(size_t primID, const BBox1f& time_range) const {
         return linearBounds(primID,time_range);
       }
-      
+
       LBBox3fa vlinearBounds(const LinearSpace3fa& space, size_t primID, const BBox1f& time_range) const {
         return linearBounds(space,primID,time_range);
       }
@@ -913,24 +895,24 @@ namespace embree
         return linearBounds(ofs,scale,r_scale0,space,primID,time_range);
       }
     };
-    
-    CurveGeometry* createCurves(Device* device, Geometry::GType gtype)
-    {
-      switch (gtype) {
-      case Geometry::GTY_ROUND_BEZIER_CURVE: return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ROUND_CURVE,CurveGeometryInterface<BezierCurve3fa,BezierCurveT<vfloat4>>,BezierCurve3fa,BezierCurveT<vfloat4>>(device,gtype);
-      case Geometry::GTY_FLAT_BEZIER_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_FLAT_CURVE,CurveGeometryInterface<BezierCurve3fa,BezierCurveT<vfloat4>>,BezierCurve3fa,BezierCurveT<vfloat4>>(device,gtype);
-      case Geometry::GTY_ORIENTED_BEZIER_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ORIENTED_CURVE,CurveGeometryInterface<BezierCurve3fa,BezierCurveT<vfloat4>>,BezierCurve3fa,BezierCurveT<vfloat4>>(device,gtype);
-        
-      case Geometry::GTY_ROUND_BSPLINE_CURVE: return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ROUND_CURVE,CurveGeometryInterface<BSplineCurve3fa,BSplineCurveT<vfloat4>>,BSplineCurve3fa,BSplineCurveT<vfloat4>>(device,gtype);
-      case Geometry::GTY_FLAT_BSPLINE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_FLAT_CURVE,CurveGeometryInterface<BSplineCurve3fa,BSplineCurveT<vfloat4>>,BSplineCurve3fa,BSplineCurveT<vfloat4>>(device,gtype);
-      case Geometry::GTY_ORIENTED_BSPLINE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ORIENTED_CURVE,CurveGeometryInterface<BSplineCurve3fa,BSplineCurveT<vfloat4>>,BSplineCurve3fa,BSplineCurveT<vfloat4>>(device,gtype);
 
-      case Geometry::GTY_ROUND_HERMITE_CURVE: return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ROUND_CURVE,HermiteCurveGeometryInterface,HermiteCurve3fa,HermiteCurveT<vfloat4>>(device,gtype);
-      case Geometry::GTY_FLAT_HERMITE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_FLAT_CURVE,HermiteCurveGeometryInterface,HermiteCurve3fa,HermiteCurveT<vfloat4>>(device,gtype);
-      case Geometry::GTY_ORIENTED_HERMITE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ORIENTED_CURVE,HermiteCurveGeometryInterface,HermiteCurve3fa,HermiteCurveT<vfloat4>>(device,gtype);
-     
-      default: throw_RTCError(RTC_ERROR_INVALID_OPERATION,"invalid geometry type");
-      }
+CurveGeometry* createCurves(Device* device, Geometry::GType gtype)
+{
+    switch (gtype) {
+    case Geometry::GTY_ROUND_BEZIER_CURVE: return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ROUND_CURVE,CurveGeometryInterface<BezierCurve3fa,BezierCurveT<vfloat4>>,BezierCurve3fa,BezierCurveT<vfloat4>>(device,gtype);
+    case Geometry::GTY_FLAT_BEZIER_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_FLAT_CURVE,CurveGeometryInterface<BezierCurve3fa,BezierCurveT<vfloat4>>,BezierCurve3fa,BezierCurveT<vfloat4>>(device,gtype);
+    case Geometry::GTY_ORIENTED_BEZIER_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ORIENTED_CURVE,CurveGeometryInterface<BezierCurve3fa,BezierCurveT<vfloat4>>,BezierCurve3fa,BezierCurveT<vfloat4>>(device,gtype);
+
+    case Geometry::GTY_ROUND_BSPLINE_CURVE: return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ROUND_CURVE,CurveGeometryInterface<BSplineCurve3fa,BSplineCurveT<vfloat4>>,BSplineCurve3fa,BSplineCurveT<vfloat4>>(device,gtype);
+    case Geometry::GTY_FLAT_BSPLINE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_FLAT_CURVE,CurveGeometryInterface<BSplineCurve3fa,BSplineCurveT<vfloat4>>,BSplineCurve3fa,BSplineCurveT<vfloat4>>(device,gtype);
+    case Geometry::GTY_ORIENTED_BSPLINE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ORIENTED_CURVE,CurveGeometryInterface<BSplineCurve3fa,BSplineCurveT<vfloat4>>,BSplineCurve3fa,BSplineCurveT<vfloat4>>(device,gtype);
+
+    case Geometry::GTY_ROUND_HERMITE_CURVE: return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ROUND_CURVE,HermiteCurveGeometryInterface,HermiteCurve3fa,HermiteCurveT<vfloat4>>(device,gtype);
+    case Geometry::GTY_FLAT_HERMITE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_FLAT_CURVE,HermiteCurveGeometryInterface,HermiteCurve3fa,HermiteCurveT<vfloat4>>(device,gtype);
+    case Geometry::GTY_ORIENTED_HERMITE_CURVE : return new CurveGeometryISA<Geometry::GTY_SUBTYPE_ORIENTED_CURVE,HermiteCurveGeometryInterface,HermiteCurve3fa,HermiteCurveT<vfloat4>>(device,gtype);
+
+    default: throw_RTCError(RTC_ERROR_INVALID_OPERATION,"invalid geometry type");
     }
+}
   }
 }

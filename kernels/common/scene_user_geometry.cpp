@@ -21,22 +21,20 @@ namespace embree
 {
 #if defined(EMBREE_LOWEST_ISA)
 
-  UserGeometry::UserGeometry (Device* device, unsigned int items, unsigned int numTimeSteps) 
+  UserGeometry::UserGeometry (Device* device, unsigned int items, unsigned int numTimeSteps)
     : AccelSet(device,Geometry::GTY_USER_GEOMETRY,items,numTimeSteps) {}
 
   void UserGeometry::enabling () {
     if (numTimeSteps == 1) scene->world.numUserGeometries += numPrimitives;
-    else                   scene->worldMB.numUserGeometries += numPrimitives;
   }
-  
-  void UserGeometry::disabling() { 
+
+  void UserGeometry::disabling() {
     if (numTimeSteps == 1) scene->world.numUserGeometries -= numPrimitives;
-    else                   scene->worldMB.numUserGeometries -= numPrimitives;
   }
-  
-  void UserGeometry::setMask (unsigned mask) 
+
+  void UserGeometry::setMask (unsigned mask)
   {
-    this->mask = mask; 
+    this->mask = mask;
     Geometry::update();
   }
 
@@ -51,7 +49,7 @@ namespace embree
   void UserGeometry::setOccludedFunctionN (RTCOccludedFunctionN occluded) {
     intersectorN.occluded = occluded;
   }
-  
+
 #endif
 
   namespace isa

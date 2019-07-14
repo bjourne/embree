@@ -27,21 +27,19 @@ namespace embree
     vertices.resize(numTimeSteps);
   }
 
-  void GridMesh::enabling() 
-  { 
+  void GridMesh::enabling()
+  {
     if (numTimeSteps == 1) scene->world.numGrids += numPrimitives;
-    else                   scene->worldMB.numGrids += numPrimitives;
-  }
-  
-  void GridMesh::disabling() 
-  { 
-    if (numTimeSteps == 1) scene->world.numGrids -= numPrimitives;
-    else                   scene->worldMB.numGrids -= numPrimitives;
   }
 
-  void GridMesh::setMask (unsigned mask) 
+  void GridMesh::disabling()
   {
-    this->mask = mask; 
+    if (numTimeSteps == 1) scene->world.numGrids -= numPrimitives;
+  }
+
+  void GridMesh::setMask (unsigned mask)
+  {
+    this->mask = mask;
     Geometry::update();
   }
 
@@ -56,11 +54,11 @@ namespace embree
     vertexAttribs.resize(N);
     Geometry::update();
   }
-  
+
   void GridMesh::setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num)
   {
     /* verify that all accesses are 4 bytes aligned */
-    if (((size_t(buffer->getPtr()) + offset) & 0x3) || (stride & 0x3)) 
+    if (((size_t(buffer->getPtr()) + offset) & 0x3) || (stride & 0x3))
       throw_RTCError(RTC_ERROR_INVALID_OPERATION, "data must be 4 bytes aligned");
 
     if (type == RTC_BUFFER_TYPE_VERTEX)
@@ -86,7 +84,7 @@ namespace embree
 
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid vertex attribute buffer slot");
-      
+
       vertexAttribs[slot].set(buffer, offset, stride, num, format);
       vertexAttribs[slot].checkPadding16();
     }
@@ -100,7 +98,7 @@ namespace embree
 		grids.set(buffer, offset, stride, num, format);
 		setNumPrimitives(num);
 	}
-    else 
+    else
       throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
   }
 
@@ -159,7 +157,7 @@ namespace embree
     Geometry::update();
   }
 
-  void GridMesh::preCommit() 
+  void GridMesh::preCommit()
   {
     /* verify that stride of all time steps are identical */
     for (unsigned int t=0; t<numTimeSteps; t++)
@@ -169,7 +167,7 @@ namespace embree
     Geometry::preCommit();
   }
 
-  void GridMesh::postCommit() 
+  void GridMesh::postCommit()
   {
     scene->vertices[geomID] = (float*) vertices0.getPtr();
 
@@ -178,11 +176,11 @@ namespace embree
       buf.setModified(false);
     for (auto& attrib : vertexAttribs)
       attrib.setModified(false);
-    
+
     Geometry::postCommit();
   }
 
-  bool GridMesh::verify() 
+  bool GridMesh::verify()
   {
     /*! verify size of vertex arrays */
     if (vertices.size() == 0) return false;
@@ -198,12 +196,12 @@ namespace embree
     /*! verify vertices */
     for (const auto& buffer : vertices)
       for (size_t i=0; i<buffer.size(); i++)
-	if (!isvalid(buffer[i])) 
+	if (!isvalid(buffer[i]))
 	  return false;
 
     return true;
   }
-  
+
   void GridMesh::interpolate(const RTCInterpolateArguments* const args)
   {
     unsigned int primID = args->primID;
@@ -222,7 +220,7 @@ namespace embree
     /* calculate base pointer and stride */
     assert((bufferType == RTC_BUFFER_TYPE_VERTEX && bufferSlot < numTimeSteps) ||
            (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE && bufferSlot <= vertexAttribs.size()));
-    const char* src = nullptr; 
+    const char* src = nullptr;
     size_t stride = 0;
     if (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE) {
       src    = vertexAttribs[bufferSlot].getPtr();
@@ -241,13 +239,13 @@ namespace embree
     const int iv = min((int)floor(V*grid_height),grid_height);
     const float u = U*grid_width-float(iu);
     const float v = V*grid_height-float(iv);
-    
+
     for (unsigned int i=0; i<valueCount; i+=4)
     {
       const size_t ofs = i*sizeof(float);
       const unsigned int idx0 = grid.startVtxID + (iv+0)*grid.lineVtxOffset + iu;
       const unsigned int idx1 = grid.startVtxID + (iv+1)*grid.lineVtxOffset + iu;
-      
+
       const vbool4 valid = vint4((int)i)+vint4(step) < vint4(int(valueCount));
       const vfloat4 p0 = vfloat4::loadu(valid,(float*)&src[(idx0+0)*stride+ofs]);
       const vfloat4 p1 = vfloat4::loadu(valid,(float*)&src[(idx0+1)*stride+ofs]);
@@ -260,24 +258,24 @@ namespace embree
       const vfloat4 U  = select(left,u,vfloat4(1.0f)-u);
       const vfloat4 V  = select(left,v,vfloat4(1.0f)-v);
       const vfloat4 W  = 1.0f-U-V;
-      
+
       if (P) {
         vfloat4::storeu(valid,P+i,madd(W,Q0,madd(U,Q1,V*Q2)));
       }
-      if (dPdu) { 
+      if (dPdu) {
         assert(dPdu); vfloat4::storeu(valid,dPdu+i,select(left,Q1-Q0,Q0-Q1)*rcp_grid_width);
         assert(dPdv); vfloat4::storeu(valid,dPdv+i,select(left,Q2-Q0,Q0-Q2)*rcp_grid_height);
       }
-      if (ddPdudu) { 
+      if (ddPdudu) {
         assert(ddPdudu); vfloat4::storeu(valid,ddPdudu+i,vfloat4(zero));
         assert(ddPdvdv); vfloat4::storeu(valid,ddPdvdv+i,vfloat4(zero));
         assert(ddPdudv); vfloat4::storeu(valid,ddPdudv+i,vfloat4(zero));
       }
     }
   }
-  
+
 #endif
-  
+
   namespace isa
   {
     GridMesh* createGridMesh(Device* device) {

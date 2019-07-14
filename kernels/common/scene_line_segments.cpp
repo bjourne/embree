@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #include "scene_line_segments.h"
 #include "scene.h"
 
@@ -30,13 +14,11 @@ namespace embree
   void LineSegments::enabling()
   {
     if (numTimeSteps == 1) scene->world.numLineSegments += numPrimitives;
-    else                   scene->worldMB.numLineSegments += numPrimitives;
   }
 
   void LineSegments::disabling()
   {
     if (numTimeSteps == 1) scene->world.numLineSegments -= numPrimitives;
-    else                   scene->worldMB.numLineSegments -= numPrimitives;
   }
 
   void LineSegments::setMask (unsigned mask)
@@ -58,7 +40,7 @@ namespace embree
     vertexAttribs.resize(N);
     Geometry::update();
   }
-  
+
   void LineSegments::setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num)
   {
     /* verify that all accesses are 4 bytes aligned */
@@ -72,7 +54,7 @@ namespace embree
 
       if (slot >= vertices.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid vertex buffer slot");
-      
+
       vertices[slot].set(buffer, offset, stride, num, format);
       vertices[slot].checkPadding16();
     }
@@ -80,13 +62,13 @@ namespace embree
     {
       if (getCurveType() != GTY_SUBTYPE_ORIENTED_CURVE)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
-        
+
       if (format != RTC_FORMAT_FLOAT3)
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid normal buffer format");
 
       if (slot >= normals.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid normal buffer slot");
-      
+
       normals[slot].set(buffer, offset, stride, num, format);
       normals[slot].checkPadding16();
     }
@@ -97,7 +79,7 @@ namespace embree
 
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_OPERATION, "invalid vertex attribute buffer slot");
-      
+
       vertexAttribs[slot].set(buffer, offset, stride, num, format);
       vertexAttribs[slot].checkPadding16();
     }
@@ -150,7 +132,7 @@ namespace embree
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
       return vertexAttribs[slot].getPtr();
     }
-    else if (type == RTC_BUFFER_TYPE_FLAGS) 
+    else if (type == RTC_BUFFER_TYPE_FLAGS)
     {
       if (slot != 0)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
@@ -189,7 +171,7 @@ namespace embree
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
       vertexAttribs[slot].setModified(true);
     }
-    else if (type == RTC_BUFFER_TYPE_FLAGS) 
+    else if (type == RTC_BUFFER_TYPE_FLAGS)
     {
       if (slot != 0)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
@@ -208,7 +190,7 @@ namespace embree
     tessellationRate = clamp((int)N,1,16);
   }
 
-  void LineSegments::preCommit() 
+  void LineSegments::preCommit()
   {
     /* verify that stride of all time steps are identical */
     for (unsigned int t=0; t<numTimeSteps; t++)
@@ -222,11 +204,11 @@ namespace embree
     vertices0 = vertices[0];
     if (getCurveType() == GTY_SUBTYPE_ORIENTED_CURVE)
       normals0 = normals[0];
-        
+
     Geometry::preCommit();
   }
 
-  void LineSegments::postCommit() 
+  void LineSegments::postCommit()
   {
     scene->vertices[geomID] = (float*) vertices0.getPtr();
 
@@ -240,11 +222,11 @@ namespace embree
   }
 
   bool LineSegments::verify ()
-  { 
+  {
     /*! verify consistent size of vertex arrays */
     if (vertices.size() == 0)
       return false;
-    
+
     for (const auto& buffer : vertices)
       if (buffer.size() != numVertices())
         return false;
@@ -280,7 +262,7 @@ namespace embree
     float* dPdu = args->dPdu;
     float* ddPdudu = args->ddPdudu;
     unsigned int valueCount = args->valueCount;
-      
+
     /* calculate base pointer and stride */
     assert((bufferType == RTC_BUFFER_TYPE_VERTEX && bufferSlot < numTimeSteps) ||
            (bufferType == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE && bufferSlot <= vertexAttribs.size()));
@@ -293,7 +275,7 @@ namespace embree
       src    = vertices[bufferSlot].getPtr();
       stride = vertices[bufferSlot].getStride();
     }
-    
+
     for (unsigned int i=0; i<valueCount; i+=4)
     {
       const size_t ofs = i*sizeof(float);

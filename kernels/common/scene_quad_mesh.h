@@ -26,7 +26,7 @@ namespace embree
   {
     /*! type of this geometry */
     static const Geometry::GTypeMask geom_type = Geometry::MTY_QUAD_MESH;
-    
+
     /*! triangle indices */
     struct Quad
     {
@@ -41,8 +41,8 @@ namespace embree
   public:
 
     /*! quad mesh construction */
-    QuadMesh (Device* device); 
-  
+    QuadMesh (Device* device);
+
     /* geometry interface */
   public:
     void enabling();
@@ -64,7 +64,7 @@ namespace embree
     __forceinline size_t numVertices() const {
       return vertices[0].size();
     }
-    
+
     /*! returns i'th quad */
     __forceinline const Quad& quad(size_t i) const {
       return quads[i];
@@ -91,7 +91,7 @@ namespace embree
     }
 
     /*! calculates the bounds of the i'th quad */
-    __forceinline BBox3fa bounds(size_t i) const 
+    __forceinline BBox3fa bounds(size_t i) const
     {
       const Quad& q = quad(i);
       const Vec3fa v0 = vertex(q.v[0]);
@@ -162,7 +162,7 @@ namespace embree
           return false;
       }
 
-      if (bbox) 
+      if (bbox)
         *bbox = bounds(i);
 
       return true;
@@ -186,7 +186,7 @@ namespace embree
       const Vec3fa b1 = vertex(q.v[1],itime+1); if (unlikely(!isvalid(b1))) return false;
       const Vec3fa b2 = vertex(q.v[2],itime+1); if (unlikely(!isvalid(b2))) return false;
       const Vec3fa b3 = vertex(q.v[3],itime+1); if (unlikely(!isvalid(b3))) return false;
-      
+
       /* use bounds of first time step in builder */
       bbox = BBox3fa(min(a0,a1,a2,a3),max(a0,a1,a2,a3));
       return true;
@@ -238,7 +238,7 @@ namespace embree
         return pinfo;
       }
 
-      PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k) const
+        PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k) const
       {
         PrimInfo pinfo(empty);
         for (size_t j=r.begin(); j<r.end(); j++)
@@ -251,7 +251,7 @@ namespace embree
         }
         return pinfo;
       }
-      
+
       PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k) const
       {
         PrimInfoMB pinfo(empty);

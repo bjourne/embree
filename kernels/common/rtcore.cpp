@@ -590,8 +590,9 @@ rtcSetGeometryTransform(RTCGeometry hgeometry,
     args->report(args,filter_args);
   }
 
-  RTC_API RTCGeometry rtcNewGeometry (RTCDevice hdevice, RTCGeometryType type)
-  {
+RTC_API RTCGeometry
+rtcNewGeometry(RTCDevice hdevice, RTCGeometryType type)
+{
     Device* device = (Device*) hdevice;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcNewGeometry);
@@ -602,24 +603,27 @@ rtcSetGeometryTransform(RTCGeometry hgeometry,
     case RTC_GEOMETRY_TYPE_TRIANGLE:
     {
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
-      createTriangleMeshTy createTriangleMesh = nullptr;
-      SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createTriangleMesh);
-      Geometry* geom = createTriangleMesh(device);
-      return (RTCGeometry) geom->refInc();
+        createTriangleMeshTy createTriangleMesh = nullptr;
+        SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(
+            device->enabled_cpu_features,createTriangleMesh);
+        Geometry* geom = createTriangleMesh(device);
+        return (RTCGeometry) geom->refInc();
 #else
-      throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_TRIANGLE is not supported");
+        throw_RTCError(
+            RTC_ERROR_UNKNOWN,
+            "RTC_GEOMETRY_TYPE_TRIANGLE is not supported");
 #endif
     }
 
     case RTC_GEOMETRY_TYPE_QUAD:
     {
 #if defined(EMBREE_GEOMETRY_QUAD)
-      createQuadMeshTy createQuadMesh = nullptr;
-      SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createQuadMesh);
-      Geometry* geom = createQuadMesh(device);
-      return (RTCGeometry) geom->refInc();
+        createQuadMeshTy createQuadMesh = nullptr;
+        SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createQuadMesh);
+        Geometry* geom = createQuadMesh(device);
+        return (RTCGeometry) geom->refInc();
 #else
-      throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_QUAD is not supported");
+        throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_QUAD is not supported");
 #endif
     }
 
@@ -628,27 +632,27 @@ rtcSetGeometryTransform(RTCGeometry hgeometry,
     case RTC_GEOMETRY_TYPE_ORIENTED_DISC_POINT:
     {
 #if defined(EMBREE_GEOMETRY_POINT)
-      createPointsTy createPoints = nullptr;
-      SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_builder_cpu_features, createPoints);
+        createPointsTy createPoints = nullptr;
+        SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_builder_cpu_features, createPoints);
 
-      Geometry *geom;
-      switch(type) {
+        Geometry *geom;
+        switch(type) {
         case RTC_GEOMETRY_TYPE_SPHERE_POINT:
-          geom = createPoints(device, Geometry::GTY_SPHERE_POINT);
-          break;
+            geom = createPoints(device, Geometry::GTY_SPHERE_POINT);
+            break;
         case RTC_GEOMETRY_TYPE_DISC_POINT:
-          geom = createPoints(device, Geometry::GTY_DISC_POINT);
-          break;
+            geom = createPoints(device, Geometry::GTY_DISC_POINT);
+            break;
         case RTC_GEOMETRY_TYPE_ORIENTED_DISC_POINT:
-          geom = createPoints(device, Geometry::GTY_ORIENTED_DISC_POINT);
-          break;
+            geom = createPoints(device, Geometry::GTY_ORIENTED_DISC_POINT);
+            break;
         default:
-          geom = nullptr;
-          break;
-      }
-      return (RTCGeometry) geom->refInc();
+            geom = nullptr;
+            break;
+        }
+        return (RTCGeometry) geom->refInc();
 #else
-      throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_POINT is not supported");
+        throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_POINT is not supported");
 #endif
     }
 
@@ -667,10 +671,12 @@ rtcSetGeometryTransform(RTCGeometry hgeometry,
     case RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE:
     {
 #if defined(EMBREE_GEOMETRY_CURVE)
-      createLineSegmentsTy createLineSegments = nullptr;
-      SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createLineSegments);
-      createCurvesTy createCurves = nullptr;
-      SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createCurves);
+        createLineSegmentsTy createLineSegments = nullptr;
+        SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(
+            device->enabled_cpu_features,createLineSegments);
+        createCurvesTy createCurves = nullptr;
+        SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(
+            device->enabled_cpu_features,createCurves);
 
       Geometry* geom;
       switch (type) {

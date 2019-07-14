@@ -21,34 +21,30 @@ namespace embree
 {
 #if defined(EMBREE_LOWEST_ISA)
 
-  Points::Points(Device* device, Geometry::GType gtype) : Geometry(device, gtype, 0, 1)
-  {
+Points::Points(Device* device, Geometry::GType gtype) : Geometry(device, gtype, 0, 1)
+{
     vertices.resize(numTimeSteps);
     if (getType() == GTY_ORIENTED_DISC_POINT)
       normals.resize(numTimeSteps);
-  }
+}
 
-  void Points::enabling()
-  {
+void Points::enabling()
+{
     if (numTimeSteps == 1)
-      scene->world.numPoints += numPrimitives;
-    else
-      scene->worldMB.numPoints += numPrimitives;
-  }
+        scene->world.numPoints += numPrimitives;
+}
 
-  void Points::disabling()
-  {
+void Points::disabling()
+{
     if (numTimeSteps == 1)
-      scene->world.numPoints -= numPrimitives;
-    else
-      scene->worldMB.numPoints -= numPrimitives;
-  }
+        scene->world.numPoints -= numPrimitives;
+}
 
-  void Points::setMask(unsigned mask)
-  {
+void Points::setMask(unsigned mask)
+{
     this->mask = mask;
     Geometry::update();
-  }
+}
 
   void Points::setNumTimeSteps(unsigned int numTimeSteps)
   {

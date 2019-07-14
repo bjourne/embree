@@ -333,17 +333,17 @@ public:
       std::atomic<size_t> numPoints;                //!< number of enabled points
     };
 
-     __forceinline unsigned int enabledGeometryTypesMask() const {
-       return (world.enabledGeometryTypesMask() << 8) + worldMB.enabledGeometryTypesMask();
-     }
+    __forceinline unsigned int enabledGeometryTypesMask() const
+    {
+        return (world.enabledGeometryTypesMask() << 8);
+    }
 
     GeometryCounts world;               //!< counts for non-motion blurred geometry
-    GeometryCounts worldMB;             //!< counts for motion blurred geometry
 
     std::atomic<size_t> numSubdivEnableDisableEvents; //!< number of enable/disable calls for any subdiv geometry
 
     __forceinline size_t numPrimitives() const {
-      return world.size() + worldMB.size();
+        return world.size();
     }
 
     template<typename Mesh, bool mblur> __forceinline size_t getNumPrimitives() const;
@@ -371,23 +371,23 @@ public:
   template<> __forceinline size_t Scene::getNumPrimitives<TriangleMesh,false>() const { return world.numTriangles; }
   template<> __forceinline size_t Scene::getNumPrimitives<TriangleMesh,true>() const
   {
-      return worldMB.numTriangles;
+      return 0;
   }
-  template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,false>() const { return world.numQuads; }
-  template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,true>() const { return worldMB.numQuads; }
-  template<> __forceinline size_t Scene::getNumPrimitives<CurveGeometry,false>() const
-  {
-      return world.numBezierCurves+world.numLineSegments+world.numPoints;
-  }
-  template<> __forceinline size_t Scene::getNumPrimitives<CurveGeometry,true>() const { return worldMB.numBezierCurves+worldMB.numLineSegments+worldMB.numPoints; }
+template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,false>() const { return world.numQuads; }
+template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,true>() const { return 0; }
+template<> __forceinline size_t Scene::getNumPrimitives<CurveGeometry,false>() const
+{
+    return world.numBezierCurves+world.numLineSegments+world.numPoints;
+}
+  template<> __forceinline size_t Scene::getNumPrimitives<CurveGeometry,true>() const { return 0; }
   template<> __forceinline size_t Scene::getNumPrimitives<LineSegments,false>() const { return world.numLineSegments; }
-  template<> __forceinline size_t Scene::getNumPrimitives<LineSegments,true>() const { return worldMB.numLineSegments; }
+template<> __forceinline size_t Scene::getNumPrimitives<LineSegments,true>() const { return 0; }
   template<> __forceinline size_t Scene::getNumPrimitives<SubdivMesh,false>() const { return world.numSubdivPatches; }
-  template<> __forceinline size_t Scene::getNumPrimitives<SubdivMesh,true>() const { return worldMB.numSubdivPatches; }
+  template<> __forceinline size_t Scene::getNumPrimitives<SubdivMesh,true>() const { return 0; }
   template<> __forceinline size_t Scene::getNumPrimitives<UserGeometry,false>() const { return world.numUserGeometries; }
-  template<> __forceinline size_t Scene::getNumPrimitives<UserGeometry,true>() const { return worldMB.numUserGeometries; }
+  template<> __forceinline size_t Scene::getNumPrimitives<UserGeometry,true>() const { return 0; }
   template<> __forceinline size_t Scene::getNumPrimitives<Instance,false>() const { return world.numInstances; }
-  template<> __forceinline size_t Scene::getNumPrimitives<Instance,true>() const { return worldMB.numInstances; }
+  template<> __forceinline size_t Scene::getNumPrimitives<Instance,true>() const { return 0; }
   template<> __forceinline size_t Scene::getNumPrimitives<GridMesh,false>() const { return world.numGrids; }
-  template<> __forceinline size_t Scene::getNumPrimitives<GridMesh,true>() const { return worldMB.numGrids; }
+template<> __forceinline size_t Scene::getNumPrimitives<GridMesh,true>() const { return 0; }
 }
