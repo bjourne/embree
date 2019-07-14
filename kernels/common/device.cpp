@@ -11,8 +11,6 @@
 #include "acceln.h"
 #include "geometry.h"
 
-#include "../geometry/cylinder.h"
-
 #include "../bvh/bvh4_factory.h"
 #include "../bvh/bvh8_factory.h"
 
@@ -48,7 +46,6 @@ Device::Device (const char* cfg)
     State::verify();
 
     /*! do some internal tests */
-    assert(isa::Cylinder::verify());
 
     /*! enable huge page support if desired */
 #if defined(__WIN32__)

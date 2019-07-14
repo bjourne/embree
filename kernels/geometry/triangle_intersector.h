@@ -214,7 +214,7 @@ struct TriangleMIntersector1Moeller
               const TriangleM<M>& tri)
     {
         STAT3(normal.trav_prims,1,1,1);
-        intersect_orig(ray, context, tri);
+        intersect_sf01(ray, context, tri);
     }
 
     /*! Test if the ray is occluded by one of M triangles. */

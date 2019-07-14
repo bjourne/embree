@@ -1,7 +1,7 @@
 #include "bvh.h"
 #include "bvh_builder.h"
 #include "../builders/primrefgen.h"
-#include "../builders/splitter.h"
+//#include "../builders/splitter.h"
 
 #include "../geometry/triangle.h"
 #include "../geometry/object.h"
