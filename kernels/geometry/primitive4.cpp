@@ -1,6 +1,5 @@
 #include "primitive.h"
 #include "triangle.h"
-#include "subdivpatch1.h"
 #include "object.h"
 #include "instance.h"
 #include "subgrid.h"
@@ -28,26 +27,6 @@ const char* Triangle4::Type::name () const {
   size_t Triangle4::Type::getBytes(const char* This) const {
     return sizeof(Triangle4);
   }
-
-  /********************** SubdivPatch1 **************************/
-
-  const char* SubdivPatch1::Type::name () const {
-    return "subdivpatch1";
-  }
-
-  size_t SubdivPatch1::Type::sizeActive(const char* This) const {
-    return 1;
-  }
-
-  size_t SubdivPatch1::Type::sizeTotal(const char* This) const {
-    return 1;
-  }
-
-  size_t SubdivPatch1::Type::getBytes(const char* This) const {
-    return sizeof(SubdivPatch1);
-  }
-
-  SubdivPatch1::Type SubdivPatch1::type;
 
   /********************** Virtual Object **************************/
 

@@ -86,6 +86,42 @@ struct TriangleMIntersector1Moeller
         ray.instID = context->instID;
     }
 
+    // static __forceinline void
+    // intersect_hh(RayHit& ray,
+    //              IntersectContext* context,
+    //              const TriangleM<M>& tri)
+    // {
+    //     vbool<M> valid = true;
+    //     Vec3<vfloat<M>> o = Vec3<vfloat<M>>(ray.org);
+    //     Vec3<vfloat<M>> d = Vec3<vfloat<M>>(ray.dir);
+
+    //     vfloat<M> det = dot(tri.n0, d);
+    //     vfloat<M> dett = tri.d0 - dot(o, tri.n0);
+    //     Vec3<vfloat<M>> wr = o * det + d * dett;
+
+    //     vfloat<M> u = dot(wr, tri.n1) + det * tri.d1;
+    //     vfloat<M> v = dot(wr, tri.n2) + det * tri.d2;
+    //     vfloat<M> tmpdet0 = det - u - v;
+
+    //     vfloat<M> pdet0 = (tmpdet0 ^ u) | (u ^ v);
+    //     valid &= pdet0 != 0x80000000;
+
+    //     vfloat<M> rdet = rcp(det);
+    //     u *= rdet;
+    //     v *= rdet;
+    //     vfloat<M> t = dett * rdet;
+
+    //     vfloat<M> tnear = vfloat<M>(ray.tnear());
+    //     vfloat<M> tfar = vfloat<M>(ray.tfar);
+    //     valid &= (tnear < t) & (t <= tfar);
+    //     if (likely(none(valid)))
+    //         return;
+
+    //     Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
+    //     runEpilog(ray, context, tri, valid, tri_Ng, t, u, v);
+    // }
+
+
     static __forceinline void
     intersect_mt(RayHit& ray,
                  IntersectContext* context,
@@ -107,24 +143,24 @@ struct TriangleMIntersector1Moeller
             return;
         vfloat<M> inv_det = rcp(det);
         Vec3<vfloat<M>> tvec = o - v0;
-        vfloat<M> vu = dot(tvec, pvec) * inv_det;
-        valid &= (vu >= 0) & (vu <= 1.0);
+        vfloat<M> u = dot(tvec, pvec) * inv_det;
+        valid &= (u >= 0) & (u <= 1.0);
         if (likely(none(valid)))
             return;
         Vec3<vfloat<M>> qvec = cross(tvec, e1);
-        vfloat<M> vv = dot(d, qvec) * inv_det;
-        valid &= (0 < vv) & (vv + vu <= 1.0);
+        vfloat<M> v = dot(d, qvec) * inv_det;
+        valid &= (0 < v) & (v + u <= 1.0);
         if (likely(none(valid)))
             return;
-        vfloat<M> vt = dot(e2, qvec) * inv_det;
+        vfloat<M> t = dot(e2, qvec) * inv_det;
         vfloat<M> tnear = vfloat<M>(ray.tnear());
         vfloat<M> tfar = vfloat<M>(ray.tfar);
-        valid &= (tnear < vt) & (vt <= tfar);
+        valid &= (tnear < t) & (t <= tfar);
         if (likely(none(valid)))
             return;
         Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
 
-        runEpilog(ray, context, tri, valid, tri_Ng, vt, vu, vv);
+        runEpilog(ray, context, tri, valid, tri_Ng, t, u, v);
     }
 
     static __forceinline void

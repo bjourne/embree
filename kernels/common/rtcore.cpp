@@ -655,18 +655,18 @@ rtcNewGeometry(RTCDevice hdevice, RTCGeometryType type)
         throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_POINT is not supported");
 #endif
     }
-    case RTC_GEOMETRY_TYPE_SUBDIVISION:
-    {
-#if defined(EMBREE_GEOMETRY_SUBDIVISION)
-      createSubdivMeshTy createSubdivMesh = nullptr;
-      SELECT_SYMBOL_DEFAULT_AVX(device->enabled_cpu_features,createSubdivMesh);
-      //SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createSubdivMesh); // FIXME: this does not work for some reason?
-      Geometry* geom = createSubdivMesh(device);
-      return (RTCGeometry) geom->refInc();
-#else
-      throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_SUBDIVISION is not supported");
-#endif
-    }
+//     case RTC_GEOMETRY_TYPE_SUBDIVISION:
+//     {
+// #if defined(EMBREE_GEOMETRY_SUBDIVISION)
+//       createSubdivMeshTy createSubdivMesh = nullptr;
+//       SELECT_SYMBOL_DEFAULT_AVX(device->enabled_cpu_features,createSubdivMesh);
+//       //SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createSubdivMesh); // FIXME: this does not work for some reason?
+//       Geometry* geom = createSubdivMesh(device);
+//       return (RTCGeometry) geom->refInc();
+// #else
+//       throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_SUBDIVISION is not supported");
+// #endif
+//     }
 
     case RTC_GEOMETRY_TYPE_INSTANCE:
     {

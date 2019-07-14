@@ -7,7 +7,6 @@
 #include "scene_quad_mesh.h"
 #include "scene_instance.h"
 #include "scene_line_segments.h"
-#include "scene_subdiv_mesh.h"
 #include "scene_grid_mesh.h"
 #include "scene_points.h"
 #include "../subdiv/tessellation_cache.h"
@@ -375,8 +374,6 @@ template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,false>() const 
 template<> __forceinline size_t Scene::getNumPrimitives<QuadMesh,true>() const { return 0; }
 template<> __forceinline size_t Scene::getNumPrimitives<LineSegments,false>() const { return world.numLineSegments; }
 template<> __forceinline size_t Scene::getNumPrimitives<LineSegments,true>() const { return 0; }
-template<> __forceinline size_t Scene::getNumPrimitives<SubdivMesh,false>() const { return world.numSubdivPatches; }
-template<> __forceinline size_t Scene::getNumPrimitives<SubdivMesh,true>() const { return 0; }
 template<> __forceinline size_t Scene::getNumPrimitives<Instance,false>() const { return world.numInstances; }
 template<> __forceinline size_t Scene::getNumPrimitives<Instance,true>() const { return 0; }
 template<> __forceinline size_t Scene::getNumPrimitives<GridMesh,false>() const { return world.numGrids; }

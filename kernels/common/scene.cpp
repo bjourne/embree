@@ -2,6 +2,7 @@
 
 #include "../bvh/bvh4_factory.h"
 #include "../bvh/bvh8_factory.h"
+#include "../../common/algorithms/parallel_for.h"
 
 namespace embree
 {

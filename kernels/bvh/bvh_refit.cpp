@@ -3,6 +3,7 @@
 
 #include "../geometry/triangle.h"
 #include "../geometry/object.h"
+#include "../../common/algorithms/parallel_for.h"
 
 namespace embree
 {

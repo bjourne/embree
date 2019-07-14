@@ -2,7 +2,6 @@
 #include "../hash.h"
 #include "scene_triangle_mesh.h"
 #include "scene_instance.h"
-#include "scene_subdiv_mesh.h"
 
 #include "../subdiv/tessellation_cache.h"
 

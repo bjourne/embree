@@ -23,7 +23,7 @@
 #include "alloc.h"
 
 #include "../builders/bvh_builder_sah.h"
-#include "../builders/bvh_builder_morton.h"
+//#include "../builders/bvh_builder_morton.h"
 
 namespace embree
 {
@@ -32,7 +32,7 @@ namespace embree
     struct BVH : public RefCount
     {
       BVH (Device* device)
-        : device(device), allocator(device,true), morton_src(device,0), morton_tmp(device,0)
+        : device(device), allocator(device,true)
       {
         device->refInc();
       }
@@ -44,106 +44,104 @@ namespace embree
     public:
       Device* device;
       FastAllocator allocator;
-      mvector<BVHBuilderMorton::BuildPrim> morton_src;
-      mvector<BVHBuilderMorton::BuildPrim> morton_tmp;
     };
 
-    void* rtcBuildBVHMorton(const RTCBuildArguments* arguments)
-    {
-      BVH* bvh = (BVH*) arguments->bvh;
-      RTCBuildPrimitive* prims_i =  arguments->primitives;
-      size_t primitiveCount = arguments->primitiveCount;
-      RTCCreateNodeFunction createNode = arguments->createNode;
-      RTCSetNodeChildrenFunction setNodeChildren = arguments->setNodeChildren;
-      RTCSetNodeBoundsFunction setNodeBounds = arguments->setNodeBounds;
-      RTCCreateLeafFunction createLeaf = arguments->createLeaf;
-      RTCProgressMonitorFunction buildProgress = arguments->buildProgress;
-      void* userPtr = arguments->userPtr;
+    // void* rtcBuildBVHMorton(const RTCBuildArguments* arguments)
+    // {
+    //   BVH* bvh = (BVH*) arguments->bvh;
+    //   RTCBuildPrimitive* prims_i =  arguments->primitives;
+    //   size_t primitiveCount = arguments->primitiveCount;
+    //   RTCCreateNodeFunction createNode = arguments->createNode;
+    //   RTCSetNodeChildrenFunction setNodeChildren = arguments->setNodeChildren;
+    //   RTCSetNodeBoundsFunction setNodeBounds = arguments->setNodeBounds;
+    //   RTCCreateLeafFunction createLeaf = arguments->createLeaf;
+    //   RTCProgressMonitorFunction buildProgress = arguments->buildProgress;
+    //   void* userPtr = arguments->userPtr;
 
-      std::atomic<size_t> progress(0);
+    //   std::atomic<size_t> progress(0);
 
-      /* initialize temporary arrays for morton builder */
-      PrimRef* prims = (PrimRef*) prims_i;
-      mvector<BVHBuilderMorton::BuildPrim>& morton_src = bvh->morton_src;
-      mvector<BVHBuilderMorton::BuildPrim>& morton_tmp = bvh->morton_tmp;
-      morton_src.resize(primitiveCount);
-      morton_tmp.resize(primitiveCount);
+    //   /* initialize temporary arrays for morton builder */
+    //   PrimRef* prims = (PrimRef*) prims_i;
+    //   mvector<BVHBuilderMorton::BuildPrim>& morton_src = bvh->morton_src;
+    //   mvector<BVHBuilderMorton::BuildPrim>& morton_tmp = bvh->morton_tmp;
+    //   morton_src.resize(primitiveCount);
+    //   morton_tmp.resize(primitiveCount);
 
-      /* compute centroid bounds */
-      const BBox3fa centBounds = parallel_reduce ( size_t(0), primitiveCount, BBox3fa(empty), [&](const range<size_t>& r) -> BBox3fa {
+    //   /* compute centroid bounds */
+    //   const BBox3fa centBounds = parallel_reduce ( size_t(0), primitiveCount, BBox3fa(empty), [&](const range<size_t>& r) -> BBox3fa {
 
-          BBox3fa bounds(empty);
-          for (size_t i=r.begin(); i<r.end(); i++)
-            bounds.extend(prims[i].bounds().center2());
-          return bounds;
-        }, BBox3fa::merge);
+    //       BBox3fa bounds(empty);
+    //       for (size_t i=r.begin(); i<r.end(); i++)
+    //         bounds.extend(prims[i].bounds().center2());
+    //       return bounds;
+    //     }, BBox3fa::merge);
 
-      /* compute morton codes */
-      BVHBuilderMorton::MortonCodeMapping mapping(centBounds);
-      parallel_for ( size_t(0), primitiveCount, [&](const range<size_t>& r) {
-          BVHBuilderMorton::MortonCodeGenerator generator(mapping,&morton_src[r.begin()]);
-          for (size_t i=r.begin(); i<r.end(); i++) {
-            generator(prims[i].bounds(),(unsigned) i);
-          }
-        });
+    //   /* compute morton codes */
+    //   BVHBuilderMorton::MortonCodeMapping mapping(centBounds);
+    //   parallel_for ( size_t(0), primitiveCount, [&](const range<size_t>& r) {
+    //       BVHBuilderMorton::MortonCodeGenerator generator(mapping,&morton_src[r.begin()]);
+    //       for (size_t i=r.begin(); i<r.end(); i++) {
+    //         generator(prims[i].bounds(),(unsigned) i);
+    //       }
+    //     });
 
-      /* start morton build */
-      std::pair<void*,BBox3fa> root = BVHBuilderMorton::build<std::pair<void*,BBox3fa>>(
+    //   /* start morton build */
+    //   std::pair<void*,BBox3fa> root = BVHBuilderMorton::build<std::pair<void*,BBox3fa>>(
 
-        /* thread local allocator for fast allocations */
-        [&] () -> FastAllocator::CachedAllocator {
-          return bvh->allocator.getCachedAllocator();
-        },
+    //     /* thread local allocator for fast allocations */
+    //     [&] () -> FastAllocator::CachedAllocator {
+    //       return bvh->allocator.getCachedAllocator();
+    //     },
 
-        /* lambda function that allocates BVH nodes */
-        [&] ( const FastAllocator::CachedAllocator& alloc, size_t N ) -> void* {
-          return createNode((RTCThreadLocalAllocator)&alloc, (unsigned int)N,userPtr);
-        },
+    //     /* lambda function that allocates BVH nodes */
+    //     [&] ( const FastAllocator::CachedAllocator& alloc, size_t N ) -> void* {
+    //       return createNode((RTCThreadLocalAllocator)&alloc, (unsigned int)N,userPtr);
+    //     },
 
-        /* lambda function that sets bounds */
-        [&] (void* node, const std::pair<void*,BBox3fa>* children, size_t N) -> std::pair<void*,BBox3fa>
-        {
-          BBox3fa bounds = empty;
-          void* childptrs[BVHBuilderMorton::MAX_BRANCHING_FACTOR];
-          const RTCBounds* cbounds[BVHBuilderMorton::MAX_BRANCHING_FACTOR];
-          for (size_t i=0; i<N; i++) {
-            bounds.extend(children[i].second);
-            childptrs[i] = children[i].first;
-            cbounds[i] = (const RTCBounds*)&children[i].second;
-          }
-          setNodeBounds(node,cbounds,(unsigned int)N,userPtr);
-          setNodeChildren(node,childptrs, (unsigned int)N,userPtr);
-          return std::make_pair(node,bounds);
-        },
+    //     /* lambda function that sets bounds */
+    //     [&] (void* node, const std::pair<void*,BBox3fa>* children, size_t N) -> std::pair<void*,BBox3fa>
+    //     {
+    //       BBox3fa bounds = empty;
+    //       void* childptrs[BVHBuilderMorton::MAX_BRANCHING_FACTOR];
+    //       const RTCBounds* cbounds[BVHBuilderMorton::MAX_BRANCHING_FACTOR];
+    //       for (size_t i=0; i<N; i++) {
+    //         bounds.extend(children[i].second);
+    //         childptrs[i] = children[i].first;
+    //         cbounds[i] = (const RTCBounds*)&children[i].second;
+    //       }
+    //       setNodeBounds(node,cbounds,(unsigned int)N,userPtr);
+    //       setNodeChildren(node,childptrs, (unsigned int)N,userPtr);
+    //       return std::make_pair(node,bounds);
+    //     },
 
-        /* lambda function that creates BVH leaves */
-        [&]( const range<unsigned>& current, const FastAllocator::CachedAllocator& alloc) -> std::pair<void*,BBox3fa>
-        {
-          const size_t id = morton_src[current.begin()].index;
-          const BBox3fa bounds = prims[id].bounds();
-          void* node = createLeaf((RTCThreadLocalAllocator)&alloc,prims_i+current.begin(),current.size(),userPtr);
-          return std::make_pair(node,bounds);
-        },
+    //     /* lambda function that creates BVH leaves */
+    //     [&]( const range<unsigned>& current, const FastAllocator::CachedAllocator& alloc) -> std::pair<void*,BBox3fa>
+    //     {
+    //       const size_t id = morton_src[current.begin()].index;
+    //       const BBox3fa bounds = prims[id].bounds();
+    //       void* node = createLeaf((RTCThreadLocalAllocator)&alloc,prims_i+current.begin(),current.size(),userPtr);
+    //       return std::make_pair(node,bounds);
+    //     },
 
-        /* lambda that calculates the bounds for some primitive */
-        [&] (const BVHBuilderMorton::BuildPrim& morton) -> BBox3fa {
-          return prims[morton.index].bounds();
-        },
+    //     /* lambda that calculates the bounds for some primitive */
+    //     [&] (const BVHBuilderMorton::BuildPrim& morton) -> BBox3fa {
+    //       return prims[morton.index].bounds();
+    //     },
 
-        /* progress monitor function */
-        [&] (size_t dn) {
-          if (!buildProgress) return true;
-          const size_t n = progress.fetch_add(dn)+dn;
-          const double f = std::min(1.0,double(n)/double(primitiveCount));
-          return buildProgress(userPtr,f);
-        },
+    //     /* progress monitor function */
+    //     [&] (size_t dn) {
+    //       if (!buildProgress) return true;
+    //       const size_t n = progress.fetch_add(dn)+dn;
+    //       const double f = std::min(1.0,double(n)/double(primitiveCount));
+    //       return buildProgress(userPtr,f);
+    //     },
 
-        morton_src.data(),morton_tmp.data(),primitiveCount,
-        *arguments);
+    //     morton_src.data(),morton_tmp.data(),primitiveCount,
+    //     *arguments);
 
-      bvh->allocator.cleanup();
-      return root.first;
-    }
+    //   bvh->allocator.cleanup();
+    //   return root.first;
+    // }
 
     void* rtcBuildBVHBinnedSAH(const RTCBuildArguments* arguments)
     {
@@ -382,7 +380,10 @@ RTC_API void* rtcBuildBVH(const RTCBuildArguments* arguments)
     /* switch between differnet builders based on quality level */
     printf("build qual %d\n", arguments->buildQuality);
     if (arguments->buildQuality == RTC_BUILD_QUALITY_LOW)
-        return rtcBuildBVHMorton(arguments);
+    {
+        printf("not here!!\n");
+        //return rtcBuildBVHMorton(arguments);
+    }
     else if (arguments->buildQuality == RTC_BUILD_QUALITY_MEDIUM)
         return rtcBuildBVHBinnedSAH(arguments);
     else if (arguments->buildQuality == RTC_BUILD_QUALITY_HIGH) {
@@ -397,8 +398,6 @@ RTC_API void* rtcBuildBVH(const RTCBuildArguments* arguments)
     /* if we are in dynamic mode, then do not clear temporary data */
     if (!(arguments->buildFlags & RTC_BUILD_FLAG_DYNAMIC))
     {
-        bvh->morton_src.clear();
-        bvh->morton_tmp.clear();
     }
 
     RTC_CATCH_END(bvh->device);
@@ -421,8 +420,6 @@ RTC_API void* rtcBuildBVH(const RTCBuildArguments* arguments)
       RTC_CATCH_BEGIN;
       RTC_TRACE(rtcStaticBVH);
       RTC_VERIFY_HANDLE(hbvh);
-      bvh->morton_src.clear();
-      bvh->morton_tmp.clear();
       RTC_CATCH_END(bvh->device);
     }
 

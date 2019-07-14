@@ -68,14 +68,6 @@ public:
         return bsf(~movemask(valid()));
     }
 
-    // /* Returns the geometry IDs */
-    // __forceinline vuint<M>& geomID()
-    // {
-    //     return geomIDs;
-    // }
-    // __forceinline const vuint<M>& geomID() const {
-    //     return geomIDs;
-    // }
     __forceinline unsigned int geomID(const size_t i) const
     {
         assert(i<M); return geomIDs[i];

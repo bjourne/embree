@@ -6,7 +6,6 @@
 #include "../bvh/bvh.h"
 
 #include "../geometry/triangle.h"
-#include "../geometry/subdivpatch1.h"
 #include "../geometry/object.h"
 #include "../geometry/instance.h"
 #include "../geometry/subgrid.h"
