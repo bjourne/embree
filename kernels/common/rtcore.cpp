@@ -716,18 +716,6 @@ rtcNewGeometry(RTCDevice hdevice, RTCGeometryType type)
 #endif
     }
 
-    case RTC_GEOMETRY_TYPE_USER:
-    {
-#if defined(EMBREE_GEOMETRY_USER)
-      createUserGeometryTy createUserGeometry = nullptr;
-      SELECT_SYMBOL_DEFAULT_AVX_AVX2_AVX512KNL_AVX512SKX(device->enabled_cpu_features,createUserGeometry);
-      Geometry* geom = createUserGeometry(device);
-      return (RTCGeometry) geom->refInc();
-#else
-      throw_RTCError(RTC_ERROR_UNKNOWN,"RTC_GEOMETRY_TYPE_USER is not supported");
-#endif
-    }
-
     case RTC_GEOMETRY_TYPE_INSTANCE:
     {
 #if defined(EMBREE_GEOMETRY_INSTANCE)

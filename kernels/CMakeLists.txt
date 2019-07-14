@@ -29,7 +29,6 @@ SET(EMBREE_LIBRARY_FILES
   common/scene.cpp
   common/alloc.cpp
   common/geometry.cpp
-  common/scene_user_geometry.cpp
   common/scene_instance.cpp
   common/scene_triangle_mesh.cpp
   common/scene_quad_mesh.cpp
@@ -86,7 +85,6 @@ MACRO(embree_files TARGET ISA)
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA} EQUAL ${AVX512SKX} OR ${ISA_LOWEST} EQUAL ${ISA})
 
     LIST(APPEND ${TARGET}
-      common/scene_user_geometry.cpp
       common/scene_instance.cpp
       common/scene_triangle_mesh.cpp
       common/scene_quad_mesh.cpp
