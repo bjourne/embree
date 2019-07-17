@@ -18,15 +18,6 @@
 
 #include "../geometry/intersector_iterators.h"
 #include "../geometry/triangle_intersector.h"
-#include "../geometry/trianglev_intersector.h"
-#include "../geometry/trianglev_mb_intersector.h"
-#include "../geometry/trianglei_intersector.h"
-#include "../geometry/quadv_intersector.h"
-#include "../geometry/quadi_intersector.h"
-#include "../geometry/linei_intersector.h"
-#include "../geometry/subdivpatch1_intersector.h"
-#include "../geometry/object_intersector.h"
-#include "../geometry/instance_intersector.h"
 
 #include "../common/scene.h"
 #include <bitset>
@@ -35,10 +26,10 @@ namespace embree
 {
   namespace isa
   {
-    __aligned(64) static const int shiftTable[32] = { 
-      (int)1 << 0, (int)1 << 1, (int)1 << 2, (int)1 << 3, (int)1 << 4, (int)1 << 5, (int)1 << 6, (int)1 << 7,  
-      (int)1 << 8, (int)1 << 9, (int)1 << 10, (int)1 << 11, (int)1 << 12, (int)1 << 13, (int)1 << 14, (int)1 << 15,  
-      (int)1 << 16, (int)1 << 17, (int)1 << 18, (int)1 << 19, (int)1 << 20, (int)1 << 21, (int)1 << 22, (int)1 << 23,  
+    __aligned(64) static const int shiftTable[32] = {
+      (int)1 << 0, (int)1 << 1, (int)1 << 2, (int)1 << 3, (int)1 << 4, (int)1 << 5, (int)1 << 6, (int)1 << 7,
+      (int)1 << 8, (int)1 << 9, (int)1 << 10, (int)1 << 11, (int)1 << 12, (int)1 << 13, (int)1 << 14, (int)1 << 15,
+      (int)1 << 16, (int)1 << 17, (int)1 << 18, (int)1 << 19, (int)1 << 20, (int)1 << 21, (int)1 << 22, (int)1 << 23,
       (int)1 << 24, (int)1 << 25, (int)1 << 26, (int)1 << 27, (int)1 << 28, (int)1 << 29, (int)1 << 30, (int)1 << 31
     };
 
@@ -52,7 +43,7 @@ namespace embree
       BVH* __restrict__ bvh = (BVH*) This->ptr;
       if (bvh->root == BVH::emptyNode)
         return;
-      
+
       // Only the coherent code path is implemented
       assert(context->isCoherent());
       intersectCoherent(This, (RayHitK<VSIZEL>**)inputPackets, numOctantRays, context);
@@ -81,7 +72,7 @@ namespace embree
       /* case of non-common origin */
       if (unlikely(!commonOctant))
       {
-        const size_t numPackets = (numOctantRays+K-1)/K; 
+        const size_t numPackets = (numOctantRays+K-1)/K;
         for (size_t i = 0; i < numPackets; i++)
           This->intersect(inputPackets[i]->tnear() <= inputPackets[i]->tfar, *inputPackets[i], context);
         return;
@@ -176,7 +167,7 @@ namespace embree
       BVH* __restrict__ bvh = (BVH*) This->ptr;
       if (bvh->root == BVH::emptyNode)
         return;
-      
+
       if (unlikely(context->isCoherent()))
         occludedCoherent(This, (RayK<VSIZEL>**)inputPackets, numOctantRays, context);
       else
@@ -209,7 +200,7 @@ namespace embree
       /* case of non-common origin */
       if (unlikely(!commonOctant))
       {
-        const size_t numPackets = (numOctantRays+K-1)/K; 
+        const size_t numPackets = (numOctantRays+K-1)/K;
         for (size_t i = 0; i < numPackets; i++)
           This->occluded(inputPackets[i]->tnear() <= inputPackets[i]->tfar, *inputPackets[i], context);
         return;
@@ -358,11 +349,11 @@ namespace embree
 
           __aligned(64) unsigned int child_mask[Nx];
           vint<Nx>::storeu(child_mask, vmask); // this explicit store here causes much better code generation
-          
+
           /*! one child is hit, continue with that child */
           size_t r = bscf(mask);
           assert(r < N);
-          cur = node->child(r);         
+          cur = node->child(r);
           cur.prefetch(types);
           cur_mask = child_mask[r];
 
@@ -378,9 +369,9 @@ namespace embree
             r = bscf(mask);
             assert(r < N);
 
-            cur = node->child(r);          
+            cur = node->child(r);
             cur.prefetch(types);
-            cur_mask = child_mask[r];            
+            cur_mask = child_mask[r];
             assert(cur != BVH::emptyNode);
             if (likely(mask == 0)) break;
             stackPtr->ptr  = cur;
@@ -388,7 +379,7 @@ namespace embree
             stackPtr++;
           }
         }
-        
+
         /*! this is a leaf node */
         assert(cur != BVH::emptyNode);
         STAT3(shadow.trav_leaves,1,1,1);
@@ -429,49 +420,6 @@ namespace embree
     template<bool filter>
     struct Triangle4IntersectorStreamMoeller {
       template<int K> using Type = ArrayIntersectorKStream<K,TriangleMIntersectorKMoeller<SIMD_MODE(4) COMMA K COMMA true>>;
-    };
-
-    template<bool filter>
-    struct Triangle4vIntersectorStreamPluecker {
-      template<int K> using Type = ArrayIntersectorKStream<K,TriangleMvIntersectorKPluecker<SIMD_MODE(4) COMMA K COMMA true>>;
-    };
-
-    template<bool filter>
-    struct Triangle4iIntersectorStreamMoeller {
-      template<int K> using Type = ArrayIntersectorKStream<K,TriangleMiIntersectorKMoeller<SIMD_MODE(4) COMMA K COMMA true>>;
-    };
-
-    template<bool filter>
-    struct Triangle4iIntersectorStreamPluecker {
-      template<int K> using Type = ArrayIntersectorKStream<K,TriangleMiIntersectorKPluecker<SIMD_MODE(4) COMMA K COMMA true>>;
-    };
-
-    template<bool filter>
-    struct Quad4vIntersectorStreamMoeller {
-      template<int K> using Type = ArrayIntersectorKStream<K,QuadMvIntersectorKMoeller<4 COMMA K COMMA true>>;
-    };
-
-    template<bool filter>
-    struct Quad4iIntersectorStreamMoeller {
-      template<int K> using Type = ArrayIntersectorKStream<K,QuadMiIntersectorKMoeller<4 COMMA K COMMA true>>;
-    };
-
-    template<bool filter>
-    struct Quad4vIntersectorStreamPluecker {
-      template<int K> using Type = ArrayIntersectorKStream<K,QuadMvIntersectorKPluecker<4 COMMA K COMMA true>>;
-    };
-
-    template<bool filter>
-    struct Quad4iIntersectorStreamPluecker {
-      template<int K> using Type = ArrayIntersectorKStream<K,QuadMiIntersectorKPluecker<4 COMMA K COMMA true>>;
-    };
-
-    struct ObjectIntersectorStream {
-      template<int K> using Type = ArrayIntersectorKStream<K,ObjectIntersectorK<K COMMA false>>;
-    };
-
-    struct InstanceIntersectorStream {
-      template<int K> using Type = ArrayIntersectorKStream<K,InstanceIntersectorK<K>>;
     };
 
     // =====================================================================================================

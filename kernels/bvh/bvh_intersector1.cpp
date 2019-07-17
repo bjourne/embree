@@ -20,16 +20,12 @@
 
 #include "../geometry/intersector_iterators.h"
 #include "../geometry/triangle_intersector.h"
-#include "../geometry/trianglev_intersector.h"
-#include "../geometry/trianglev_mb_intersector.h"
-#include "../geometry/trianglei_intersector.h"
 #include "../geometry/quadv_intersector.h"
 #include "../geometry/quadi_intersector.h"
 #include "../geometry/curveNv_intersector.h"
 #include "../geometry/curveNi_intersector.h"
 #include "../geometry/curveNi_mb_intersector.h"
 #include "../geometry/linei_intersector.h"
-#include "../geometry/subdivpatch1_intersector.h"
 #include "../geometry/object_intersector.h"
 #include "../geometry/instance_intersector.h"
 #include "../geometry/subgrid_intersector.h"
@@ -46,11 +42,11 @@ namespace embree
                                                                               IntersectContext* __restrict__ context)
     {
       const BVH* __restrict__ bvh = (const BVH*)This->ptr;
-      
+
       /* we may traverse an empty BVH in case all geometry was invalid */
       if (bvh->root == BVH::emptyNode)
         return;
-      
+
       /* perform per ray precalculations required by the primitive intersector */
       Precalculations pre(ray, bvh);
 
@@ -60,10 +56,10 @@ namespace embree
       StackItemT<NodeRef>* stackEnd = stack+stackSize;
       stack[0].ptr  = bvh->root;
       stack[0].dist = neg_inf;
-      
+
       if (bvh->root == BVH::emptyNode)
         return;
-      
+
       /* filter out invalid rays */
 #if defined(EMBREE_IGNORE_INVALID_RAYS)
       if (!ray.valid()) return;
@@ -137,11 +133,11 @@ namespace embree
                                                                              IntersectContext* __restrict__ context)
     {
       const BVH* __restrict__ bvh = (const BVH*)This->ptr;
-      
+
       /* we may traverse an empty BVH in case all geometry was invalid */
       if (bvh->root == BVH::emptyNode)
         return;
-       
+
       /* early out for already occluded rays */
       if (unlikely(ray.tfar < 0.0f))
         return;

@@ -178,7 +178,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int K, bool filter>
     struct Occluded1KEpilog1
     {
@@ -218,11 +218,11 @@ namespace embree
             return found;
           }
         }
-#endif 
+#endif
         return true;
       }
     };
-    
+
     template<int M, int Mx, bool filter>
     struct Intersect1EpilogM
     {
@@ -268,7 +268,7 @@ namespace embree
           }
 #endif
 
-#if defined(EMBREE_FILTER_FUNCTION) 
+#if defined(EMBREE_FILTER_FUNCTION)
           /* call intersection filter function */
           if (filter) {
             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
@@ -352,7 +352,7 @@ namespace embree
           }
 #endif
 
-#if defined(EMBREE_FILTER_FUNCTION) 
+#if defined(EMBREE_FILTER_FUNCTION)
           /* call intersection filter function */
           if (filter) {
             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
@@ -380,8 +380,8 @@ namespace embree
 
       }
     };
-#endif    
-    
+#endif
+
     template<int M, int Mx, bool filter>
     struct Occluded1EpilogM
     {
@@ -450,7 +450,7 @@ namespace embree
       }
     };
 
-    
+
     template<int M, bool filter>
     struct Intersect1EpilogMU
     {
@@ -519,7 +519,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, bool filter>
     struct Occluded1EpilogMU
     {
@@ -564,7 +564,7 @@ namespace embree
         return true;
       }
     };
-        
+
     template<int M, int K, bool filter>
     struct IntersectKEpilogM
     {
@@ -584,13 +584,14 @@ namespace embree
       template<typename Hit>
       __forceinline vbool<K> operator() (const vbool<K>& valid_i, const Hit& hit) const
       {
+        printf("IntersectKEpilogM::operator()\n");
         Scene* scene = context->scene;
 
         vfloat<K> u, v, t;
         Vec3vf<K> Ng;
         vbool<K> valid = valid_i;
 
-        std::tie(u,v,t,Ng) = hit();
+        std::tie(u,v,t,Ng) = hit.finalizeK();
 
         const unsigned int geomID = geomIDs[i];
         const unsigned int primID = primIDs[i];
@@ -629,7 +630,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct OccludedKEpilogM
     {
@@ -670,7 +671,7 @@ namespace embree
           {
             vfloat<K> u, v, t;
             Vec3vf<K> Ng;
-            std::tie(u,v,t,Ng) = hit();
+            std::tie(u,v,t,Ng) = hit.finalizeK();
             HitK<K> h(context->instID,geomID,primID,u,v,Ng);
             const vfloat<K> old_t = ray.tfar;
             ray.tfar = select(valid,t,ray.tfar);
@@ -685,7 +686,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct IntersectKEpilogMU
     {
@@ -744,7 +745,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct OccludedKEpilogMU
     {
@@ -795,7 +796,7 @@ namespace embree
         return valid;
       }
     };
-    
+
     template<int M, int Mx, int K, bool filter>
     struct Intersect1KEpilogM
     {
@@ -843,7 +844,7 @@ namespace embree
           }
 #endif
 
-#if defined(EMBREE_FILTER_FUNCTION) 
+#if defined(EMBREE_FILTER_FUNCTION)
           /* call intersection filter function */
           if (filter) {
             if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
@@ -884,7 +885,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, int Mx, int K, bool filter>
     struct Occluded1KEpilogM
     {
@@ -953,7 +954,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct Intersect1KEpilogMU
     {
@@ -1031,7 +1032,7 @@ namespace embree
         return true;
       }
     };
-    
+
     template<int M, int K, bool filter>
     struct Occluded1KEpilogMU
     {
@@ -1076,7 +1077,7 @@ namespace embree
             return false;
           }
         }
-#endif 
+#endif
         return true;
       }
     };
