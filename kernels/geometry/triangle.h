@@ -48,6 +48,7 @@ public:
       : v0(v0), e1(v0 - v1), e2(v2 - v0),
         geomIDs(geomIDs), primIDs(primIDs)
     {
+        #ifdef ISECT_HH
         Vec3<vfloat<M>> e1p = v1 - v0;
         n0 = cross(e1p, e2);
         d0 = dot(n0, v0);
@@ -56,6 +57,7 @@ public:
         d1 = -dot(n1, v0);
         n2 = cross(n0, e1p) * inv_denom;
         d2 = -dot(n2, v0);
+        #endif
     }
 
     /* Returns a mask that tells which triangles are valid */
@@ -127,6 +129,7 @@ public:
         vuint<M>::store_nt(&dst->primIDs,src.primIDs);
 
         // HH
+        #ifdef ISECT_HH
         vfloat<M>::store_nt(&dst->n0.x, src.n0.x);
         vfloat<M>::store_nt(&dst->n0.y, src.n0.y);
         vfloat<M>::store_nt(&dst->n0.z, src.n0.z);
@@ -140,6 +143,7 @@ public:
         vfloat<M>::store_nt(&dst->d0, src.d0);
         vfloat<M>::store_nt(&dst->d1, src.d1);
         vfloat<M>::store_nt(&dst->d2, src.d2);
+        #endif
     }
 
     /* Fill triangle from triangle list */
@@ -215,9 +219,10 @@ public:
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
     vuint<M> geomIDs; // geometry IDs
     vuint<M> primIDs; // primitive IDs
-
+    #ifdef ISECT_HH
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
+    #endif
 };
 
 template<int M>
