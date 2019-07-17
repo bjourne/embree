@@ -526,9 +526,9 @@ namespace embree
 
   void Scene::createGridAccel()
   {
-    BVHFactory::IntersectVariant ivariant = isRobustAccel() ? BVHFactory::IntersectVariant::ROBUST : BVHFactory::IntersectVariant::FAST;
 #if defined(EMBREE_GEOMETRY_GRID)
-    if (device->grid_accel == "default") 
+    BVHFactory::IntersectVariant ivariant = isRobustAccel() ? BVHFactory::IntersectVariant::ROBUST : BVHFactory::IntersectVariant::FAST;
+    if (device->grid_accel == "default")
     {
 #if defined (EMBREE_TARGET_SIMD8)
       if (device->canUseAVX() && !isCompactAccel())
