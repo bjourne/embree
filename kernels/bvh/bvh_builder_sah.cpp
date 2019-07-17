@@ -19,7 +19,6 @@
 #include "../builders/primrefgen.h"
 #include "../builders/splitter.h"
 
-#include "../geometry/linei.h"
 #include "../geometry/triangle.h"
 #include "../geometry/trianglev.h"
 #include "../geometry/trianglev_mb.h"
@@ -159,7 +158,7 @@ namespace embree
             const size_t leaf_bytes = size_t(1.2*Primitive::blocks(numPrimitives)*sizeof(Primitive));
             bvh->alloc.init_estimate(node_bytes+leaf_bytes);
             settings.singleThreadThreshold = bvh->alloc.fixSingleThreadThreshold(N,DEFAULT_SINGLE_THREAD_THRESHOLD,numPrimitives,node_bytes+leaf_bytes);
-            prims.resize(numPrimitives); 
+            prims.resize(numPrimitives);
 
             PrimInfo pinfo = mesh ?
               createPrimRefArray(mesh,prims,bvh->scene->progressInterface) :
@@ -313,7 +312,7 @@ namespace embree
           for (size_t j=0;j<num_geomIDs;j++)
             if (new_geomID == geomIDs[j])
             { found = true; break; }
-          if (!found) 
+          if (!found)
             geomIDs[num_geomIDs++] = new_geomID;
         }
 
@@ -332,7 +331,7 @@ namespace embree
           {
             if (unlikely(prims[start+i].geomID() != geomIDs[g])) continue;
 
-            const SubGridBuildData  &sgrid_bd = sgrids[prims[start+i].primID()];                      
+            const SubGridBuildData  &sgrid_bd = sgrids[prims[start+i].primID()];
             x[pos] = sgrid_bd.sx;
             y[pos] = sgrid_bd.sy;
             primID[pos] = sgrid_bd.primID;
@@ -355,7 +354,7 @@ namespace embree
     {
       typedef BVHN<N> BVH;
       typedef typename BVHN<N>::NodeRef NodeRef;
-      
+
       BVH* bvh;
       Scene* scene;
       GridMesh* mesh;
@@ -379,7 +378,7 @@ namespace embree
         /* if we use the primrefarray for allocations we have to take it back from the BVH */
         if (settings.primrefarrayalloc != size_t(inf))
           bvh->alloc.unshare(prims);
-        
+
         PrimInfo pinfo(empty);
         size_t numPrimitives = 0;
 
@@ -409,8 +408,8 @@ namespace embree
           numPrimitives = pinfo.size();
 
           /* resize arrays */
-          sgrids.resize(numPrimitives); 
-          prims.resize(numPrimitives); 
+          sgrids.resize(numPrimitives);
+          prims.resize(numPrimitives);
 
           /* second run to fill primrefs and SubGridBuildData arrays */
           pinfo = parallel_for_for_prefix_sum1( pstate, iter, PrimInfo(empty), [&](GridMesh* mesh, const range<size_t>& r, size_t k, const PrimInfo& base) -> PrimInfo
@@ -430,7 +429,7 @@ namespace embree
                                                         const PrimRef prim(bounds,mesh->geomID,unsigned(p_index));
                                                         pinfo.add_center2(prim);
                                                         sgrids[p_index] = SubGridBuildData(x | g.get3x3FlagsX(x), y | g.get3x3FlagsY(y), unsigned(j));
-                                                        prims[p_index++] = prim;                
+                                                        prims[p_index++] = prim;
                                                       }
                                                   }
                                                   return pinfo;
@@ -455,8 +454,8 @@ namespace embree
                                        }, [](const PrimInfo& a, const PrimInfo& b) -> PrimInfo { return PrimInfo::merge(a,b); });
           numPrimitives = pinfo.size();
           /* resize arrays */
-          sgrids.resize(numPrimitives); 
-          prims.resize(numPrimitives); 
+          sgrids.resize(numPrimitives);
+          prims.resize(numPrimitives);
 
           /* second run to fill primrefs and SubGridBuildData arrays */
           pinfo = parallel_prefix_sum( pstate, size_t(0), mesh->size(), size_t(1024), PrimInfo(empty), [&](const range<size_t>& r, const PrimInfo& base) -> PrimInfo
@@ -476,7 +475,7 @@ namespace embree
                                                const PrimRef prim(bounds,mesh->geomID,unsigned(p_index));
                                                pinfo.add_center2(prim);
                                                sgrids[p_index] = SubGridBuildData(x | g.get3x3FlagsX(x), y | g.get3x3FlagsY(y), unsigned(j));
-                                               prims[p_index++] = prim;                
+                                               prims[p_index++] = prim;
                                              }
                                          }
                                          return pinfo;

@@ -27,11 +27,6 @@ namespace embree
     BVH8Factory(int bfeatures, int ifeatures);
 
   public:
-    Accel* BVH8OBBVirtualCurve8v(Scene* scene);
-    Accel* BVH8OBBVirtualCurve8iMB(Scene* scene);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8v);
-    DEFINE_SYMBOL2(VirtualCurveIntersector*,VirtualCurveIntersector8iMB);
-    
     Accel* BVH8Triangle4   (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH8Triangle4v  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH8Triangle4i  (Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
@@ -54,7 +49,7 @@ namespace embree
 
     Accel* BVH8Grid(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
     Accel* BVH8GridMB(Scene* scene, BuildVariant bvariant = BuildVariant::STATIC, IntersectVariant ivariant = IntersectVariant::FAST);
-  
+
     static void createTriangleMeshTriangle4Morton (TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
     static void createTriangleMeshTriangle4vMorton(TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
     static void createTriangleMeshTriangle4iMorton(TriangleMesh* mesh, AccelData*& accel, Builder*& builder);
@@ -72,9 +67,6 @@ namespace embree
     void selectIntersectors(int features);
 
   private:
-    Accel::Intersectors BVH8OBBVirtualCurveIntersectors(BVH8* bvh, VirtualCurveIntersector* leafIntersector);
-    Accel::Intersectors BVH8OBBVirtualCurveIntersectorsMB(BVH8* bvh, VirtualCurveIntersector* leafIntersector);
-    
     Accel::Intersectors BVH8Triangle4Intersectors(BVH8* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH8Triangle4vIntersectors(BVH8* bvh, IntersectVariant ivariant);
     Accel::Intersectors BVH8Triangle4iIntersectors(BVH8* bvh, IntersectVariant ivariant);
@@ -99,9 +91,6 @@ namespace embree
     Accel::Intersectors BVH8GridMBIntersectors(BVH8* bvh, IntersectVariant ivariant);
 
   private:
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH8OBBVirtualCurveIntersector1);
-    DEFINE_SYMBOL2(Accel::Intersector1,BVH8OBBVirtualCurveIntersector1MB);
-    
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8Triangle4Intersector1Moeller);
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8Triangle4iIntersector1Moeller);
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8Triangle4vIntersector1Pluecker);
@@ -125,7 +114,7 @@ namespace embree
     DEFINE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4iIntersector1Pluecker);
     DEFINE_SYMBOL2(Accel::Intersector1,QBVH8Triangle4Intersector1Moeller);
     DEFINE_SYMBOL2(Accel::Intersector1,QBVH8Quad4iIntersector1Pluecker);
-    
+
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8VirtualIntersector1);
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8VirtualMBIntersector1);
 
@@ -135,9 +124,6 @@ namespace embree
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8GridIntersector1Moeller);
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8GridMBIntersector1Moeller);
     DEFINE_SYMBOL2(Accel::Intersector1,BVH8GridIntersector1Pluecker);
-    
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH8OBBVirtualCurveIntersector4Hybrid);
-    DEFINE_SYMBOL2(Accel::Intersector4,BVH8OBBVirtualCurveIntersector4HybridMB);
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH8Triangle4Intersector4HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH8Triangle4Intersector4HybridMoellerNoFilter);
@@ -164,12 +150,10 @@ namespace embree
 
     DEFINE_SYMBOL2(Accel::Intersector4,BVH8InstanceIntersector4Chunk);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH8InstanceMBIntersector4Chunk);
-    
+
     DEFINE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector4,BVH8GridIntersector4HybridPluecker);
 
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH8OBBVirtualCurveIntersector8Hybrid);
-    DEFINE_SYMBOL2(Accel::Intersector8,BVH8OBBVirtualCurveIntersector8HybridMB);
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH8Triangle4Intersector8HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH8Triangle4Intersector8HybridMoellerNoFilter);
@@ -199,9 +183,6 @@ namespace embree
 
     DEFINE_SYMBOL2(Accel::Intersector8,BVH8GridIntersector8HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector8,BVH8GridIntersector8HybridPluecker);
-   
-    DEFINE_SYMBOL2(Accel::Intersector16,BVH8OBBVirtualCurveIntersector16Hybrid);
-    DEFINE_SYMBOL2(Accel::Intersector16,BVH8OBBVirtualCurveIntersector16HybridMB);
 
     DEFINE_SYMBOL2(Accel::Intersector16,BVH8Triangle4Intersector16HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector16,BVH8Triangle4Intersector16HybridMoellerNoFilter);
@@ -228,7 +209,7 @@ namespace embree
 
     DEFINE_SYMBOL2(Accel::Intersector16,BVH8InstanceIntersector16Chunk);
     DEFINE_SYMBOL2(Accel::Intersector16,BVH8InstanceMBIntersector16Chunk);
-   
+
     DEFINE_SYMBOL2(Accel::Intersector16,BVH8GridIntersector16HybridMoeller);
     DEFINE_SYMBOL2(Accel::Intersector16,BVH8GridIntersector16HybridPluecker);
 
@@ -247,14 +228,11 @@ namespace embree
     DEFINE_SYMBOL2(Accel::IntersectorN,BVH8Quad4iIntersectorStreamPluecker);
 
     DEFINE_SYMBOL2(Accel::IntersectorN,BVH8VirtualIntersectorStream);
-    
+
     DEFINE_SYMBOL2(Accel::IntersectorN,BVH8InstanceIntersectorStream);
 
     // SAH scene builders
   private:
-    DEFINE_ISA_FUNCTION(Builder*,BVH8Curve8vBuilder_OBB_New,void* COMMA Scene* COMMA size_t);
-    DEFINE_ISA_FUNCTION(Builder*,BVH8OBBCurve8iMBBuilder_OBB,void* COMMA Scene* COMMA size_t);
- 
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4vSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4iSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
@@ -262,12 +240,12 @@ namespace embree
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4vMBSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8QuantizedTriangle4iSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8QuantizedTriangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
- 
+
     DEFINE_ISA_FUNCTION(Builder*,BVH8Quad4vSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8Quad4iSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8Quad4iMBSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8QuantizedQuad4iSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
-    
+
     DEFINE_ISA_FUNCTION(Builder*,BVH8VirtualSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
     DEFINE_ISA_FUNCTION(Builder*,BVH8VirtualMBSceneBuilderSAH,void* COMMA Scene* COMMA size_t);
 
@@ -288,7 +266,7 @@ namespace embree
     DEFINE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelTriangleMeshSAH,void* COMMA Scene* COMMA const createTriangleMeshAccelTy);
     DEFINE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelQuadMeshSAH,void* COMMA Scene* COMMA const createQuadMeshAccelTy);
     DEFINE_ISA_FUNCTION(Builder*,BVH8BuilderTwoLevelVirtualSAH,void* COMMA Scene* COMMA const createUserGeometryAccelTy);
- 
+
     // SAH mesh builders
   private:
     DEFINE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);

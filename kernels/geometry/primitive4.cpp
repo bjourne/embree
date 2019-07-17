@@ -15,10 +15,6 @@
 // ======================================================================== //
 
 #include "primitive.h"
-#include "curveNv.h"
-#include "curveNi.h"
-#include "curveNi_mb.h"
-#include "linei.h"
 #include "triangle.h"
 #include "trianglev.h"
 #include "trianglev_mb.h"
@@ -32,130 +28,6 @@
 
 namespace embree
 {
-  /********************** Curve4v **************************/
-
-  template<>
-  const char* Curve4v::Type::name () const {
-    return "curve4v";
-  }
-
-  template<>
-  size_t Curve4v::Type::sizeActive(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return ((Line4i*)This)->size();
-    else
-      return ((Curve4v*)This)->N;
-  }
-
-  template<>
-  size_t Curve4v::Type::sizeTotal(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return 4;
-    else
-      return ((Curve4v*)This)->N;
-  }
-
-  template<>
-  size_t Curve4v::Type::getBytes(const char* This) const
-  {
-     if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-       return Line4i::bytes(sizeActive(This));
-     else
-       return Curve4v::bytes(sizeActive(This));
-  }
-
-  /********************** Curve4i **************************/
-
-  template<>
-  const char* Curve4i::Type::name () const {
-    return "curve4i";
-  }
-
-  template<>
-  size_t Curve4i::Type::sizeActive(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return ((Line4i*)This)->size();
-    else
-      return ((Curve4i*)This)->N;
-  }
-
-  template<>
-  size_t Curve4i::Type::sizeTotal(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return 4;
-    else
-      return ((Curve4i*)This)->N;
-  }
-
-  template<>
-  size_t Curve4i::Type::getBytes(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-       return Line4i::bytes(sizeActive(This));
-     else
-       return Curve4i::bytes(sizeActive(This));
-  }
-
-  /********************** Curve4iMB **************************/
-
-  template<>
-  const char* Curve4iMB::Type::name () const {
-    return "curve4imb";
-  }
-
-  template<>
-  size_t Curve4iMB::Type::sizeActive(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return ((Line4i*)This)->size();
-    else
-      return ((Curve4iMB*)This)->N;
-  }
-
-  template<>
-  size_t Curve4iMB::Type::sizeTotal(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-      return 4;
-    else
-      return ((Curve4iMB*)This)->N;
-  }
-
-  template<>
-  size_t Curve4iMB::Type::getBytes(const char* This) const
-  {
-    if ((*This & Geometry::GType::GTY_BASIS_MASK) == Geometry::GType::GTY_BASIS_LINEAR)
-       return Line4i::bytes(sizeActive(This));
-     else
-       return Curve4iMB::bytes(sizeActive(This));
-  }
-
-  /********************** Line4i **************************/
-
-  template<>
-  const char* Line4i::Type::name () const {
-    return "line4i";
-  }
-
-  template<>
-  size_t Line4i::Type::sizeActive(const char* This) const {
-    return ((Line4i*)This)->size();
-  }
-
-  template<>
-  size_t Line4i::Type::sizeTotal(const char* This) const {
-    return 4;
-  }
-
-  template<>
-  size_t Line4i::Type::getBytes(const char* This) const {
-    return sizeof(Line4i);
-  }
-
   /********************** Triangle4 **************************/
 
   template<>
@@ -367,7 +239,7 @@ namespace embree
   }
 
   SubGrid::Type SubGrid::type;
-  
+
   /********************** SubGridQBVH4 **************************/
 
   template<>

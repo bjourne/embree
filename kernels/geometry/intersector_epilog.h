@@ -24,11 +24,6 @@ namespace embree
 {
   namespace isa
   {
-    template<int M>
-    struct UVIdentity {
-      __forceinline void operator() (vfloat<M>& u, vfloat<M>& v) const {}
-    };
-
     template<bool filter>
     struct Intersect1Epilog1
     {
@@ -584,7 +579,7 @@ namespace embree
       template<typename Hit>
       __forceinline vbool<K> operator() (const vbool<K>& valid_i, const Hit& hit) const
       {
-        printf("IntersectKEpilogM::operator()\n");
+        //printf("IntersectKEpilogM::operator()\n");
         Scene* scene = context->scene;
 
         vfloat<K> u, v, t;
@@ -599,12 +594,14 @@ namespace embree
 
         /* ray masking test */
 #if defined(EMBREE_RAY_MASK)
+        printf("ray mask!\n");
         valid &= (geometry->mask & ray.mask) != 0;
         if (unlikely(none(valid))) return false;
 #endif
 
         /* occlusion filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
+        printf("filter function!\n");
         if (filter) {
           if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
             HitK<K> h(context->instID,geomID,primID,u,v,Ng);
