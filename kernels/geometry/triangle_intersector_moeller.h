@@ -38,8 +38,8 @@ namespace embree
 
       __forceinline MoellerTrumboreHitM(const vbool<M>& valid, const vfloat<M>& U, const vfloat<M>& V, const vfloat<M>& T, const vfloat<M>& absDen, const Vec3vf<M>& Ng)
         : U(U), V(V), T(T), absDen(absDen), valid(valid), vNg(Ng) {}
-      
-      __forceinline void finalize() 
+
+      __forceinline void finalize()
       {
         const vfloat<M> rcpAbsDen = rcp(absDen);
         vt = T * rcpAbsDen;
@@ -50,13 +50,13 @@ namespace embree
       __forceinline Vec2f uv (const size_t i) const { return Vec2f(vu[i],vv[i]); }
       __forceinline float t  (const size_t i) const { return vt[i]; }
       __forceinline Vec3fa Ng(const size_t i) const { return Vec3fa(vNg.x[i],vNg.y[i],vNg.z[i]); }
-      
+
     public:
       vfloat<M> U;
       vfloat<M> V;
       vfloat<M> T;
       vfloat<M> absDen;
-      
+
     public:
       vbool<M> valid;
       vfloat<M> vu;
@@ -64,7 +64,7 @@ namespace embree
       vfloat<M> vt;
       Vec3vf<M> vNg;
     };
-    
+
     template<int M>
     struct MoellerTrumboreIntersector1
     {
@@ -89,24 +89,24 @@ namespace embree
         const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
         const vfloat<M> absDen = abs(den);
         const vfloat<M> sgnDen = signmsk(den);
-        
+
         /* perform edge tests */
         const vfloat<M> U = dot(R,Vec3vf<M>(tri_e2)) ^ sgnDen;
         const vfloat<M> V = dot(R,Vec3vf<M>(tri_e1)) ^ sgnDen;
-        
-        /* perform backface culling */        
+
+        /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
         valid &= (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
 #else
         valid &= (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
 #endif
         if (likely(none(valid))) return false;
-        
+
         /* perform depth test */
         const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
         valid &= (absDen*vfloat<M>(ray.tnear()) < T) & (T <= absDen*vfloat<M>(ray.tfar));
         if (likely(none(valid))) return false;
-        
+
         /* update hit information */
         new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
         return true;
@@ -122,29 +122,29 @@ namespace embree
         const Vec3<vfloat<M>> tri_Ng = cross(tri_e2,tri_e1);
         return intersect(valid,ray,tri_v0,tri_e1,tri_e2,tri_Ng,hit);
       }
-      
-      __forceinline bool intersect(Ray& ray,
-                                   const Vec3vf<M>& v0,
-                                   const Vec3vf<M>& v1,
-                                   const Vec3vf<M>& v2,
-                                   MoellerTrumboreHitM<M>& hit) const
-      {
-        const Vec3vf<M> e1 = v0-v1;
-        const Vec3vf<M> e2 = v2-v0;
-        return intersectEdge(ray,v0,e1,e2,hit);
-      }
 
-      __forceinline bool intersect(const vbool<M>& valid,
-                                   Ray& ray,
-                                   const Vec3vf<M>& v0,
-                                   const Vec3vf<M>& v1,
-                                   const Vec3vf<M>& v2,
-                                   MoellerTrumboreHitM<M>& hit) const
-      {
-        const Vec3vf<M> e1 = v0-v1;
-        const Vec3vf<M> e2 = v2-v0;
-        return intersectEdge(valid,ray,v0,e1,e2,hit);
-      }
+      // __forceinline bool intersect(Ray& ray,
+      //                              const Vec3vf<M>& v0,
+      //                              const Vec3vf<M>& v1,
+      //                              const Vec3vf<M>& v2,
+      //                              MoellerTrumboreHitM<M>& hit) const
+      // {
+      //   const Vec3vf<M> e1 = v0-v1;
+      //   const Vec3vf<M> e2 = v2-v0;
+      //   return intersectEdge(ray,v0,e1,e2,hit);
+      // }
+
+      // __forceinline bool intersect(const vbool<M>& valid,
+      //                              Ray& ray,
+      //                              const Vec3vf<M>& v0,
+      //                              const Vec3vf<M>& v1,
+      //                              const Vec3vf<M>& v2,
+      //                              MoellerTrumboreHitM<M>& hit) const
+      // {
+      //   const Vec3vf<M> e1 = v0-v1;
+      //   const Vec3vf<M> e2 = v2-v0;
+      //   return intersectEdge(valid,ray,v0,e1,e2,hit);
+      // }
 
       template<typename Epilog>
       __forceinline bool intersectEdge(Ray& ray,
@@ -158,38 +158,38 @@ namespace embree
         return false;
       }
 
-      template<typename Epilog>
-        __forceinline bool intersect(Ray& ray,
-                                     const Vec3vf<M>& v0,
-                                     const Vec3vf<M>& v1,
-                                     const Vec3vf<M>& v2,
-                                     const Epilog& epilog) const
-      {
-        MoellerTrumboreHitM<M> hit;
-        if (likely(intersect(ray,v0,v1,v2,hit))) return epilog(hit.valid,hit);
-        return false;
-      }
+      // template<typename Epilog>
+      //   __forceinline bool intersect(Ray& ray,
+      //                                const Vec3vf<M>& v0,
+      //                                const Vec3vf<M>& v1,
+      //                                const Vec3vf<M>& v2,
+      //                                const Epilog& epilog) const
+      // {
+      //   MoellerTrumboreHitM<M> hit;
+      //   if (likely(intersect(ray,v0,v1,v2,hit))) return epilog(hit.valid,hit);
+      //   return false;
+      // }
 
-      template<typename Epilog>
-      __forceinline bool intersect(const vbool<M>& valid,
-                                   Ray& ray,
-                                   const Vec3vf<M>& v0,
-                                   const Vec3vf<M>& v1,
-                                   const Vec3vf<M>& v2,
-                                   const Epilog& epilog) const
-      {
-        MoellerTrumboreHitM<M> hit;
-        if (likely(intersect(valid,ray,v0,v1,v2,hit))) return epilog(hit.valid,hit);
-        return false;
-      }
+      // template<typename Epilog>
+      // __forceinline bool intersect(const vbool<M>& valid,
+      //                              Ray& ray,
+      //                              const Vec3vf<M>& v0,
+      //                              const Vec3vf<M>& v1,
+      //                              const Vec3vf<M>& v2,
+      //                              const Epilog& epilog) const
+      // {
+      //   MoellerTrumboreHitM<M> hit;
+      //   if (likely(intersect(valid,ray,v0,v1,v2,hit))) return epilog(hit.valid,hit);
+      //   return false;
+      // }
     };
-    
+
     template<int K>
     struct MoellerTrumboreHitK
     {
       __forceinline MoellerTrumboreHitK(const vfloat<K>& U, const vfloat<K>& V, const vfloat<K>& T, const vfloat<K>& absDen, const Vec3vf<K>& Ng)
         : U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
-      
+
       __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>> operator() () const
       {
         const vfloat<K> rcpAbsDen = rcp(absDen);
@@ -198,7 +198,7 @@ namespace embree
         const vfloat<K> v = V * rcpAbsDen;
         return std::make_tuple(u,v,t,Ng);
       }
-      
+
     private:
       const vfloat<K> U;
       const vfloat<K> V;
@@ -206,12 +206,12 @@ namespace embree
       const vfloat<K> absDen;
       const Vec3vf<K> Ng;
     };
-    
+
     template<int M, int K>
     struct MoellerTrumboreIntersectorK
     {
       __forceinline MoellerTrumboreIntersectorK(const vbool<K>& valid, const RayK<K>& ray) {}
-      
+
       /*! Intersects K rays with one of M triangles. */
       template<typename Epilog>
       __forceinline vbool<K> intersectK(const vbool<K>& valid0,
@@ -225,7 +225,7 @@ namespace embree
                                         const Vec3vf<K>& tri_e2,
                                         const Vec3vf<K>& tri_Ng,
                                         const Epilog& epilog) const
-      { 
+      {
         /* calculate denominator */
         vbool<K> valid = valid0;
         const Vec3vf<K> C = tri_v0 - ray_org;
@@ -233,27 +233,27 @@ namespace embree
         const vfloat<K> den = dot(tri_Ng,ray_dir);
         const vfloat<K> absDen = abs(den);
         const vfloat<K> sgnDen = signmsk(den);
-        
+
         /* test against edge p2 p0 */
         const vfloat<K> U = dot(tri_e2,R) ^ sgnDen;
         valid &= U >= 0.0f;
         if (likely(none(valid))) return false;
-        
+
         /* test against edge p0 p1 */
         const vfloat<K> V = dot(tri_e1,R) ^ sgnDen;
         valid &= V >= 0.0f;
         if (likely(none(valid))) return false;
-        
+
         /* test against edge p1 p2 */
         const vfloat<K> W = absDen-U-V;
         valid &= W >= 0.0f;
         if (likely(none(valid))) return false;
-        
+
         /* perform depth test */
         const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
         valid &= (absDen*ray_tnear < T) & (T <= absDen*ray_tfar);
         if (unlikely(none(valid))) return false;
-        
+
         /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
         valid &= den < vfloat<K>(zero);
@@ -262,15 +262,15 @@ namespace embree
         valid &= den != vfloat<K>(zero);
         if (unlikely(none(valid))) return false;
 #endif
-        
+
         /* calculate hit information */
         MoellerTrumboreHitK<K> hit(U,V,T,absDen,tri_Ng);
         return epilog(valid,hit);
       }
-      
+
       /*! Intersects K rays with one of M triangles. */
       template<typename Epilog>
-      __forceinline vbool<K> intersectK(const vbool<K>& valid0, 
+      __forceinline vbool<K> intersectK(const vbool<K>& valid0,
                                         RayK<K>& ray,
                                         const Vec3vf<K>& tri_v0,
                                         const Vec3vf<K>& tri_v1,
@@ -285,17 +285,17 @@ namespace embree
 
       /*! Intersects K rays with one of M triangles. */
       template<typename Epilog>
-      __forceinline vbool<K> intersectEdgeK(const vbool<K>& valid0, 
+      __forceinline vbool<K> intersectEdgeK(const vbool<K>& valid0,
                                             RayK<K>& ray,
-                                            const Vec3vf<K>& tri_v0, 
-                                            const Vec3vf<K>& tri_e1, 
-                                            const Vec3vf<K>& tri_e2, 
+                                            const Vec3vf<K>& tri_v0,
+                                            const Vec3vf<K>& tri_e1,
+                                            const Vec3vf<K>& tri_e2,
                                             const Epilog& epilog) const
       {
         const Vec3vf<K> tri_Ng = cross(tri_e2,tri_e1);
         return intersectK(valid0,ray.org,ray.dir,ray.tnear(),ray.tfar,tri_v0,tri_e1,tri_e2,tri_Ng,epilog);
       }
-      
+
       /*! Intersect k'th ray from ray packet of size K with M triangles. */
       __forceinline bool intersectEdge(RayK<K>& ray,
                                        size_t k,
@@ -315,11 +315,11 @@ namespace embree
         const vfloat<M> den = dot(Vec3vfM(tri_Ng),D);
         const vfloat<M> absDen = abs(den);
         const vfloat<M> sgnDen = signmsk(den);
-        
+
         /* perform edge tests */
         const vfloat<M> U = dot(Vec3vf<M>(tri_e2),R) ^ sgnDen;
         const vfloat<M> V = dot(Vec3vf<M>(tri_e1),R) ^ sgnDen;
-        
+
         /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
         vbool<M> valid = (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
@@ -327,12 +327,12 @@ namespace embree
         vbool<M> valid = (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
 #endif
         if (likely(none(valid))) return false;
-        
+
         /* perform depth test */
         const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
         valid &= (absDen*vfloat<M>(ray.tnear()[k]) < T) & (T <= absDen*vfloat<M>(ray.tfar[k]));
         if (likely(none(valid))) return false;
-        
+
         /* calculate hit information */
         new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
         return true;
@@ -341,12 +341,12 @@ namespace embree
       __forceinline bool intersectEdge(RayK<K>& ray,
                                        size_t k,
                                        const BBox<vfloat<M>>& time_range,
-                                       const Vec3vf<M>& tri_v0, 
-                                       const Vec3vf<M>& tri_e1, 
-                                       const Vec3vf<M>& tri_e2, 
+                                       const Vec3vf<M>& tri_v0,
+                                       const Vec3vf<M>& tri_e1,
+                                       const Vec3vf<M>& tri_e2,
                                        MoellerTrumboreHitM<M>& hit) const
       {
-        if (likely(intersect(ray,k,tri_v0,tri_e1,tri_e2,hit))) 
+        if (likely(intersect(ray,k,tri_v0,tri_e1,tri_e2,hit)))
         {
           hit.valid &= time_range.lower <= vfloat<M>(ray.time[k]);
           hit.valid &= vfloat<M>(ray.time[k]) < time_range.upper;
@@ -358,9 +358,9 @@ namespace embree
       template<typename Epilog>
       __forceinline bool intersectEdge(RayK<K>& ray,
                                        size_t k,
-                                       const Vec3vf<M>& tri_v0, 
-                                       const Vec3vf<M>& tri_e1, 
-                                       const Vec3vf<M>& tri_e2, 
+                                       const Vec3vf<M>& tri_v0,
+                                       const Vec3vf<M>& tri_e1,
+                                       const Vec3vf<M>& tri_e2,
                                        const Epilog& epilog) const
       {
         MoellerTrumboreHitM<M> hit;
@@ -370,25 +370,25 @@ namespace embree
 
       template<typename Epilog>
       __forceinline bool intersectEdge(RayK<K>& ray,
-                                       size_t k,                           
+                                       size_t k,
                                        const BBox<vfloat<M>>& time_range,
-                                       const Vec3vf<M>& tri_v0, 
-                                       const Vec3vf<M>& tri_e1, 
-                                       const Vec3vf<M>& tri_e2, 
+                                       const Vec3vf<M>& tri_v0,
+                                       const Vec3vf<M>& tri_e1,
+                                       const Vec3vf<M>& tri_e2,
                                        const Epilog& epilog) const
       {
         MoellerTrumboreHitM<M> hit;
         if (likely(intersectEdge(ray,k,time_range,tri_v0,tri_e1,tri_e2,hit))) return epilog(hit.valid,hit);
         return false;
       }
-      
+
       template<typename Epilog>
       __forceinline bool intersect(RayK<K>& ray,
                                    size_t k,
-                                   const Vec3vf<M>& v0, 
-                                   const Vec3vf<M>& v1, 
-                                   const Vec3vf<M>& v2, 
-                                   const Epilog& epilog) const      
+                                   const Vec3vf<M>& v0,
+                                   const Vec3vf<M>& v1,
+                                   const Vec3vf<M>& v2,
+                                   const Epilog& epilog) const
       {
         const Vec3vf<M> e1 = v0-v1;
         const Vec3vf<M> e2 = v2-v0;
