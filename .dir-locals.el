@@ -7,6 +7,7 @@
             (inclass . +)
             (innamespace . +)
             (statement-block-intro . +)
+            (substatement . +)
             (topmost-intro . 0)
             (topmost-intro-cont . 0)
             (member-init-intro . +)

@@ -601,9 +601,9 @@ namespace embree
 
         /* occlusion filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
-        printf("filter function!\n");
         if (filter) {
           if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
+            //printf("doing filtering!\n");
             HitK<K> h(context->instID,geomID,primID,u,v,Ng);
             const vfloat<K> old_t = ray.tfar;
             ray.tfar = select(valid,t,ray.tfar);

@@ -118,7 +118,11 @@ namespace embree
       }
 
       /*! Test if the ray is occluded by one of the M triangles. */
-      static __forceinline bool occluded(Precalculations& pre, RayK<K>& ray, size_t k, IntersectContext* context, const TriangleM<M>& tri)
+      static __forceinline bool occluded(Precalculations& pre,
+                                         RayK<K>& ray,
+                                         size_t k,
+                                         IntersectContext* context,
+                                         const TriangleM<M>& tri)
       {
         STAT3(shadow.trav_prims,1,1,1);
         return pre.intersectEdge(ray,k,tri.v0,tri.e1,tri.e2,Occluded1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID()));
