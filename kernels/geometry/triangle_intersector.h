@@ -100,6 +100,8 @@ namespace embree
       typedef TriangleM<M> Primitive;
       typedef MoellerTrumboreIntersectorK<Mx,K> Precalculations;
 
+
+
       /*! Intersects K rays with M triangles. */
       static __forceinline
       void intersect(const vbool<K>& valid_i,

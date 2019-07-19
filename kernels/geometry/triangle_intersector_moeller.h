@@ -174,11 +174,12 @@ namespace embree
 
       /*! Intersects K rays with one of M triangles. */
       template<typename Epilog>
-      __forceinline vbool<K> intersectK(const vbool<K>& valid0,
-                                        const RayHitK<K>& ray,
-                                        const TriangleM<M>& tri,
-                                        size_t i,
-                                        const Epilog& epilog) const
+      __forceinline void
+      intersectK(const vbool<K>& valid0,
+                 const RayHitK<K>& ray,
+                 const TriangleM<M>& tri,
+                 size_t i,
+                 const Epilog& epilog) const
       {
 
         // Do broadcasting and cross prod.
@@ -199,40 +200,40 @@ namespace embree
         const vfloat<K> U = dot(e2, R) ^ sgnDen;
         valid &= U >= 0.0f;
         if (likely(none(valid)))
-          return false;
+          return;
 
         /* test against edge p0 p1 */
         const vfloat<K> V = dot(e1, R) ^ sgnDen;
         valid &= V >= 0.0f;
         if (likely(none(valid)))
-          return false;
+          return;
 
         /* test against edge p1 p2 */
         const vfloat<K> W = absDen-U-V;
         valid &= W >= 0.0f;
         if (likely(none(valid)))
-          return false;
+          return;
 
         /* perform depth test */
         const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
         valid &= (absDen*ray.tnear() < T) & (T <= absDen*ray.tfar);
         if (unlikely(none(valid)))
-          return false;
+          return;
 
         /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
         valid &= den < vfloat<K>(zero);
         if (unlikely(none(valid)))
-          return false;
+          return;
 #else
         valid &= den != vfloat<K>(zero);
         if (unlikely(none(valid)))
-          return false;
+          return;
 #endif
 
         /* calculate hit information */
         MoellerTrumboreHitK<K> hit(U,V,T,absDen,tri_Ng);
-        return epilog(valid,hit);
+        epilog(valid,hit);
       }
 
       /*! Intersect k'th ray from ray packet of size K with M triangles. */
