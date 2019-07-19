@@ -2,6 +2,7 @@
 ((c++-mode (c-basic-offset . 2)
            (c-offsets-alist
             (access-label . -)
+            (arglist-intro . +)
             (arglist-cont-nonempty . c-lineup-arglist)
             (defun-block-intro . +)
             (inclass . +)
