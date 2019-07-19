@@ -19,8 +19,6 @@
 #include "trianglev.h"
 #include "trianglev_mb.h"
 #include "trianglei.h"
-#include "quadv.h"
-#include "quadi.h"
 #include "subdivpatch1.h"
 #include "object.h"
 #include "instance.h"
@@ -114,50 +112,6 @@ namespace embree
   template<>
   size_t Triangle4vMB::Type::getBytes(const char* This) const {
     return sizeof(Triangle4vMB);
-  }
-
-  /********************** Quad4v **************************/
-
-  template<>
-  const char* Quad4v::Type::name () const {
-    return "quad4v";
-  }
-
-  template<>
-  size_t Quad4v::Type::sizeActive(const char* This) const {
-    return ((Quad4v*)This)->size();
-  }
-
-  template<>
-  size_t Quad4v::Type::sizeTotal(const char* This) const {
-    return 4;
-  }
-
-  template<>
-  size_t Quad4v::Type::getBytes(const char* This) const {
-    return sizeof(Quad4v);
-  }
-
-  /********************** Quad4i **************************/
-
-  template<>
-  const char* Quad4i::Type::name () const {
-    return "quad4i";
-  }
-
-  template<>
-  size_t Quad4i::Type::sizeActive(const char* This) const {
-    return ((Quad4i*)This)->size();
-  }
-
-  template<>
-  size_t Quad4i::Type::sizeTotal(const char* This) const {
-    return 4;
-  }
-
-  template<>
-  size_t Quad4i::Type::getBytes(const char* This) const {
-    return sizeof(Quad4i);
   }
 
   /********************** SubdivPatch1 **************************/

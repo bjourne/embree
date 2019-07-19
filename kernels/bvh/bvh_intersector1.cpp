@@ -20,8 +20,6 @@
 
 #include "../geometry/intersector_iterators.h"
 #include "../geometry/triangle_intersector.h"
-#include "../geometry/quadv_intersector.h"
-#include "../geometry/quadi_intersector.h"
 #include "../geometry/object_intersector.h"
 #include "../geometry/instance_intersector.h"
 

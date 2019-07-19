@@ -19,8 +19,6 @@
 #include "trianglev.h"
 #include "trianglev_mb.h"
 #include "trianglei.h"
-#include "quadv.h"
-#include "quadi.h"
 #include "subdivpatch1.h"
 #include "object.h"
 #include "instance.h"

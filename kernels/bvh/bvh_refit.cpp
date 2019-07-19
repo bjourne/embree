@@ -20,7 +20,6 @@
 #include "../geometry/triangle.h"
 #include "../geometry/trianglev.h"
 #include "../geometry/trianglei.h"
-#include "../geometry/quadv.h"
 #include "../geometry/object.h"
 
 namespace embree
@@ -220,17 +219,6 @@ namespace embree
     Builder* BVH8Triangle4vMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4v>((BVH8*)accel,BVH8Triangle4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
     Builder* BVH8Triangle4iMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4i>((BVH8*)accel,BVH8Triangle4iMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
 #endif
-#endif
-
-#if defined(EMBREE_GEOMETRY_QUAD)
-    Builder* BVH4Quad4vMeshBuilderSAH (void* bvh, QuadMesh* mesh, size_t mode);
-    Builder* BVH4Quad4vMeshRefitSAH (void* accel, QuadMesh* mesh, size_t mode) { return new BVHNRefitT<4,QuadMesh,Quad4v>((BVH4*)accel,BVH4Quad4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
-
-#if  defined(__AVX__)
-    Builder* BVH8Quad4vMeshBuilderSAH (void* bvh, QuadMesh* mesh, size_t mode);
-    Builder* BVH8Quad4vMeshRefitSAH (void* accel, QuadMesh* mesh, size_t mode) { return new BVHNRefitT<8,QuadMesh,Quad4v>((BVH8*)accel,BVH8Quad4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
-#endif
-
 #endif
 
 #if defined(EMBREE_GEOMETRY_USER)

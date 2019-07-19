@@ -24,8 +24,6 @@
 #include "../geometry/trianglev.h"
 #include "../geometry/trianglev_mb.h"
 #include "../geometry/trianglei.h"
-#include "../geometry/quadv.h"
-#include "../geometry/quadi.h"
 #include "../geometry/object.h"
 #include "../geometry/instance.h"
 #include "../geometry/subgrid.h"
