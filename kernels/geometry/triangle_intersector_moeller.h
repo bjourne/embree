@@ -175,32 +175,38 @@ namespace embree
       /*! Intersects K rays with one of M triangles. */
       template<typename Epilog>
       __forceinline vbool<K> intersectK(const vbool<K>& valid0,
-                                        //RayK<K>& ray,
-                                        const Vec3vf<K>& ray_org,
-                                        const Vec3vf<K>& ray_dir,
-                                        const vfloat<K>& ray_tnear,
-                                        const vfloat<K>& ray_tfar,
-                                        const Vec3vf<K>& tri_v0,
-                                        const Vec3vf<K>& tri_e1,
-                                        const Vec3vf<K>& tri_e2,
-                                        const Vec3vf<K>& tri_Ng,
+                                        const RayHitK<K>& ray,
+                                        const TriangleM<M>& tri,
+                                        // const Vec3vf<K>& tri_v0,
+                                        // const Vec3vf<K>& tri_e1,
+                                        // const Vec3vf<K>& tri_e2,
+                                        // const Vec3vf<K>& tri_Ng,
+                                        size_t i,
                                         const Epilog& epilog) const
       {
+
+        // Do broadcasting and cross prod.
+        Vec3<vfloat<K>> p0 = broadcast<vfloat<K>>(tri.v0, i);
+        Vec3<vfloat<K>> e1 = broadcast<vfloat<K>>(tri.e1,i);
+        Vec3<vfloat<K>> e2 = broadcast<vfloat<K>>(tri.e2,i);
+        Vec3<vfloat<K>> tri_Ng = cross(e2, e1);
+
         /* calculate denominator */
         vbool<K> valid = valid0;
-        const Vec3vf<K> C = tri_v0 - ray_org;
-        const Vec3vf<K> R = cross(C,ray_dir);
-        const vfloat<K> den = dot(tri_Ng,ray_dir);
+        const Vec3vf<K> C = p0 - ray.org;
+        const Vec3vf<K> R = cross(C,ray.dir);
+        const vfloat<K> den = dot(tri_Ng,ray.dir);
         const vfloat<K> absDen = abs(den);
         const vfloat<K> sgnDen = signmsk(den);
 
         /* test against edge p2 p0 */
-        const vfloat<K> U = dot(tri_e2,R) ^ sgnDen;
+        const vfloat<K> U = dot(e2, R) ^ sgnDen;
         valid &= U >= 0.0f;
-        if (likely(none(valid))) return false;
+        if (likely(none(valid)))
+          return false;
 
         /* test against edge p0 p1 */
-        const vfloat<K> V = dot(tri_e1,R) ^ sgnDen;
+        const vfloat<K> V = dot(e1, R) ^ sgnDen;
         valid &= V >= 0.0f;
         if (likely(none(valid)))
           return false;
@@ -213,36 +219,24 @@ namespace embree
 
         /* perform depth test */
         const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
-        valid &= (absDen*ray_tnear < T) & (T <= absDen*ray_tfar);
-        if (unlikely(none(valid))) return false;
+        valid &= (absDen*ray.tnear() < T) & (T <= absDen*ray.tfar);
+        if (unlikely(none(valid)))
+          return false;
 
         /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
         valid &= den < vfloat<K>(zero);
-        if (unlikely(none(valid))) return false;
+        if (unlikely(none(valid)))
+          return false;
 #else
         valid &= den != vfloat<K>(zero);
-        if (unlikely(none(valid))) return false;
+        if (unlikely(none(valid)))
+          return false;
 #endif
 
         /* calculate hit information */
         MoellerTrumboreHitK<K> hit(U,V,T,absDen,tri_Ng);
         return epilog(valid,hit);
-      }
-
-      /*! Intersects K rays with one of M triangles. */
-      template<typename Epilog>
-      __forceinline vbool<K> intersectEdgeK(const vbool<K>& valid0,
-                                            RayK<K>& ray,
-                                            const Vec3vf<K>& tri_v0,
-                                            const Vec3vf<K>& tri_e1,
-                                            const Vec3vf<K>& tri_e2,
-                                            const Epilog& epilog) const
-      {
-        const Vec3vf<K> tri_Ng = cross(tri_e2,tri_e1);
-        return intersectK(valid0, ray.org, ray.dir, ray.tnear(), ray.tfar,
-                          tri_v0,tri_e1,tri_e2,tri_Ng,
-                          epilog);
       }
 
       /*! Intersect k'th ray from ray packet of size K with M triangles. */
