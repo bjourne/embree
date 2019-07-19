@@ -177,10 +177,6 @@ namespace embree
       __forceinline vbool<K> intersectK(const vbool<K>& valid0,
                                         const RayHitK<K>& ray,
                                         const TriangleM<M>& tri,
-                                        // const Vec3vf<K>& tri_v0,
-                                        // const Vec3vf<K>& tri_e1,
-                                        // const Vec3vf<K>& tri_e2,
-                                        // const Vec3vf<K>& tri_Ng,
                                         size_t i,
                                         const Epilog& epilog) const
       {
