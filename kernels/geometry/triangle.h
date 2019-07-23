@@ -27,7 +27,7 @@ namespace embree
   struct TriangleM
   {
   public:
-    struct Type : public PrimitiveType 
+    struct Type : public PrimitiveType
     {
       const char* name() const;
       size_t sizeActive(const char* This) const;
@@ -35,12 +35,12 @@ namespace embree
       size_t getBytes(const char* This) const;
     };
     static Type type;
-    
+
   public:
 
     /* Returns maximum number of stored triangles */
     static __forceinline size_t max_size() { return M; }
-    
+
     /* Returns required number of primitive blocks for N primitives */
     static __forceinline size_t blocks(size_t N) { return (N+max_size()-1)/max_size(); }
 
@@ -58,7 +58,7 @@ namespace embree
 
     /* Returns true if the specified triangle is valid */
     __forceinline bool valid(const size_t i) const { assert(i<M); return geomIDs[i] != -1; }
-    
+
     /* Returns the number of stored triangles */
     __forceinline size_t size() const { return bsf(~movemask(valid()));  }
 
@@ -73,7 +73,7 @@ namespace embree
     __forceinline unsigned int primID(const size_t i) const { assert(i<M); return primIDs[i]; }
 
     /* Calculate the bounds of the triangle */
-    __forceinline BBox3fa bounds() const 
+    __forceinline BBox3fa bounds() const
     {
       Vec3vf<M> p0 = v0;
       Vec3vf<M> p1 = v0-e1;
@@ -112,7 +112,7 @@ namespace embree
     {
       vuint<M> vgeomID = -1, vprimID = -1;
       Vec3vf<M> v0 = zero, v1 = zero, v2 = zero;
-      
+
       for (size_t i=0; i<M && begin<end; i++, begin++)
       {
 	const PrimRef& prim = prims[begin];
@@ -163,7 +163,7 @@ namespace embree
     Vec3vf<M> v0;      // base vertex of the triangles
     Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
-  private:
+  public:
     vuint<M> geomIDs; // geometry IDs
     vuint<M> primIDs; // primitive IDs
   };

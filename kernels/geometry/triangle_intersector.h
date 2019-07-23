@@ -48,6 +48,71 @@ namespace embree
         }
       }
 
+      template<typename Hit>
+      static __forceinline bool
+      occludedEpilog(Ray& ray,
+                     IntersectContext* context,
+                     const vbool<Mx>& valid_i,
+                     const TriangleM<M>& tri,
+                     Hit& hit)
+      {
+        Scene* scene = context->scene;
+        /* intersection filter test */
+#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+        if (unlikely(filter))
+          hit.finalize(); /* called only once */
+
+        vbool<Mx> valid = valid_i;
+        if (Mx > M)
+          valid &= (1<<M)-1;
+        size_t m=movemask(valid);
+        goto entry;
+        while (true)
+        {
+          if (unlikely(m == 0))
+            return false;
+        entry:
+          size_t i=bsf(m);
+
+          const unsigned int geomID = tri.geomIDs[i];
+          Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+
+#if defined(EMBREE_RAY_MASK)
+          /* goto next hit if mask test fails */
+          if ((geometry->mask & ray.mask) == 0) {
+            m=btc(m,i);
+            continue;
+          }
+#endif
+
+#if defined(EMBREE_FILTER_FUNCTION)
+          /* if we have no filter then the test passed */
+          if (filter) {
+            if (unlikely(context->hasContextFilter() ||
+                         geometry->hasOcclusionFilter()))
+            {
+              const Vec2f uv = hit.uv(i);
+              HitK<1> h(context->instID,
+                        geomID,
+                        tri.primIDs[i],
+                        uv.x, uv.y,
+                        hit.Ng(i));
+              const float old_t = ray.tfar;
+              ray.tfar = hit.t(i);
+              if (runOcclusionFilter1(geometry,ray,context,h))
+                return true;
+              ray.tfar = old_t;
+              m=btc(m,i);
+              continue;
+            }
+          }
+#endif
+          break;
+        }
+#endif
+        return true;
+      }
+
       /*! Test if the ray is occluded by one of M triangles. */
       static __forceinline bool
       occluded(const MoellerTrumboreIntersector1<Mx>& pre,
@@ -59,10 +124,7 @@ namespace embree
         MoellerTrumboreHitM<M> hit;
         vbool<M> valid = true;
         if (likely(pre.intersect(valid, ray, tri, hit))) {
-          const Occluded1EpilogM<M, Mx, filter> epi =
-            Occluded1EpilogM<M,Mx,filter>(
-              ray,context,tri.geomID(),tri.primID());
-          return epi(hit.valid, hit);
+          return occludedEpilog(ray, context, hit.valid, tri, hit);
         }
         return false;
       }
@@ -79,7 +141,7 @@ namespace embree
       typedef MoellerTrumboreIntersector1<Mx> Precalculations;
 
       static __forceinline void
-      intersect(const Precalculations& pre,
+      intersect(const MoellerTrumboreIntersector1<Mx>& pre,
                 RayHit& ray,
                 IntersectContext* context,
                 const TriangleM<M>& tri)
@@ -91,13 +153,16 @@ namespace embree
 
       /*! Test if the ray is occluded by one of M triangles. */
       static __forceinline bool
-      occluded(const Precalculations& pre,
+      occluded(const MoellerTrumboreIntersector1<Mx>& pre,
                Ray& ray,
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
+        printf("__AVX__ TriangleMIntersector1Moeller::occluded\n");
         STAT3(shadow.trav_prims,1,1,1);
-        return pre.intersect(ray,tri.v0,tri.e1,tri.e2,Occluded1EpilogM<M,Mx,filter>(ray,context,tri.geomID(),tri.primID()));
+        return pre.intersect(
+          ray, tri.v0, tri.e1, tri.e2,
+          Occluded1EpilogM<M,Mx,filter>(ray,context,tri.geomID(),tri.primID()));
       }
     };
 #endif
@@ -142,15 +207,12 @@ namespace embree
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
-        printf("TriangleMIntersectorKMoeller::intersect\n");
         STAT3(normal.trav_prims,1,1,1);
         pre.intersectEdge(
           ray, k,
           tri,
           Intersect1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID()));
       }
-
-
 
       /*! Test for K rays if they are occluded by any of the M triangles. */
       static __forceinline vbool<K>
