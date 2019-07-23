@@ -157,7 +157,7 @@ namespace embree
     }
 
     /*! Intersects M triangles with 1 ray */
-    template<int M, int Mx, bool filter>
+    template<int M, int Mx>
     struct TriangleMIntersector1Moeller
     {
       typedef TriangleM<M> Primitive;

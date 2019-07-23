@@ -35,9 +35,9 @@ namespace embree
 
       __forceinline IntersectKEpilogM(RayHitK<K>& ray,
                                       IntersectContext* context,
-                                     const vuint<M>& geomIDs,
-                                     const vuint<M>& primIDs,
-                                     size_t i)
+                                      const vuint<M>& geomIDs,
+                                      const vuint<M>& primIDs,
+                                      size_t i)
         : ray(ray), context(context), geomIDs(geomIDs), primIDs(primIDs), i(i) {}
 
       template<typename Hit>
