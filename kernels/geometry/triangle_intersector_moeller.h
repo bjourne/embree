@@ -79,25 +79,23 @@ namespace embree
 
       __forceinline bool intersect(const vbool<M>& valid0,
                                    Ray& ray,
-                                   const Vec3vf<M>& tri_v0,
-                                   const Vec3vf<M>& tri_e1,
-                                   const Vec3vf<M>& tri_e2,
-                                   const Vec3vf<M>& tri_Ng,
+                                   const TriangleM<M>& tri,
                                    MoellerTrumboreHitM<M>& hit) const
       {
         /* calculate denominator */
         vbool<M> valid = valid0;
         const Vec3vf<M> O = Vec3vf<M>(ray.org);
         const Vec3vf<M> D = Vec3vf<M>(ray.dir);
-        const Vec3vf<M> C = Vec3vf<M>(tri_v0) - O;
+        const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
         const Vec3vf<M> R = cross(C,D);
+        const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
         const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
         const vfloat<M> absDen = abs(den);
         const vfloat<M> sgnDen = signmsk(den);
 
         /* perform edge tests */
-        const vfloat<M> U = dot(R,Vec3vf<M>(tri_e2)) ^ sgnDen;
-        const vfloat<M> V = dot(R,Vec3vf<M>(tri_e1)) ^ sgnDen;
+        const vfloat<M> U = dot(R,Vec3vf<M>(tri.e2)) ^ sgnDen;
+        const vfloat<M> V = dot(R,Vec3vf<M>(tri.e1)) ^ sgnDen;
 
         /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
@@ -115,23 +113,6 @@ namespace embree
         /* update hit information */
         new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
         return true;
-      }
-
-      template<typename Epilog>
-      __forceinline bool intersectEdge(Ray& ray,
-                                       const TriangleM<M>& tri,
-                                       // const Vec3vf<M>& v0,
-                                       // const Vec3vf<M>& e1,
-                                       // const Vec3vf<M>& e2,
-                                       const Epilog& epilog) const
-      {
-
-        MoellerTrumboreHitM<M> hit;
-        vbool<M> valid = true;
-        const Vec3<vfloat<M>> tri_Ng = cross(tri.e2, tri.e1);
-        if (likely(intersect(valid, ray, tri.v0, tri.e1, tri.e2, tri_Ng, hit)))
-          return epilog(hit.valid, hit);
-        return false;
       }
     };
 
