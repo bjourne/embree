@@ -23,7 +23,7 @@ namespace embree
 {
   namespace isa
   {
-    template<int M, int Mx, bool filter>
+    template<int M, int Mx>
     static __forceinline bool
     occludedEpilog(Ray& ray,
                    IntersectContext* context,
@@ -34,8 +34,7 @@ namespace embree
       Scene* scene = context->scene;
       /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
-      if (unlikely(filter))
-        hit.finalize(); /* called only once */
+      hit.finalize(); /* called only once */
 
       vbool<Mx> valid = valid_i;
       if (Mx > M)
@@ -61,23 +60,21 @@ namespace embree
 
 #if defined(EMBREE_FILTER_FUNCTION)
         /* if we have no filter then the test passed */
-        if (filter) {
-          if (unlikely(context->hasContextFilter() ||
-                       geometry->hasOcclusionFilter())) {
-            const Vec2f uv = hit.uv(i);
-            HitK<1> h(context->instID,
-                      geomID,
-                      tri.primIDs[i],
-                      uv.x, uv.y,
-                      hit.Ng(i));
-            const float old_t = ray.tfar;
-            ray.tfar = hit.t(i);
-            if (runOcclusionFilter1(geometry,ray,context,h))
-              return true;
-            ray.tfar = old_t;
-            m=btc(m,i);
-            continue;
-          }
+        if (unlikely(context->hasContextFilter() ||
+                     geometry->hasOcclusionFilter())) {
+          const Vec2f uv = hit.uv(i);
+          HitK<1> h(context->instID,
+                    geomID,
+                    tri.primIDs[i],
+                    uv.x, uv.y,
+                    hit.Ng(i));
+          const float old_t = ray.tfar;
+          ray.tfar = hit.t(i);
+          if (runOcclusionFilter1(geometry,ray,context,h))
+            return true;
+          ray.tfar = old_t;
+          m=btc(m,i);
+          continue;
         }
 #endif
         break;
@@ -122,8 +119,8 @@ namespace embree
         MoellerTrumboreHitM<M> hit;
         vbool<M> valid = true;
         if (likely(pre.intersect(valid, ray, tri, hit))) {
-          return occludedEpilog<M, Mx, filter>(ray, context,
-                                               hit.valid, tri, hit);
+          return occludedEpilog<M, Mx>(ray, context,
+                                       hit.valid, tri, hit);
         }
         return false;
       }
