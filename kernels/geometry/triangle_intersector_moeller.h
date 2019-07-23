@@ -52,8 +52,6 @@ namespace embree
         vv = V * rcpAbsDen;
       }
 
-      __forceinline Vec2f uv (const size_t i) const { return Vec2f(vu[i],vv[i]); }
-      __forceinline float t  (const size_t i) const { return vt[i]; }
       __forceinline Vec3fa Ng(const size_t i) const { return Vec3fa(vNg.x[i],vNg.y[i],vNg.z[i]); }
 
     public:
