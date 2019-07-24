@@ -23,6 +23,49 @@ namespace embree
 {
   namespace isa
   {
+
+    /*! Intersect 1 ray with one of M triangles. */
+    template<int M>
+    static __forceinline bool
+    intersect1RayMTris(const vbool<M>& valid0,
+                       Ray& ray,
+                       const TriangleM<M>& tri,
+                       MoellerTrumboreHitM<M>& hit)
+    {
+      vbool<M> valid = valid0;
+      const Vec3vf<M> O = Vec3vf<M>(ray.org);
+      const Vec3vf<M> D = Vec3vf<M>(ray.dir);
+      const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
+      const Vec3vf<M> R = cross(C,D);
+      const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
+      const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
+      const vfloat<M> absDen = abs(den);
+      const vfloat<M> sgnDen = signmsk(den);
+
+      /* perform edge tests */
+      const vfloat<M> U = dot(R,Vec3vf<M>(tri.e2)) ^ sgnDen;
+      const vfloat<M> V = dot(R,Vec3vf<M>(tri.e1)) ^ sgnDen;
+
+        /* perform backface culling */
+#if defined(EMBREE_BACKFACE_CULLING)
+      valid &= (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+#else
+      valid &= (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+#endif
+      if (likely(none(valid)))
+        return false;
+
+      /* perform depth test */
+      const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
+      valid &= (absDen*vfloat<M>(ray.tnear()) < T) & (T <= absDen*vfloat<M>(ray.tfar));
+      if (likely(none(valid)))
+        return false;
+
+      /* update hit information */
+      new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
+      return true;
+    }
+
     /*! Intersects K rays with one of M triangles. */
     template<typename Epilog, int M, int K>
     static __forceinline void
@@ -237,10 +280,9 @@ namespace embree
         STAT3(normal.trav_prims, 1, 1, 1);
         MoellerTrumboreHitM<M> hit;
         vbool<M> valid = true;
-        if (likely(pre.intersect(valid, ray, tri, hit))) {
 
-          intersectEpilog<M, Mx>(ray, context, hit.valid,
-                                 tri, hit);
+        if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
+          intersectEpilog<M, Mx>(ray, context, hit.valid, tri, hit);
         }
       }
 
@@ -254,9 +296,8 @@ namespace embree
         STAT3(shadow.trav_prims, 1, 1, 1);
         MoellerTrumboreHitM<M> hit;
         vbool<M> valid = true;
-        if (likely(pre.intersect(valid, ray, tri, hit))) {
-          return occludedEpilog<M, Mx>(ray, context,
-                                       hit.valid, tri, hit);
+        if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
+          return occludedEpilog<M, Mx>(ray, context, hit.valid, tri, hit);
         }
         return false;
       }
