@@ -156,6 +156,16 @@ namespace embree
       return true;
     }
 
+    template<int M, int Mx, int K>
+    static __forceinline bool
+    intersectKEpilogM(RayHitK<K>& ray,
+                      IntersectContext* context,
+                      const vbool<Mx>& valid_i,
+                      const TriangleM<M>& tri,
+                      size_t i) {
+      return true;
+    }
+
     /*! Intersects M triangles with 1 ray */
     template<int M, int Mx>
     struct TriangleMIntersector1Moeller
@@ -210,7 +220,7 @@ namespace embree
       /*! Intersects K rays with M triangles. */
       static __forceinline
       void intersect(const vbool<K>& valid_i,
-                     Precalculations& pre,
+                     MoellerTrumboreIntersectorK<Mx,K>& pre,
                      RayHitK<K>& ray,
                      IntersectContext* context,
                      const TriangleM<M>& tri)
@@ -222,27 +232,32 @@ namespace embree
           if (!tri.valid(i))
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
+          MoellerTrumboreHitM<M> hit;
           pre.intersectK(
             valid_i,
             ray,
-            tri, i,
-            IntersectKEpilogM<M,K,filter>(ray,context,tri.geomID(),tri.primID(),i));
+            tri, i, IntersectKEpilogM<M,K,filter>(
+              ray,context, tri.geomID(),tri.primID(),i));
         }
       }
 
       /*! Intersect a ray with M triangles and updates the hit. */
       static __forceinline void
-      intersect(Precalculations& pre,
+      intersect(MoellerTrumboreIntersectorK<Mx,K>& pre,
                 RayHitK<K>& ray,
                 size_t k,
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
+        //printf("TriangleMIntersectorKMoeller::intersect\n");
         STAT3(normal.trav_prims,1,1,1);
-        pre.intersectEdge(
-          ray, k,
-          tri,
-          Intersect1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID()));
+
+        MoellerTrumboreHitM<M> hit;
+        if (likely(pre.intersectEdge(ray, k, tri, hit))) {
+          Intersect1KEpilogM<M,Mx,K,filter> epi =
+            Intersect1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID());
+          epi(hit.valid,hit);
+        }
       }
 
       /*! Test for K rays if they are occluded by any of the M triangles. */
@@ -260,12 +275,13 @@ namespace embree
           if (!tri.valid(i))
             break;
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
+
+          MoellerTrumboreHitM<M> hit;
           pre.intersectK(
             valid0,
             ray,
             tri, i,
             OccludedKEpilogM<M,K,filter>(valid0,ray,context,tri.geomID(),tri.primID(),i));
-
           if (none(valid0))
             break;
         }
@@ -273,17 +289,22 @@ namespace embree
       }
 
       /*! Test if the ray is occluded by one of the M triangles. */
-      static __forceinline bool occluded(Precalculations& pre,
-                                         RayK<K>& ray,
-                                         size_t k,
-                                         IntersectContext* context,
-                                         const TriangleM<M>& tri)
+      static __forceinline bool
+      occluded(MoellerTrumboreIntersectorK<Mx,K>& pre,
+               RayK<K>& ray,
+               size_t k,
+               IntersectContext* context,
+               const TriangleM<M>& tri)
       {
+        //printf("TriangleMIntersectorKMoeller::occluded\n");
         STAT3(shadow.trav_prims,1,1,1);
-        return pre.intersectEdge(
-          ray, k,
-          tri,
-          Occluded1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID()));
+        MoellerTrumboreHitM<M> hit;
+        if (likely(pre.intersectEdge(ray, k, tri, hit))) {
+          Occluded1KEpilogM<M, Mx, K, filter> epi =
+            Occluded1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID());
+          return epi(hit.valid, hit);
+        }
+        return false;
       }
     };
   }

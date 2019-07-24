@@ -419,7 +419,8 @@ namespace embree
 
     template<bool filter>
     struct Triangle4IntersectorStreamMoeller {
-      template<int K> using Type = ArrayIntersectorKStream<K,TriangleMIntersectorKMoeller<SIMD_MODE(4) COMMA K COMMA true>>;
+      template<int K> using Type =
+        ArrayIntersectorKStream<K,TriangleMIntersectorKMoeller<SIMD_MODE(4) COMMA K COMMA true>>;
     };
 
     // =====================================================================================================
@@ -452,10 +453,12 @@ namespace embree
 
     template<int N, int Nx>
     template<int K>
-    __noinline void BVHNIntersectorStreamPacketFallback<N, Nx>::intersectK(Accel::Intersectors* __restrict__ This,
-                                                                              RayHitK<K>** inputRays,
-                                                                              size_t numTotalRays,
-                                                                              IntersectContext* context)
+    __noinline
+    void BVHNIntersectorStreamPacketFallback<N, Nx>::intersectK(
+      Accel::Intersectors* __restrict__ This,
+      RayHitK<K>** inputRays,
+      size_t numTotalRays,
+      IntersectContext* context)
     {
       /* fallback to packets */
       for (size_t i = 0; i < numTotalRays; i += K)
