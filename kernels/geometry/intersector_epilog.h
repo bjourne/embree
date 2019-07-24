@@ -29,16 +29,14 @@ namespace embree
     {
       RayHitK<K>& ray;
       IntersectContext* context;
-      const vuint<M>& geomIDs;
-      const vuint<M>& primIDs;
+      const TriangleM<M>& tri;
       const size_t i;
 
       __forceinline IntersectKEpilogM(RayHitK<K>& ray,
                                       IntersectContext* context,
-                                      const vuint<M>& geomIDs,
-                                      const vuint<M>& primIDs,
+                                      const TriangleM<M>& tri,
                                       size_t i)
-        : ray(ray), context(context), geomIDs(geomIDs), primIDs(primIDs), i(i) {}
+        : ray(ray), context(context), tri(tri), i(i) {}
 
       template<typename Hit>
       __forceinline vbool<K> operator() (const vbool<K>& valid_i, const Hit& hit) const
@@ -52,8 +50,8 @@ namespace embree
 
         std::tie(u,v,t,Ng) = hit.finalizeK();
 
-        const unsigned int geomID = geomIDs[i];
-        const unsigned int primID = primIDs[i];
+        const unsigned int geomID = tri.geomIDs[i];
+        const unsigned int primID = tri.primIDs[i];
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
         /* ray masking test */

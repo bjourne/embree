@@ -23,6 +23,70 @@ namespace embree
 {
   namespace isa
   {
+    /*! Intersects K rays with one of M triangles. */
+    template<typename Epilog, int M, int K>
+    static __forceinline void
+    intersectKRaysMTris(const vbool<K>& valid0,
+                        const RayHitK<K>& ray,
+                        const TriangleM<M>& tri,
+                        size_t i,
+                        const Epilog& epilog)
+    {
+      // Do broadcasting and cross prod.
+      Vec3<vfloat<K>> p0 = broadcast<vfloat<K>>(tri.v0, i);
+      Vec3<vfloat<K>> e1 = broadcast<vfloat<K>>(tri.e1,i);
+      Vec3<vfloat<K>> e2 = broadcast<vfloat<K>>(tri.e2,i);
+      Vec3<vfloat<K>> tri_Ng = cross(e2, e1);
+
+      /* calculate denominator */
+      vbool<K> valid = valid0;
+      const Vec3vf<K> C = p0 - ray.org;
+      const Vec3vf<K> R = cross(C,ray.dir);
+      const vfloat<K> den = dot(tri_Ng,ray.dir);
+      const vfloat<K> absDen = abs(den);
+      const vfloat<K> sgnDen = signmsk(den);
+
+      /* test against edge p2 p0 */
+      const vfloat<K> U = dot(e2, R) ^ sgnDen;
+      valid &= U >= 0.0f;
+      if (likely(none(valid)))
+        return;
+
+      /* test against edge p0 p1 */
+      const vfloat<K> V = dot(e1, R) ^ sgnDen;
+      valid &= V >= 0.0f;
+      if (likely(none(valid)))
+        return;
+
+      /* test against edge p1 p2 */
+      const vfloat<K> W = absDen-U-V;
+      valid &= W >= 0.0f;
+      if (likely(none(valid)))
+        return;
+
+      /* perform depth test */
+      const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
+      valid &= (absDen*ray.tnear() < T) & (T <= absDen*ray.tfar);
+      if (unlikely(none(valid)))
+        return;
+
+        /* perform backface culling */
+#if defined(EMBREE_BACKFACE_CULLING)
+      valid &= den < vfloat<K>(zero);
+      if (unlikely(none(valid)))
+        return;
+#else
+      valid &= den != vfloat<K>(zero);
+      if (unlikely(none(valid)))
+        return;
+#endif
+
+      /* calculate hit information */
+      MoellerTrumboreHitK<K> hit(U,V,T,absDen,tri_Ng);
+      epilog(valid,hit);
+    }
+
+
     template<int M, int Mx>
     static __forceinline bool
     occludedEpilog(Ray& ray,
@@ -156,16 +220,6 @@ namespace embree
       return true;
     }
 
-    template<int M, int Mx, int K>
-    static __forceinline bool
-    intersectKEpilogM(RayHitK<K>& ray,
-                      IntersectContext* context,
-                      const vbool<Mx>& valid_i,
-                      const TriangleM<M>& tri,
-                      size_t i) {
-      return true;
-    }
-
     /*! Intersects M triangles with 1 ray */
     template<int M, int Mx>
     struct TriangleMIntersector1Moeller
@@ -215,8 +269,6 @@ namespace embree
       typedef TriangleM<M> Primitive;
       typedef MoellerTrumboreIntersectorK<Mx,K> Precalculations;
 
-
-
       /*! Intersects K rays with M triangles. */
       static __forceinline
       void intersect(const vbool<K>& valid_i,
@@ -225,19 +277,18 @@ namespace embree
                      IntersectContext* context,
                      const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::intersect LOOP\n");
+        //printf("TriangleMIntersectorKMoeller::intersect filter = %d\n", filter);
         STAT_USER(0,TriangleM<M>::max_size());
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
         {
           if (!tri.valid(i))
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
-          pre.intersectK(
-            valid_i,
-            ray,
-            tri, i, IntersectKEpilogM<M,K,filter>(
-              ray, context, tri.geomID(), tri.primID(), i),
-            false);
+          IntersectKEpilogM<M,K,filter> epi =
+            IntersectKEpilogM<M,K,filter>(ray, context, tri, i);
+
+          intersectKRaysMTris<IntersectKEpilogM<M,K,filter>, M, K>(
+            valid_i, ray, tri, i, epi);
         }
       }
 
@@ -249,7 +300,7 @@ namespace embree
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::intersect\n");
+        //printf("TriangleMIntersectorKMoeller::intersect %d\n", filter);
         STAT3(normal.trav_prims,1,1,1);
 
         MoellerTrumboreHitM<M> hit;
@@ -268,6 +319,7 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
+        //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
         vbool<K> valid0 = valid_i;
 
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
@@ -275,12 +327,12 @@ namespace embree
           if (!tri.valid(i))
             break;
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
-          pre.intersectK(
-            valid0,
-            ray,
-            tri, i,
-            OccludedKEpilogM<M,K,filter>(valid0,ray,context,tri.geomID(),tri.primID(),i),
-            true);
+
+          OccludedKEpilogM<M,K,filter> epi =
+            OccludedKEpilogM<M,K,filter>(valid0,ray,context,tri.geomID(),tri.primID(),i);
+
+          intersectKRaysMTris<OccludedKEpilogM<M,K,filter>, M, K>(
+            valid0, ray, tri, i, epi);
           if (none(valid0))
             break;
         }
@@ -295,7 +347,7 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::occluded\n");
+        //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
         STAT3(shadow.trav_prims,1,1,1);
         MoellerTrumboreHitM<M> hit;
         if (likely(pre.intersectEdge(ray, k, tri, hit))) {
