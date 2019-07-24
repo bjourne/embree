@@ -281,7 +281,7 @@ namespace embree
         STAT_USER(0,TriangleM<M>::max_size());
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
         {
-          if (!tri.valid(i))
+          if (tri.geomIDs[i] == -1)
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
           IntersectKEpilogM<M,K,filter> epi =
@@ -324,12 +324,12 @@ namespace embree
 
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
         {
-          if (!tri.valid(i))
+          if (tri.geomIDs[i] == -1)
             break;
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
 
           OccludedKEpilogM<M,K,filter> epi =
-            OccludedKEpilogM<M,K,filter>(valid0,ray,context,tri.geomID(),tri.primID(),i);
+            OccludedKEpilogM<M,K,filter>(valid0, ray, context, tri, i);
 
           intersectKRaysMTris<OccludedKEpilogM<M,K,filter>, M, K>(
             valid0, ray, tri, i, epi);

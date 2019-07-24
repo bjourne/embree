@@ -96,17 +96,15 @@ namespace embree
       vbool<K>& valid0;
       RayK<K>& ray;
       IntersectContext* context;
-      const vuint<M>& geomIDs;
-      const vuint<M>& primIDs;
+      const TriangleM<M>& tri;
       const size_t i;
 
       __forceinline OccludedKEpilogM(vbool<K>& valid0,
                                      RayK<K>& ray,
                                      IntersectContext* context,
-                                     const vuint<M>& geomIDs,
-                                     const vuint<M>& primIDs,
+                                     const TriangleM<M>& tri,
                                      size_t i)
-        : valid0(valid0), ray(ray), context(context), geomIDs(geomIDs), primIDs(primIDs), i(i) {}
+        : valid0(valid0), ray(ray), context(context), tri(tri), i(i) {}
 
       template<typename Hit>
       __forceinline void
@@ -116,8 +114,8 @@ namespace embree
 
         /* ray masking test */
         Scene* scene = context->scene;
-        const unsigned int geomID = geomIDs[i];
-        const unsigned int primID = primIDs[i];
+        const unsigned int geomID = tri.geomIDs[i];
+        const unsigned int primID = tri.primIDs[i];
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 #if defined(EMBREE_RAY_MASK)
         valid &= (geometry->mask & ray.mask) != 0;
@@ -133,11 +131,11 @@ namespace embree
             vfloat<K> u, v, t;
             Vec3vf<K> Ng;
             std::tie(u,v,t,Ng) = hit.finalizeK();
-            HitK<K> h(context->instID,geomID,primID,u,v,Ng);
+            HitK<K> h(context->instID,geomID,primID, u, v, Ng);
             const vfloat<K> old_t = ray.tfar;
-            ray.tfar = select(valid,t,ray.tfar);
+            ray.tfar = select(valid, t, ray.tfar);
             valid = runOcclusionFilter(valid, geometry, ray, context, h);
-            ray.tfar = select(valid,ray.tfar,old_t);
+            ray.tfar = select(valid, ray.tfar, old_t);
           }
         }
 #endif

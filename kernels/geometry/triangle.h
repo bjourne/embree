@@ -56,13 +56,6 @@ namespace embree
     /* Returns a mask that tells which triangles are valid */
     __forceinline vbool<M> valid() const { return geomIDs != vuint<M>(-1); }
 
-    /* Returns true if the specified triangle is valid */
-    __forceinline bool
-    valid(const size_t i) const
-    {
-      assert(i<M); return geomIDs[i] != -1;
-    }
-
     /* Returns the number of stored triangles */
     __forceinline size_t size() const { return bsf(~movemask(valid()));  }
 
