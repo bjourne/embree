@@ -134,7 +134,6 @@ namespace embree
     static __forceinline bool
     occludedEpilog(Ray& ray,
                    IntersectContext* context,
-                   const vbool<Mx>& valid_i,
                    const TriangleM<M>& tri,
                    MoellerTrumboreHitM<M>& hit)
     {
@@ -143,7 +142,7 @@ namespace embree
 #if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
       hit.finalize(); /* called only once */
 
-      vbool<Mx> valid = valid_i;
+      vbool<Mx> valid = hit.valid;
       if (Mx > M)
         valid &= (1<<M)-1;
       size_t m=movemask(valid);
@@ -194,12 +193,11 @@ namespace embree
     static __forceinline bool
     intersectEpilog(RayHit& ray,
                     IntersectContext* context,
-                    const vbool<Mx>& valid_i,
                     const TriangleM<M>& tri,
                     MoellerTrumboreHitM<M>& hit)
     {
       Scene* scene = context->scene;
-      vbool<Mx> valid = valid_i;
+      vbool<Mx> valid = hit.valid;
       if (Mx > M)
         valid &= (1<<M)-1;
       hit.finalize();
@@ -282,7 +280,7 @@ namespace embree
         vbool<M> valid = true;
 
         if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
-          intersectEpilog<M, Mx>(ray, context, hit.valid, tri, hit);
+          intersectEpilog<M, Mx>(ray, context, tri, hit);
         }
       }
 
@@ -297,7 +295,7 @@ namespace embree
         MoellerTrumboreHitM<M> hit;
         vbool<M> valid = true;
         if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
-          return occludedEpilog<M, Mx>(ray, context, hit.valid, tri, hit);
+          return occludedEpilog<M, Mx>(ray, context, tri, hit);
         }
         return false;
       }
