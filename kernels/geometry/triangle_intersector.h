@@ -300,14 +300,14 @@ namespace embree
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::intersect %d\n", filter);
+        //printf("TriangleMIntersectorKMoeller::intersect (a ray) %d\n", filter);
         STAT3(normal.trav_prims,1,1,1);
 
         MoellerTrumboreHitM<M> hit;
         if (likely(pre.intersectEdge(ray, k, tri, hit))) {
           Intersect1KEpilogM<M,Mx,K,filter> epi =
-            Intersect1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID());
-          epi(hit.valid,hit);
+            Intersect1KEpilogM<M,Mx,K,filter>(ray,k,context,tri);
+          epi(hit.valid, hit);
         }
       }
 
@@ -352,7 +352,7 @@ namespace embree
         MoellerTrumboreHitM<M> hit;
         if (likely(pre.intersectEdge(ray, k, tri, hit))) {
           Occluded1KEpilogM<M, Mx, K, filter> epi =
-            Occluded1KEpilogM<M,Mx,K,filter>(ray,k,context,tri.geomID(),tri.primID());
+            Occluded1KEpilogM<M,Mx,K,filter>(ray, k, context, tri);
           return epi(hit.valid, hit);
         }
         return false;

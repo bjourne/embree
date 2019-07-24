@@ -148,14 +148,12 @@ namespace embree
       RayHitK<K>& ray;
       size_t k;
       IntersectContext* context;
-      const vuint<M>& geomIDs;
-      const vuint<M>& primIDs;
+      const TriangleM<M>& tri;
 
       __forceinline Intersect1KEpilogM(RayHitK<K>& ray, size_t k,
                                        IntersectContext* context,
-                                       const vuint<M>& geomIDs,
-                                       const vuint<M>& primIDs)
-        : ray(ray), k(k), context(context), geomIDs(geomIDs), primIDs(primIDs) {}
+                                       const TriangleM<M>& tri)
+        : ray(ray), k(k), context(context), tri(tri) {}
 
       template<typename Hit>
       __forceinline bool operator() (const vbool<Mx>& valid_i, Hit& hit) const
@@ -166,7 +164,7 @@ namespace embree
         if (Mx > M) valid &= (1<<M)-1;
         size_t i = select_min(valid,hit.vt);
         assert(i<M);
-        unsigned int geomID = geomIDs[i];
+        unsigned int geomID = tri.geomIDs[i];
 
         /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
@@ -177,7 +175,7 @@ namespace embree
           if (unlikely(none(valid))) return foundhit;
           i = select_min(valid,hit.vt);
           assert(i<M);
-          geomID = geomIDs[i];
+          geomID = tri.geomIDs[i];
         entry:
           Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
@@ -197,7 +195,7 @@ namespace embree
               assert(i<M);
               const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
               HitK<K> h(context->instID,
-                        geomID, primIDs[i],
+                        geomID, tri.primIDs[i],
                         uv.x,uv.y,
                         hit.Ng(i));
               const float old_t = ray.tfar[k];
@@ -227,7 +225,7 @@ namespace embree
         ray.Ng.z[k] = hit.vNg.z[i];
         ray.u[k] = uv.x;
         ray.v[k] = uv.y;
-        ray.primID[k] = primIDs[i];
+        ray.primID[k] = tri.primIDs[i];
         ray.geomID[k] = geomID;
         ray.instID[k] = context->instID;
 #endif
@@ -241,14 +239,12 @@ namespace embree
       RayK<K>& ray;
       size_t k;
       IntersectContext* context;
-      const vuint<M>& geomIDs;
-      const vuint<M>& primIDs;
+      const TriangleM<M>& tri;
 
       __forceinline Occluded1KEpilogM(RayK<K>& ray, size_t k,
                                       IntersectContext* context,
-                                      const vuint<M>& geomIDs,
-                                      const vuint<M>& primIDs)
-        : ray(ray), k(k), context(context), geomIDs(geomIDs), primIDs(primIDs) {}
+                                      const TriangleM<M>& tri)
+        : ray(ray), k(k), context(context), tri(tri) {}
 
       template<typename Hit>
       __forceinline bool operator() (const vbool<Mx>& valid_i, Hit& hit) const
@@ -270,7 +266,7 @@ namespace embree
         entry:
           size_t i=bsf(m);
 
-          const unsigned int geomID = geomIDs[i];
+          const unsigned int geomID = tri.geomIDs[i];
           Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
 #if defined(EMBREE_RAY_MASK)
@@ -289,7 +285,10 @@ namespace embree
               const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
               const float old_t = ray.tfar[k];
               ray.tfar[k] = hit.vt[i];
-              HitK<K> h(context->instID,geomID,primIDs[i],uv.x,uv.y,hit.Ng(i));
+              HitK<K> h(context->instID,
+                        geomID, tri.primIDs[i],
+                        uv.x, uv.y,
+                        hit.Ng(i));
               if (any(runOcclusionFilter(vbool<K>(1<<k),geometry,ray,context,h))) return true;
               ray.tfar[k] = old_t;
               m=btc(m,i);
