@@ -232,12 +232,12 @@ namespace embree
           if (!tri.valid(i))
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
-          MoellerTrumboreHitM<M> hit;
           pre.intersectK(
             valid_i,
             ray,
             tri, i, IntersectKEpilogM<M,K,filter>(
-              ray,context, tri.geomID(),tri.primID(),i));
+              ray, context, tri.geomID(), tri.primID(), i),
+            false);
         }
       }
 
@@ -270,18 +270,17 @@ namespace embree
       {
         vbool<K> valid0 = valid_i;
 
-        for (size_t i=0; i<TriangleM<M>::max_size(); i++)
+        for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
         {
           if (!tri.valid(i))
             break;
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
-
-          MoellerTrumboreHitM<M> hit;
           pre.intersectK(
             valid0,
             ray,
             tri, i,
-            OccludedKEpilogM<M,K,filter>(valid0,ray,context,tri.geomID(),tri.primID(),i));
+            OccludedKEpilogM<M,K,filter>(valid0,ray,context,tri.geomID(),tri.primID(),i),
+            true);
           if (none(valid0))
             break;
         }

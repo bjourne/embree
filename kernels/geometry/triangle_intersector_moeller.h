@@ -119,6 +119,7 @@ namespace embree
     template<int K>
     struct MoellerTrumboreHitK
     {
+      __forceinline MoellerTrumboreHitK() {}
       __forceinline MoellerTrumboreHitK(const vfloat<K>& U,
                                         const vfloat<K>& V,
                                         const vfloat<K>& T,
@@ -160,7 +161,8 @@ namespace embree
                  const RayHitK<K>& ray,
                  const TriangleM<M>& tri,
                  size_t i,
-                 const Epilog& epilog) const
+                 const Epilog& epilog,
+                 bool occluded) const
       {
 
         // Do broadcasting and cross prod.

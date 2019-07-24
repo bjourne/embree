@@ -111,7 +111,8 @@ namespace embree
         : valid0(valid0), ray(ray), context(context), geomIDs(geomIDs), primIDs(primIDs), i(i) {}
 
       template<typename Hit>
-      __forceinline vbool<K> operator() (const vbool<K>& valid_i, const Hit& hit) const
+      __forceinline void
+      operator() (const vbool<K>& valid_i, const Hit& hit) const
       {
         vbool<K> valid = valid_i;
 
@@ -122,7 +123,8 @@ namespace embree
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 #if defined(EMBREE_RAY_MASK)
         valid &= (geometry->mask & ray.mask) != 0;
-        if (unlikely(none(valid))) return valid;
+        if (unlikely(none(valid)))
+          return valid;
 #endif
 
         /* intersection filter test */
@@ -136,15 +138,11 @@ namespace embree
             HitK<K> h(context->instID,geomID,primID,u,v,Ng);
             const vfloat<K> old_t = ray.tfar;
             ray.tfar = select(valid,t,ray.tfar);
-            valid = runOcclusionFilter(valid,geometry,ray,context,h);
+            valid = runOcclusionFilter(valid, geometry, ray, context, h);
             ray.tfar = select(valid,ray.tfar,old_t);
           }
         }
 #endif
-
-        /* update occlusion */
-        valid0 = valid0 & !valid;
-        return valid;
       }
     };
 
