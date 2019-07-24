@@ -319,7 +319,7 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
+        printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
         vbool<K> valid0 = valid_i;
 
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)

@@ -114,7 +114,8 @@ namespace embree
 #endif
   }
 
-  Accel::Intersectors BVH4Factory::BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant)
+  Accel::Intersectors
+  BVH4Factory::BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant)
   {
     assert(ivariant == IntersectVariant::FAST);
     Accel::Intersectors intersectors;
