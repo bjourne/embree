@@ -75,16 +75,19 @@ namespace embree
 
         /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
-      valid &= (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+      valid &= (den < vfloat<M>(zero)) &
+        (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
 #else
-      valid &= (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+      valid &= (den != vfloat<M>(zero)) &
+        (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
 #endif
       if (likely(none(valid)))
         return false;
 
       /* perform depth test */
       const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
-      valid &= (absDen*vfloat<M>(ray.tnear()) < T) & (T <= absDen*vfloat<M>(ray.tfar));
+      valid &= (absDen*vfloat<M>(ray.tnear()) < T) &
+        (T <= absDen*vfloat<M>(ray.tfar));
       if (likely(none(valid)))
         return false;
 
@@ -93,26 +96,25 @@ namespace embree
       return true;
     }
 
-    /*! Intersects K rays with one of M triangles. */
-    template<typename Epilog, int M, int K>
+    template<int M, int K, bool filter>
     static __forceinline void
-    intersectKRaysMTris(const vbool<K>& valid0,
-                        const RayHitK<K>& ray,
-                        const TriangleM<M>& tri,
-                        size_t i,
-                        const Epilog& epilog)
+    occludedKRaysMTrisEpilog(IntersectContext* context,
+                             const vbool<K>& valid0,
+                             RayK<K>& ray,
+                             const TriangleM<M>& tri,
+                             size_t i)
     {
       // Do broadcasting and cross prod.
       Vec3<vfloat<K>> p0 = broadcast<vfloat<K>>(tri.v0, i);
-      Vec3<vfloat<K>> e1 = broadcast<vfloat<K>>(tri.e1,i);
-      Vec3<vfloat<K>> e2 = broadcast<vfloat<K>>(tri.e2,i);
+      Vec3<vfloat<K>> e1 = broadcast<vfloat<K>>(tri.e1, i);
+      Vec3<vfloat<K>> e2 = broadcast<vfloat<K>>(tri.e2, i);
       Vec3<vfloat<K>> tri_Ng = cross(e2, e1);
 
       /* calculate denominator */
       vbool<K> valid = valid0;
       const Vec3vf<K> C = p0 - ray.org;
-      const Vec3vf<K> R = cross(C,ray.dir);
-      const vfloat<K> den = dot(tri_Ng,ray.dir);
+      const Vec3vf<K> R = cross(C, ray.dir);
+      const vfloat<K> den = dot(tri_Ng, ray.dir);
       const vfloat<K> absDen = abs(den);
       const vfloat<K> sgnDen = signmsk(den);
 
@@ -152,10 +154,153 @@ namespace embree
 #endif
 
       /* calculate hit information */
-      MoellerTrumboreHitK<K> hit(U,V,T,absDen,tri_Ng);
-      epilog(valid,hit);
+      MoellerTrumboreHitK<K> hit(U, V, T, absDen, tri_Ng);
+
+      vbool<K> valid2 = valid;
+
+      /* ray masking test */
+      Scene* scene = context->scene;
+      const unsigned int geomID = tri.geomIDs[i];
+      const unsigned int primID = tri.primIDs[i];
+      Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+#if defined(EMBREE_RAY_MASK)
+      valid2 &= (geometry->mask & ray.mask) != 0;
+      if (unlikely(none(valid2)))
+        return;
+#endif
+
+      /* intersection filter test */
+#if defined(EMBREE_FILTER_FUNCTION)
+      if (filter) {
+        if (unlikely(context->hasContextFilter() ||
+                     geometry->hasOcclusionFilter())) {
+          vfloat<K> u, v, t;
+          Vec3vf<K> Ng;
+          std::tie(u,v,t,Ng) = hit.finalizeK();
+          HitK<K> h(context->instID,geomID,primID, u, v, Ng);
+          const vfloat<K> old_t = ray.tfar;
+          ray.tfar = select(valid2, t, ray.tfar);
+          valid2 = runOcclusionFilter(valid2, geometry, ray, context, h);
+          ray.tfar = select(valid2, ray.tfar, old_t);
+        }
+      }
+#endif
     }
 
+    /*! Runs intersection for K rays with one of M triangles. */
+    template<int M, int K, bool filter>
+    static __forceinline void
+    intersectKRaysMTrisEpilog(IntersectContext* context,
+                              const vbool<K>& valid0,
+                              RayHitK<K>& ray,
+                              const TriangleM<M>& tri,
+                              size_t i)
+    {
+      // Do broadcasting and cross prod.
+      Vec3<vfloat<K>> p0 = broadcast<vfloat<K>>(tri.v0, i);
+      Vec3<vfloat<K>> e1 = broadcast<vfloat<K>>(tri.e1, i);
+      Vec3<vfloat<K>> e2 = broadcast<vfloat<K>>(tri.e2, i);
+      Vec3<vfloat<K>> tri_Ng = cross(e2, e1);
+
+      /* calculate denominator */
+      vbool<K> valid = valid0;
+      const Vec3vf<K> C = p0 - ray.org;
+      const Vec3vf<K> R = cross(C, ray.dir);
+      const vfloat<K> den = dot(tri_Ng, ray.dir);
+      const vfloat<K> absDen = abs(den);
+      const vfloat<K> sgnDen = signmsk(den);
+
+      /* test against edge p2 p0 */
+      const vfloat<K> U = dot(e2, R) ^ sgnDen;
+      valid &= U >= 0.0f;
+      if (likely(none(valid)))
+        return;
+
+      /* test against edge p0 p1 */
+      const vfloat<K> V = dot(e1, R) ^ sgnDen;
+      valid &= V >= 0.0f;
+      if (likely(none(valid)))
+        return;
+
+      /* test against edge p1 p2 */
+      const vfloat<K> W = absDen-U-V;
+      valid &= W >= 0.0f;
+      if (likely(none(valid)))
+        return;
+
+      /* perform depth test */
+      const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
+      valid &= (absDen*ray.tnear() < T) & (T <= absDen*ray.tfar);
+      if (unlikely(none(valid)))
+        return;
+
+        /* perform backface culling */
+#if defined(EMBREE_BACKFACE_CULLING)
+      valid &= den < vfloat<K>(zero);
+      if (unlikely(none(valid)))
+        return;
+#else
+      valid &= den != vfloat<K>(zero);
+      if (unlikely(none(valid)))
+        return;
+#endif
+
+      /* calculate hit information */
+      MoellerTrumboreHitK<K> hit(U, V, T, absDen, tri_Ng);
+
+
+      // Now for the epilog...
+      Scene* scene = context->scene;
+
+      vfloat<K> u, v, t;
+      Vec3vf<K> Ng;
+      vbool<K> valid2 = valid;
+
+      std::tie(u,v,t,Ng) = hit.finalizeK();
+
+      const unsigned int geomID = tri.geomIDs[i];
+      const unsigned int primID = tri.primIDs[i];
+      Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+
+        /* ray masking test */
+#if defined(EMBREE_RAY_MASK)
+      printf("ray mask!\n");
+      valid2 &= (geometry->mask & ray.mask) != 0;
+      if (unlikely(none(valid2)))
+        return;
+#endif
+
+      /* occlusion filter test */
+#if defined(EMBREE_FILTER_FUNCTION)
+      if (filter) {
+        if (unlikely(context->hasContextFilter() ||
+                     geometry->hasIntersectionFilter())) {
+          printf("doing filtering!\n");
+          HitK<K> h(context->instID,geomID,primID,u,v,Ng);
+          const vfloat<K> old_t = ray.tfar;
+          ray.tfar = select(valid2,t,ray.tfar);
+          const vbool<K> m_accept = runIntersectionFilter(valid2,
+                                                          geometry,
+                                                          ray,
+                                                          context,
+                                                          h);
+          ray.tfar = select(m_accept, ray.tfar, old_t);
+          return;
+        }
+      }
+#endif
+
+      /* update hit information */
+      vfloat<K>::store(valid2, &ray.tfar, t);
+      vfloat<K>::store(valid2, &ray.Ng.x, Ng.x);
+      vfloat<K>::store(valid2, &ray.Ng.y, Ng.y);
+      vfloat<K>::store(valid2, &ray.Ng.z, Ng.z);
+      vfloat<K>::store(valid2, &ray.u, u);
+      vfloat<K>::store(valid2, &ray.v, v);
+      vuint<K>::store(valid2, &ray.primID, primID);
+      vuint<K>::store(valid2, &ray.geomID, geomID);
+      vuint<K>::store(valid2, &ray.instID, context->instID);
+    }
 
     template<int M, int Mx>
     static __forceinline bool
@@ -344,18 +489,16 @@ namespace embree
                      IntersectContext* context,
                      const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::intersect filter = %d\n", filter);
-        STAT_USER(0,TriangleM<M>::max_size());
+        STAT_USER(0, TriangleM<M>::max_size());
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
         {
           if (tri.geomIDs[i] == -1)
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
-          IntersectKEpilogM<M,K,filter> epi =
-            IntersectKEpilogM<M,K,filter>(ray, context, tri, i);
 
-          intersectKRaysMTris<IntersectKEpilogM<M,K,filter>, M, K>(
-            valid_i, ray, tri, i, epi);
+          intersectKRaysMTrisEpilog<M,K,filter>(context,
+                                                valid_i,
+                                                ray, tri, i);
         }
       }
 
@@ -397,11 +540,8 @@ namespace embree
             break;
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
 
-          OccludedKEpilogM<M,K,filter> epi =
-            OccludedKEpilogM<M,K,filter>(valid0, ray, context, tri, i);
-
-          intersectKRaysMTris<OccludedKEpilogM<M,K,filter>, M, K>(
-            valid0, ray, tri, i, epi);
+          occludedKRaysMTrisEpilog<M,K,filter>(
+            context, valid0, ray, tri, i);
           if (none(valid0))
             break;
         }
