@@ -9,6 +9,80 @@ namespace embree
   namespace isa
   {
     /////////////////////////////////////////////////////////////////
+    /// Hit types
+    /////////////////////////////////////////////////////////////////
+    template<int M>
+    struct MTHitM
+    {
+      __forceinline MTHitM() {}
+      __forceinline MTHitM(const vbool<M>& valid,
+                                        const vfloat<M>& U,
+                                        const vfloat<M>& V,
+                                        const vfloat<M>& T,
+                                        const vfloat<M>& absDen,
+                                        const Vec3vf<M>& Ng)
+        : U(U), V(V), T(T), absDen(absDen), valid(valid), vNg(Ng) {}
+
+      __forceinline void finalize()
+      {
+        const vfloat<M> rcpAbsDen = rcp(absDen);
+        vt = T * rcpAbsDen;
+        vu = U * rcpAbsDen;
+        vv = V * rcpAbsDen;
+      }
+
+      __forceinline Vec3fa Ng(const size_t i) const
+      {
+        return Vec3fa(vNg.x[i],vNg.y[i],vNg.z[i]);
+      }
+
+    public:
+      vfloat<M> U;
+      vfloat<M> V;
+      vfloat<M> T;
+      vfloat<M> absDen;
+
+    public:
+      vbool<M> valid;
+      vfloat<M> vu;
+      vfloat<M> vv;
+      vfloat<M> vt;
+      Vec3vf<M> vNg;
+    };
+
+    template<int K>
+    struct MTHitK
+    {
+      __forceinline MTHitK() {}
+      __forceinline MTHitK(const vbool<K>& valid,
+                         const vfloat<K>& U,
+                         const vfloat<K>& V,
+                         const vfloat<K>& T,
+                         const vfloat<K>& absDen,
+                         const Vec3vf<K>& Ng)
+        : valid(valid), U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
+
+      __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>>
+      finalizeK () const
+      {
+        const vfloat<K> rcpAbsDen = rcp(absDen);
+        const vfloat<K> t = T * rcpAbsDen;
+        const vfloat<K> u = U * rcpAbsDen;
+        const vfloat<K> v = V * rcpAbsDen;
+        return std::make_tuple(u,v,t,Ng);
+      }
+
+    public:
+      const vbool<K> valid;
+      const vfloat<K> U;
+      const vfloat<K> V;
+      const vfloat<K> T;
+      const vfloat<K> absDen;
+      const Vec3vf<K> Ng;
+    };
+
+
+    /////////////////////////////////////////////////////////////////
     /// Intersector functions
     /////////////////////////////////////////////////////////////////
     template<int M, int K>
@@ -16,7 +90,7 @@ namespace embree
     intersectKRaysMTris(const RayK<K>& ray,
                         size_t i,
                         const vbool<K>& valid0,
-                        MoellerTrumboreHitK<K>& hit,
+                        MTHitK<K>& hit,
                         const TriangleM<M>& tri)
     {
       // Do broadcasting and cross prod.
@@ -62,7 +136,7 @@ namespace embree
         return false;
 
       /* calculate hit information */
-      new (&hit) MoellerTrumboreHitK<K>(valid, U, V, T, absDen, tri_Ng);
+      new (&hit) MTHitK<K>(valid, U, V, T, absDen, tri_Ng);
       return true;
     }
 
@@ -71,7 +145,7 @@ namespace embree
     intersectKthRayMTris(const RayK<K>& ray,
                          size_t k,
                          const TriangleM<M>& tri,
-                         MoellerTrumboreHitM<M>& hit)
+                         MTHitM<M>& hit)
     {
       const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
 
@@ -100,7 +174,7 @@ namespace embree
         return false;
 
       /* calculate hit information */
-      new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
+      new (&hit) MTHitM<M>(valid,U,V,T,absDen,tri_Ng);
       return true;
     }
 
@@ -110,7 +184,7 @@ namespace embree
     intersect1RayMTris(const vbool<M>& valid0,
                        Ray& ray,
                        const TriangleM<M>& tri,
-                       MoellerTrumboreHitM<M>& hit)
+                       MTHitM<M>& hit)
     {
       vbool<M> valid = valid0;
       const Vec3vf<M> O = Vec3vf<M>(ray.org);
@@ -140,7 +214,7 @@ namespace embree
         return false;
 
       /* update hit information */
-      new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
+      new (&hit) MTHitM<M>(valid,U,V,T,absDen,tri_Ng);
       return true;
     }
 
@@ -153,7 +227,7 @@ namespace embree
                               RayHitK<K>& ray,
                               size_t i,
                               const vbool<K> valid0,
-                              MoellerTrumboreHitK<K>& hit,
+                              MTHitK<K>& hit,
                               const TriangleM<M>& tri)
     {
       Scene* scene = context->scene;
@@ -206,7 +280,7 @@ namespace embree
     epilogKRaysMTrisOccluded(IntersectContext* context,
                              RayK<K>& ray,
                              const vbool<K> valid0,
-                             MoellerTrumboreHitK<K>& hit,
+                             MTHitK<K>& hit,
                              const TriangleM<M>& tri,
                              size_t i)
     {
@@ -243,7 +317,7 @@ namespace embree
                               RayK<K>& ray,
                               size_t k,
                               const vbool<Mx> valid_i,
-                              MoellerTrumboreHitM<M>& hit,
+                              MTHitM<M>& hit,
                               const TriangleM<M>& tri)
     {
       Scene* scene = context->scene;
@@ -302,7 +376,7 @@ namespace embree
                                RayHitK<K>& ray,
                                size_t k,
                                const vbool<Mx>& valid_i,
-                               MoellerTrumboreHitM<M>& hit,
+                               MTHitM<M>& hit,
                                const TriangleM<M>& tri)
     {
       // Do the epilog
@@ -372,7 +446,7 @@ namespace embree
     epilog1RayMTrisOccluded(Ray& ray,
                             IntersectContext* context,
                             const TriangleM<M>& tri,
-                            MoellerTrumboreHitM<M>& hit)
+                            MTHitM<M>& hit)
     {
       Scene* scene = context->scene;
       /* intersection filter test */
@@ -424,7 +498,7 @@ namespace embree
     epilog1RayMTrisIntersect(RayHit& ray,
                              IntersectContext* context,
                              const TriangleM<M>& tri,
-                             MoellerTrumboreHitM<M>& hit)
+                             MTHitM<M>& hit)
     {
       Scene* scene = context->scene;
       vbool<Mx> valid = hit.valid;
@@ -499,7 +573,7 @@ namespace embree
                 const TriangleM<M>& tri)
       {
         STAT3(normal.trav_prims, 1, 1, 1);
-        MoellerTrumboreHitM<M> hit;
+        MTHitM<M> hit;
         vbool<M> valid = true;
         if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
           epilog1RayMTrisIntersect<M, Mx>(ray, context, tri, hit);
@@ -514,7 +588,7 @@ namespace embree
                const TriangleM<M>& tri)
       {
         STAT3(shadow.trav_prims, 1, 1, 1);
-        MoellerTrumboreHitM<M> hit;
+        MTHitM<M> hit;
         vbool<M> valid = true;
         if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
           return epilog1RayMTrisOccluded<M, Mx>(ray, context, tri, hit);
@@ -545,7 +619,7 @@ namespace embree
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
 
-          MoellerTrumboreHitK<K> hit;
+          MTHitK<K> hit;
           if (likely(intersectKRaysMTris(ray, i, valid_i, hit, tri))) {
             epilogKRaysMTrisIntersect<M,K,filter>(
               context, ray, i, hit.valid, hit, tri);
@@ -564,7 +638,7 @@ namespace embree
         // printf("TriangleMIntersectorKMoeller::intersect (a ray) %d\n",
         //        filter);
         STAT3(normal.trav_prims,1,1,1);
-        MoellerTrumboreHitM<M> hit;
+        MTHitM<M> hit;
         if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
           epilogKthRayMTrisIntersect<M, Mx, K, filter>(
             context, ray, k, hit.valid, hit, tri);
@@ -588,7 +662,7 @@ namespace embree
             break;
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
 
-          MoellerTrumboreHitK<K> hit;
+          MTHitK<K> hit;
           if (likely(intersectKRaysMTris(ray, i, valid0, hit, tri))) {
             epilogKRaysMTrisOccluded<M, K, filter>(
               context, ray, hit.valid, hit, tri, i);
@@ -609,7 +683,7 @@ namespace embree
       {
         //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
         STAT3(shadow.trav_prims,1,1,1);
-        MoellerTrumboreHitM<M> hit;
+        MTHitM<M> hit;
         bool val = intersectKthRayMTris<M, K>(ray, k, tri, hit);
         if (likely(val)) {
           return epilogKthRayMTrisOccluded<M, Mx, K, filter>(

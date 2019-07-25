@@ -30,42 +30,6 @@ namespace embree
 {
   namespace isa
   {
-    template<int M>
-    struct MoellerTrumboreHitM
-    {
-      __forceinline MoellerTrumboreHitM() {}
-
-      __forceinline MoellerTrumboreHitM(const vbool<M>& valid,
-                                        const vfloat<M>& U,
-                                        const vfloat<M>& V,
-                                        const vfloat<M>& T,
-                                        const vfloat<M>& absDen,
-                                        const Vec3vf<M>& Ng)
-        : U(U), V(V), T(T), absDen(absDen), valid(valid), vNg(Ng) {}
-
-      __forceinline void finalize()
-      {
-        const vfloat<M> rcpAbsDen = rcp(absDen);
-        vt = T * rcpAbsDen;
-        vu = U * rcpAbsDen;
-        vv = V * rcpAbsDen;
-      }
-
-      __forceinline Vec3fa Ng(const size_t i) const { return Vec3fa(vNg.x[i],vNg.y[i],vNg.z[i]); }
-
-    public:
-      vfloat<M> U;
-      vfloat<M> V;
-      vfloat<M> T;
-      vfloat<M> absDen;
-
-    public:
-      vbool<M> valid;
-      vfloat<M> vu;
-      vfloat<M> vv;
-      vfloat<M> vt;
-      Vec3vf<M> vNg;
-    };
 
     template<int M>
     struct MoellerTrumboreIntersector1
@@ -76,36 +40,6 @@ namespace embree
 
     };
 
-    template<int K>
-    struct MoellerTrumboreHitK
-    {
-      __forceinline MoellerTrumboreHitK() {}
-      __forceinline MoellerTrumboreHitK(const vbool<K>& valid,
-                                        const vfloat<K>& U,
-                                        const vfloat<K>& V,
-                                        const vfloat<K>& T,
-                                        const vfloat<K>& absDen,
-                                        const Vec3vf<K>& Ng)
-        : valid(valid), U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
-
-      __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>>
-      finalizeK () const
-      {
-        const vfloat<K> rcpAbsDen = rcp(absDen);
-        const vfloat<K> t = T * rcpAbsDen;
-        const vfloat<K> u = U * rcpAbsDen;
-        const vfloat<K> v = V * rcpAbsDen;
-        return std::make_tuple(u,v,t,Ng);
-      }
-
-    public:
-      const vbool<K> valid;
-      const vfloat<K> U;
-      const vfloat<K> V;
-      const vfloat<K> T;
-      const vfloat<K> absDen;
-      const Vec3vf<K> Ng;
-    };
 
     template<int M, int K>
     struct MoellerTrumboreIntersectorK
