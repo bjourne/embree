@@ -8,6 +8,7 @@
             (inclass . +)
             (innamespace . +)
             (statement-block-intro . +)
+            (statement-case-intro . +)
             (statement-cont . +)
             (substatement . +)
             (topmost-intro . 0)
