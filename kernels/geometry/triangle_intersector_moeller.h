@@ -80,12 +80,13 @@ namespace embree
     struct MoellerTrumboreHitK
     {
       __forceinline MoellerTrumboreHitK() {}
-      __forceinline MoellerTrumboreHitK(const vfloat<K>& U,
+      __forceinline MoellerTrumboreHitK(const vbool<K>& valid,
+                                        const vfloat<K>& U,
                                         const vfloat<K>& V,
                                         const vfloat<K>& T,
                                         const vfloat<K>& absDen,
                                         const Vec3vf<K>& Ng)
-        : U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
+        : valid(valid), U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
 
       __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>>
       finalizeK () const
@@ -97,7 +98,8 @@ namespace embree
         return std::make_tuple(u,v,t,Ng);
       }
 
-    private:
+    public:
+      const vbool<K> valid;
       const vfloat<K> U;
       const vfloat<K> V;
       const vfloat<K> T;
