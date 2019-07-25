@@ -17,10 +17,6 @@
 #include "device.h"
 #include "../hash.h"
 #include "scene_triangle_mesh.h"
-#include "scene_user_geometry.h"
-#include "scene_instance.h"
-#include "scene_curves.h"
-#include "scene_subdiv_mesh.h"
 
 #include "../subdiv/tessellation_cache.h"
 
@@ -396,10 +392,14 @@ namespace embree
     /* documented properties */
     switch (prop)
     {
-    case RTC_DEVICE_PROPERTY_VERSION_MAJOR: return RTC_VERSION_MAJOR;
-    case RTC_DEVICE_PROPERTY_VERSION_MINOR: return RTC_VERSION_MINOR;
-    case RTC_DEVICE_PROPERTY_VERSION_PATCH: return RTC_VERSION_PATCH;
-    case RTC_DEVICE_PROPERTY_VERSION      : return RTC_VERSION;
+    case RTC_DEVICE_PROPERTY_VERSION_MAJOR:
+      return RTC_VERSION_MAJOR;
+    case RTC_DEVICE_PROPERTY_VERSION_MINOR:
+      return RTC_VERSION_MINOR;
+    case RTC_DEVICE_PROPERTY_VERSION_PATCH:
+      return RTC_VERSION_PATCH;
+    case RTC_DEVICE_PROPERTY_VERSION      :
+      return RTC_VERSION;
 
 #if defined(EMBREE_TARGET_SIMD4) && defined(EMBREE_RAY_PACKETS)
     case RTC_DEVICE_PROPERTY_NATIVE_RAY4_SUPPORTED:  return hasISA(SSE2);
