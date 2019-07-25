@@ -55,7 +55,7 @@ namespace embree
       unsigned int geomID = tri.geomIDs[i];
 
         /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+#if defined(EMBREE_FILTER_FUNCTION)
       bool foundhit = false;
       goto entry;
       while (true)
@@ -68,15 +68,6 @@ namespace embree
       entry:
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
-#if defined(EMBREE_RAY_MASK)
-        /* goto next hit if mask test fails */
-        if ((geometry->mask & ray.mask[k]) == 0) {
-          clear(valid2,i);
-          continue;
-        }
-#endif
-
-#if defined(EMBREE_FILTER_FUNCTION)
         /* call intersection filter function */
         if (filter) {
           if (unlikely(context->hasContextFilter() ||
@@ -98,7 +89,6 @@ namespace embree
             continue;
           }
         }
-#endif
         break;
       }
 #endif
@@ -155,7 +145,7 @@ namespace embree
       Scene* scene = context->scene;
 
       /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+#if defined(EMBREE_FILTER_FUNCTION)
       if (unlikely(filter))
         hit.finalize(); /* called only once */
 
@@ -174,15 +164,6 @@ namespace embree
         const unsigned int geomID = tri.geomIDs[i];
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
-#if defined(EMBREE_RAY_MASK)
-        /* goto next hit if mask test fails */
-        if ((geometry->mask & ray.mask[k]) == 0) {
-          m=btc(m,i);
-          continue;
-        }
-#endif
-
-#if defined(EMBREE_FILTER_FUNCTION)
         /* execute occlusion filer */
         if (filter) {
           if (unlikely(context->hasContextFilter() ||
@@ -204,7 +185,6 @@ namespace embree
             continue;
           }
         }
-#endif
         break;
       }
 #endif
@@ -438,7 +418,8 @@ namespace embree
     {
       Scene* scene = context->scene;
       /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+#if defined(EMBREE_FILTER_FUNCTION)
+      // Verify this?
       hit.finalize(); /* called only once */
 
       vbool<Mx> valid = hit.valid;
@@ -454,14 +435,6 @@ namespace embree
 
         const unsigned int geomID = tri.geomIDs[i];
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-
-#if defined(EMBREE_RAY_MASK)
-        /* goto next hit if mask test fails */
-        if ((geometry->mask & ray.mask) == 0) {
-          m=btc(m,i);
-          continue;
-        }
-#endif
 
 #if defined(EMBREE_FILTER_FUNCTION)
         /* if we have no filter then the test passed */
@@ -504,7 +477,7 @@ namespace embree
       unsigned int geomID = tri.geomIDs[i];
 
       /* intersection filter test */
-#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+#if defined(EMBREE_FILTER_FUNCTION)
       bool foundhit = false;
       goto entry;
       while (true)
@@ -516,15 +489,6 @@ namespace embree
       entry:
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
-#if defined(EMBREE_RAY_MASK)
-        /* goto next hit if mask test fails */
-        if ((geometry->mask & ray.mask) == 0) {
-          clear(valid,i);
-          continue;
-        }
-#endif
-
-#if defined(EMBREE_FILTER_FUNCTION)
         /* call intersection filter function */
         if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
           const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
@@ -541,7 +505,6 @@ namespace embree
           valid &= hit.vt <= ray.tfar; // intersection filters may modify tfar value
           continue;
         }
-#endif
         break;
       }
 #endif
