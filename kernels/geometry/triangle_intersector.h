@@ -163,11 +163,6 @@ namespace embree
       const unsigned int geomID = tri.geomIDs[i];
       const unsigned int primID = tri.primIDs[i];
       Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-#if defined(EMBREE_RAY_MASK)
-      valid2 &= (geometry->mask & ray.mask) != 0;
-      if (unlikely(none(valid2)))
-        return;
-#endif
 
       /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
