@@ -225,7 +225,13 @@ namespace embree
         : ptr(nullptr), leafIntersector(nullptr), intersector1(nullptr), intersector4(nullptr), intersector8(nullptr), intersector16(nullptr), intersectorN(nullptr) {}
 
       Intersectors (ErrorFunc error)
-      : ptr(nullptr), leafIntersector(nullptr), intersector1(error), intersector4(error), intersector8(error), intersector16(error), intersectorN(error) {}
+        : ptr(nullptr),
+          leafIntersector(nullptr),
+          intersector1(error),
+          intersector4(error),
+          intersector8(error),
+          intersector16(error),
+          intersectorN(error) {}
 
       void print(size_t ident)
       {
@@ -307,7 +313,9 @@ namespace embree
       }
 
       /*! Intersects a stream of N rays in SOA layout with the scene. */
-      __forceinline void intersectN (RTCRayHitN** rayN, const size_t N, IntersectContext* context)
+      __forceinline void intersectN (RTCRayHitN** rayN,
+                                     const size_t N,
+                                     IntersectContext* context)
       {
         assert(intersectorN.intersect);
         intersectorN.intersect(this,rayN,N,context);
@@ -333,7 +341,9 @@ namespace embree
 #endif
 
       template<int K>
-      __forceinline void intersectN (RayHitK<K>** rayN, const size_t N, IntersectContext* context)
+      __forceinline void intersectN (RayHitK<K>** rayN,
+                                     const size_t N,
+                                     IntersectContext* context)
       {
         intersectN((RTCRayHitN**)rayN,N,context);
       }

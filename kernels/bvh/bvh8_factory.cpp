@@ -118,8 +118,10 @@ namespace embree
     }
   }
 
-  Accel::Intersectors BVH8Factory::BVH8Triangle4Intersectors(BVH8* bvh, IntersectVariant ivariant)
+  Accel::Intersectors
+  BVH8Factory::BVH8Triangle4Intersectors(BVH8* bvh, IntersectVariant ivariant)
   {
+    printf("BVH8Factory::BVH8Triangle4Intersectors\n");
     assert(ivariant == IntersectVariant::FAST);
     Accel::Intersectors intersectors;
     intersectors.ptr = bvh;

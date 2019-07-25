@@ -26,7 +26,8 @@ namespace embree
 {
   namespace isa
   {
-    __forceinline bool runIntersectionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
+    __forceinline bool
+    runIntersectionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
     {
       if (geometry->intersectionFilterN)
       {
@@ -162,7 +163,12 @@ namespace embree
     }
 
     template<int K>
-    __forceinline vbool<K> runIntersectionFilter(const vbool<K>& valid, const Geometry* const geometry, RayHitK<K>& ray, IntersectContext* context, HitK<K>& hit)
+    __forceinline vbool<K>
+    runIntersectionFilter(const vbool<K>& valid,
+                          const Geometry* const geometry,
+                          RayHitK<K>& ray,
+                          IntersectContext* context,
+                          HitK<K>& hit)
     {
       RTCFilterFunctionNArguments args;
       vint<K> mask = valid.mask32();

@@ -97,7 +97,10 @@ RTC_API void rtcIntersect8(const int* uniform valid, RTCScene scene, const RTCIn
 RTC_API void rtcIntersect16(const int* uniform valid, RTCScene scene, const RTCIntersectContext* uniform context, void* uniform rayhit);
 
 /* Intersects a varying ray with the scene. */
-RTC_FORCEINLINE void rtcIntersectV(RTCScene scene, uniform RTCIntersectContext* uniform context, varying RTCRayHit* uniform rayhit) 
+RTC_FORCEINLINE void
+rtcIntersectV(RTCScene scene,
+              uniform RTCIntersectContext* uniform context,
+              varying RTCRayHit* uniform rayhit)
 {
   varying bool mask = __mask;
   unmasked {

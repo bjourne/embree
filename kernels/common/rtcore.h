@@ -28,7 +28,11 @@ namespace embree
 #define RTC_MAX_INDEX_BUFFERS 65536
 
   /*! decoding of intersection flags */
-  __forceinline bool isCoherent  (RTCIntersectContextFlags flags) { return (flags & RTC_INTERSECT_CONTEXT_FLAG_COHERENT) == RTC_INTERSECT_CONTEXT_FLAG_COHERENT; }
+  __forceinline bool isCoherent  (RTCIntersectContextFlags flags)
+  {
+    return (flags & RTC_INTERSECT_CONTEXT_FLAG_COHERENT) ==
+      RTC_INTERSECT_CONTEXT_FLAG_COHERENT;
+  }
   __forceinline bool isIncoherent(RTCIntersectContextFlags flags) { return (flags & RTC_INTERSECT_CONTEXT_FLAG_COHERENT) == RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT; }
 
 #if defined(TASKING_TBB) && (TBB_INTERFACE_VERSION_MAJOR >= 8)
@@ -39,7 +43,7 @@ namespace embree
 
 /*! Macros used in the rtcore API implementation */
 #define RTC_CATCH_BEGIN try {
-  
+
 #define RTC_CATCH_END(device)                                                \
   } catch (std::bad_alloc&) {                                                   \
     Device::process_error(device,RTC_ERROR_OUT_OF_MEMORY,"out of memory");      \
@@ -50,7 +54,7 @@ namespace embree
   } catch (...) {                                                               \
     Device::process_error(device,RTC_ERROR_UNKNOWN,"unknown exception caught"); \
   }
-  
+
 #define RTC_CATCH_END2(scene)                                                \
   } catch (std::bad_alloc&) {                                                   \
     Device* device = scene ? scene->device : nullptr;                           \
@@ -84,11 +88,11 @@ namespace embree
 #define RTC_VERIFY_RANGE(id,lower,upper)	\
   if (id < lower || id > upper)						  \
     throw_RTCError(RTC_ERROR_INVALID_OPERATION,"argument out of bounds");
-  
+
 #if 0 // enable to debug print all API calls
 #define RTC_TRACE(x) std::cout << #x << std::endl;
 #else
-#define RTC_TRACE(x) 
+#define RTC_TRACE(x)
 #endif
 
   /*! used to throw embree API errors */
@@ -96,13 +100,13 @@ namespace embree
   {
     __forceinline rtcore_error(RTCError error, const std::string& str)
       : error(error), str(str) {}
-    
+
     ~rtcore_error() throw() {}
-    
+
     const char* what () const throw () {
       return str.c_str();
     }
-    
+
     RTCError error;
     std::string str;
   };
@@ -116,5 +120,5 @@ namespace embree
 #endif
 
 #define RTC_BUILD_ARGUMENTS_HAS(settings,member) \
-  (settings.byteSize > (offsetof(RTCBuildArguments,member)+sizeof(settings.member))) 
+  (settings.byteSize > (offsetof(RTCBuildArguments,member)+sizeof(settings.member)))
 }

@@ -22,7 +22,12 @@ namespace embree
   namespace isa
   {
     template<int K, bool intersect>
-    __noinline void RayStreamFilter::filterAOS(Scene* scene, void* _rayN, size_t N, size_t stride, IntersectContext* context)
+    __noinline void
+    RayStreamFilter::filterAOS(Scene* scene,
+                               void* _rayN,
+                               size_t N,
+                               size_t stride,
+                               IntersectContext* context)
     {
       RayStreamAOS rayN(_rayN);
 
@@ -115,7 +120,7 @@ namespace embree
           /* all rays traced? */
           if (unlikely(curOctant == -1))
             break;
-        
+
           unsigned int* const rayIDs = &octants[curOctant][0];
           const unsigned int numOctantRays = raysInOctant[curOctant];
           assert(numOctantRays);
@@ -462,7 +467,7 @@ namespace embree
 
     template<int K, bool intersect>
     __noinline void RayStreamFilter::filterSOP(Scene* scene, const void* _rayN, size_t N, IntersectContext* context)
-    { 
+    {
       RayStreamSOP& rayN = *(RayStreamSOP*)_rayN;
 
       /* use fast path for coherent ray mode */
@@ -605,14 +610,25 @@ namespace embree
     }
 
 
-    void RayStreamFilter::intersectAOS(Scene* scene, RTCRayHit* _rayN, size_t N, size_t stride, IntersectContext* context) {
+    void
+    RayStreamFilter::intersectAOS(Scene* scene,
+                                  RTCRayHit* _rayN,
+                                  size_t N,
+                                  size_t stride,
+                                  IntersectContext* context) {
       if (unlikely(context->isCoherent()))
         filterAOS<VSIZEL, true>(scene, _rayN, N, stride, context);
       else
         filterAOS<VSIZEX, true>(scene, _rayN, N, stride, context);
     }
 
-    void RayStreamFilter::occludedAOS(Scene* scene, RTCRay* _rayN, size_t N, size_t stride, IntersectContext* context) {
+    void
+    RayStreamFilter::occludedAOS(Scene* scene,
+                                 RTCRay* _rayN,
+                                 size_t N,
+                                 size_t stride,
+                                 IntersectContext* context) {
+      // Coherent is probably the default
       if (unlikely(context->isCoherent()))
         filterAOS<VSIZEL, false>(scene, _rayN, N, stride, context);
       else

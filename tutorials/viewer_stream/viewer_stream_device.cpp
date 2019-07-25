@@ -267,15 +267,16 @@ inline Vec3fa face_forward(const Vec3fa& dir, const Vec3fa& _Ng) {
 }
 
 /* renders a single screen tile */
-void renderTileStandard(int taskIndex,
-                        int threadIndex,
-                        int* pixels,
-                        const unsigned int width,
-                        const unsigned int height,
-                        const float time,
-                        const ISPCCamera& camera,
-                        const int numTilesX,
-                        const int numTilesY)
+void
+renderTileStandard(int taskIndex,
+                   int threadIndex,
+                   int* pixels,
+                   const unsigned int width,
+                   const unsigned int height,
+                   const float time,
+                   const ISPCCamera& camera,
+                   const int numTilesX,
+                   const int numTilesY)
 {
   const unsigned int tileY = taskIndex / numTilesX;
   const unsigned int tileX = taskIndex - tileY * numTilesX;
@@ -290,24 +291,26 @@ void renderTileStandard(int taskIndex,
 
   /* generate stream of primary rays */
   int N = 0;
-  for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
-  {
-    /* ISPC workaround for mask == 0 */
+  for (unsigned int y=y0; y<y1; y++)
+    for (unsigned int x=x0; x<x1; x++) {
+      /* ISPC workaround for mask == 0 */
+      RandomSampler sampler;
+      RandomSampler_init(sampler, x, y, 0);
 
+      /* initialize ray */
+      Ray& ray = rays[N++];
+      bool mask = 1; { // invalidates inactive rays
+        ray.tnear() = mask ? 0.0f         : (float)(pos_inf);
+        ray.tfar  = mask ? (float)(inf) : (float)(neg_inf);
+      }
+      init_Ray(ray,
+               Vec3fa(camera.xfm.p),
+               Vec3fa(normalize((float)x*camera.xfm.l.vx + (float)y*camera.xfm.l.vy + camera.xfm.l.vz)),
+               ray.tnear(), ray.tfar,
+               RandomSampler_get1D(sampler));
 
-    RandomSampler sampler;
-    RandomSampler_init(sampler, x, y, 0);
-
-    /* initialize ray */
-    Ray& ray = rays[N++];
-    bool mask = 1; { // invalidates inactive rays
-      ray.tnear() = mask ? 0.0f         : (float)(pos_inf);
-      ray.tfar  = mask ? (float)(inf) : (float)(neg_inf);
+      RayStats_addRay(stats);
     }
-    init_Ray(ray, Vec3fa(camera.xfm.p), Vec3fa(normalize((float)x*camera.xfm.l.vx + (float)y*camera.xfm.l.vy + camera.xfm.l.vz)), ray.tnear(), ray.tfar, RandomSampler_get1D(sampler));
-
-    RayStats_addRay(stats);
-  }
 
   RTCIntersectContext context;
   rtcInitIntersectContext(&context);
@@ -315,6 +318,7 @@ void renderTileStandard(int taskIndex,
 
   /* trace stream of rays */
 #if USE_INTERFACE == 0
+  //printf("Streaming %d rays...\n", N);
   rtcIntersect1M(g_scene,&context,(RTCRayHit*)&rays[0],N,sizeof(Ray));
 #elif USE_INTERFACE == 1
   for (unsigned int i=0; i<N; i++)

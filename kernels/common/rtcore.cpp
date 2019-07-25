@@ -410,36 +410,46 @@ RTC_NAMESPACE_BEGIN;
     RTC_CATCH_END2(scene);
   }
 
-  RTC_API void rtcIntersect1M (RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit* rayhit, unsigned int M, size_t byteStride)
-  {
-    Scene* scene = (Scene*) hscene;
-    RTC_CATCH_BEGIN;
-    RTC_TRACE(rtcIntersect1M);
+RTC_API void
+rtcIntersect1M (RTCScene hscene,
+                RTCIntersectContext* user_context,
+                RTCRayHit* rayhit,
+                unsigned int M,
+                size_t byteStride)
+{
+  Scene* scene = (Scene*) hscene;
+  RTC_CATCH_BEGIN;
+  RTC_TRACE(rtcIntersect1M);
 
 #if defined (EMBREE_RAY_PACKETS)
 #if defined(DEBUG)
-    RTC_VERIFY_HANDLE(hscene);
-    if (scene->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
-    if (((size_t)rayhit ) & 0x03) throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "ray not aligned to 4 bytes");
+  RTC_VERIFY_HANDLE(hscene);
+  if (scene->isModified())
+    throw_RTCError(RTC_ERROR_INVALID_OPERATION,
+                   "scene got not committed");
+  if (((size_t)rayhit ) & 0x03)
+    throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,
+                   "ray not aligned to 4 bytes");
 #endif
-    STAT3(normal.travs,M,M,M);
-    IntersectContext context(scene,user_context);
+  STAT3(normal.travs,M,M,M);
+  IntersectContext context(scene, user_context);
 
-    /* fast codepath for single rays */
-    if (likely(M == 1)) {
-      if (likely(rayhit->ray.tnear <= rayhit->ray.tfar))
-        scene->intersectors.intersect(*rayhit,&context);
-    }
-
-    /* codepath for streams */
-    else {
-      scene->device->rayStreamFilters.intersectAOS(scene,rayhit,M,byteStride,&context);
-    }
-#else
-    throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect1M not supported");
-#endif
-    RTC_CATCH_END2(scene);
+  /* fast codepath for single rays */
+  if (likely(M == 1)) {
+    if (likely(rayhit->ray.tnear <= rayhit->ray.tfar))
+      scene->intersectors.intersect(*rayhit,&context);
   }
+
+  /* codepath for streams */
+  else {
+    scene->device->rayStreamFilters.intersectAOS(
+      scene,rayhit,M,byteStride,&context);
+  }
+#else
+  throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect1M not supported");
+#endif
+  RTC_CATCH_END2(scene);
+}
 
   RTC_API void rtcIntersect1Mp (RTCScene hscene, RTCIntersectContext* user_context, RTCRayHit** rn, unsigned int M)
   {

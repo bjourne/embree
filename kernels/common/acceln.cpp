@@ -24,27 +24,27 @@ namespace embree
   AccelN::AccelN()
     : Accel(AccelData::TY_ACCELN), accels() {}
 
-  AccelN::~AccelN() 
+  AccelN::~AccelN()
   {
     for (size_t i=0; i<accels.size(); i++)
       delete accels[i];
   }
 
-  void AccelN::accels_add(Accel* accel) 
+  void AccelN::accels_add(Accel* accel)
   {
     assert(accel);
     accels.push_back(accel);
   }
 
-  void AccelN::accels_init() 
+  void AccelN::accels_init()
   {
     for (size_t i=0; i<accels.size(); i++)
       delete accels[i];
-    
+
     accels.clear();
   }
-  
-  void AccelN::intersect (Accel::Intersectors* This_in, RTCRayHit& ray, IntersectContext* context) 
+
+  void AccelN::intersect (Accel::Intersectors* This_in, RTCRayHit& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++)
@@ -52,7 +52,7 @@ namespace embree
         This->accels[i]->intersectors.intersect(ray,context);
   }
 
-  void AccelN::intersect4 (const void* valid, Accel::Intersectors* This_in, RTCRayHit4& ray, IntersectContext* context) 
+  void AccelN::intersect4 (const void* valid, Accel::Intersectors* This_in, RTCRayHit4& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++)
@@ -60,7 +60,7 @@ namespace embree
         This->accels[i]->intersectors.intersect4(valid,ray,context);
   }
 
-  void AccelN::intersect8 (const void* valid, Accel::Intersectors* This_in, RTCRayHit8& ray, IntersectContext* context) 
+  void AccelN::intersect8 (const void* valid, Accel::Intersectors* This_in, RTCRayHit8& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++)
@@ -68,7 +68,7 @@ namespace embree
         This->accels[i]->intersectors.intersect8(valid,ray,context);
   }
 
-  void AccelN::intersect16 (const void* valid, Accel::Intersectors* This_in, RTCRayHit16& ray, IntersectContext* context) 
+  void AccelN::intersect16 (const void* valid, Accel::Intersectors* This_in, RTCRayHit16& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++)
@@ -76,7 +76,11 @@ namespace embree
         This->accels[i]->intersectors.intersect16(valid,ray,context);
   }
 
-  void AccelN::intersectN (Accel::Intersectors* This_in, RTCRayHitN** ray, const size_t N, IntersectContext* context)
+  void
+  AccelN::intersectN (Accel::Intersectors* This_in,
+                      RTCRayHitN** ray,
+                      const size_t N,
+                      IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++)
@@ -84,17 +88,17 @@ namespace embree
         This->accels[i]->intersectors.intersectN(ray,N,context);
   }
 
-  void AccelN::occluded (Accel::Intersectors* This_in, RTCRay& ray, IntersectContext* context) 
+  void AccelN::occluded (Accel::Intersectors* This_in, RTCRay& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++) {
       if (This->accels[i]->isEmpty()) continue;
-      This->accels[i]->intersectors.occluded(ray,context); 
-      if (ray.tfar < 0.0f) break; 
+      This->accels[i]->intersectors.occluded(ray,context);
+      if (ray.tfar < 0.0f) break;
     }
   }
 
-  void AccelN::occluded4 (const void* valid, Accel::Intersectors* This_in, RTCRay4& ray, IntersectContext* context) 
+  void AccelN::occluded4 (const void* valid, Accel::Intersectors* This_in, RTCRay4& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++) {
@@ -108,7 +112,7 @@ namespace embree
     }
   }
 
-  void AccelN::occluded8 (const void* valid, Accel::Intersectors* This_in, RTCRay8& ray, IntersectContext* context) 
+  void AccelN::occluded8 (const void* valid, Accel::Intersectors* This_in, RTCRay8& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++) {
@@ -124,7 +128,7 @@ namespace embree
     }
   }
 
-  void AccelN::occluded16 (const void* valid, Accel::Intersectors* This_in, RTCRay16& ray, IntersectContext* context) 
+  void AccelN::occluded16 (const void* valid, Accel::Intersectors* This_in, RTCRay16& ray, IntersectContext* context)
   {
     AccelN* This = (AccelN*)This_in->ptr;
     for (size_t i=0; i<This->accels.size(); i++) {
@@ -157,7 +161,7 @@ namespace embree
   {
     for (size_t i=0; i<accels.size(); i++)
     {
-      for (size_t j=0; j<ident; j++) std::cout << " "; 
+      for (size_t j=0; j<ident; j++) std::cout << " ";
       std::cout << "accels[" << i << "]" << std::endl;
       accels[i]->intersectors.print(ident+2);
     }
@@ -168,14 +172,14 @@ namespace embree
     for (size_t i=0; i<accels.size(); i++)
       accels[i]->immutable();
   }
-  
-  void AccelN::accels_build () 
+
+  void AccelN::accels_build ()
   {
     /* reduce memory consumption */
     accels.shrink_to_fit();
-    
+
     /* build all acceleration structures in parallel */
-    parallel_for (accels.size(), [&] (size_t i) { 
+    parallel_for (accels.size(), [&] (size_t i) {
         accels[i]->build();
       });
 
@@ -196,7 +200,7 @@ namespace embree
       bounds = accels[0]->bounds;
       intersectors = accels[0]->intersectors;
     }
-    else 
+    else
     {
       type = AccelData::TY_ACCELN;
       intersectors.ptr = this;
@@ -204,24 +208,26 @@ namespace embree
       intersectors.intersector4  = Intersector4(&intersect4,&occluded4,valid4 ? "AccelN::intersector4" : nullptr);
       intersectors.intersector8  = Intersector8(&intersect8,&occluded8,valid8 ? "AccelN::intersector8" : nullptr);
       intersectors.intersector16 = Intersector16(&intersect16,&occluded16,valid16 ? "AccelN::intersector16": nullptr);
-      intersectors.intersectorN  = IntersectorN(&intersectN,&occludedN,"AccelN::intersectorN");
+      intersectors.intersectorN  = IntersectorN(&intersectN,
+                                                &occludedN,
+                                                "AccelN::intersectorN");
 
       /*! calculate bounds */
       bounds = empty;
-      for (size_t i=0; i<accels.size(); i++) 
+      for (size_t i=0; i<accels.size(); i++)
         bounds.extend(accels[i]->bounds);
     }
   }
 
   void AccelN::accels_select(bool filter)
   {
-    for (size_t i=0; i<accels.size(); i++) 
+    for (size_t i=0; i<accels.size(); i++)
       accels[i]->intersectors.select(filter);
   }
 
-  void AccelN::accels_deleteGeometry(size_t geomID) 
+  void AccelN::accels_deleteGeometry(size_t geomID)
   {
-    for (size_t i=0; i<accels.size(); i++) 
+    for (size_t i=0; i<accels.size(); i++)
       accels[i]->deleteGeometry(geomID);
   }
 
@@ -232,4 +238,3 @@ namespace embree
     }
   }
 }
-
