@@ -108,15 +108,19 @@ namespace embree
     return intersectors;
   }
 
-  void BVH4Factory::createTriangleMeshTriangle4(TriangleMesh* mesh, AccelData*& accel, Builder*& builder)
+  void
+  BVH4Factory::createTriangleMeshTriangle4(TriangleMesh* mesh, AccelData*& accel, Builder*& builder)
   {
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
     accel = new BVH4(Triangle4::type,mesh->scene);
     switch (mesh->quality) {
     case RTC_BUILD_QUALITY_MEDIUM:
-    case RTC_BUILD_QUALITY_HIGH:   builder = factory->BVH4Triangle4MeshBuilderSAH(accel,mesh,0); break;
-    case RTC_BUILD_QUALITY_REFIT:  builder = factory->BVH4Triangle4MeshRefitSAH(accel,mesh,0); break;
-    default: throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
+    case RTC_BUILD_QUALITY_HIGH:
+      builder = factory->BVH4Triangle4MeshBuilderSAH(accel,mesh,0); break;
+    case RTC_BUILD_QUALITY_REFIT:
+      builder = factory->BVH4Triangle4MeshRefitSAH(accel,mesh,0); break;
+    default:
+      throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
     }
   }
 
@@ -125,10 +129,10 @@ namespace embree
     BVH4* accel = new BVH4(Triangle4::type,scene);
 
     Accel::Intersectors intersectors;
-    if      (scene->device->tri_traverser == "default")
-      intersectors = BVH4Triangle4Intersectors(accel,ivariant);
+    if (scene->device->tri_traverser == "default")
+      intersectors = BVH4Triangle4Intersectors(accel, ivariant);
     else if (scene->device->tri_traverser == "fast"   )
-      intersectors = BVH4Triangle4Intersectors(accel,IntersectVariant::FAST);
+      intersectors = BVH4Triangle4Intersectors(accel, IntersectVariant::FAST);
     else
       throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown traverser "+scene->device->tri_traverser+" for BVH4<Triangle4>");
 
@@ -140,7 +144,8 @@ namespace embree
       case BuildVariant::HIGH_QUALITY: builder = BVH4Triangle4SceneBuilderFastSpatialSAH(accel,scene,0); break;
       }
     }
-    else if (scene->device->tri_builder == "sah"         ) builder = BVH4Triangle4SceneBuilderSAH(accel,scene,0);
+    else if (scene->device->tri_builder == "sah")
+      builder = BVH4Triangle4SceneBuilderSAH(accel,scene,0);
     else if (scene->device->tri_builder == "sah_fast_spatial" ) builder = BVH4Triangle4SceneBuilderFastSpatialSAH(accel,scene,0);
     else if (scene->device->tri_builder == "sah_presplit") builder = BVH4Triangle4SceneBuilderSAH(accel,scene,MODE_HIGH_QUALITY);
     else if (scene->device->tri_builder == "dynamic"     ) builder = BVH4BuilderTwoLevelTriangleMeshSAH(accel,scene,&createTriangleMeshTriangle4);
