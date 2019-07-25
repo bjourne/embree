@@ -142,7 +142,7 @@ namespace embree
       if (unlikely(none(valid)))
         return;
 
-        /* perform backface culling */
+      /* perform backface culling */
 #if defined(EMBREE_BACKFACE_CULLING)
       valid &= den < vfloat<K>(zero);
       if (unlikely(none(valid)))
@@ -248,7 +248,6 @@ namespace embree
       /* calculate hit information */
       MoellerTrumboreHitK<K> hit(U, V, T, absDen, tri_Ng);
 
-
       // Now for the epilog...
       Scene* scene = context->scene;
 
@@ -256,19 +255,12 @@ namespace embree
       Vec3vf<K> Ng;
       vbool<K> valid2 = valid;
 
+      // todo: check if we always finalize...
       std::tie(u,v,t,Ng) = hit.finalizeK();
 
       const unsigned int geomID = tri.geomIDs[i];
       const unsigned int primID = tri.primIDs[i];
       Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
-
-        /* ray masking test */
-#if defined(EMBREE_RAY_MASK)
-      printf("ray mask!\n");
-      valid2 &= (geometry->mask & ray.mask) != 0;
-      if (unlikely(none(valid2)))
-        return;
-#endif
 
       /* occlusion filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
