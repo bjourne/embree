@@ -31,7 +31,9 @@ namespace embree
     /// BVH4IntersectorStream Definitions
     ////////////////////////////////////////////////////////////////////////////////
 
-    IF_ENABLED_TRIS(DEFINE_INTERSECTORN(BVH4Triangle4IntersectorStreamMoeller,         BVHNIntersectorStream<SIMD_MODE(4) COMMA BVH_AN1 COMMA false COMMA Triangle4IntersectorStreamMoeller<true>>));
+    IF_ENABLED_TRIS(DEFINE_INTERSECTORN(
+                      BVH4Triangle4IntersectorStreamMoeller,
+                      BVHNIntersectorStream<SIMD_MODE(4) COMMA BVH_AN1 COMMA false COMMA Triangle4IntersectorStreamMoeller<true>>));
     IF_ENABLED_TRIS(DEFINE_INTERSECTORN(BVH4Triangle4IntersectorStreamMoellerNoFilter, BVHNIntersectorStream<SIMD_MODE(4) COMMA BVH_AN1 COMMA false COMMA Triangle4IntersectorStreamMoeller<false>>));
   }
 }

@@ -36,7 +36,8 @@ namespace embree
       if (bvh->root == BVH::emptyNode)
         return;
 
-      /* perform per ray precalculations required by the primitive intersector */
+      /* perform per ray precalculations required by the primitive
+      intersector */
       Precalculations pre(ray, bvh);
 
       /* stack state */
