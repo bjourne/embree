@@ -254,20 +254,28 @@ namespace embree
       void select(bool filter)
       {
 	if (intersector4_filter) {
-	  if (filter) intersector4 = intersector4_filter;
-	  else        intersector4 = intersector4_nofilter;
+	  if (filter)
+            intersector4 = intersector4_filter;
+	  else
+            intersector4 = intersector4_nofilter;
 	}
 	if (intersector8_filter) {
-	  if (filter) intersector8 = intersector8_filter;
-	  else        intersector8 = intersector8_nofilter;
+	  if (filter)
+            intersector8 = intersector8_filter;
+	  else
+            intersector8 = intersector8_nofilter;
 	}
 	if (intersector16_filter) {
-	  if (filter) intersector16 = intersector16_filter;
-	  else         intersector16 = intersector16_nofilter;
+	  if (filter)
+            intersector16 = intersector16_filter;
+	  else
+            intersector16 = intersector16_nofilter;
 	}
 	if (intersectorN_filter) {
-	  if (filter) intersectorN = intersectorN_filter;
-	  else        intersectorN = intersectorN_nofilter;
+	  if (filter)
+            intersectorN = intersectorN_filter;
+	  else
+            intersectorN = intersectorN_nofilter;
 	}
       }
 

@@ -37,11 +37,11 @@ namespace embree
       GTY_FLAT_LINEAR_CURVE = 0,
       GTY_ROUND_LINEAR_CURVE = 1,
       GTY_ORIENTED_LINEAR_CURVE = 2,
-      
+
       GTY_FLAT_BEZIER_CURVE = 4,
       GTY_ROUND_BEZIER_CURVE = 5,
       GTY_ORIENTED_BEZIER_CURVE = 6,
-      
+
       GTY_FLAT_BSPLINE_CURVE = 8,
       GTY_ROUND_BSPLINE_CURVE = 9,
       GTY_ORIENTED_BSPLINE_CURVE = 10,
@@ -58,7 +58,7 @@ namespace embree
       GTY_SPHERE_POINT = 21,
       GTY_DISC_POINT = 22,
       GTY_ORIENTED_DISC_POINT = 23,
-      
+
       GTY_USER_GEOMETRY = 25,
       GTY_INSTANCE = 26,
       GTY_END = 27,
@@ -68,7 +68,7 @@ namespace embree
       GTY_BASIS_BSPLINE = 8,
       GTY_BASIS_HERMITE = 12,
       GTY_BASIS_MASK = 12,
-      
+
       GTY_SUBTYPE_FLAT_CURVE = 0,
       GTY_SUBTYPE_ROUND_CURVE = 1,
       GTY_SUBTYPE_ORIENTED_CURVE = 2,
@@ -80,11 +80,11 @@ namespace embree
       MTY_FLAT_LINEAR_CURVE = 1 << GTY_FLAT_LINEAR_CURVE,
       MTY_ROUND_LINEAR_CURVE = 1 << GTY_ROUND_LINEAR_CURVE,
       MTY_ORIENTED_LINEAR_CURVE = 1 << GTY_ORIENTED_LINEAR_CURVE,
-      
+
       MTY_FLAT_BEZIER_CURVE = 1 << GTY_FLAT_BEZIER_CURVE,
       MTY_ROUND_BEZIER_CURVE = 1 << GTY_ROUND_BEZIER_CURVE,
       MTY_ORIENTED_BEZIER_CURVE = 1 << GTY_ORIENTED_BEZIER_CURVE,
-      
+
       MTY_FLAT_BSPLINE_CURVE = 1 << GTY_FLAT_BSPLINE_CURVE,
       MTY_ROUND_BSPLINE_CURVE = 1 << GTY_ROUND_BSPLINE_CURVE,
       MTY_ORIENTED_BSPLINE_CURVE = 1 << GTY_ORIENTED_BSPLINE_CURVE,
@@ -94,7 +94,7 @@ namespace embree
       MTY_ORIENTED_HERMITE_CURVE = 1 << GTY_ORIENTED_HERMITE_CURVE,
 
       MTY_CURVE2 = MTY_FLAT_LINEAR_CURVE | MTY_ROUND_LINEAR_CURVE | MTY_ORIENTED_LINEAR_CURVE,
-      
+
       MTY_CURVE4 = MTY_FLAT_BEZIER_CURVE | MTY_ROUND_BEZIER_CURVE | MTY_ORIENTED_BEZIER_CURVE |
                    MTY_FLAT_BSPLINE_CURVE | MTY_ROUND_BSPLINE_CURVE | MTY_ORIENTED_BSPLINE_CURVE |
                    MTY_FLAT_HERMITE_CURVE | MTY_ROUND_HERMITE_CURVE | MTY_ORIENTED_HERMITE_CURVE,
@@ -124,7 +124,7 @@ namespace embree
     };
 
   public:
-    
+
     /*! Geometry constructor */
     Geometry (Device* device, GType gtype, unsigned int numPrimitives, unsigned int numTimeSteps);
 
@@ -176,12 +176,12 @@ namespace embree
 
     /*! sets number of vertex attributes */
     virtual void setVertexAttributeCount (unsigned int N) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! sets number of topologies */
     virtual void setTopologyCount (unsigned int N) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! sets the build quality */
@@ -200,7 +200,7 @@ namespace embree
       __forceinline vint<N> timeSegment(const vfloat<N>& time, vfloat<N>& ftime) const {
       return getTimeSegment(time,vfloat<N>(time_range.lower),vfloat<N>(time_range.upper),vfloat<N>(fnumTimeSegments),ftime);
     }
-    
+
     /* calculate overlapping time segment range */
     __forceinline range<int> timeSegmentRange(const BBox1f& range) const {
       return getTimeSegmentRange(range,time_range,fnumTimeSegments);
@@ -211,7 +211,7 @@ namespace embree
       assert(i>=0 && i<(int)numTimeSteps);
       return time_range.lower + time_range.size()*float(i)/fnumTimeSegments;
     }
-    
+
     /*! for all geometries */
   public:
 
@@ -223,7 +223,7 @@ namespace embree
 
     /*! Update geometry. */
     void update();
-    
+
     /*! commit of geometry */
     virtual void commit();
 
@@ -231,7 +231,7 @@ namespace embree
     virtual void updateBuffer(RTCBufferType type, unsigned int slot) {
       update(); // update everything for geometries not supporting this call
     }
-    
+
     /*! Disable geometry. */
     virtual void disable();
 
@@ -246,18 +246,18 @@ namespace embree
 
     /*! called before every build */
     virtual void preCommit();
-  
+
     /*! called after every build */
     virtual void postCommit();
 
     /*! sets constant tessellation rate for the geometry */
     virtual void setTessellationRate(float N) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! Set user data pointer. */
     virtual void setUserData(void* ptr);
-      
+
     /*! Get user data pointer. */
     __forceinline void* getUserData() const {
       return userPtr;
@@ -265,7 +265,7 @@ namespace embree
 
     /*! interpolates user data to the specified u/v location */
     virtual void interpolate(const RTCInterpolateArguments* const args) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! interpolates user data to the specified u/v locations */
@@ -274,36 +274,36 @@ namespace embree
     /*! for subdivision surfaces only */
   public:
     virtual void setSubdivisionMode (unsigned topologyID, RTCSubdivisionMode mode) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     virtual void setVertexAttributeTopology(unsigned int vertexBufferSlot, unsigned int indexBufferSlot) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! Set displacement function. */
     virtual void setDisplacementFunction (RTCDisplacementFunctionN filter) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     virtual unsigned int getFirstHalfEdge(unsigned int faceID) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     virtual unsigned int getFace(unsigned int edgeID) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
-    
+
     virtual unsigned int getNextHalfEdge(unsigned int edgeID) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     virtual unsigned int getPreviousHalfEdge(unsigned int edgeID) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     virtual unsigned int getOppositeHalfEdge(unsigned int topologyID, unsigned int edgeID) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! for triangle meshes and bezier curves only */
@@ -311,13 +311,13 @@ namespace embree
 
 
     /*! Sets ray mask. */
-    virtual void setMask(unsigned mask) { 
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+    virtual void setMask(unsigned mask) {
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
-    
+
     /*! Sets specified buffer. */
     virtual void setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! Gets specified buffer. */
@@ -336,35 +336,35 @@ namespace embree
 
     /*! Sets the instanced scene */
     virtual void setInstancedScene(const Ref<Scene>& scene) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
-    
+
     /*! Sets transformation of the instance */
     virtual void setTransform(const AffineSpace3fa& transform, unsigned int timeStep) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! Returns the transformation of the instance */
     virtual AffineSpace3fa getTransform(float time) {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! for user geometries only */
   public:
 
     /*! Set bounds function. */
-    virtual void setBoundsFunction (RTCBoundsFunction bounds, void* userPtr) { 
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+    virtual void setBoundsFunction (RTCBoundsFunction bounds, void* userPtr) {
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! Set intersect function for ray packets of size N. */
-    virtual void setIntersectFunctionN (RTCIntersectFunctionN intersect) { 
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+    virtual void setIntersectFunctionN (RTCIntersectFunctionN intersect) {
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
-    
+
     /*! Set occlusion function for ray packets of size N. */
-    virtual void setOccludedFunctionN (RTCOccludedFunctionN occluded) { 
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+    virtual void setOccludedFunctionN (RTCOccludedFunctionN occluded) {
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry");
     }
 
     /*! returns number of time segments */
@@ -375,59 +375,50 @@ namespace embree
   public:
 
     virtual PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"createPrimRefArray not implemented for this geometry"); 
-    }
-
-    virtual PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"createPrimRefMBArray not implemented for this geometry"); 
-    }
-
-    virtual PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"createPrimRefMBArray not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"createPrimRefArray not implemented for this geometry");
     }
 
     virtual LinearSpace3fa computeAlignedSpace(const size_t primID) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"computeAlignedSpace not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"computeAlignedSpace not implemented for this geometry");
     }
 
-    virtual LinearSpace3fa computeAlignedSpaceMB(const size_t primID, const BBox1f time_range) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"computeAlignedSpace not implemented for this geometry"); 
-    }
-    
     virtual Vec3fa computeDirection(unsigned int primID) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"computeDirection not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"computeDirection not implemented for this geometry");
     }
 
     virtual Vec3fa computeDirection(unsigned int primID, size_t time) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"computeDirection not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"computeDirection not implemented for this geometry");
     }
 
     virtual BBox3fa vbounds(size_t primID) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vbounds not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vbounds not implemented for this geometry");
     }
-    
+
     virtual BBox3fa vbounds(const LinearSpace3fa& space, size_t primID) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vbounds not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vbounds not implemented for this geometry");
     }
 
     virtual BBox3fa vbounds(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t i, size_t itime = 0) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vbounds not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vbounds not implemented for this geometry");
     }
 
     virtual LBBox3fa vlinearBounds(size_t primID, const BBox1f& time_range) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vlinearBounds not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vlinearBounds not implemented for this geometry");
     }
-    
+
     virtual LBBox3fa vlinearBounds(const LinearSpace3fa& space, size_t primID, const BBox1f& time_range) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vlinearBounds not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vlinearBounds not implemented for this geometry");
     }
 
     virtual LBBox3fa vlinearBounds(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t primID, const BBox1f& time_range) const {
-      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vlinearBounds not implemented for this geometry"); 
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"vlinearBounds not implemented for this geometry");
     }
-    
+
   public:
-    __forceinline bool hasIntersectionFilter() const { return intersectionFilterN != nullptr; }
+    __forceinline bool hasIntersectionFilter() const
+    {
+      return intersectionFilterN != nullptr;
+    }
     __forceinline bool hasOcclusionFilter() const { return occlusionFilterN != nullptr; }
 
   public:
@@ -437,11 +428,11 @@ namespace embree
     void* userPtr;              //!< user pointer
     unsigned int geomID;        //!< internal geometry ID
     unsigned int numPrimitives; //!< number of primitives of this geometry
-    
+
     unsigned int numTimeSteps;  //!< number of time steps
     float fnumTimeSegments;     //!< number of time segments (precalculation)
     BBox1f time_range;          //!< motion blur time range
-    
+
     unsigned int mask;             //!< for masking out geometry
     struct {
       GType gtype : 6;                //!< geometry type
@@ -450,7 +441,7 @@ namespace embree
       bool numPrimitivesChanged : 1; //!< true if number of primitives changed
       bool enabled : 1;              //!< true if geometry is enabled
     };
-       
+
     RTCFilterFunctionN intersectionFilterN;
     RTCFilterFunctionN occlusionFilterN;
   };

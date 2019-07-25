@@ -45,11 +45,7 @@ SET(EMBREE_LIBRARY_FILES
   common/scene.cpp
   common/alloc.cpp
   common/geometry.cpp
-  common/scene_user_geometry.cpp
   common/scene_triangle_mesh.cpp
-  common/scene_line_segments.cpp
-  common/scene_grid_mesh.cpp
-  common/scene_points.cpp
 
   geometry/primitive4.cpp
   builders/primrefgen.cpp
@@ -69,17 +65,6 @@ SET(EMBREE_LIBRARY_FILES
 
   bvh/bvh_intersector1_bvh4.cpp
   )
-
-IF (EMBREE_GEOMETRY_SUBDIVISION)
-  SET(EMBREE_LIBRARY_FILES ${EMBREE_LIBRARY_FILES}
-  common/scene_subdiv_mesh.cpp
-  subdiv/tessellation_cache.cpp
-  subdiv/subdivpatch1base.cpp
-  subdiv/catmullclark_coefficients.cpp
-  geometry/grid_soa.cpp
-  subdiv/subdivpatch1base_eval.cpp
-  bvh/bvh_builder_subdiv.cpp)
-ENDIF()
 
 IF (EMBREE_RAY_PACKETS)
   SET(EMBREE_LIBRARY_FILES ${EMBREE_LIBRARY_FILES}
@@ -101,11 +86,7 @@ MACRO(embree_files TARGET ISA)
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA} EQUAL ${AVX512SKX} OR ${ISA_LOWEST} EQUAL ${ISA})
 
     LIST(APPEND ${TARGET}
-      common/scene_user_geometry.cpp
       common/scene_triangle_mesh.cpp
-      common/scene_line_segments.cpp
-      common/scene_grid_mesh.cpp
-      common/scene_points.cpp
 
       bvh/bvh_refit.cpp
       bvh/bvh_builder.cpp
@@ -133,13 +114,6 @@ MACRO(embree_files TARGET ISA)
     LIST(APPEND ${TARGET}
       bvh/bvh.cpp
       bvh/bvh_statistics.cpp)
-  ENDIF()
-
-  IF (EMBREE_GEOMETRY_SUBDIVISION)
-    LIST(APPEND ${TARGET}
-        common/scene_subdiv_mesh.cpp
-        geometry/grid_soa.cpp
-        subdiv/subdivpatch1base_eval.cpp)
   ENDIF()
 
   IF (EMBREE_RAY_PACKETS)
