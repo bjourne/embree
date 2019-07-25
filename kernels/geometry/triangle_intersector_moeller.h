@@ -17,7 +17,6 @@
 #pragma once
 
 #include "triangle.h"
-#include "intersector_epilog.h"
 
 /*! This intersector implements a modified version of the Moeller
  *  Trumbore intersector from the paper "Fast, Minimum Storage

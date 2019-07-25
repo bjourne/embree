@@ -2,20 +2,19 @@
 
 #include "triangle.h"
 #include "triangle_intersector_moeller.h"
+#include "filter.h"
 
 namespace embree
 {
   namespace isa
   {
-    /*! Intersect k'th ray from ray packet of size K with M triangles. */
-    template<int M, int K>
-    static __forceinline bool
-    intersectKthRayMTris(RayK<K>& ray,
-                         size_t k,
-                         const TriangleM<M>& tri,
-                         MoellerTrumboreHitM<M>& hit)
+    template<int M, int Mx, int K, bool filter>
+    static __forceinline void
+    intersectKthRayMTrisEpilog(IntersectContext* context,
+                               RayHitK<K>& ray,
+                               size_t k,
+                               const TriangleM<M>& tri)
     {
-      printf("is here?\n");
       /* calculate denominator */
       const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
 
@@ -31,18 +30,184 @@ namespace embree
       const vfloat<M> U = dot(Vec3vf<M>(tri.e2), R) ^ sgnDen;
       const vfloat<M> V = dot(Vec3vf<M>(tri.e1), R) ^ sgnDen;
 
-      vbool<M> valid = (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+      vbool<M> valid = (den != vfloat<M>(zero)) &
+        (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
       if (likely(none(valid)))
-        return false;
+        return;
 
       /* perform depth test */
       const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
       valid &= (absDen*vfloat<M>(ray.tnear()[k]) < T) & (T <= absDen*vfloat<M>(ray.tfar[k]));
       if (likely(none(valid)))
+        return;
+
+      /* calculate hit information */
+      MoellerTrumboreHitM<M> hit(valid, U, V, T, absDen, tri_Ng);
+
+      // Do the epilog
+      Scene* scene = context->scene;
+      vbool<Mx> valid2 = valid;
+      hit.finalize();
+      if (Mx > M)
+        valid2 &= (1<<M)-1;
+      size_t i = select_min(valid2, hit.vt);
+      assert(i<M);
+      unsigned int geomID = tri.geomIDs[i];
+
+        /* intersection filter test */
+#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+      bool foundhit = false;
+      goto entry;
+      while (true)
+      {
+        if (unlikely(none(valid2)))
+          return;
+        i = select_min(valid2, hit.vt);
+        assert(i<M);
+        geomID = tri.geomIDs[i];
+      entry:
+        Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+
+#if defined(EMBREE_RAY_MASK)
+        /* goto next hit if mask test fails */
+        if ((geometry->mask & ray.mask[k]) == 0) {
+          clear(valid2,i);
+          continue;
+        }
+#endif
+
+#if defined(EMBREE_FILTER_FUNCTION)
+        /* call intersection filter function */
+        if (filter) {
+          if (unlikely(context->hasContextFilter() ||
+                       geometry->hasIntersectionFilter())) {
+            assert(i<M);
+            const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
+            HitK<K> h(context->instID,
+                      geomID, tri.primIDs[i],
+                      uv.x,uv.y,
+                      hit.Ng(i));
+            const float old_t = ray.tfar[k];
+            ray.tfar[k] = hit.vt[i];
+            const bool found = any(runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
+            if (!found) ray.tfar[k] = old_t;
+            foundhit = foundhit | found;
+            clear(valid2, i);
+            // intersection filters may modify tfar value
+            valid2 &= hit.vt <= ray.tfar[k];
+            continue;
+          }
+        }
+#endif
+        break;
+      }
+#endif
+      assert(i<M);
+      /* update hit information */
+      const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
+      ray.tfar[k] = hit.vt[i];
+      ray.Ng.x[k] = hit.vNg.x[i];
+      ray.Ng.y[k] = hit.vNg.y[i];
+      ray.Ng.z[k] = hit.vNg.z[i];
+      ray.u[k] = uv.x;
+      ray.v[k] = uv.y;
+      ray.primID[k] = tri.primIDs[i];
+      ray.geomID[k] = geomID;
+      ray.instID[k] = context->instID;
+    }
+
+    template<int M, int Mx, int K, bool filter>
+    static __forceinline bool
+    occludedKthRayMTrisEpilog(IntersectContext* context,
+                              RayK<K>& ray,
+                              size_t k,
+                              const TriangleM<M>& tri)
+    {
+      const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
+
+      const Vec3vf<M> O = broadcast<vfloat<M>>(ray.org, k);
+      const Vec3vf<M> D = broadcast<vfloat<M>>(ray.dir, k);
+      const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
+      const Vec3vf<M> R = cross(C,D);
+      const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
+      const vfloat<M> absDen = abs(den);
+      const vfloat<M> sgnDen = signmsk(den);
+
+      /* perform edge tests */
+      const vfloat<M> U = dot(Vec3vf<M>(tri.e2), R) ^ sgnDen;
+      const vfloat<M> V = dot(Vec3vf<M>(tri.e1), R) ^ sgnDen;
+
+      vbool<M> valid = (den != vfloat<M>(zero)) &
+        (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+      if (likely(none(valid)))
+        return false;
+
+      /* perform depth test */
+      const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
+      valid &= (absDen * vfloat<M>(ray.tnear()[k]) < T) &
+        (T <= absDen * vfloat<M>(ray.tfar[k]));
+      if (likely(none(valid)))
         return false;
 
       /* calculate hit information */
-      new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
+      MoellerTrumboreHitM<M> hit(valid,U,V,T,absDen,tri_Ng);
+
+      Scene* scene = context->scene;
+
+      /* intersection filter test */
+#if defined(EMBREE_FILTER_FUNCTION) || defined(EMBREE_RAY_MASK)
+      if (unlikely(filter))
+        hit.finalize(); /* called only once */
+
+      vbool<Mx> valid2 = valid;
+      if (Mx > M)
+        valid2 &= (1<<M)-1;
+      size_t m = movemask(valid2);
+      goto entry;
+      while (true)
+      {
+        if (unlikely(m == 0))
+          return false;
+      entry:
+        size_t i=bsf(m);
+
+        const unsigned int geomID = tri.geomIDs[i];
+        Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
+
+#if defined(EMBREE_RAY_MASK)
+        /* goto next hit if mask test fails */
+        if ((geometry->mask & ray.mask[k]) == 0) {
+          m=btc(m,i);
+          continue;
+        }
+#endif
+
+#if defined(EMBREE_FILTER_FUNCTION)
+        /* execute occlusion filer */
+        if (filter) {
+          if (unlikely(context->hasContextFilter() ||
+                       geometry->hasOcclusionFilter()))
+          {
+            const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
+            const float old_t = ray.tfar[k];
+            ray.tfar[k] = hit.vt[i];
+            HitK<K> h(context->instID,
+                      geomID, tri.primIDs[i],
+                      uv.x, uv.y,
+                      hit.Ng(i));
+            if (any(runOcclusionFilter(vbool<K>(1<<k),
+                                       geometry,
+                                       ray,context,h)))
+              return false;
+            ray.tfar[k] = old_t;
+            m=btc(m,i);
+            continue;
+          }
+        }
+#endif
+        break;
+      }
+#endif
       return true;
     }
 
@@ -226,7 +391,7 @@ namespace embree
       Vec3vf<K> Ng;
       vbool<K> valid2 = valid;
 
-      // todo: check if we always finalize...
+      // Yes, we always finalize.
       std::tie(u,v,t,Ng) = hit.finalizeK();
 
       const unsigned int geomID = tri.geomIDs[i];
@@ -238,7 +403,6 @@ namespace embree
       if (filter) {
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasIntersectionFilter())) {
-          printf("doing filtering!\n");
           HitK<K> h(context->instID,geomID,primID,u,v,Ng);
           const vfloat<K> old_t = ray.tfar;
           ray.tfar = select(valid2,t,ray.tfar);
@@ -267,10 +431,10 @@ namespace embree
 
     template<int M, int Mx>
     static __forceinline bool
-    occludedEpilog(Ray& ray,
-                   IntersectContext* context,
-                   const TriangleM<M>& tri,
-                   MoellerTrumboreHitM<M>& hit)
+    occluded1RayMTrisEpilog(Ray& ray,
+                            IntersectContext* context,
+                            const TriangleM<M>& tri,
+                            MoellerTrumboreHitM<M>& hit)
     {
       Scene* scene = context->scene;
       /* intersection filter test */
@@ -326,10 +490,10 @@ namespace embree
 
     template<int M, int Mx>
     static __forceinline bool
-    intersectEpilog(RayHit& ray,
-                    IntersectContext* context,
-                    const TriangleM<M>& tri,
-                    MoellerTrumboreHitM<M>& hit)
+    intersect1RayMTrisEpilog(RayHit& ray,
+                             IntersectContext* context,
+                             const TriangleM<M>& tri,
+                             MoellerTrumboreHitM<M>& hit)
     {
       Scene* scene = context->scene;
       vbool<Mx> valid = hit.valid;
@@ -416,7 +580,7 @@ namespace embree
         vbool<M> valid = true;
 
         if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
-          intersectEpilog<M, Mx>(ray, context, tri, hit);
+          intersect1RayMTrisEpilog<M, Mx>(ray, context, tri, hit);
         }
       }
 
@@ -431,7 +595,7 @@ namespace embree
         MoellerTrumboreHitM<M> hit;
         vbool<M> valid = true;
         if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
-          return occludedEpilog<M, Mx>(ray, context, tri, hit);
+          return occluded1RayMTrisEpilog<M, Mx>(ray, context, tri, hit);
         }
         return false;
       }
@@ -473,16 +637,10 @@ namespace embree
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
-        printf("TriangleMIntersectorKMoeller::intersect (a ray) %d\n",
-               filter);
+        // printf("TriangleMIntersectorKMoeller::intersect (a ray) %d\n",
+        //        filter);
         STAT3(normal.trav_prims,1,1,1);
-        MoellerTrumboreHitM<M> hit;
-
-        if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
-          Intersect1KEpilogM<M,Mx,K,filter> epi =
-            Intersect1KEpilogM<M,Mx,K,filter>(ray,k,context,tri);
-          epi(hit.valid, hit);
-        }
+        intersectKthRayMTrisEpilog<M, Mx, K, filter>(context, ray, k, tri);
       }
 
       /*! Test for K rays if they are occluded by any of the M
@@ -494,7 +652,7 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
+        //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
         vbool<K> valid0 = valid_i;
 
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
@@ -512,7 +670,6 @@ namespace embree
       }
 
       /*! Test if the ray is occluded by one of the M triangles. */
-      // Todo: is this function ever called?
       static __forceinline bool
       occluded(MoellerTrumboreIntersectorK<Mx,K>& pre,
                RayK<K>& ray,
@@ -520,17 +677,10 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
+        //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
         STAT3(shadow.trav_prims,1,1,1);
-        MoellerTrumboreHitM<M> hit;
-
-        // todo: why does specifying <M,K> break?
-        if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
-          Occluded1KEpilogM<M, Mx, K, filter> epi =
-            Occluded1KEpilogM<M,Mx,K,filter>(ray, k, context, tri);
-          return epi(hit.valid, hit);
-        }
-        return false;
+        return occludedKthRayMTrisEpilog<M, Mx, K, filter>(
+          context, ray, k, tri);
       }
     };
   }
