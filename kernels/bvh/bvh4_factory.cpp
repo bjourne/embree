@@ -47,6 +47,7 @@ namespace embree
 
   BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
   {
+    printf("BVH4Factory::BVH4Factory\n");
     selectBuilders(bfeatures);
     selectIntersectors(ifeatures);
   }

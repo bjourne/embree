@@ -97,7 +97,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateMeshEdgeLevelBufferTask((int)i,threadIndex,scene_in,cam_pos);
-  }); 
+  });
 #endif
 
   /* now update large meshes */
@@ -112,7 +112,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateSubMeshEdgeLevelBufferTask((int)i,threadIndex,mesh,cam_pos);
-  }); 
+  });
 #else
     updateEdgeLevelBuffer(mesh,cam_pos,0,mesh->numFaces);
 #endif
@@ -208,31 +208,6 @@ void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometr
     ISPCTriangleMesh* mesh = (ISPCTriangleMesh*) geometry;
     materialID = mesh->geom.materialID;
   }
-  else if (geometry->type == QUAD_MESH)
-  {
-    ISPCQuadMesh* mesh = (ISPCQuadMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == GRID_MESH)
-  {
-    ISPCGridMesh* mesh = (ISPCGridMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == SUBDIV_MESH)
-  {
-    ISPCSubdivMesh* mesh = (ISPCSubdivMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == CURVES)
-  {
-    ISPCHairSet* mesh = (ISPCHairSet*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == GROUP) {
-    unsigned int geomID = ray.geomID; {
-      postIntersectGeometry(ray,dg,((ISPCGroup*) geometry)->geometries[geomID],materialID);
-    }
-  }
   else
     assert(false);
 }
@@ -318,7 +293,7 @@ void renderTileStandard(int taskIndex,
   for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
   {
     /* ISPC workaround for mask == 0 */
-    
+
 
     RandomSampler sampler;
     RandomSampler_init(sampler, x, y, 0);
@@ -354,7 +329,7 @@ void renderTileStandard(int taskIndex,
   for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
   {
     /* ISPC workaround for mask == 0 */
-    
+
     Ray& ray = rays[N++];
 
     /* eyelight shading */
@@ -375,13 +350,13 @@ void renderTileStandard(int taskIndex,
       int materialID = postIntersect(ray,dg);
       dg.Ng = face_forward(ray.dir,normalize(dg.Ng));
       dg.Ns = face_forward(ray.dir,normalize(dg.Ns));
-      
+
       /* shade */
       if (g_ispc_scene->materials[materialID]->type == MATERIAL_OBJ) {
         ISPCOBJMaterial* material = (ISPCOBJMaterial*) g_ispc_scene->materials[materialID];
         Kd = Vec3fa(material->Kd);
       }
-      
+
       color = Kd*dot(neg(ray.dir),dg.Ns);
 #else
       color = Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))));
@@ -432,7 +407,7 @@ extern "C" void device_render (int* pixels,
     updateEdgeLevels(g_ispc_scene, camera.xfm.p);
     rtcCommitScene (g_scene);
   }
-  
+
   /* render image */
   const int numTilesX = (width +TILE_SIZE_X-1)/TILE_SIZE_X;
   const int numTilesY = (height+TILE_SIZE_Y-1)/TILE_SIZE_Y;
@@ -440,7 +415,7 @@ extern "C" void device_render (int* pixels,
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       renderTileTask((int)i,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
-  }); 
+  });
 }
 
 /* called by the C++ code for cleanup */

@@ -536,15 +536,21 @@ namespace embree
     // ===================================================================================================================================================================
     // ===================================================================================================================================================================
 
-    template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
-    bool BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::occluded1(Accel::Intersectors* This,
-                                                                                               const BVH* bvh,
-                                                                                               NodeRef root,
-                                                                                               size_t k,
-                                                                                               Precalculations& pre,
-                                                                                               RayK<K>& ray,
-                                                                                               const TravRayK<K, robust>& tray,
-                                                                                               IntersectContext* context)
+    template<int N, int K,
+             int types, bool robust,
+             typename PrimitiveIntersectorK,
+             bool single>
+    bool
+    BVHNIntersectorKHybrid<
+      N, K, types, robust, PrimitiveIntersectorK, single>
+    ::occluded1(Accel::Intersectors* This,
+                const BVH* bvh,
+                NodeRef root,
+                size_t k,
+                Precalculations& pre,
+                RayK<K>& ray,
+                const TravRayK<K, robust>& tray,
+                IntersectContext* context)
       {
         /* stack state */
         NodeRef stack[stackSizeSingle];  // stack of nodes that still need to get traversed
@@ -589,7 +595,12 @@ namespace embree
           size_t num; Primitive* prim = (Primitive*)cur.leaf(num);
 
           size_t lazy_node = 0;
-          if (PrimitiveIntersectorK::occluded(This, pre, ray, k, context, prim, num, tray1, lazy_node)) {
+          if (PrimitiveIntersectorK::occluded(This,
+                                              pre,
+                                              ray, k,
+                                              context,
+                                              prim, num,
+                                              tray1, lazy_node)) {
 	    ray.tfar[k] = neg_inf;
 	    return true;
 	  }
@@ -602,11 +613,15 @@ namespace embree
 	return false;
       }
 
-    template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
-    void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::occluded(vint<K>* __restrict__ valid_i,
-                                                                                              Accel::Intersectors* __restrict__ This,
-                                                                                              RayK<K>& __restrict__ ray,
-                                                                                              IntersectContext* context)
+    template<
+      int N, int K, int types, bool robust,
+      typename PrimitiveIntersectorK, bool single>
+    void BVHNIntersectorKHybrid<
+      N, K, types, robust, PrimitiveIntersectorK, single>
+    ::occluded(vint<K>* __restrict__ valid_i,
+               Accel::Intersectors* __restrict__ This,
+               RayK<K>& __restrict__ ray,
+               IntersectContext* context)
     {
       BVH* __restrict__ bvh = (BVH*)This->ptr;
 
@@ -616,7 +631,9 @@ namespace embree
 
 #if ENABLE_FAST_COHERENT_CODEPATHS == 1
       assert(context);
-      if (unlikely(types == BVH_AN1 && context->user && context->isCoherent()))
+      if (unlikely(types == BVH_AN1 &&
+                   context->user &&
+                   context->isCoherent()))
       {
         occludedCoherent(valid_i, This, ray, context);
         return;
@@ -787,7 +804,9 @@ namespace embree
     }
 
 
-    template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
+    template<int N, int K, int types,
+             bool robust, typename PrimitiveIntersectorK,
+             bool single>
     void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::occludedCoherent(vint<K>* __restrict__ valid_i,
                                                                                                       Accel::Intersectors* __restrict__ This,
                                                                                                       RayK<K>& __restrict__ ray,
