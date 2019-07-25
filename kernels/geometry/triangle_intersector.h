@@ -31,12 +31,7 @@ namespace embree
       const vfloat<M> U = dot(Vec3vf<M>(tri.e2), R) ^ sgnDen;
       const vfloat<M> V = dot(Vec3vf<M>(tri.e1), R) ^ sgnDen;
 
-        /* perform backface culling */
-#if defined(EMBREE_BACKFACE_CULLING)
-      vbool<M> valid = (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#else
       vbool<M> valid = (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#endif
       if (likely(none(valid)))
         return false;
 
@@ -74,13 +69,8 @@ namespace embree
       const vfloat<M> V = dot(R,Vec3vf<M>(tri.e1)) ^ sgnDen;
 
         /* perform backface culling */
-#if defined(EMBREE_BACKFACE_CULLING)
-      valid &= (den < vfloat<M>(zero)) &
-        (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#else
       valid &= (den != vfloat<M>(zero)) &
         (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#endif
       if (likely(none(valid)))
         return false;
 
@@ -142,16 +132,9 @@ namespace embree
       if (unlikely(none(valid)))
         return;
 
-      /* perform backface culling */
-#if defined(EMBREE_BACKFACE_CULLING)
-      valid &= den < vfloat<K>(zero);
-      if (unlikely(none(valid)))
-        return;
-#else
       valid &= den != vfloat<K>(zero);
       if (unlikely(none(valid)))
         return;
-#endif
 
       /* calculate hit information */
       MoellerTrumboreHitK<K> hit(U, V, T, absDen, tri_Ng);
@@ -229,16 +212,9 @@ namespace embree
       if (unlikely(none(valid)))
         return;
 
-        /* perform backface culling */
-#if defined(EMBREE_BACKFACE_CULLING)
-      valid &= den < vfloat<K>(zero);
-      if (unlikely(none(valid)))
-        return;
-#else
       valid &= den != vfloat<K>(zero);
       if (unlikely(none(valid)))
         return;
-#endif
 
       /* calculate hit information */
       MoellerTrumboreHitK<K> hit(U, V, T, absDen, tri_Ng);

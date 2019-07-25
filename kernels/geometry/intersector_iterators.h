@@ -131,7 +131,14 @@ namespace embree
       typedef typename IntersectorK::Primitive PrimitiveK;
       typedef typename IntersectorK::Precalculations PrecalculationsK;
 
-      static __forceinline void intersectK(const vbool<K>& valid, const Accel::Intersectors* This, /* PrecalculationsK& pre, */ RayHitK<K>& ray, IntersectContext* context, const PrimitiveK* prim, size_t num, size_t& lazy_node)
+      static __forceinline void
+      intersectK(const vbool<K>& valid,
+                 const Accel::Intersectors* This,
+                 /* PrecalculationsK& pre, */ RayHitK<K>& ray,
+                 IntersectContext* context,
+                 const PrimitiveK* prim,
+                 size_t num,
+                 size_t& lazy_node)
       {
         PrecalculationsK pre(valid,ray); // FIXME: might cause trouble
 
@@ -159,7 +166,14 @@ namespace embree
         }
       }
 
-      static __forceinline bool occluded(const Accel::Intersectors* This, RayK<K>& ray, size_t k, IntersectContext* context, const PrimitiveK* prim, size_t num, size_t& lazy_node)
+      static __forceinline bool
+      occluded(const Accel::Intersectors* This,
+               RayK<K>& ray,
+               size_t k,
+               IntersectContext* context,
+               const PrimitiveK* prim,
+               size_t num,
+               size_t& lazy_node)
       {
         PrecalculationsK pre(ray.tnear() <= ray.tfar,ray); // FIXME: might cause trouble
         for (size_t i=0; i<num; i++) {
