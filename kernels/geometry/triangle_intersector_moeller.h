@@ -114,49 +114,6 @@ namespace embree
                                   const RayK<K>& ray)
       {
       }
-
-      /*! Intersect k'th ray from ray packet of size K with M triangles. */
-      __forceinline bool
-      intersectEdge(RayK<K>& ray,
-                    size_t k,
-                    const TriangleM<M>& tri,
-                    MoellerTrumboreHitM<M>& hit) const
-      {
-        /* calculate denominator */
-        typedef Vec3vf<M> Vec3vfM;
-        const Vec3vf<M> tri_Ng = cross(tri.e2,tri.e1);
-
-        const Vec3vfM O = broadcast<vfloat<M>>(ray.org,k);
-        const Vec3vfM D = broadcast<vfloat<M>>(ray.dir,k);
-        const Vec3vfM C = Vec3vfM(tri.v0) - O;
-        const Vec3vfM R = cross(C,D);
-        const vfloat<M> den = dot(Vec3vfM(tri_Ng),D);
-        const vfloat<M> absDen = abs(den);
-        const vfloat<M> sgnDen = signmsk(den);
-
-        /* perform edge tests */
-        const vfloat<M> U = dot(Vec3vf<M>(tri.e2),R) ^ sgnDen;
-        const vfloat<M> V = dot(Vec3vf<M>(tri.e1),R) ^ sgnDen;
-
-        /* perform backface culling */
-#if defined(EMBREE_BACKFACE_CULLING)
-        vbool<M> valid = (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#else
-        vbool<M> valid = (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-#endif
-        if (likely(none(valid)))
-          return false;
-
-        /* perform depth test */
-        const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
-        valid &= (absDen*vfloat<M>(ray.tnear()[k]) < T) & (T <= absDen*vfloat<M>(ray.tfar[k]));
-        if (likely(none(valid)))
-          return false;
-
-        /* calculate hit information */
-        new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
-        return true;
-      }
     };
   }
 }

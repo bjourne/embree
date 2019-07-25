@@ -1,19 +1,3 @@
-// ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
-
 #pragma once
 
 #include "triangle.h"
@@ -23,6 +7,49 @@ namespace embree
 {
   namespace isa
   {
+    /*! Intersect k'th ray from ray packet of size K with M triangles. */
+    template<int M, int K>
+    static __forceinline bool
+    intersectKthRayMTris(RayK<K>& ray,
+                         size_t k,
+                         const TriangleM<M>& tri,
+                         MoellerTrumboreHitM<M>& hit)
+    {
+      printf("is here?\n");
+      /* calculate denominator */
+      const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
+
+      const Vec3vf<M> O = broadcast<vfloat<M>>(ray.org, k);
+      const Vec3vf<M> D = broadcast<vfloat<M>>(ray.dir, k);
+      const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
+      const Vec3vf<M> R = cross(C,D);
+      const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
+      const vfloat<M> absDen = abs(den);
+      const vfloat<M> sgnDen = signmsk(den);
+
+      /* perform edge tests */
+      const vfloat<M> U = dot(Vec3vf<M>(tri.e2), R) ^ sgnDen;
+      const vfloat<M> V = dot(Vec3vf<M>(tri.e1), R) ^ sgnDen;
+
+        /* perform backface culling */
+#if defined(EMBREE_BACKFACE_CULLING)
+      vbool<M> valid = (den < vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+#else
+      vbool<M> valid = (den != vfloat<M>(zero)) & (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+#endif
+      if (likely(none(valid)))
+        return false;
+
+      /* perform depth test */
+      const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
+      valid &= (absDen*vfloat<M>(ray.tnear()[k]) < T) & (T <= absDen*vfloat<M>(ray.tfar[k]));
+      if (likely(none(valid)))
+        return false;
+
+      /* calculate hit information */
+      new (&hit) MoellerTrumboreHitM<M>(valid,U,V,T,absDen,tri_Ng);
+      return true;
+    }
 
     /*! Intersect 1 ray with one of M triangles. */
     template<int M>
@@ -201,7 +228,7 @@ namespace embree
       if (Mx > M)
         valid &= (1<<M)-1;
       hit.finalize();
-      size_t i = select_min(valid,hit.vt);
+      size_t i = select_min(valid, hit.vt);
       unsigned int geomID = tri.geomIDs[i];
 
       /* intersection filter test */
@@ -262,6 +289,7 @@ namespace embree
     }
 
     /*! Intersects M triangles with 1 ray */
+    // Note: Need to check again that filter is always true.
     template<int M, int Mx>
     struct TriangleMIntersector1Moeller
     {
@@ -339,18 +367,20 @@ namespace embree
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::intersect (a ray) %d\n", filter);
+        printf("TriangleMIntersectorKMoeller::intersect (a ray) %d\n",
+               filter);
         STAT3(normal.trav_prims,1,1,1);
-
         MoellerTrumboreHitM<M> hit;
-        if (likely(pre.intersectEdge(ray, k, tri, hit))) {
+
+        if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
           Intersect1KEpilogM<M,Mx,K,filter> epi =
             Intersect1KEpilogM<M,Mx,K,filter>(ray,k,context,tri);
           epi(hit.valid, hit);
         }
       }
 
-      /*! Test for K rays if they are occluded by any of the M triangles. */
+      /*! Test for K rays if they are occluded by any of the M
+      triangles. */
       static __forceinline vbool<K>
       occluded(const vbool<K>& valid_i,
                Precalculations& pre,
@@ -379,6 +409,7 @@ namespace embree
       }
 
       /*! Test if the ray is occluded by one of the M triangles. */
+      // Todo: is this function ever called?
       static __forceinline bool
       occluded(MoellerTrumboreIntersectorK<Mx,K>& pre,
                RayK<K>& ray,
@@ -386,10 +417,12 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
+        printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
         STAT3(shadow.trav_prims,1,1,1);
         MoellerTrumboreHitM<M> hit;
-        if (likely(pre.intersectEdge(ray, k, tri, hit))) {
+
+        // todo: why does specifying <M,K> break?
+        if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
           Occluded1KEpilogM<M, Mx, K, filter> epi =
             Occluded1KEpilogM<M,Mx,K,filter>(ray, k, context, tri);
           return epi(hit.valid, hit);
