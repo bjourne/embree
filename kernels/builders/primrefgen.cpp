@@ -26,7 +26,7 @@ namespace embree
     PrimInfo createPrimRefArray(Geometry* geometry, mvector<PrimRef>& prims, BuildProgressMonitor& progressMonitor)
     {
       ParallelPrefixSumState<PrimInfo> pstate;
-      
+
       /* first try */
       progressMonitor(0);
       PrimInfo pinfo = parallel_prefix_sum( pstate, size_t(0), geometry->size(), size_t(1024), PrimInfo(empty), [&](const range<size_t>& r, const PrimInfo& base) -> PrimInfo {
@@ -48,14 +48,14 @@ namespace embree
     {
       ParallelForForPrefixSumState<PrimInfo> pstate;
       Scene::Iterator2 iter(scene,types,mblur);
-      
+
       /* first try */
       progressMonitor(0);
       pstate.init(iter,size_t(1024));
       PrimInfo pinfo = parallel_for_for_prefix_sum0( pstate, iter, PrimInfo(empty), [&](Geometry* mesh, const range<size_t>& r, size_t k) -> PrimInfo {
           return mesh->createPrimRefArray(prims,r,k);
         }, [](const PrimInfo& a, const PrimInfo& b) -> PrimInfo { return PrimInfo::merge(a,b); });
-      
+
       /* if we need to filter out geometry, run again */
       if (pinfo.size() != prims.size())
       {
@@ -67,55 +67,6 @@ namespace embree
       return pinfo;
     }
 
-    PrimInfo createPrimRefArrayMBlur(Scene* scene, Geometry::GTypeMask types, mvector<PrimRef>& prims, BuildProgressMonitor& progressMonitor, size_t itime)
-    {
-      ParallelForForPrefixSumState<PrimInfo> pstate;
-      Scene::Iterator2 iter(scene,types,true);
-      
-      /* first try */
-      progressMonitor(0);
-      pstate.init(iter,size_t(1024));
-      PrimInfo pinfo = parallel_for_for_prefix_sum0( pstate, iter, PrimInfo(empty), [&](Geometry* mesh, const range<size_t>& r, size_t k) -> PrimInfo {
-          return mesh->createPrimRefArrayMB(prims,itime,r,k);
-        }, [](const PrimInfo& a, const PrimInfo& b) -> PrimInfo { return PrimInfo::merge(a,b); });
-      
-      /* if we need to filter out geometry, run again */
-      if (pinfo.size() != prims.size())
-      {
-        progressMonitor(0);
-        pinfo = parallel_for_for_prefix_sum1( pstate, iter, PrimInfo(empty), [&](Geometry* mesh, const range<size_t>& r, size_t k, const PrimInfo& base) -> PrimInfo {
-            return mesh->createPrimRefArrayMB(prims,itime,r,base.size());
-          }, [](const PrimInfo& a, const PrimInfo& b) -> PrimInfo { return PrimInfo::merge(a,b); });
-      }
-      return pinfo;
-    }
-
-    PrimInfoMB createPrimRefArrayMSMBlur(Scene* scene, Geometry::GTypeMask types, mvector<PrimRefMB>& prims, BuildProgressMonitor& progressMonitor, BBox1f t0t1)
-    {
-      ParallelForForPrefixSumState<PrimInfoMB> pstate;
-      Scene::Iterator2 iter(scene,types,true);
-      
-      /* first try */
-      progressMonitor(0);
-      pstate.init(iter,size_t(1024));
-      PrimInfoMB pinfo = parallel_for_for_prefix_sum0( pstate, iter, PrimInfoMB(empty), [&](Geometry* mesh, const range<size_t>& r, size_t k) -> PrimInfoMB {
-          return mesh->createPrimRefMBArray(prims,t0t1,r,k);
-      }, [](const PrimInfoMB& a, const PrimInfoMB& b) -> PrimInfoMB { return PrimInfoMB::merge2(a,b); });
-      
-      /* if we need to filter out geometry, run again */
-      if (pinfo.size() != prims.size())
-      {
-        progressMonitor(0);
-        pinfo = parallel_for_for_prefix_sum1( pstate, iter, PrimInfoMB(empty), [&](Geometry* mesh, const range<size_t>& r, size_t k, const PrimInfoMB& base) -> PrimInfoMB {
-            return mesh->createPrimRefMBArray(prims,t0t1,r,base.size());
-        }, [](const PrimInfoMB& a, const PrimInfoMB& b) -> PrimInfoMB { return PrimInfoMB::merge2(a,b); });
-      }
-
-      /* the BVH starts with that time range, even though primitives might have smaller/larger time range */
-      pinfo.time_range = t0t1;
-      return pinfo;
-    }
-
     template<typename Mesh>
     size_t createMortonCodeArray(Mesh* mesh, mvector<BVHBuilderMorton::BuildPrim>& morton, BuildProgressMonitor& progressMonitor)
     {
@@ -123,12 +74,12 @@ namespace embree
 
       /* compute scene bounds */
       std::pair<size_t,BBox3fa> cb_empty(0,empty);
-      auto cb = parallel_reduce 
+      auto cb = parallel_reduce
         ( size_t(0), numPrimitives, size_t(1024), cb_empty, [&](const range<size_t>& r) -> std::pair<size_t,BBox3fa>
           {
             size_t num = 0;
             BBox3fa bounds = empty;
-            
+
             for (size_t j=r.begin(); j<r.end(); j++)
             {
               BBox3fa prim_bounds = empty;
@@ -138,13 +89,13 @@ namespace embree
             }
             return std::make_pair(num,bounds);
           }, [] (const std::pair<size_t,BBox3fa>& a, const std::pair<size_t,BBox3fa>& b) {
-          return std::make_pair(a.first + b.first,merge(a.second,b.second)); 
+          return std::make_pair(a.first + b.first,merge(a.second,b.second));
         });
-      
-      
+
+
       size_t numPrimitivesGen = cb.first;
       const BBox3fa centBounds = cb.second;
-      
+
       /* compute morton codes */
       if (likely(numPrimitivesGen == numPrimitives))
       {
@@ -173,7 +124,7 @@ namespace embree
             }
             return num;
           }, std::plus<size_t>());
-        
+
         parallel_prefix_sum( pstate, size_t(0), numPrimitives, size_t(1024), size_t(0), [&](const range<size_t>& r, const size_t base) -> size_t {
             size_t num = 0;
             BVHBuilderMorton::MortonCodeGenerator generator(mapping,&morton.data()[base]);
@@ -185,7 +136,7 @@ namespace embree
               num++;
             }
             return num;
-          }, std::plus<size_t>());          
+          }, std::plus<size_t>());
       }
       return numPrimitivesGen;
     }
@@ -203,7 +154,7 @@ namespace embree
       PING;
       ParallelForForPrefixSumState<PrimInfo> pstate;
       Scene::Iterator<GridMesh,false> iter(scene);
-      
+
       /* first try */
       progressMonitor(0);
       pstate.init(iter,size_t(1024));
@@ -220,7 +171,7 @@ namespace embree
         }
         return pinfo;
       }, [](const PrimInfo& a, const PrimInfo& b) -> PrimInfo { return PrimInfo::merge(a,b); });
-      
+
       /* if we need to filter out geometry, run again */
       if (pinfo.size() != prims.size())
       {

@@ -18,9 +18,8 @@
 #include "bvh_statistics.h"
 
 #include "../geometry/triangle.h"
-#include "../geometry/trianglev.h"
-#include "../geometry/trianglei.h"
-#include "../geometry/object.h"
+#include "../../common/algorithms/parallel_for.h"
+
 
 namespace embree
 {
@@ -204,20 +203,12 @@ namespace embree
 
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
     Builder* BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
-    Builder* BVH4Triangle4vMeshBuilderSAH (void* bvh, TriangleMesh* mesh, size_t mode);
-    Builder* BVH4Triangle4iMeshBuilderSAH (void* bvh, TriangleMesh* mesh, size_t mode);
 
     Builder* BVH4Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4> ((BVH4*)accel,BVH4Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
-    Builder* BVH4Triangle4vMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4v>((BVH4*)accel,BVH4Triangle4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
-    Builder* BVH4Triangle4iMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<4,TriangleMesh,Triangle4i>((BVH4*)accel,BVH4Triangle4iMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
 #if  defined(__AVX__)
     Builder* BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode);
-    Builder* BVH8Triangle4vMeshBuilderSAH (void* bvh, TriangleMesh* mesh, size_t mode);
-    Builder* BVH8Triangle4iMeshBuilderSAH (void* bvh, TriangleMesh* mesh, size_t mode);
 
     Builder* BVH8Triangle4MeshRefitSAH  (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4> ((BVH8*)accel,BVH8Triangle4MeshBuilderSAH (accel,mesh,mode),mesh,mode); }
-    Builder* BVH8Triangle4vMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4v>((BVH8*)accel,BVH8Triangle4vMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
-    Builder* BVH8Triangle4iMeshRefitSAH (void* accel, TriangleMesh* mesh, size_t mode) { return new BVHNRefitT<8,TriangleMesh,Triangle4i>((BVH8*)accel,BVH8Triangle4iMeshBuilderSAH(accel,mesh,mode),mesh,mode); }
 #endif
 #endif
 

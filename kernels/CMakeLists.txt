@@ -46,15 +46,12 @@ SET(EMBREE_LIBRARY_FILES
   common/alloc.cpp
   common/geometry.cpp
   common/scene_user_geometry.cpp
-  common/scene_instance.cpp
   common/scene_triangle_mesh.cpp
-  common/scene_quad_mesh.cpp
   common/scene_line_segments.cpp
   common/scene_grid_mesh.cpp
   common/scene_points.cpp
 
   geometry/primitive4.cpp
-  geometry/instance_intersector.cpp
   builders/primrefgen.cpp
 
   bvh/bvh.cpp
@@ -95,7 +92,6 @@ ENDIF()
 MACRO(embree_files TARGET ISA)
 
   SET(${TARGET}
-    geometry/instance_intersector.cpp
     bvh/bvh_intersector1_bvh4.cpp)
 
   IF (${ISA} EQUAL ${ISA_LOWEST_AVX})
@@ -106,9 +102,7 @@ MACRO(embree_files TARGET ISA)
 
     LIST(APPEND ${TARGET}
       common/scene_user_geometry.cpp
-      common/scene_instance.cpp
       common/scene_triangle_mesh.cpp
-      common/scene_quad_mesh.cpp
       common/scene_line_segments.cpp
       common/scene_grid_mesh.cpp
       common/scene_points.cpp
