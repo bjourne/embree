@@ -18,6 +18,16 @@
 
 #include "primitive.h"
 
+// 9.4 mrays, 25% mem
+#define ISECT_EMBREE    0
+
+// 9.4 mrays, 30% mem
+#define ISECT_HH        1
+
+#define ISECT_METHOD ISECT_EMBREE
+
+
+
 namespace embree
 {
   /* Precalculated representation for M triangles. Stores for each
@@ -60,11 +70,26 @@ namespace embree
         e1(v0-v1),
         e2(v2-v0),
         geomIDs(geomIDs),
-        primIDs(primIDs) {}
+        primIDs(primIDs)
+    {
+      #if ISECT_METHOD == ISECT_HH
+      Vec3<vfloat<M>> e1p = v1 - v0;
+      n0 = cross(e1p, e2);
+      d0 = dot(n0, v0);
+      vfloat<M> inv_denom = rcp(dot(n0, n0));
+      n1 = cross(e2, n0) * inv_denom;
+      d1 = -dot(n1, v0);
+      n2 = cross(n0, e1p) * inv_denom;
+      d2 = -dot(n2, v0);
+      #endif
+    }
 
     /* Returns a mask that tells which triangles are valid */
     __forceinline vbool<M>
-    valid() const { return geomIDs != vuint<M>(-1); }
+    valid() const
+    {
+      return geomIDs != vuint<M>(-1);
+    }
 
     /* Returns the number of stored triangles */
     __forceinline size_t size() const
@@ -117,6 +142,22 @@ namespace embree
       vfloat<M>::store_nt(&dst->e2.z,src.e2.z);
       vuint<M>::store_nt(&dst->geomIDs,src.geomIDs);
       vuint<M>::store_nt(&dst->primIDs,src.primIDs);
+
+      #if ISECT_METHOD == ISECT_HH
+      vfloat<M>::store_nt(&dst->n0.x, src.n0.x);
+      vfloat<M>::store_nt(&dst->n0.y, src.n0.y);
+      vfloat<M>::store_nt(&dst->n0.z, src.n0.z);
+      vfloat<M>::store_nt(&dst->n1.x, src.n1.x);
+      vfloat<M>::store_nt(&dst->n1.y, src.n1.y);
+      vfloat<M>::store_nt(&dst->n1.z, src.n1.z);
+      vfloat<M>::store_nt(&dst->n2.x, src.n2.x);
+      vfloat<M>::store_nt(&dst->n2.y, src.n2.y);
+      vfloat<M>::store_nt(&dst->n2.z, src.n2.z);
+
+      vfloat<M>::store_nt(&dst->d0, src.d0);
+      vfloat<M>::store_nt(&dst->d1, src.d1);
+      vfloat<M>::store_nt(&dst->d2, src.d2);
+      #endif
     }
 
     /* Fill triangle from triangle list */
@@ -133,16 +174,23 @@ namespace embree
         const PrimRef& prim = prims[begin];
         const unsigned geomID = prim.geomID();
         const unsigned primID = prim.primID();
-        const TriangleMesh* __restrict__ const mesh = scene->get<TriangleMesh>(geomID);
+        const TriangleMesh* __restrict__ const mesh =
+          scene->get<TriangleMesh>(geomID);
         const TriangleMesh::Triangle& tri = mesh->triangle(primID);
         const Vec3fa& p0 = mesh->vertex(tri.v[0]);
         const Vec3fa& p1 = mesh->vertex(tri.v[1]);
         const Vec3fa& p2 = mesh->vertex(tri.v[2]);
         vgeomID [i] = geomID;
         vprimID [i] = primID;
-        v0.x[i] = p0.x; v0.y[i] = p0.y; v0.z[i] = p0.z;
-        v1.x[i] = p1.x; v1.y[i] = p1.y; v1.z[i] = p1.z;
-        v2.x[i] = p2.x; v2.y[i] = p2.y; v2.z[i] = p2.z;
+        v0.x[i] = p0.x;
+        v0.y[i] = p0.y;
+        v0.z[i] = p0.z;
+        v1.x[i] = p1.x;
+        v1.y[i] = p1.y;
+        v1.z[i] = p1.z;
+        v2.x[i] = p2.x;
+        v2.y[i] = p2.y;
+        v2.z[i] = p2.z;
       }
       TriangleM::store_nt(this,TriangleM(v0,v1,v2,vgeomID,vprimID));
     }
@@ -151,9 +199,13 @@ namespace embree
     Vec3vf<M> v0;      // base vertex of the triangles
     Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
-  public:
-    vuint<M> geomIDs; // geometry IDs
-    vuint<M> primIDs; // primitive IDs
+    vuint<M> geomIDs;  // geometry IDs
+    vuint<M> primIDs;  // primitive IDs
+
+    #if ISECT_METHOD == ISECT_HH
+    Vec3vf<M> n0, n1, n2;
+    vfloat<M> d0, d1, d2;
+    #endif
   };
 
   template<int M>
