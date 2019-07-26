@@ -43,8 +43,6 @@ namespace embree
 
   DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
 
-  DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
-
   BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
   {
     printf("BVH4Factory::BVH4Factory\n");
@@ -62,8 +60,6 @@ namespace embree
 
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshBuilderSAH));
-    IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshRefitSAH));
-
   }
 
   void BVH4Factory::selectIntersectors(int features)
@@ -96,16 +92,25 @@ namespace embree
     assert(ivariant == IntersectVariant::FAST);
     Accel::Intersectors intersectors;
     intersectors.ptr = bvh;
-    intersectors.intersector1           = BVH4Triangle4Intersector1Moeller();
+    intersectors.intersector1           =
+      BVH4Triangle4Intersector1Moeller();
 #if defined (EMBREE_RAY_PACKETS)
-    intersectors.intersector4_filter    = BVH4Triangle4Intersector4HybridMoeller();
-    intersectors.intersector4_nofilter  = BVH4Triangle4Intersector4HybridMoellerNoFilter();
-    intersectors.intersector8_filter    = BVH4Triangle4Intersector8HybridMoeller();
-    intersectors.intersector8_nofilter  = BVH4Triangle4Intersector8HybridMoellerNoFilter();
-    intersectors.intersector16_filter   = BVH4Triangle4Intersector16HybridMoeller();
-    intersectors.intersector16_nofilter = BVH4Triangle4Intersector16HybridMoellerNoFilter();
-    intersectors.intersectorN_filter    = BVH4Triangle4IntersectorStreamMoeller();
-    intersectors.intersectorN_nofilter  = BVH4Triangle4IntersectorStreamMoellerNoFilter();
+    intersectors.intersector4_filter =
+      BVH4Triangle4Intersector4HybridMoeller();
+    intersectors.intersector4_nofilter =
+      BVH4Triangle4Intersector4HybridMoellerNoFilter();
+    intersectors.intersector8_filter    =
+      BVH4Triangle4Intersector8HybridMoeller();
+    intersectors.intersector8_nofilter  =
+      BVH4Triangle4Intersector8HybridMoellerNoFilter();
+    intersectors.intersector16_filter   =
+      BVH4Triangle4Intersector16HybridMoeller();
+    intersectors.intersector16_nofilter =
+      BVH4Triangle4Intersector16HybridMoellerNoFilter();
+    intersectors.intersectorN_filter    =
+      BVH4Triangle4IntersectorStreamMoeller();
+    intersectors.intersectorN_nofilter  =
+      BVH4Triangle4IntersectorStreamMoellerNoFilter();
 #endif
     return intersectors;
   }
@@ -115,15 +120,14 @@ namespace embree
                                            AccelData*& accel,
                                            Builder*& builder)
   {
+    printf("BVH4Factory::createTriangleMeshTriangle4 "
+           "mesh->quality = %d\n", mesh->quality);
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
     accel = new BVH4(Triangle4::type,mesh->scene);
     switch (mesh->quality) {
     case RTC_BUILD_QUALITY_MEDIUM:
     case RTC_BUILD_QUALITY_HIGH:
       builder = factory->BVH4Triangle4MeshBuilderSAH(accel,mesh,0);
-      break;
-    case RTC_BUILD_QUALITY_REFIT:
-      builder = factory->BVH4Triangle4MeshRefitSAH(accel,mesh,0);
       break;
     default:
       throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");

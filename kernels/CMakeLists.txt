@@ -56,7 +56,6 @@ SET(EMBREE_LIBRARY_FILES
   bvh/bvh8_factory.cpp
 
   bvh/bvh_rotate.cpp
-  bvh/bvh_refit.cpp
   bvh/bvh_builder.cpp
   bvh/bvh_builder_morton.cpp
   bvh/bvh_builder_sah.cpp
@@ -88,7 +87,6 @@ MACRO(embree_files TARGET ISA)
     LIST(APPEND ${TARGET}
       common/scene_triangle_mesh.cpp
 
-      bvh/bvh_refit.cpp
       bvh/bvh_builder.cpp
       bvh/bvh_builder_sah.cpp
       bvh/bvh_builder_sah_spatial.cpp

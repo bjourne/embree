@@ -51,8 +51,6 @@ namespace embree
 
   DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
 
-  DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshRefitSAH,void* COMMA TriangleMesh* COMMA size_t);
-
   BVH8Factory::BVH8Factory(int bfeatures, int ifeatures)
   {
     selectBuilders(bfeatures);
@@ -73,7 +71,7 @@ namespace embree
 
     IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4MeshBuilderSAH));
 
-    IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4MeshRefitSAH));
+    //IF_ENABLED_TRIS(SELECT_SYMBOL_INIT_AVX_AVX512KNL(features,BVH8Triangle4MeshRefitSAH));
 
   }
 
@@ -105,14 +103,14 @@ namespace embree
 
   void BVH8Factory::createTriangleMeshTriangle4(TriangleMesh* mesh, AccelData*& accel, Builder*& builder)
   {
+    printf("BVH8Factory::createTriangleMeshTriangle4 "
+           "mesh->quality = %d\n", mesh->quality);
     BVH8Factory* factory = mesh->scene->device->bvh8_factory.get();
     accel = new BVH8(Triangle4::type,mesh->scene);
     switch (mesh->quality) {
     case RTC_BUILD_QUALITY_MEDIUM:
     case RTC_BUILD_QUALITY_HIGH:
       builder = factory->BVH8Triangle4MeshBuilderSAH(accel,mesh,0); break;
-    case RTC_BUILD_QUALITY_REFIT:
-      builder = factory->BVH8Triangle4MeshRefitSAH(accel,mesh,0); break;
     default:
       throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
     }
