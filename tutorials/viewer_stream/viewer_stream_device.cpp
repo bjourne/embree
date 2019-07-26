@@ -39,7 +39,11 @@ RTCScene g_scene = nullptr;
 #define MIN_EDGE_LEVEL  4.0f
 #define LEVEL_FACTOR   64.0f
 
-inline float updateEdgeLevel( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, const unsigned int e0, const unsigned int e1)
+inline float
+updateEdgeLevel(ISPCSubdivMesh* mesh,
+                const Vec3fa& cam_pos,
+                const unsigned int e0,
+                const unsigned int e1)
 {
   const Vec3fa v0 = mesh->positions[0][mesh->position_indices[e0]];
   const Vec3fa v1 = mesh->positions[0][mesh->position_indices[e1]];
@@ -50,7 +54,11 @@ inline float updateEdgeLevel( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, const
 }
 
 
-void updateEdgeLevelBuffer( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, unsigned int startID, unsigned int endID )
+void
+updateEdgeLevelBuffer(ISPCSubdivMesh* mesh,
+                      const Vec3fa& cam_pos,
+                      unsigned int startID,
+                      unsigned int endID )
 {
   for (unsigned int f=startID; f<endID;f++) {
     unsigned int e = mesh->face_offsets[f];
@@ -201,7 +209,11 @@ Vec3fa ambientOcclusionShading(int x, int y, Ray& ray, RayStats& stats)
 }
 
 
-void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometry* geometry, int& materialID)
+void
+postIntersectGeometry(const Ray& ray,
+                      DifferentialGeometry& dg,
+                      ISPCGeometry* geometry,
+                      int& materialID)
 {
   if (geometry->type == TRIANGLE_MESH)
   {
@@ -330,42 +342,42 @@ renderTileStandard(int taskIndex,
 
   /* shade stream of rays */
   N = 0;
-  for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
-  {
-    /* ISPC workaround for mask == 0 */
+  for (unsigned int y=y0; y<y1; y++)
+    for (unsigned int x=x0; x<x1; x++) {
+      /* ISPC workaround for mask == 0 */
 
-    Ray& ray = rays[N++];
+      Ray& ray = rays[N++];
 
-    /* eyelight shading */
-    Vec3fa color = Vec3fa(0.0f);
-    if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
+      /* eyelight shading */
+      Vec3fa color = Vec3fa(0.0f);
+      if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
 #if SIMPLE_SHADING == 1
-    {
+      {
 #if OBJ_MATERIAL == 1
-      Vec3fa Kd = Vec3fa(0.5f);
-      DifferentialGeometry dg;
-      dg.geomID = ray.geomID;
-      dg.primID = ray.primID;
-      dg.u = ray.u;
-      dg.v = ray.v;
-      dg.P  = ray.org+ray.tfar*ray.dir;
-      dg.Ng = ray.Ng;
-      dg.Ns = ray.Ng;
-      int materialID = postIntersect(ray,dg);
-      dg.Ng = face_forward(ray.dir,normalize(dg.Ng));
-      dg.Ns = face_forward(ray.dir,normalize(dg.Ns));
+        Vec3fa Kd = Vec3fa(0.5f);
+        DifferentialGeometry dg;
+        dg.geomID = ray.geomID;
+        dg.primID = ray.primID;
+        dg.u = ray.u;
+        dg.v = ray.v;
+        dg.P  = ray.org+ray.tfar*ray.dir;
+        dg.Ng = ray.Ng;
+        dg.Ns = ray.Ng;
+        int materialID = postIntersect(ray,dg);
+        dg.Ng = face_forward(ray.dir,normalize(dg.Ng));
+        dg.Ns = face_forward(ray.dir,normalize(dg.Ns));
 
-      /* shade */
-      if (g_ispc_scene->materials[materialID]->type == MATERIAL_OBJ) {
-        ISPCOBJMaterial* material = (ISPCOBJMaterial*) g_ispc_scene->materials[materialID];
-        Kd = Vec3fa(material->Kd);
-      }
+        /* shade */
+        if (g_ispc_scene->materials[materialID]->type == MATERIAL_OBJ) {
+          ISPCOBJMaterial* material = (ISPCOBJMaterial*) g_ispc_scene->materials[materialID];
+          Kd = Vec3fa(material->Kd);
+        }
 
-      color = Kd*dot(neg(ray.dir),dg.Ns);
+        color = Kd*dot(neg(ray.dir),dg.Ns);
 #else
-      color = Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))));
+        color = Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))));
 #endif
-    }
+      }
 #else
       color = ambientOcclusionShading(x,y,ray,g_stats[threadIndex]);
 #endif
@@ -379,13 +391,16 @@ renderTileStandard(int taskIndex,
 }
 
 /* task that renders a single screen tile */
-void renderTileTask (int taskIndex, int threadIndex, int* pixels,
-                         const unsigned int width,
-                         const unsigned int height,
-                         const float time,
-                         const ISPCCamera& camera,
-                         const int numTilesX,
-                         const int numTilesY)
+void
+renderTileTask (int taskIndex,
+                int threadIndex,
+                int* pixels,
+                const unsigned int width,
+                const unsigned int height,
+                const float time,
+                const ISPCCamera& camera,
+                const int numTilesX,
+                const int numTilesY)
 {
   renderTile(taskIndex,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
 }

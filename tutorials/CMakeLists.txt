@@ -63,7 +63,6 @@ ADD_SUBDIRECTORY(viewer)
 ADD_SUBDIRECTORY(intersection_filter)
 ADD_SUBDIRECTORY(pathtracer)
 ADD_SUBDIRECTORY(bvh_builder)
-ADD_SUBDIRECTORY(interpolation)
 ADD_SUBDIRECTORY(convert)
 ADD_SUBDIRECTORY(buildbench)
 
