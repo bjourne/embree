@@ -94,9 +94,6 @@ MACRO(embree_files TARGET ISA)
       bvh/bvh_builder_sah_spatial.cpp
       bvh/bvh_builder_twolevel.cpp)
 
-    IF (EMBREE_GEOMETRY_SUBDIVISION)
-      LIST(APPEND ${TARGET} bvh/bvh_builder_subdiv.cpp)
-    ENDIF()
   ENDIF()
 
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA_LOWEST} EQUAL ${ISA})
