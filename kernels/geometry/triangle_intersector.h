@@ -94,32 +94,32 @@ namespace embree
                         const TriangleM<M>& tri)
     {
       // Do broadcasting and cross prod.
-      Vec3<vfloat<K>> p0 = broadcast<vfloat<K>>(tri.v0, i);
+      Vec3<vfloat<K>> v0 = broadcast<vfloat<K>>(tri.v0, i);
       Vec3<vfloat<K>> e1 = broadcast<vfloat<K>>(tri.e1, i);
       Vec3<vfloat<K>> e2 = broadcast<vfloat<K>>(tri.e2, i);
       Vec3<vfloat<K>> tri_Ng = cross(e2, e1);
 
       /* calculate denominator */
       vbool<K> valid = valid0;
-      const Vec3vf<K> C = p0 - ray.org;
+      const Vec3vf<K> C = v0 - ray.org;
       const Vec3vf<K> R = cross(C, ray.dir);
       const vfloat<K> den = dot(tri_Ng, ray.dir);
       const vfloat<K> absDen = abs(den);
       const vfloat<K> sgnDen = signmsk(den);
 
-      /* test against edge p2 p0 */
+      /* test against edge e2 v0 */
       const vfloat<K> U = dot(e2, R) ^ sgnDen;
       valid &= U >= 0.0f;
       if (likely(none(valid)))
         return false;
 
-      /* test against edge p0 p1 */
+      /* test against edge v0 e1 */
       const vfloat<K> V = dot(e1, R) ^ sgnDen;
       valid &= V >= 0.0f;
       if (likely(none(valid)))
         return false;
 
-      /* test against edge p1 p2 */
+      /* test against edge e1 e2 */
       const vfloat<K> W = absDen-U-V;
       valid &= W >= 0.0f;
       if (likely(none(valid)))
@@ -587,6 +587,7 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
+        //printf("TriangleMIntersector1Moeller::occluded\n");
         STAT3(shadow.trav_prims, 1, 1, 1);
         MTHitM<M> hit;
         vbool<M> valid = true;
@@ -612,6 +613,7 @@ namespace embree
                      IntersectContext* context,
                      const TriangleM<M>& tri)
       {
+        //printf("TriangleMIntersectorKMoeller::intersect %d (packet)\n", filter);
         STAT_USER(0, TriangleM<M>::max_size());
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
         {
@@ -627,7 +629,8 @@ namespace embree
         }
       }
 
-      /*! Intersect a ray with M triangles and updates the hit. */
+      /* Intersect the kth ray with M triangles and updates the
+      hit. */
       static __forceinline void
       intersect(MoellerTrumboreIntersectorK<Mx,K>& pre,
                 RayHitK<K>& ray,
@@ -635,8 +638,7 @@ namespace embree
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
-        // printf("TriangleMIntersectorKMoeller::intersect (a ray) %d\n",
-        //        filter);
+        //printf("TriangleMIntersectorKMoeller::intersect %d (one ray)\n", filter);
         STAT3(normal.trav_prims,1,1,1);
         MTHitM<M> hit;
         if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
@@ -646,7 +648,7 @@ namespace embree
       }
 
       /*! Test for K rays if they are occluded by any of the M
-      triangles. */
+      triangles. When is this code run? */
       static __forceinline vbool<K>
       occluded(const vbool<K>& valid_i,
                Precalculations& pre,
@@ -654,6 +656,7 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
+        //printf("TriangleMIntersectorKMoeller::occluded %d (packet)\n", filter);
         // For occlusion we make a copy...
         vbool<K> valid0 = valid_i;
 
@@ -681,7 +684,7 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::occluded %d\n", filter);
+        //printf("TriangleMIntersectorKMoeller::occluded %d (one ray)\n", filter);
         STAT3(shadow.trav_prims,1,1,1);
         MTHitM<M> hit;
         bool val = intersectKthRayMTris<M, K>(ray, k, tri, hit);
