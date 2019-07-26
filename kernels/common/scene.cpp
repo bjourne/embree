@@ -23,7 +23,12 @@
 namespace embree
 {
   /* error raising rtcIntersect and rtcOccluded functions */
-  void missing_rtcCommit()      { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed"); }
+  void missing_rtcCommit()
+  {
+    throw_RTCError(
+      RTC_ERROR_INVALID_OPERATION,
+      "scene got not committed");
+  }
   void invalid_rtcIntersect1()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect and rtcOccluded not enabled"); }
   void invalid_rtcIntersect4()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect4 and rtcOccluded4 not enabled"); }
   void invalid_rtcIntersect8()  { throw_RTCError(RTC_ERROR_INVALID_OPERATION,"rtcIntersect8 and rtcOccluded8 not enabled"); }
@@ -118,72 +123,28 @@ namespace embree
     }
   }
 
+  // device->tri_accel has to be default and only
+  // RTC_BUILD_QUALITY_MEDIUM is ok.
   void Scene::createTriangleAccel()
   {
-#if defined(EMBREE_GEOMETRY_TRIANGLE)
-    if (device->tri_accel == "default")
+    printf("Scene::createTriangleAccel device->tri_accel = %s\n",
+           device->tri_accel.c_str());
+#if defined (EMBREE_TARGET_SIMD8)
+    if (device->canUseAVX())
     {
-      if (quality_flags != RTC_BUILD_QUALITY_LOW)
-      {
-        int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-        switch (mode) {
-        case /*0b00*/ 0:
-#if defined (EMBREE_TARGET_SIMD8)
-          if (device->canUseAVX())
-	  {
-            if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-              accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-            else
-              accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
-          }
-          else
-#endif
-          {
-            if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-              accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-            else
-              accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
-          }
-          break;
-
-        case /*0b01*/ 1:
-        printf("not here!!!\n");
-// #if defined (EMBREE_TARGET_SIMD8)
-//           if (device->canUseAVX())
-//             accels_add(device->bvh8_factory->BVH8Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-//           else
-// #endif
-//             accels_add(device->bvh4_factory->BVH4Triangle4v(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::ROBUST));
-
-          break;
-        }
-      }
-      else /* dynamic */
-      {
-#if defined (EMBREE_TARGET_SIMD8)
-          if (device->canUseAVX())
-	  {
-            int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-            switch (mode) {
-            case /*0b00*/ 0: accels_add(device->bvh8_factory->BVH8Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-            }
-          }
-          else
-#endif
-          {
-            int mode =  2*(int)isCompactAccel() + 1*(int)isRobustAccel();
-            switch (mode) {
-            case /*0b00*/ 0: accels_add(device->bvh4_factory->BVH4Triangle4 (this,BVHFactory::BuildVariant::DYNAMIC,BVHFactory::IntersectVariant::FAST  )); break;
-            }
-          }
-      }
+      if (quality_flags == RTC_BUILD_QUALITY_HIGH)
+        accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
+      else
+        accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
     }
-    else if (device->tri_accel == "bvh4.triangle4")       accels_add(device->bvh4_factory->BVH4Triangle4 (this));
-#if defined (EMBREE_TARGET_SIMD8)
-    else if (device->tri_accel == "bvh8.triangle4")       accels_add(device->bvh8_factory->BVH8Triangle4 (this));
-    #endif
-    else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown triangle acceleration structure "+device->tri_accel);
+    else
 #endif
+    {
+      if (quality_flags == RTC_BUILD_QUALITY_HIGH)
+        accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
+      else
+        accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+    }
   }
 
   void Scene::clear() {

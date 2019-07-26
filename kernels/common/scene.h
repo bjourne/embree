@@ -233,7 +233,10 @@ namespace embree
     /* flag decoding */
     __forceinline bool isFastAccel() const { return !isCompactAccel() && !isRobustAccel(); }
     __forceinline bool isCompactAccel() const { return scene_flags & RTC_SCENE_FLAG_COMPACT; }
-    __forceinline bool isRobustAccel()  const { return scene_flags & RTC_SCENE_FLAG_ROBUST; }
+    __forceinline bool isRobustAccel()  const
+    {
+      return scene_flags & RTC_SCENE_FLAG_ROBUST;
+    }
     __forceinline bool isStaticAccel()  const { return !(scene_flags & RTC_SCENE_FLAG_DYNAMIC); }
     __forceinline bool isDynamicAccel() const { return scene_flags & RTC_SCENE_FLAG_DYNAMIC; }
 
