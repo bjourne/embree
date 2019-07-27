@@ -582,12 +582,10 @@ namespace embree
     struct TriangleMIntersector1Moeller
     {
       typedef TriangleM<M> Primitive;
-      typedef MoellerTrumboreIntersector1<Mx> Precalculations;
 
       /*! Intersect a ray with the M triangles and updates the hit. */
       static __forceinline void
-      intersect(const MoellerTrumboreIntersector1<Mx>& pre,
-                RayHit& ray,
+      intersect(RayHit& ray,
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
@@ -601,8 +599,7 @@ namespace embree
 
       /*! Test if the ray is occluded by one of M triangles. */
       static __forceinline bool
-      occluded(const MoellerTrumboreIntersector1<Mx>& pre,
-               Ray& ray,
+      occluded(Ray& ray,
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
@@ -622,12 +619,10 @@ namespace embree
     struct TriangleMIntersectorKMoeller
     {
       typedef TriangleM<M> Primitive;
-      typedef MoellerTrumboreIntersectorK<Mx,K> Precalculations;
 
       /*! Intersects K rays with M triangles. */
       static __forceinline
       void intersect(const vbool<K>& valid_i,
-                     MoellerTrumboreIntersectorK<Mx,K>& pre,
                      RayHitK<K>& ray,
                      IntersectContext* context,
                      const TriangleM<M>& tri)
@@ -651,8 +646,7 @@ namespace embree
       /* Intersect the kth ray with M triangles and updates the
       hit. */
       static __forceinline void
-      intersect(MoellerTrumboreIntersectorK<Mx,K>& pre,
-                RayHitK<K>& ray,
+      intersect(RayHitK<K>& ray,
                 size_t k,
                 IntersectContext* context,
                 const TriangleM<M>& tri)
@@ -670,7 +664,6 @@ namespace embree
       triangles. When is this code run? */
       static __forceinline vbool<K>
       occluded(const vbool<K>& valid_i,
-               Precalculations& pre,
                RayK<K>& ray,
                IntersectContext* context,
                const TriangleM<M>& tri)
@@ -697,8 +690,7 @@ namespace embree
 
       /*! Test if the ray is occluded by one of the M triangles. */
       static __forceinline bool
-      occluded(MoellerTrumboreIntersectorK<Mx,K>& pre,
-               RayK<K>& ray,
+      occluded(RayK<K>& ray,
                size_t k,
                IntersectContext* context,
                const TriangleM<M>& tri)

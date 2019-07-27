@@ -36,10 +36,6 @@ namespace embree
       if (bvh->root == BVH::emptyNode)
         return;
 
-      /* perform per ray precalculations required by the primitive
-      intersector */
-      Precalculations pre(ray, bvh);
-
       /* stack state */
       StackItemT<NodeRef> stack[stackSize];    // stack of nodes
       StackItemT<NodeRef>* stackPtr = stack+1; // current stack pointer
@@ -105,7 +101,7 @@ namespace embree
         STAT3(normal.trav_leaves,1,1,1);
         size_t num; Primitive* prim = (Primitive*)cur.leaf(num);
         size_t lazy_node = 0;
-        PrimitiveIntersector1::intersect(This, pre, ray, context, prim, num, tray, lazy_node);
+        PrimitiveIntersector1::intersect(This, ray, context, prim, num, tray, lazy_node);
         tray.tfar = ray.tfar;
 
         /* push lazy node onto stack */
@@ -131,9 +127,6 @@ namespace embree
       /* early out for already occluded rays */
       if (unlikely(ray.tfar < 0.0f))
         return;
-
-      /* perform per ray precalculations required by the primitive intersector */
-      Precalculations pre(ray, bvh);
 
       /* stack state */
       NodeRef stack[stackSize];    // stack of nodes that still need to get traversed
@@ -187,7 +180,7 @@ namespace embree
         STAT3(shadow.trav_leaves,1,1,1);
         size_t num; Primitive* prim = (Primitive*)cur.leaf(num);
         size_t lazy_node = 0;
-        if (PrimitiveIntersector1::occluded(This, pre, ray, context, prim, num, tray, lazy_node)) {
+        if (PrimitiveIntersector1::occluded(This,  ray, context, prim, num, tray, lazy_node)) {
           ray.tfar = neg_inf;
           break;
         }

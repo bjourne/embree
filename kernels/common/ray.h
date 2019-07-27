@@ -33,13 +33,19 @@ namespace embree
 
     /* Constructs a ray from origin, direction, and ray segment. Near
      * has to be smaller than far */
-    __forceinline RayK(const Vec3vf<K>& org, const Vec3vf<K>& dir,
-                       const vfloat<K>& tnear = zero, const vfloat<K>& tfar = inf,
-                       const vfloat<K>& time = zero, const vint<K>& mask = -1, const vint<K>& id = 0, const vint<K>& flags = 0)
-      : org(org), dir(dir), _tnear(tnear), tfar(tfar), _time(time), mask(mask), id(id), flags(flags) {}
+    __forceinline
+    RayK(const Vec3vf<K>& org, const Vec3vf<K>& dir,
+         const vfloat<K>& tnear = zero, const vfloat<K>& tfar = inf,
+         const vfloat<K>& time = zero, const vint<K>& mask = -1,
+         const vint<K>& id = 0, const vint<K>& flags = 0)
+      : org(org), dir(dir),
+        _tnear(tnear), tfar(tfar),
+        _time(time), mask(mask),
+        id(id), flags(flags) {}
 
     /* Returns the size of the ray */
-    static __forceinline size_t size()
+    static __forceinline size_t
+    size()
     {
       return K;
     }

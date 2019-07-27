@@ -28,7 +28,6 @@ namespace embree
     class BVHNIntersector1
     {
       /* shortcuts for frequently used types */
-      typedef typename PrimitiveIntersector1::Precalculations Precalculations;
       typedef typename PrimitiveIntersector1::Primitive Primitive;
       typedef BVHN<N> BVH;
       typedef typename BVH::NodeRef NodeRef;
