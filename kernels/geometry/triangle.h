@@ -37,22 +37,43 @@ namespace embree
   struct TriangleM
   {
   public:
-    struct Type : public PrimitiveType
-    {
-      const char* name() const;
-      size_t sizeActive(const char* This) const;
-      size_t sizeTotal(const char* This) const;
-      size_t getBytes(const char* This) const;
-    };
-    static Type type;
+    // struct Type : public PrimitiveType
+    // {
+    //   // M appears to always be 4.
+    //   const char* name() const
+    //   {
+    //     return "triangle4";
+    //   }
+    //   size_t sizeActive(const char* This) const
+    //   {
+    //     return ((TriangleM<4>*)This)->size();
+    //   }
+    //   size_t sizeTotal(const char* This) const
+    //   {
+    //     return 4;
+    //   }
+    //   size_t getBytes(const char* This) const
+    //   {
+    //     return sizeof(TriangleM<4>);
+    //   }
+    // };
+    // static Type type;
 
   public:
 
     /* Returns maximum number of stored triangles */
-    static __forceinline size_t max_size() { return M; }
+    static __forceinline size_t
+    max_size()
+    {
+      return M;
+    }
 
     /* Returns required number of primitive blocks for N primitives */
-    static __forceinline size_t blocks(size_t N) { return (N+max_size()-1)/max_size(); }
+    static __forceinline size_t
+    blocks(size_t N)
+    {
+      return (N+max_size()-1)/max_size();
+    }
 
   public:
 
@@ -99,13 +120,21 @@ namespace embree
 
     /* Returns the geometry IDs */
     __forceinline unsigned int
-    geomID(const size_t i) const { assert(i<M); return geomIDs[i]; }
+    geomID(const size_t i) const
+    {
+      assert(i<M); return geomIDs[i];
+    }
 
     /* Returns the primitive IDs */
-    __forceinline unsigned int primID(const size_t i) const { assert(i<M); return primIDs[i]; }
+    __forceinline unsigned int
+    primID(const size_t i) const
+    {
+      assert(i<M); return primIDs[i];
+    }
 
     /* Calculate the bounds of the triangle */
-    __forceinline BBox3fa bounds() const
+    __forceinline BBox3fa
+    bounds() const
     {
       Vec3vf<M> p0 = v0;
       Vec3vf<M> p1 = v0-e1;
@@ -161,10 +190,11 @@ namespace embree
     }
 
     /* Fill triangle from triangle list */
-    __forceinline void fill(const PrimRef* prims,
-                            size_t& begin,
-                            size_t end,
-                            Scene* scene)
+    __forceinline void
+    fill(const PrimRef* prims,
+         size_t& begin,
+         size_t end,
+         Scene* scene)
     {
       vuint<M> vgeomID = -1, vprimID = -1;
       Vec3vf<M> v0 = zero, v1 = zero, v2 = zero;
@@ -192,7 +222,7 @@ namespace embree
         v2.y[i] = p2.y;
         v2.z[i] = p2.z;
       }
-      TriangleM::store_nt(this,TriangleM(v0,v1,v2,vgeomID,vprimID));
+      TriangleM::store_nt(this, TriangleM(v0, v1, v2, vgeomID, vprimID));
     }
 
   public:
@@ -208,8 +238,8 @@ namespace embree
     #endif
   };
 
-  template<int M>
-  typename TriangleM<M>::Type TriangleM<M>::type;
+  // template<int M>
+  // typename TriangleM<M>::Type TriangleM<M>::type;
 
-  typedef TriangleM<4> Triangle4;
+  // typedef TriangleM<4> Triangle4;
 }

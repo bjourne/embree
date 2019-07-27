@@ -57,7 +57,6 @@ SET(EMBREE_LIBRARY_FILES
 
   bvh/bvh_rotate.cpp
   bvh/bvh_builder.cpp
-  bvh/bvh_builder_morton.cpp
   bvh/bvh_builder_sah.cpp
   bvh/bvh_builder_sah_spatial.cpp
   bvh/bvh_builder_twolevel.cpp
@@ -78,10 +77,6 @@ MACRO(embree_files TARGET ISA)
   SET(${TARGET}
     bvh/bvh_intersector1_bvh4.cpp)
 
-  IF (${ISA} EQUAL ${ISA_LOWEST_AVX})
-    LIST(APPEND ${TARGET} geometry/primitive8.cpp)
-  ENDIF()
-
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA} EQUAL ${AVX512SKX} OR ${ISA_LOWEST} EQUAL ${ISA})
 
     LIST(APPEND ${TARGET}
@@ -96,7 +91,6 @@ MACRO(embree_files TARGET ISA)
 
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA_LOWEST} EQUAL ${ISA})
     LIST(APPEND ${TARGET}
-      bvh/bvh_builder_morton.cpp
       bvh/bvh_rotate.cpp
       builders/primrefgen.cpp)
   ENDIF()

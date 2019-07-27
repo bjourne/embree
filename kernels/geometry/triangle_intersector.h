@@ -52,7 +52,6 @@ namespace embree
       const Vec3vf<K> N;
     };
 
-
     /////////////////////////////////////////////////////////////////
     /// Intersector functions
     /////////////////////////////////////////////////////////////////
@@ -633,7 +632,6 @@ namespace embree
           if (tri.geomIDs[i] == -1)
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
-
           MTHitK<K> hit;
           if (likely(intersectKRaysMTris(ray, i, valid_i, hit, tri))) {
             epilogKRaysMTrisIntersect<M,K,filter>(

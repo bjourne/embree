@@ -106,7 +106,7 @@ namespace embree
     printf("BVH8Factory::createTriangleMeshTriangle4 "
            "mesh->quality = %d\n", mesh->quality);
     BVH8Factory* factory = mesh->scene->device->bvh8_factory.get();
-    accel = new BVH8(Triangle4::type,mesh->scene);
+    accel = new BVH8(mesh->scene);
     switch (mesh->quality) {
     case RTC_BUILD_QUALITY_MEDIUM:
     case RTC_BUILD_QUALITY_HIGH:
@@ -145,9 +145,13 @@ namespace embree
     return intersectors;
   }
 
-  Accel* BVH8Factory::BVH8Triangle4(Scene* scene, BuildVariant bvariant, IntersectVariant ivariant)
+  Accel*
+  BVH8Factory::BVH8Triangle4(Scene* scene,
+                             BuildVariant bvariant,
+                             IntersectVariant ivariant)
   {
-    BVH8* accel = new BVH8(Triangle4::type,scene);
+    printf("BVH8Factory::BVH8Triangle4 bvariant %d\n", bvariant);
+    BVH8* accel = new BVH8(scene);
     Accel::Intersectors intersectors= BVH8Triangle4Intersectors(accel,ivariant);
     Builder* builder = nullptr;
     if (scene->device->tri_builder == "default")  {

@@ -123,7 +123,7 @@ namespace embree
     printf("BVH4Factory::createTriangleMeshTriangle4 "
            "mesh->quality = %d\n", mesh->quality);
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
-    accel = new BVH4(Triangle4::type,mesh->scene);
+    accel = new BVH4(mesh->scene);
     switch (mesh->quality) {
     case RTC_BUILD_QUALITY_MEDIUM:
     case RTC_BUILD_QUALITY_HIGH:
@@ -139,7 +139,8 @@ namespace embree
                              BuildVariant bvariant,
                              IntersectVariant ivariant)
   {
-    BVH4* accel = new BVH4(Triangle4::type,scene);
+    printf("BVH4Factory::BVH4Triangle4\n");
+    BVH4* accel = new BVH4(scene);
 
     Accel::Intersectors intersectors;
     if (scene->device->tri_traverser == "default")

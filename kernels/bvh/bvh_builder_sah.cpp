@@ -99,10 +99,22 @@ namespace embree
       GeneralBVHBuilder::Settings settings;
       bool primrefarrayalloc;
 
-      BVHNBuilderSAH (BVH* bvh, Scene* scene, const size_t sahBlockSize, const float intCost, const size_t minLeafSize, const size_t maxLeafSize,
-                      const size_t mode, bool primrefarrayalloc = false)
-        : bvh(bvh), scene(scene), mesh(nullptr), prims(scene->device,0),
-          settings(sahBlockSize, minLeafSize, min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks), travCost, intCost, DEFAULT_SINGLE_THREAD_THRESHOLD), primrefarrayalloc(primrefarrayalloc) {}
+      BVHNBuilderSAH (BVH* bvh,
+                      Scene* scene,
+                      const size_t sahBlockSize,
+                      const float intCost,
+                      const size_t minLeafSize,
+                      const size_t maxLeafSize,
+                      const size_t mode,
+                      bool primrefarrayalloc = false)
+        : bvh(bvh), scene(scene), mesh(nullptr),
+          prims(scene->device,0),
+          settings(sahBlockSize,
+                   minLeafSize,
+                   min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks),
+                   travCost, intCost,
+                   DEFAULT_SINGLE_THREAD_THRESHOLD),
+          primrefarrayalloc(primrefarrayalloc) {}
 
       BVHNBuilderSAH (BVH* bvh, Mesh* mesh, const size_t sahBlockSize, const float intCost, const size_t minLeafSize, const size_t maxLeafSize, const size_t mode)
         : bvh(bvh), scene(nullptr), mesh(mesh), prims(bvh->device,0), settings(sahBlockSize, minLeafSize, min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks), travCost, intCost, DEFAULT_SINGLE_THREAD_THRESHOLD), primrefarrayalloc(false) {}
@@ -165,7 +177,13 @@ namespace embree
             }
 
             /* call BVH builder */
-            NodeRef root = BVHNBuilderVirtual<N>::build(&bvh->alloc,CreateLeaf<N,Primitive>(bvh),bvh->scene->progressInterface,prims.data(),pinfo,settings);
+            NodeRef root = BVHNBuilderVirtual<N>::build(
+              &bvh->alloc,
+              CreateLeaf<N,Primitive>(bvh),
+              bvh->scene->progressInterface,
+              prims.data(),
+              pinfo,
+              settings);
             bvh->set(root,LBBox3fa(pinfo.geomBounds),pinfo.size());
             bvh->layoutLargeNodes(size_t(pinfo.size()*0.005f));
 
@@ -279,15 +297,38 @@ namespace embree
 
 
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
-    Builder* BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode) { return new BVHNBuilderSAH<4,TriangleMesh,Triangle4>((BVH4*)bvh,mesh,4,1.0f,4,inf,mode); }
-    Builder* BVH4Triangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<4,TriangleMesh,Triangle4>((BVH4*)bvh,scene,4,1.0f,4,inf,mode); }
+    Builder*
+    BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode)
+    {
+      return new BVHNBuilderSAH<4,TriangleMesh,TriangleM<4>>((BVH4*)bvh,mesh,4,1.0f,4,inf,mode);
+    }
+    Builder*
+    BVH4Triangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode)
+    {
+      return new BVHNBuilderSAH<4,TriangleMesh,TriangleM<4>>((BVH4*)bvh,scene,4,1.0f,4,inf,mode);
+    }
 
 
 #if defined(__AVX__)
-    Builder* BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode) { return new BVHNBuilderSAH<8,TriangleMesh,Triangle4>((BVH8*)bvh,mesh,4,1.0f,4,inf,mode); }
-
-    Builder* BVH8Triangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAH<8,TriangleMesh,Triangle4>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
-    Builder* BVH8QuantizedTriangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode) { return new BVHNBuilderSAHQuantized<8,TriangleMesh,Triangle4>((BVH8*)bvh,scene,4,1.0f,4,inf,mode); }
+    Builder*
+    BVH8Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode)
+    {
+      return new BVHNBuilderSAH<8,TriangleMesh,TriangleM<4>>((BVH8*)bvh,mesh,4,1.0f,4,inf,mode);
+    }
+    Builder*
+    BVH8Triangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode)
+    {
+      return new BVHNBuilderSAH<8,TriangleMesh,TriangleM<4>>((BVH8*)bvh,scene,4,1.0f,4,inf,mode);
+    }
+    Builder*
+    BVH8QuantizedTriangle4SceneBuilderSAH  (void* bvh,
+                                            Scene* scene,
+                                            size_t mode)
+    {
+      printf("BVH8QuantizedTriangle4SceneBuilderSAH\n");
+      return new BVHNBuilderSAHQuantized<8,TriangleMesh,TriangleM<4>>(
+        (BVH8*)bvh, scene, 4, 1.0f, 4, inf, mode);
+    }
 
 #endif
 #endif

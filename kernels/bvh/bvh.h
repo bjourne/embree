@@ -602,12 +602,12 @@ namespace embree
       };
 
       struct Set2
-      { 
+      {
         template<typename BuildRecord>
         __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
         {
           AlignedNodeMB* node = ref.alignedNodeMB();
-          
+
           LBBox3fa bounds = empty;
           for (size_t i=0; i<num; i++) {
             node->setRef(i,children[i].ref);
@@ -663,7 +663,7 @@ namespace embree
         bounds1 = bounds1.enlarge_by(4.0f*float(ulp));
         Vec3fa dlower = bounds1.lower-bounds0.lower;
         Vec3fa dupper = bounds1.upper-bounds0.upper;
-        
+
         lower_x[i] = bounds0.lower.x; lower_y[i] = bounds0.lower.y; lower_z[i] = bounds0.lower.z;
         upper_x[i] = bounds0.upper.x; upper_y[i] = bounds0.upper.y; upper_z[i] = bounds0.upper.z;
 
@@ -744,7 +744,7 @@ namespace embree
 
       /*! Returns the expected surface area when randomly sampling the time. */
       __forceinline float expectedHalfArea(size_t i, const BBox1f& t0t1) const {
-        return lbounds(i).expectedHalfArea(t0t1); 
+        return lbounds(i).expectedHalfArea(t0t1);
       }
 
       /*! swap two children of the node */
@@ -773,10 +773,10 @@ namespace embree
       __forceinline const NodeRef& child(size_t i) const { assert(i<N); return children[i]; }
 
       /*! stream output operator */
-      friend std::ostream& operator<<(std::ostream& cout, const AlignedNodeMB& n) 
+      friend std::ostream& operator<<(std::ostream& cout, const AlignedNodeMB& n)
       {
         cout << "AlignedNodeMB {" << std::endl;
-        for (size_t i=0; i<N; i++) 
+        for (size_t i=0; i<N; i++)
         {
           const BBox3fa b0 = n.bounds0(i);
           const BBox3fa b1 = n.bounds1(i);
@@ -870,7 +870,7 @@ namespace embree
         bounds1 = bounds1.enlarge_by(4.0f*float(ulp));
         Vec3fa dlower = bounds1.lower-bounds0.lower;
         Vec3fa dupper = bounds1.upper-bounds0.upper;
-        
+
         lower_x[i] = bounds0.lower.x; lower_y[i] = bounds0.lower.y; lower_z[i] = bounds0.lower.z;
         upper_x[i] = bounds0.upper.x; upper_y[i] = bounds0.upper.y; upper_z[i] = bounds0.upper.z;
 
@@ -892,7 +892,7 @@ namespace embree
       }
 
       /*! Sets bounding box and ID of child. */
-      __forceinline void set(size_t i, NodeRef childID, const LBBox3fa& bounds, const BBox1f& tbounds) 
+      __forceinline void set(size_t i, NodeRef childID, const LBBox3fa& bounds, const BBox1f& tbounds)
       {
         AlignedNodeMB::setRef(i,childID);
         setBounds(i, bounds, tbounds);
@@ -918,10 +918,10 @@ namespace embree
       }
 
       /*! stream output operator */
-      friend std::ostream& operator<<(std::ostream& cout, const AlignedNodeMB4D& n) 
+      friend std::ostream& operator<<(std::ostream& cout, const AlignedNodeMB4D& n)
       {
         cout << "AlignedNodeMB4D {" << std::endl;
-        for (size_t i=0; i<N; i++) 
+        for (size_t i=0; i<N; i++)
         {
           const BBox3fa b0 = n.bounds0(i);
           const BBox3fa b1 = n.bounds1(i);
@@ -944,7 +944,7 @@ namespace embree
     struct UnalignedNode : public BaseNode
     {
       using BaseNode::children;
-      
+
       struct Create
       {
         __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc) const
@@ -1120,7 +1120,7 @@ namespace embree
         for (size_t i=0; i<N; i++) lower_x[i] = lower_y[i] = lower_z[i] = MAX_QUAN;
         for (size_t i=0; i<N; i++) upper_x[i] = upper_y[i] = upper_z[i] = MIN_QUAN;
       }
-      
+
       /*! Returns bounds of specified child. */
       __forceinline BBox3fa bounds(size_t i) const
       {
@@ -1214,7 +1214,7 @@ namespace embree
 #if defined(__AVX512F__)
       __forceinline vfloat16 dequantizeLowerUpperX(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_x),p)),scale.x,vfloat16(start.x)); }
       __forceinline vfloat16 dequantizeLowerUpperY(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_y),p)),scale.y,vfloat16(start.y)); }
-      __forceinline vfloat16 dequantizeLowerUpperZ(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_z),p)),scale.z,vfloat16(start.z)); }      
+      __forceinline vfloat16 dequantizeLowerUpperZ(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_z),p)),scale.z,vfloat16(start.z)); }
 #endif
 
       union {
@@ -1279,7 +1279,7 @@ namespace embree
           }
           QuantizedNode *qnode = (QuantizedNode*) alloc.malloc0(sizeof(QuantizedNode), byteAlignment);
           qnode->init(node);
-          
+
           return (size_t)qnode | tyQuantizedNode;
         }
       };
@@ -1315,7 +1315,7 @@ namespace embree
         node0.clear();
         node1.clear();
       }
-      
+
       /*! Returns bounds of specified child. */
       __forceinline BBox3fa bounds(size_t i) const
       {
@@ -1421,7 +1421,7 @@ namespace embree
   public:
 
     /*! BVHN default constructor. */
-    BVHN (const PrimitiveType& primTy, Scene* scene);
+    BVHN (Scene* scene);
 
     /*! BVHN destruction */
     ~BVHN ();
@@ -1449,8 +1449,8 @@ namespace embree
     struct Allocator {
       BVHN* bvh;
       Allocator (BVHN* bvh) : bvh(bvh) {}
-      __forceinline void* operator() (size_t bytes) const { 
-        return bvh->alloc._threadLocal()->malloc(&bvh->alloc,bytes); 
+      __forceinline void* operator() (size_t bytes) const {
+        return bvh->alloc._threadLocal()->malloc(&bvh->alloc,bytes);
       }
     };
 
@@ -1518,10 +1518,6 @@ namespace embree
       return NodeRef((size_t)ptr | (tyLeaf+ty));
     }
 
-    /*! bvh type information */
-  public:
-    const PrimitiveType* primTy;       //!< primitive type stored in the BVH
-
     /*! bvh data */
   public:
     Device* device;                    //!< device pointer
@@ -1545,7 +1541,6 @@ namespace embree
     transpose(lower_x,lower_y,lower_z,vfloat4(zero),bounds0.lower,bounds1.lower,bounds2.lower,bounds3.lower);
     transpose(upper_x,upper_y,upper_z,vfloat4(zero),bounds0.upper,bounds1.upper,bounds2.upper,bounds3.upper);
   }
-
   typedef BVHN<4> BVH4;
   typedef BVHN<8> BVH8;
 }
