@@ -16,38 +16,23 @@ namespace embree
     {
       __forceinline MTHitM() {}
       __forceinline MTHitM(const vbool<M>& valid,
-                                        const vfloat<M>& U,
-                                        const vfloat<M>& V,
-                                        const vfloat<M>& T,
-                                        const vfloat<M>& absDen,
-                                        const Vec3vf<M>& Ng)
-        : U(U), V(V), T(T), absDen(absDen), valid(valid), vNg(Ng) {}
-
-      __forceinline void finalize()
-      {
-        const vfloat<M> rcpAbsDen = rcp(absDen);
-        vt = T * rcpAbsDen;
-        vu = U * rcpAbsDen;
-        vv = V * rcpAbsDen;
-      }
+                           const vfloat<M>& U,
+                           const vfloat<M>& V,
+                           const vfloat<M>& T,
+                           const Vec3vf<M>& N)
+        : valid(valid), U(U), V(V), T(T), N(N) {}
 
       __forceinline Vec3fa Ng(const size_t i) const
       {
-        return Vec3fa(vNg.x[i],vNg.y[i],vNg.z[i]);
+        return Vec3fa(N.x[i], N.y[i], N.z[i]);
       }
 
     public:
+      vbool<M> valid;
       vfloat<M> U;
       vfloat<M> V;
       vfloat<M> T;
-      vfloat<M> absDen;
-
-    public:
-      vbool<M> valid;
-      vfloat<M> vu;
-      vfloat<M> vv;
-      vfloat<M> vt;
-      Vec3vf<M> vNg;
+      Vec3vf<M> N;
     };
 
     template<int K>
@@ -55,37 +40,17 @@ namespace embree
     {
       __forceinline MTHitK() {}
       __forceinline MTHitK(const vbool<K>& valid,
-                         const vfloat<K>& U,
-                         const vfloat<K>& V,
-                         const vfloat<K>& T,
-                         const vfloat<K>& absDen,
-                         const Vec3vf<K>& Ng)
-        : valid(valid), U(U), V(V), T(T), absDen(absDen), Ng(Ng) {}
-
-      __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>>
-      finalizeK () const
-      {
-        #if ISECT_METHOD == ISECT_EMBREE
-        const vfloat<K> rcpAbsDen = rcp(absDen);
-        const vfloat<K> t = T * rcpAbsDen;
-        const vfloat<K> u = U * rcpAbsDen;
-        const vfloat<K> v = V * rcpAbsDen;
-        return std::make_tuple(u,v,t,Ng);
-        #else
-        const vfloat<K> t = T;
-        const vfloat<K> u = U;
-        const vfloat<K> v = V;
-        return std::make_tuple(u,v,t,Ng);
-        #endif
-      }
-
+                           const vfloat<K>& U,
+                           const vfloat<K>& V,
+                           const vfloat<K>& T,
+                           const Vec3vf<K>& N)
+        : valid(valid), U(U), V(V), T(T), N(N) {}
     public:
       const vbool<K> valid;
       const vfloat<K> U;
       const vfloat<K> V;
       const vfloat<K> T;
-      const vfloat<K> absDen;
-      const Vec3vf<K> Ng;
+      const Vec3vf<K> N;
     };
 
 
@@ -185,7 +150,12 @@ namespace embree
         return false;
 
       /* calculate hit information */
-      new (&hit) MTHitK<K>(valid, U, V, T, absDen, tri_Ng);
+      const vfloat<K> rcpAbsDen = rcp(absDen);
+      new (&hit) MTHitK<K>(valid,
+                           U * rcpAbsDen,
+                           V * rcpAbsDen,
+                           T * rcpAbsDen,
+                           tri_Ng);
       return true;
     }
     #endif
@@ -224,7 +194,12 @@ namespace embree
         return false;
 
       /* calculate hit information */
-      new (&hit) MTHitM<M>(valid,U,V,T,absDen,tri_Ng);
+      const vfloat<M> rcpAbsDen = rcp(absDen);
+      new (&hit) MTHitM<M>(valid,
+                           U * rcpAbsDen,
+                           V * rcpAbsDen,
+                           T * rcpAbsDen,
+                           tri_Ng);
       return true;
     }
 
@@ -264,7 +239,12 @@ namespace embree
         return false;
 
       /* update hit information */
-      new (&hit) MTHitM<M>(valid,U,V,T,absDen,tri_Ng);
+      const vfloat<M> rcpAbsDen = rcp(absDen);
+      new (&hit) MTHitM<M>(valid,
+                           U * rcpAbsDen,
+                           V * rcpAbsDen,
+                           T * rcpAbsDen,
+                           tri_Ng);
       return true;
     }
 
@@ -281,13 +261,7 @@ namespace embree
                               const TriangleM<M>& tri)
     {
       Scene* scene = context->scene;
-
-      vfloat<K> u, v, t;
-      Vec3vf<K> Ng;
       vbool<K> valid2 = valid0;
-
-      // Yes, we always finalize.
-      std::tie(u,v,t,Ng) = hit.finalizeK();
 
       const unsigned int geomID = tri.geomIDs[i];
       const unsigned int primID = tri.primIDs[i];
@@ -298,9 +272,10 @@ namespace embree
       if (filter) {
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasIntersectionFilter())) {
-          HitK<K> h(context->instID,geomID,primID,u,v,Ng);
+          HitK<K> h(context->instID, geomID, primID,
+                    hit.U, hit.V, hit.N);
           const vfloat<K> old_t = ray.tfar;
-          ray.tfar = select(valid2,t,ray.tfar);
+          ray.tfar = select(valid2, hit.T, ray.tfar);
           const vbool<K> m_accept = runIntersectionFilter(valid2,
                                                           geometry,
                                                           ray,
@@ -313,12 +288,12 @@ namespace embree
 #endif
 
       /* update hit information */
-      vfloat<K>::store(valid2, &ray.tfar, t);
-      vfloat<K>::store(valid2, &ray.Ng.x, Ng.x);
-      vfloat<K>::store(valid2, &ray.Ng.y, Ng.y);
-      vfloat<K>::store(valid2, &ray.Ng.z, Ng.z);
-      vfloat<K>::store(valid2, &ray.u, u);
-      vfloat<K>::store(valid2, &ray.v, v);
+      vfloat<K>::store(valid2, &ray.tfar, hit.T);
+      vfloat<K>::store(valid2, &ray.Ng.x, hit.N.x);
+      vfloat<K>::store(valid2, &ray.Ng.y, hit.N.y);
+      vfloat<K>::store(valid2, &ray.Ng.z, hit.N.z);
+      vfloat<K>::store(valid2, &ray.u, hit.U);
+      vfloat<K>::store(valid2, &ray.v, hit.V);
       vuint<K>::store(valid2, &ray.primID, primID);
       vuint<K>::store(valid2, &ray.geomID, geomID);
       vuint<K>::store(valid2, &ray.instID, context->instID);
@@ -347,12 +322,11 @@ namespace embree
       if (filter) {
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasOcclusionFilter())) {
-          vfloat<K> u, v, t;
-          Vec3vf<K> Ng;
-          std::tie(u,v,t,Ng) = hit.finalizeK();
-          HitK<K> h(context->instID,geomID,primID, u, v, Ng);
+          HitK<K> h(context->instID,
+                    geomID, primID,
+                    hit.U, hit.V, hit.N);
           const vfloat<K> old_t = ray.tfar;
-          ray.tfar = select(valid2, t, ray.tfar);
+          ray.tfar = select(valid2, hit.T, ray.tfar);
           valid2 = runOcclusionFilter(valid2, geometry, ray, context, h);
           ray.tfar = select(valid2, ray.tfar, old_t);
         }
@@ -374,8 +348,6 @@ namespace embree
 
       /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
-      if (unlikely(filter))
-        hit.finalize(); /* called only once */
 
       vbool<Mx> valid2 = valid_i;
       if (Mx > M)
@@ -397,9 +369,9 @@ namespace embree
           if (unlikely(context->hasContextFilter() ||
                        geometry->hasOcclusionFilter()))
           {
-            const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
+            const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
             const float old_t = ray.tfar[k];
-            ray.tfar[k] = hit.vt[i];
+            ray.tfar[k] = hit.T[i];
             HitK<K> h(context->instID,
                       geomID, tri.primIDs[i],
                       uv.x, uv.y,
@@ -409,7 +381,7 @@ namespace embree
                                        ray,context,h)))
               return false;
             ray.tfar[k] = old_t;
-            m=btc(m,i);
+            m = btc(m,i);
             continue;
           }
         }
@@ -432,10 +404,9 @@ namespace embree
       // Do the epilog
       Scene* scene = context->scene;
       vbool<Mx> valid2 = valid_i;
-      hit.finalize();
       if (Mx > M)
         valid2 &= (1<<M)-1;
-      size_t i = select_min(valid2, hit.vt);
+      size_t i = select_min(valid2, hit.T);
       assert(i<M);
       unsigned int geomID = tri.geomIDs[i];
 
@@ -447,7 +418,7 @@ namespace embree
       {
         if (unlikely(none(valid2)))
           return;
-        i = select_min(valid2, hit.vt);
+        i = select_min(valid2, hit.T);
         assert(i<M);
         geomID = tri.geomIDs[i];
       entry:
@@ -458,19 +429,19 @@ namespace embree
           if (unlikely(context->hasContextFilter() ||
                        geometry->hasIntersectionFilter())) {
             assert(i<M);
-            const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
+            const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
             HitK<K> h(context->instID,
                       geomID, tri.primIDs[i],
                       uv.x,uv.y,
                       hit.Ng(i));
             const float old_t = ray.tfar[k];
-            ray.tfar[k] = hit.vt[i];
+            ray.tfar[k] = hit.T[i];
             const bool found = any(runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
             if (!found) ray.tfar[k] = old_t;
             foundhit = foundhit | found;
             clear(valid2, i);
             // intersection filters may modify tfar value
-            valid2 &= hit.vt <= ray.tfar[k];
+            valid2 &= hit.T <= ray.tfar[k];
             continue;
           }
         }
@@ -479,11 +450,11 @@ namespace embree
 #endif
       assert(i<M);
       /* update hit information */
-      const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
-      ray.tfar[k] = hit.vt[i];
-      ray.Ng.x[k] = hit.vNg.x[i];
-      ray.Ng.y[k] = hit.vNg.y[i];
-      ray.Ng.z[k] = hit.vNg.z[i];
+      const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
+      ray.tfar[k] = hit.T[i];
+      ray.Ng.x[k] = hit.N.x[i];
+      ray.Ng.y[k] = hit.N.y[i];
+      ray.Ng.z[k] = hit.N.z[i];
       ray.u[k] = uv.x;
       ray.v[k] = uv.y;
       ray.primID[k] = tri.primIDs[i];
@@ -501,8 +472,6 @@ namespace embree
       Scene* scene = context->scene;
       /* intersection filter test */
 #if defined(EMBREE_FILTER_FUNCTION)
-      // Verify this?
-      hit.finalize(); /* called only once */
 
       vbool<Mx> valid = hit.valid;
       if (Mx > M)
@@ -522,18 +491,18 @@ namespace embree
         /* if we have no filter then the test passed */
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasOcclusionFilter())) {
-          const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
+          const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
           HitK<1> h(context->instID,
                     geomID,
                     tri.primIDs[i],
                     uv.x, uv.y,
                     hit.Ng(i));
           const float old_t = ray.tfar;
-          ray.tfar = hit.vt[i];
+          ray.tfar = hit.T[i];
           if (runOcclusionFilter1(geometry,ray,context,h))
             return true;
           ray.tfar = old_t;
-          m=btc(m,i);
+          m = btc(m,i);
           continue;
         }
 #endif
@@ -554,8 +523,7 @@ namespace embree
       vbool<Mx> valid = hit.valid;
       if (Mx > M)
         valid &= (1<<M)-1;
-      hit.finalize();
-      size_t i = select_min(valid, hit.vt);
+      size_t i = select_min(valid, hit.T);
       unsigned int geomID = tri.geomIDs[i];
 
       /* intersection filter test */
@@ -565,7 +533,7 @@ namespace embree
       while (true)
       {
         if (unlikely(none(valid))) return foundhit;
-        i = select_min(valid,hit.vt);
+        i = select_min(valid,hit.T);
 
         geomID = tri.geomIDs[i];
       entry:
@@ -573,20 +541,21 @@ namespace embree
 
         /* call intersection filter function */
         if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
-          const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
+          const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
           HitK<1> h(context->instID,
                     geomID, tri.primIDs[i],
                     uv.x,uv.y,
                     hit.Ng(i));
           const float old_t = ray.tfar;
-          ray.tfar = hit.vt[i];
+          ray.tfar = hit.T[i];
           const bool found = runIntersectionFilter1(geometry,
                                                     ray,
                                                     context,h);
           if (!found) ray.tfar = old_t;
           foundhit |= found;
           clear(valid,i);
-          valid &= hit.vt <= ray.tfar; // intersection filters may modify tfar value
+          // intersection filters may modify tfar value
+          valid &= hit.T <= ray.tfar;
           continue;
         }
         break;
@@ -594,11 +563,11 @@ namespace embree
 #endif
 
       /* update hit information */
-      const Vec2f uv = Vec2f(hit.vu[i], hit.vv[i]);
-      ray.tfar = hit.vt[i];
-      ray.Ng.x = hit.vNg.x[i];
-      ray.Ng.y = hit.vNg.y[i];
-      ray.Ng.z = hit.vNg.z[i];
+      const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
+      ray.tfar = hit.T[i];
+      ray.Ng.x = hit.N.x[i];
+      ray.Ng.y = hit.N.y[i];
+      ray.Ng.z = hit.N.z[i];
       ray.u = uv.x;
       ray.v = uv.y;
       ray.primID = tri.primIDs[i];
