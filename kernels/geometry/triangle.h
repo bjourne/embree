@@ -37,28 +37,6 @@ namespace embree
   struct TriangleM
   {
   public:
-    // struct Type : public PrimitiveType
-    // {
-    //   // M appears to always be 4.
-    //   const char* name() const
-    //   {
-    //     return "triangle4";
-    //   }
-    //   size_t sizeActive(const char* This) const
-    //   {
-    //     return ((TriangleM<4>*)This)->size();
-    //   }
-    //   size_t sizeTotal(const char* This) const
-    //   {
-    //     return 4;
-    //   }
-    //   size_t getBytes(const char* This) const
-    //   {
-    //     return sizeof(TriangleM<4>);
-    //   }
-    // };
-    // static Type type;
-
   public:
 
     /* Returns maximum number of stored triangles */
@@ -74,8 +52,6 @@ namespace embree
     {
       return (N+max_size()-1)/max_size();
     }
-
-  public:
 
     /* Default constructor */
     __forceinline TriangleM() {}
@@ -237,9 +213,4 @@ namespace embree
     vfloat<M> d0, d1, d2;
     #endif
   };
-
-  // template<int M>
-  // typename TriangleM<M>::Type TriangleM<M>::type;
-
-  // typedef TriangleM<4> Triangle4;
 }
