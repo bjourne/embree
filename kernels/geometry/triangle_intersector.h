@@ -65,11 +65,18 @@ namespace embree
       __forceinline std::tuple<vfloat<K>,vfloat<K>,vfloat<K>,Vec3vf<K>>
       finalizeK () const
       {
+        #if ISECT_METHOD == ISECT_EMBREE
         const vfloat<K> rcpAbsDen = rcp(absDen);
         const vfloat<K> t = T * rcpAbsDen;
         const vfloat<K> u = U * rcpAbsDen;
         const vfloat<K> v = V * rcpAbsDen;
         return std::make_tuple(u,v,t,Ng);
+        #else
+        const vfloat<K> t = T;
+        const vfloat<K> u = U;
+        const vfloat<K> v = V;
+        return std::make_tuple(u,v,t,Ng);
+        #endif
       }
 
     public:
@@ -94,26 +101,35 @@ namespace embree
                         MTHitK<K>& hit,
                         const TriangleM<M>& tri)
     {
-      Vec3vf<K> v0 = broadcast<vfloat<K>>(tri.v0, i);
-      Vec3vf<K> e1 = broadcast<vfloat<K>>(tri.e1, i);
-      Vec3vf<K> e2 = broadcast<vfloat<K>>(tri.e2, i);
       Vec3vf<K> n0 = broadcast<vfloat<K>>(tri.n0, i);
       Vec3vf<K> n1 = broadcast<vfloat<K>>(tri.n1, i);
       Vec3vf<K> n2 = broadcast<vfloat<K>>(tri.n2, i);
 
-      vfloat<K> d0 = broadcast<vfloat<K>>(tri.d0, i);
-      vfloat<K> d1 = broadcast<vfloat<K>>(tri.d1, i);
-      vfloat<K> d2 = broadcast<vfloat<K>>(tri.d2, i);
-
+      vfloat<K> d0 = vfloat<K>(tri.d0[i]);
+      vfloat<K> d1 = vfloat<K>(tri.d1[i]);
+      vfloat<K> d2 = vfloat<K>(tri.d2[i]);
 
       vfloat<K> det = dot(n0, ray.org);
       vfloat<K> dett = d0 - dot(ray.org, n0);
-      Vec3vf<K> wr = o * det + d * dett;
+      Vec3vf<K> wr = ray.org * det + ray.dir * dett;
 
       vfloat<K> u = dot(wr, n1) + det * d1;
       vfloat<K> v = dot(wr, n2) + det * d2;
       vfloat<K> tmpdet0 = det - u - v;
 
+      vfloat<K> pdet0 = (tmpdet0 ^ u) | (u ^ v);
+
+      // Return if negative
+      vfloat<K> rdet = rcp(det);
+      u = u * det;
+      v = v * det;
+      vfloat<K> t = (dett * rdet) | signmsk(pdet0);
+
+      vbool<K> valid = valid0;
+      valid &= (ray.tnear() < t) & (t <= ray.tfar);
+      if (likely(none(valid)))
+        return false;
+      return true;
     }
     #else
 
