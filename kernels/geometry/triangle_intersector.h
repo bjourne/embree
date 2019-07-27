@@ -1,7 +1,6 @@
 #pragma once
 
 #include "triangle.h"
-#include "triangle_intersector_moeller.h"
 #include "filter.h"
 
 namespace embree
