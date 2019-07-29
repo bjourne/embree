@@ -65,58 +65,13 @@ intersectKRaysMTris(const RayK<K>& ray,
   return true;
 }
 
-template<int M, int K>
-static __forceinline bool
-intersectKthRayMTris(const RayK<K>& ray,
-                     size_t k,
-                     const TriangleM<M>& tri,
-                     MTHitM<M>& hit)
-{
-  const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
-
-  const Vec3vf<M> O = broadcast<vfloat<M>>(ray.org, k);
-  const Vec3vf<M> D = broadcast<vfloat<M>>(ray.dir, k);
-  const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
-  const Vec3vf<M> R = cross(C,D);
-  const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
-  const vfloat<M> absDen = abs(den);
-  const vfloat<M> sgnDen = signmsk(den);
-
-  /* perform edge tests */
-  const vfloat<M> u = dot(R, Vec3vf<M>(tri.e2)) ^ sgnDen;
-  const vfloat<M> v = dot(R, Vec3vf<M>(tri.e1)) ^ sgnDen;
-
-  vbool<M> valid = (den != vfloat<M>(zero)) &
-    (u >= 0.0f) & (v >= 0.0f) & (u + v <= absDen);
-  if (likely(none(valid)))
-    return false;
-
-  /* perform depth test */
-  const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
-  valid &= (absDen * vfloat<M>(ray.tnear()[k]) < T) &
-    (T <= absDen * vfloat<M>(ray.tfar[k]));
-  if (likely(none(valid)))
-    return false;
-
-  /* calculate hit information */
-  const vfloat<M> rcpAbsDen = rcp(absDen);
-  new (&hit) MTHitM<M>(valid,
-                       u * rcpAbsDen,
-                       v * rcpAbsDen,
-                       T * rcpAbsDen,
-                       tri_Ng);
-  return true;
-}
-
 /*! Intersect 1 ray with one of M triangles. */
 template<int M>
 static __forceinline bool
-intersect1RayMTris(Ray& ray,
-                   const TriangleM<M>& tri,
-                   MTHitM<M>& hit)
+intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
+                   vfloat<M> tnear, vfloat<M> tfar,
+                   const TriangleM<M>& tri, MTHitM<M>& hit)
 {
-  const Vec3vf<M> o = Vec3vf<M>(ray.org);
-  const Vec3vf<M> d = Vec3vf<M>(ray.dir);
   const Vec3vf<M> C = Vec3vf<M>(tri.v0) - o;
   const Vec3vf<M> R = cross(C,d);
   const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
@@ -136,8 +91,7 @@ intersect1RayMTris(Ray& ray,
 
   /* perform depth test */
   const vfloat<M> t = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
-  valid &= (absDen*vfloat<M>(ray.tnear()) < t) &
-    (t <= absDen*vfloat<M>(ray.tfar));
+  valid &= ((absDen * tnear) < t) & (t <= absDen * tfar);
   if (likely(none(valid)))
     return false;
 

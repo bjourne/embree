@@ -404,7 +404,11 @@ namespace embree
       {
         STAT3(normal.trav_prims, 1, 1, 1);
         MTHitM<M> hit;
-        if (likely(intersect1RayMTris<M>(ray, tri, hit))) {
+        Vec3vf<M> o = Vec3vf<M>(ray.org);
+        Vec3vf<M> d = Vec3vf<M>(ray.dir);
+        vfloat<M> tnear = vfloat<M>(ray.tnear());
+        vfloat<M> tfar = vfloat<M>(ray.tfar);
+        if (likely(intersect1RayMTris<M>(o, d, tnear, tfar, tri, hit))) {
           epilog1RayMTrisIntersect<M, Mx>(ray, context, tri, hit);
         }
       }
@@ -417,7 +421,11 @@ namespace embree
       {
         STAT3(shadow.trav_prims, 1, 1, 1);
         MTHitM<M> hit;
-        if (likely(intersect1RayMTris<M>(ray, tri, hit))) {
+        Vec3vf<M> o = Vec3vf<M>(ray.org);
+        Vec3vf<M> d = Vec3vf<M>(ray.dir);
+        vfloat<M> tnear = vfloat<M>(ray.tnear());
+        vfloat<M> tfar = vfloat<M>(ray.tfar);
+        if (likely(intersect1RayMTris<M>(o, d, tnear, tfar, tri, hit))) {
           return epilog1RayMTrisOccluded<M, Mx>(ray, context, tri, hit);
         }
         return false;
@@ -461,7 +469,11 @@ namespace embree
       {
         STAT3(normal.trav_prims,1,1,1);
         MTHitM<M> hit;
-        if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
+        Vec3vf<M> o = broadcast<vfloat<M>>(ray.org, k);
+        Vec3vf<M> d = broadcast<vfloat<M>>(ray.dir, k);
+        vfloat<M> tnear = vfloat<M>(ray.tnear()[k]);
+        vfloat<M> tfar = vfloat<M>(ray.tfar[k]);
+        if (likely(intersect1RayMTris(o, d, tnear, tfar, tri, hit))) {
           epilogKthRayMTrisIntersect<M, Mx, K, filter>(
             context, ray, k, hit.valid, hit, tri);
         }
@@ -503,7 +515,11 @@ namespace embree
       {
         STAT3(shadow.trav_prims,1,1,1);
         MTHitM<M> hit;
-        bool val = intersectKthRayMTris<M, K>(ray, k, tri, hit);
+        Vec3vf<M> o = broadcast<vfloat<M>>(ray.org, k);
+        Vec3vf<M> d = broadcast<vfloat<M>>(ray.dir, k);
+        vfloat<M> tnear = vfloat<M>(ray.tnear()[k]);
+        vfloat<M> tfar = vfloat<M>(ray.tfar[k]);
+        bool val = intersect1RayMTris<M>(o, d, tnear, tfar, tri, hit);
         if (likely(val)) {
           return epilogKthRayMTrisOccluded<M, Mx, K, filter>(
             context, ray, k, hit.valid, hit, tri);
