@@ -74,8 +74,11 @@ namespace embree
 #endif
   }
 
-  __forceinline float signmsk ( const float x ) {
-    return _mm_cvtss_f32(_mm_and_ps(_mm_set_ss(x),_mm_castsi128_ps(_mm_set1_epi32(0x80000000))));
+  __forceinline float signmsk ( const float x )
+  {
+    return _mm_cvtss_f32(
+      _mm_and_ps(_mm_set_ss(x),
+                 _mm_castsi128_ps(_mm_set1_epi32(0x80000000))));
   }
   __forceinline float xorf( const float x, const float y ) {
     return _mm_cvtss_f32(_mm_xor_ps(_mm_set_ss(x),_mm_set_ss(y)));

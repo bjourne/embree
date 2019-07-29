@@ -242,10 +242,6 @@ namespace embree
   __forceinline vfloat8 asFloat(const vint8&   a) { return _mm256_castsi256_ps(a); }
   __forceinline vint8   asInt  (const vfloat8& a) { return _mm256_castps_si256(a); }
 
-#if defined(__AVX512VL__)
-
-#endif
-
   __forceinline vfloat8 operator +(const vfloat8& a) { return a; }
   __forceinline vfloat8 operator -(const vfloat8& a) {
     const __m256 mask = _mm256_castsi256_ps(_mm256_set1_epi32(0x80000000));
@@ -313,8 +309,16 @@ namespace embree
   __forceinline vfloat8 operator /(const vfloat8& a, float          b) { return a / vfloat8(b); }
   __forceinline vfloat8 operator /(float          a, const vfloat8& b) { return vfloat8(a) / b; }
 
-  __forceinline vfloat8 operator ^(const vfloat8& a, const vfloat8& b) { return _mm256_xor_ps(a,b); }
-  __forceinline vfloat8 operator ^(const vfloat8& a, const vint8&   b) { return _mm256_xor_ps(a,_mm256_castsi256_ps(b)); }
+  __forceinline vfloat8
+  operator ^(const vfloat8& a, const vfloat8& b)
+  {
+    return _mm256_xor_ps(a,b);
+  }
+  __forceinline vfloat8
+  operator ^(const vfloat8& a, const vint8&   b)
+  {
+    return _mm256_xor_ps(a,_mm256_castsi256_ps(b));
+  }
 
   __forceinline vfloat8
   operator &(const vfloat8& a, const vfloat8& b)

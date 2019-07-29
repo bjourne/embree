@@ -115,7 +115,11 @@ namespace embree
       return _mm_broadcast_ss((float*)a);
     }
 #else
-    static __forceinline vfloat4 broadcast(const void* a) { return _mm_set1_ps(*(float*)a); }
+    static __forceinline vfloat4
+    broadcast(const void* a)
+    {
+      return _mm_set1_ps(*(float*)a);
+    }
 #endif
 
     static __forceinline vfloat4 load_nt (const float* ptr) {
@@ -268,7 +272,10 @@ namespace embree
 #else
   __forceinline vfloat4 sign(const vfloat4& a) { return blendv_ps(vfloat4(one), -vfloat4(one), _mm_cmplt_ps(a, vfloat4(zero))); }
 #endif
-  __forceinline vfloat4 signmsk(const vfloat4& a) { return _mm_and_ps(a,_mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
+  __forceinline vfloat4 signmsk(const vfloat4& a)
+  {
+    return _mm_and_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x80000000)));
+  }
 
   __forceinline vfloat4 rcp(const vfloat4& a)
   {

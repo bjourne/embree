@@ -50,7 +50,11 @@ namespace embree
       return true;
     }
 
-    __forceinline bool runIntersectionFilter1(const Geometry* const geometry, RayHit& ray, IntersectContext* context, Hit& hit)
+    __forceinline bool
+    runIntersectionFilter1(const Geometry* const geometry,
+                           RayHit& ray,
+                           IntersectContext* context,
+                           Hit& hit)
     {
       RTCFilterFunctionNArguments args;
       int mask = -1;

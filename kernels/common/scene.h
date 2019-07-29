@@ -149,19 +149,6 @@ namespace embree
 
   public:
     void createTriangleAccel();
-    void createTriangleMBAccel();
-    void createQuadAccel();
-    void createQuadMBAccel();
-    void createHairAccel();
-    void createHairMBAccel();
-    void createSubdivAccel();
-    void createSubdivMBAccel();
-    void createUserGeometryAccel();
-    void createUserGeometryMBAccel();
-    void createInstanceAccel();
-    void createInstanceMBAccel();
-    void createGridAccel();
-    void createGridMBAccel();
 
     /*! prints statistics about the scene */
     void printStatistics();
