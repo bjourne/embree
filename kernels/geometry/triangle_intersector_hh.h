@@ -24,18 +24,17 @@ intersectKRaysMTris(const RayK<K>& ray,
   vfloat<K> v = dot(wr, n2) + det * d2;
   vfloat<K> tmpdet0 = det - u - v;
   vfloat<K> pdet0 = (tmpdet0 ^ u) | (u ^ v);
-  vfloat<K> pdet0msk = signmsk(pdet0);
+  vfloat<K> msk = signmsk(pdet0);
 
-  // This allows early return without hitting the division. Not sure
-  // if it is beneficial.
-  vbool<K> valid = valid0 & asInt(pdet0msk) == vint<K>(zero);
+  // This allows early return without hitting the division.
+  vbool<K> valid = valid0 & asInt(msk) == vint<K>(zero);
   if (likely(none(valid))) {
     return false;
   }
   vfloat<K> rdet = rcp(det);
   u = u * rdet;
   v = v * rdet;
-  vfloat<K> t = (dett * rdet);
+  vfloat<K> t = dett * rdet;
   valid &= (ray.tnear() < t) & (t <= ray.tfar);
   if (unlikely(none(valid))) {
     return false;
@@ -86,7 +85,6 @@ intersect1RayMTris(Ray& ray,
                    const TriangleM<M>& tri,
                    MTHitM<M>& hit)
 {
-  vbool<M> valid = true;
   Vec3vf<M> o = Vec3vf<M>(ray.org);
   Vec3vf<M> d = Vec3vf<M>(ray.dir);
 
@@ -97,14 +95,17 @@ intersect1RayMTris(Ray& ray,
   vfloat<M> u = dot(wr, tri.n1) + det * tri.d1;
   vfloat<M> v = dot(wr, tri.n2) + det * tri.d2;
   vfloat<M> tmpdet0 = det - u - v;
-
   vfloat<M> pdet0 = (tmpdet0 ^ u) | (u ^ v);
+  vfloat<M> msk = signmsk(pdet0);
+  vbool<M> valid = asInt(msk) == vint<M>(zero);
+  if (likely(none(valid))) {
+    return false;
+  }
 
   vfloat<M> rdet = rcp(det);
   u = u * rdet;
   v = v * rdet;
-  vfloat<M> t = (dett * rdet) | signmsk(pdet0);
-
+  vfloat<M> t = dett * rdet;
   vfloat<M> tnear = vfloat<M>(ray.tnear());
   vfloat<M> tfar = vfloat<M>(ray.tfar);
   valid &= (tnear < t) & (t <= tfar);
