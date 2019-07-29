@@ -49,7 +49,7 @@ namespace embree
     static __forceinline size_t
     blocks(size_t N)
     {
-      return (N+max_size()-1)/max_size();
+      return (N + M - 1) / M;
     }
 
     /* Default constructor */
@@ -107,30 +107,6 @@ namespace embree
     {
       assert(i<M);
       return primIDs[i];
-    }
-
-    /* Calculate the bounds of the triangle */
-    __forceinline BBox3fa
-    bounds() const
-    {
-      Vec3vf<M> p0 = v0;
-      Vec3vf<M> p1 = v0-e1;
-      Vec3vf<M> p2 = v0+e2;
-      Vec3vf<M> lower = min(p0,p1,p2);
-      Vec3vf<M> upper = max(p0,p1,p2);
-      vbool<M> mask = valid();
-      lower.x = select(mask,lower.x,vfloat<M>(pos_inf));
-      lower.y = select(mask,lower.y,vfloat<M>(pos_inf));
-      lower.z = select(mask,lower.z,vfloat<M>(pos_inf));
-      upper.x = select(mask,upper.x,vfloat<M>(neg_inf));
-      upper.y = select(mask,upper.y,vfloat<M>(neg_inf));
-      upper.z = select(mask,upper.z,vfloat<M>(neg_inf));
-      return BBox3fa(Vec3fa(reduce_min(lower.x),
-                            reduce_min(lower.y),
-                            reduce_min(lower.z)),
-                     Vec3fa(reduce_max(upper.x),
-                            reduce_max(upper.y),
-                            reduce_max(upper.z)));
     }
 
     /* Non temporal store */
