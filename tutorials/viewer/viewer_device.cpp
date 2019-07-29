@@ -37,11 +37,11 @@ bool g_subdiv_mode = false;
 #define MIN_EDGE_LEVEL  4.0f
 #define LEVEL_FACTOR   64.0f
 
-bool monitorProgressFunction(void* ptr, double dn) 
+bool monitorProgressFunction(void* ptr, double dn)
 {
   return true;
 }
-  
+
 inline float updateEdgeLevel( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, const unsigned int e0, const unsigned int e1)
 {
   const Vec3fa v0 = mesh->positions[0][mesh->position_indices[e0]];
@@ -100,7 +100,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateMeshEdgeLevelBufferTask((int)i,threadIndex,scene_in,cam_pos);
-  }); 
+  });
 #endif
 
   /* now update large meshes */
@@ -115,7 +115,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateSubMeshEdgeLevelBufferTask((int)i,threadIndex,mesh,cam_pos);
-  }); 
+  });
 #else
     updateEdgeLevelBuffer(mesh,cam_pos,0,mesh->numFaces);
 #endif
@@ -267,7 +267,7 @@ Vec3fa renderPixelStandard(float x, float y, const ISPCCamera& camera, RayStats&
   RTCIntersectContext context;
   rtcInitIntersectContext(&context);
   context.flags = g_iflags_coherent;
-  rtcIntersect1(g_scene,&context,RTCRayHit_(ray));
+  rtcIntersect1(g_scene, &context, RTCRayHit_(ray));
   RayStats_addRay(stats);
 
   /* shade background black */
@@ -284,7 +284,7 @@ Vec3fa renderPixelStandard(float x, float y, const ISPCCamera& camera, RayStats&
   dg.primID = ray.primID;
   dg.u = ray.u;
   dg.v = ray.v;
-  dg.P  = ray.org+ray.tfar*ray.dir;
+  dg.P  = ray.org + ray.tfar * ray.dir;
   dg.Ng = ray.Ng;
   dg.Ns = ray.Ng;
 
@@ -293,7 +293,11 @@ Vec3fa renderPixelStandard(float x, float y, const ISPCCamera& camera, RayStats&
     {
       Vec3fa dPdu,dPdv;
       unsigned int geomID = ray.geomID; {
-        rtcInterpolate1(rtcGetGeometry(g_scene,geomID),ray.primID,ray.u,ray.v,RTC_BUFFER_TYPE_VERTEX,0,nullptr,&dPdu.x,&dPdv.x,3);
+        rtcInterpolate1(rtcGetGeometry(g_scene,geomID),
+                        ray.primID, ray.u, ray.v,
+                        RTC_BUFFER_TYPE_VERTEX, 0,
+                        nullptr,
+                        &dPdu.x,&dPdv.x,3);
       }
       dg.Ns = cross(dPdv,dPdu);
     }
@@ -404,7 +408,7 @@ extern "C" void device_render (int* pixels,
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       renderTileTask((int)i,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
-  }); 
+  });
   //rtcDebug();
 }
 
