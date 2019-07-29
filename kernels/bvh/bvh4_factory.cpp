@@ -37,8 +37,6 @@ namespace embree
 
   DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
 
-  DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4SceneBuilderFastSpatialSAH,void* COMMA Scene* COMMA size_t);
-
   DECLARE_ISA_FUNCTION(Builder*,BVH4Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
 
   BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
@@ -51,10 +49,6 @@ namespace embree
   void BVH4Factory::selectBuilders(int features)
   {
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4SceneBuilderSAH));
-
-    IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX(features,BVH4Triangle4SceneBuilderFastSpatialSAH));
-
-
     IF_ENABLED_TRIS(SELECT_SYMBOL_DEFAULT_AVX_AVX512KNL(features,BVH4Triangle4MeshBuilderSAH));
   }
 
@@ -136,8 +130,10 @@ namespace embree
                              IntersectVariant ivariant)
   {
     printf("BVH4Factory::BVH4Triangle4 "
-           "tri_traverser = %s\n",
-           scene->device->tri_traverser.c_str());
+           "tri_traverser = %s "
+           "bvariant = %d",
+           scene->device->tri_traverser.c_str(),
+           bvariant);
     BVH4* accel = new BVH4(scene);
 
     Accel::Intersectors intersectors;
@@ -151,21 +147,10 @@ namespace embree
 
     Builder* builder = nullptr;
     if (scene->device->tri_builder == "default") {
-      switch (bvariant) {
-      case BuildVariant::STATIC      :
-        builder = BVH4Triangle4SceneBuilderSAH(accel,scene,0);
-        break;
-      case BuildVariant::HIGH_QUALITY:
-        builder = BVH4Triangle4SceneBuilderFastSpatialSAH(accel,scene,0);
-        break;
-      }
-    }
-    else if (scene->device->tri_builder == "sah")
+      // Only static builders supported
       builder = BVH4Triangle4SceneBuilderSAH(accel,scene,0);
-    else if (scene->device->tri_builder == "sah_fast_spatial" ) builder = BVH4Triangle4SceneBuilderFastSpatialSAH(accel,scene,0);
-    else if (scene->device->tri_builder == "sah_presplit") builder = BVH4Triangle4SceneBuilderSAH(accel,scene,MODE_HIGH_QUALITY);
+    }
     else throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown builder "+scene->device->tri_builder+" for BVH4<Triangle4>");
-
     return new AccelInstance(accel,builder,intersectors);
   }
 

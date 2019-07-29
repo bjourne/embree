@@ -41,7 +41,9 @@ namespace embree
       : org(org), dir(dir),
         _tnear(tnear), tfar(tfar),
         _time(time), mask(mask),
-        id(id), flags(flags) {}
+        id(id), flags(flags)
+    {
+    }
 
     /* Returns the size of the ray */
     static __forceinline size_t
@@ -53,9 +55,12 @@ namespace embree
     /* Calculates if this is a valid ray that does not cause issues during traversal */
     __forceinline vbool<K> valid() const
     {
-      const vbool<K> vx = (abs(org.x) <= vfloat<K>(FLT_LARGE)) & (abs(dir.x) <= vfloat<K>(FLT_LARGE));
-      const vbool<K> vy = (abs(org.y) <= vfloat<K>(FLT_LARGE)) & (abs(dir.y) <= vfloat<K>(FLT_LARGE));
-      const vbool<K> vz = (abs(org.z) <= vfloat<K>(FLT_LARGE)) & (abs(dir.z) <= vfloat<K>(FLT_LARGE));
+      const vbool<K> vx =
+        (abs(org.x) <= vfloat<K>(FLT_LARGE)) & (abs(dir.x) <= vfloat<K>(FLT_LARGE));
+      const vbool<K> vy =
+        (abs(org.y) <= vfloat<K>(FLT_LARGE)) & (abs(dir.y) <= vfloat<K>(FLT_LARGE));
+      const vbool<K> vz =
+        (abs(org.z) <= vfloat<K>(FLT_LARGE)) & (abs(dir.z) <= vfloat<K>(FLT_LARGE));
       const vbool<K> vn = abs(tnear()) <= vfloat<K>(inf);
       const vbool<K> vf = abs(tfar) <= vfloat<K>(inf);
       return vx & vy & vz & vn & vf;
@@ -272,12 +277,28 @@ namespace embree
 
     /* Constructs a ray from origin, direction, and ray segment. Near
      *  has to be smaller than far */
-    __forceinline RayK(const Vec3fa& org, const Vec3fa& dir, float tnear = zero, float tfar = inf, float time = zero, int mask = -1, int id = 0, int flags = 0)
-      : org(org,tnear), dir(dir,time), tfar(tfar), mask(mask), id(id), flags(flags) {}
+    __forceinline
+    RayK(const Vec3fa& org,
+         const Vec3fa& dir,
+         float tnear = zero,
+         float tfar = inf,
+         float time = zero,
+         int mask = -1,
+         int id = 0,
+         int flags = 0)
+      : org(org,tnear), dir(dir,time),
+        tfar(tfar), mask(mask), id(id),
+        flags(flags)
+    {
+    }
 
-    /* Calculates if this is a valid ray that does not cause issues during traversal */
+    /* Calculates if this is a valid ray that does not cause issues
+    during traversal */
     __forceinline bool valid() const {
-      return all(le_mask(abs(Vec3fa(org,0.0f)), Vec3fa(FLT_LARGE)) & le_mask(abs(Vec3fa(dir,0.0f)), Vec3fa(FLT_LARGE))) && abs(tnear()) <= float(inf) && abs(tfar) <= float(inf);
+      return all(
+        le_mask(abs(Vec3fa(org,0.0f)), Vec3fa(FLT_LARGE)) &
+        le_mask(abs(Vec3fa(dir,0.0f)), Vec3fa(FLT_LARGE)))
+        && abs(tnear()) <= float(inf) && abs(tfar) <= float(inf);
     }
 
 #if defined(__AVX512F__)

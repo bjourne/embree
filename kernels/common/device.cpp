@@ -18,8 +18,6 @@
 #include "../hash.h"
 #include "scene_triangle_mesh.h"
 
-#include "../subdiv/tessellation_cache.h"
-
 #include "acceln.h"
 #include "geometry.h"
 

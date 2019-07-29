@@ -20,7 +20,6 @@
 #include "device.h"
 #include "builder.h"
 #include "scene_triangle_mesh.h"
-#include "../subdiv/tessellation_cache.h"
 
 #include "acceln.h"
 #include "geometry.h"
@@ -200,8 +199,14 @@ namespace embree
     }
 
     /* get mesh by ID */
-    __forceinline       Geometry* get(size_t i)       { assert(i < geometries.size()); return geometries[i].ptr; }
-    __forceinline const Geometry* get(size_t i) const { assert(i < geometries.size()); return geometries[i].ptr; }
+    __forceinline       Geometry* get(size_t i)
+    {
+      assert(i < geometries.size()); return geometries[i].ptr;
+    }
+    __forceinline const Geometry* get(size_t i) const
+    {
+      assert(i < geometries.size()); return geometries[i].ptr;
+    }
 
     template<typename Mesh>
       __forceinline       Mesh* get(size_t i)       {
