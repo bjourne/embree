@@ -7,14 +7,11 @@ namespace embree
 {
   namespace isa
   {
-    /////////////////////////////////////////////////////////////////
-    /// Hit types
-    /////////////////////////////////////////////////////////////////
     template<int M>
-    struct MTHitM
+    struct MTHit
     {
-      __forceinline MTHitM() {}
-      __forceinline MTHitM(const vbool<M>& valid,
+      __forceinline MTHit() {}
+      __forceinline MTHit(const vbool<M>& valid,
                            const vfloat<M>& U,
                            const vfloat<M>& V,
                            const vfloat<M>& T,
@@ -33,25 +30,6 @@ namespace embree
       vfloat<M> T;
       Vec3vf<M> N;
     };
-
-    template<int K>
-    struct MTHitK
-    {
-      __forceinline MTHitK() {}
-      __forceinline MTHitK(const vbool<K>& valid,
-                           const vfloat<K>& U,
-                           const vfloat<K>& V,
-                           const vfloat<K>& T,
-                           const Vec3vf<K>& N)
-        : valid(valid), U(U), V(V), T(T), N(N) {}
-    public:
-      const vbool<K> valid;
-      const vfloat<K> U;
-      const vfloat<K> V;
-      const vfloat<K> T;
-      const Vec3vf<K> N;
-    };
-
     /////////////////////////////////////////////////////////////////
     /// Intersector functions
     /////////////////////////////////////////////////////////////////
@@ -70,7 +48,7 @@ namespace embree
                               RayHitK<K>& ray,
                               size_t i,
                               const vbool<K> valid0,
-                              MTHitK<K>& hit,
+                              MTHit<K>& hit,
                               const TriangleM<M>& tri)
     {
       Scene* scene = context->scene;
@@ -118,7 +96,7 @@ namespace embree
     epilogKRaysMTrisOccluded(IntersectContext* context,
                              RayK<K>& ray,
                              const vbool<K> valid0,
-                             MTHitK<K>& hit,
+                             MTHit<K>& hit,
                              const TriangleM<M>& tri,
                              size_t i)
     {
@@ -154,7 +132,7 @@ namespace embree
                               RayK<K>& ray,
                               size_t k,
                               const vbool<Mx> valid_i,
-                              MTHitM<M>& hit,
+                              MTHit<M>& hit,
                               const TriangleM<M>& tri)
     {
       Scene* scene = context->scene;
@@ -211,7 +189,7 @@ namespace embree
                                RayHitK<K>& ray,
                                size_t k,
                                const vbool<Mx>& valid_i,
-                               MTHitM<M>& hit,
+                               MTHit<M>& hit,
                                const TriangleM<M>& tri)
     {
       // Do the epilog
@@ -280,7 +258,7 @@ namespace embree
     epilog1RayMTrisOccluded(Ray& ray,
                             IntersectContext* context,
                             const TriangleM<M>& tri,
-                            MTHitM<M>& hit)
+                            MTHit<M>& hit)
     {
       Scene* scene = context->scene;
       /* intersection filter test */
@@ -330,7 +308,7 @@ namespace embree
     epilog1RayMTrisIntersect(RayHit& ray,
                              IntersectContext* context,
                              const TriangleM<M>& tri,
-                             MTHitM<M>& hit)
+                             MTHit<M>& hit)
     {
       Scene* scene = context->scene;
       vbool<Mx> valid = hit.valid;
@@ -403,7 +381,7 @@ namespace embree
                 const TriangleM<M>& tri)
       {
         STAT3(normal.trav_prims, 1, 1, 1);
-        MTHitM<M> hit;
+        MTHit<M> hit;
         Vec3vf<M> o = Vec3vf<M>(ray.org);
         Vec3vf<M> d = Vec3vf<M>(ray.dir);
         vfloat<M> tnear = vfloat<M>(ray.tnear());
@@ -420,7 +398,7 @@ namespace embree
                const TriangleM<M>& tri)
       {
         STAT3(shadow.trav_prims, 1, 1, 1);
-        MTHitM<M> hit;
+        MTHit<M> hit;
         Vec3vf<M> o = Vec3vf<M>(ray.org);
         Vec3vf<M> d = Vec3vf<M>(ray.dir);
         vfloat<M> tnear = vfloat<M>(ray.tnear());
@@ -451,7 +429,7 @@ namespace embree
           if (tri.geomIDs[i] == -1)
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid), K);
-          MTHitK<K> hit;
+          MTHit<K> hit;
           if (likely(intersectKRaysMTris(ray, i, valid, hit, tri))) {
             epilogKRaysMTrisIntersect<M,K,filter>(
               context, ray, i, hit.valid, hit, tri);
@@ -468,7 +446,7 @@ namespace embree
                 const TriangleM<M>& tri)
       {
         STAT3(normal.trav_prims,1,1,1);
-        MTHitM<M> hit;
+        MTHit<M> hit;
         Vec3vf<M> o = broadcast<vfloat<M>>(ray.org, k);
         Vec3vf<M> d = broadcast<vfloat<M>>(ray.dir, k);
         vfloat<M> tnear = vfloat<M>(ray.tnear()[k]);
@@ -495,7 +473,7 @@ namespace embree
             break;
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
 
-          MTHitK<K> hit;
+          MTHit<K> hit;
           if (likely(intersectKRaysMTris(ray, i, valid0, hit, tri))) {
             epilogKRaysMTrisOccluded<M, K, filter>(
               context, ray, hit.valid, hit, tri, i);
@@ -514,7 +492,7 @@ namespace embree
                const TriangleM<M>& tri)
       {
         STAT3(shadow.trav_prims,1,1,1);
-        MTHitM<M> hit;
+        MTHit<M> hit;
         Vec3vf<M> o = broadcast<vfloat<M>>(ray.org, k);
         Vec3vf<M> d = broadcast<vfloat<M>>(ray.dir, k);
         vfloat<M> tnear = vfloat<M>(ray.tnear()[k]);

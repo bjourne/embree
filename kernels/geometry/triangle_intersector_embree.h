@@ -5,7 +5,7 @@ static __forceinline bool
 intersectKRaysMTris(const RayK<K>& ray,
                     size_t i,
                     const vbool<K>& valid0,
-                    MTHitK<K>& hit,
+                    MTHit<K>& hit,
                     const TriangleM<M>& tri)
 {
   // Do broadcasting and cross prod.
@@ -57,11 +57,11 @@ intersectKRaysMTris(const RayK<K>& ray,
 
   /* calculate hit information */
   const vfloat<K> rcpAbsDen = rcp(absDen);
-  new (&hit) MTHitK<K>(valid,
-                       u * rcpAbsDen,
-                       v * rcpAbsDen,
-                       t * rcpAbsDen,
-                       ng);
+  new (&hit) MTHit<K>(valid,
+                      u * rcpAbsDen,
+                      v * rcpAbsDen,
+                      t * rcpAbsDen,
+                      ng);
   return true;
 }
 
@@ -69,8 +69,8 @@ intersectKRaysMTris(const RayK<K>& ray,
 template<int M>
 static __forceinline bool
 intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
-                   vfloat<M> tnear, vfloat<M> tfar,
-                   const TriangleM<M>& tri, MTHitM<M>& hit)
+                   vfloat<M> tn, vfloat<M> tf,
+                   const TriangleM<M>& tri, MTHit<M>& hit)
 {
   const Vec3vf<M> c = Vec3vf<M>(tri.v0) - o;
   const Vec3vf<M> r = cross(c,d);
@@ -80,8 +80,8 @@ intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
   const vfloat<M> sgnDen = signmsk(den);
 
   /* perform edge tests */
-  const vfloat<M> u = dot(r, Vec3vf<M>(tri.e2)) ^ sgnDen;
-  const vfloat<M> v = dot(r, Vec3vf<M>(tri.e1)) ^ sgnDen;
+  const vfloat<M> u = dot(r, tri.e2) ^ sgnDen;
+  const vfloat<M> v = dot(r, tri.e1) ^ sgnDen;
 
   /* perform backface culling */
   vbool<M> valid = (den != vfloat<M>(zero)) &
@@ -90,18 +90,18 @@ intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
     return false;
 
   /* perform depth test */
-  const vfloat<M> t = dot(Vec3vf<M>(ng),c) ^ sgnDen;
-  valid &= ((absDen * tnear) < t) & (t <= absDen * tfar);
+  const vfloat<M> t = dot(ng, c) ^ sgnDen;
+  valid &= ((absDen * tn) < t) & (t <= absDen * tf);
   if (likely(none(valid)))
     return false;
 
   /* update hit information */
   const vfloat<M> rcpAbsDen = rcp(absDen);
-  new (&hit) MTHitM<M>(valid,
-                       u * rcpAbsDen,
-                       v * rcpAbsDen,
-                       t * rcpAbsDen,
-                       ng);
+  new (&hit) MTHit<M>(valid,
+                      u * rcpAbsDen,
+                      v * rcpAbsDen,
+                      t * rcpAbsDen,
+                      ng);
   return true;
 }
 

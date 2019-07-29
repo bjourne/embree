@@ -26,7 +26,7 @@
 // 9.4 mrays, 30% mem
 #define ISECT_HH        1
 
-#define ISECT_METHOD ISECT_HH
+#define ISECT_METHOD ISECT_EMBREE
 
 namespace embree
 {
