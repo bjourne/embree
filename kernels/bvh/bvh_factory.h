@@ -27,7 +27,12 @@ namespace embree
   class BVHFactory
   {
   public:
-    enum class BuildVariant     { STATIC, DYNAMIC, HIGH_QUALITY };
+    enum class BuildVariant
+    {
+      STATIC,
+      DYNAMIC,
+      HIGH_QUALITY
+    };
     enum class IntersectVariant { FAST, ROBUST };
   };
 }
