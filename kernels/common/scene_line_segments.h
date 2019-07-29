@@ -63,7 +63,7 @@ namespace embree
     /*! returns the i'th segment */
     __forceinline unsigned int getStartEndBitMask(size_t i) const {
       unsigned int mask = 0;
-      if (flags) 
+      if (flags)
         mask |= (flags[i] & 0x3) << 30;
       return mask;
     }
@@ -165,7 +165,7 @@ namespace embree
     {
       const unsigned int index = segment(i);
       if (index+1 >= numVertices()) return false;
-      
+
       for (size_t itime = itime_range.begin(); itime <= itime_range.end(); itime++)
       {
         const Vec3fa v0 = vertex(index+0,itime); if (unlikely(!isvalid((vfloat4)v0))) return false;
@@ -184,7 +184,7 @@ namespace embree
     __forceinline bool buildBounds(size_t i, BBox3fa* bbox) const
     {
       if (!valid(i,0)) return false;
-      *bbox = bounds(i); 
+      *bbox = bounds(i);
       return true;
     }
 
@@ -280,24 +280,11 @@ namespace embree
         }
         return pinfo;
       }
-      
-      PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k) const
-      {
-        PrimInfoMB pinfo(empty);
-        for (size_t j=r.begin(); j<r.end(); j++)
-        {
-          if (!valid(j, timeSegmentRange(t0t1))) continue;
-          const PrimRefMB prim(linearBounds(j,t0t1),this->numTimeSegments(),this->time_range,this->numTimeSegments(),this->geomID,unsigned(j));
-          pinfo.add_primref(prim);
-          prims[k++] = prim;
-        }
-        return pinfo;
-      }
 
       BBox3fa vbounds(size_t i) const {
         return bounds(i);
       }
-      
+
       BBox3fa vbounds(const LinearSpace3fa& space, size_t i) const {
         return bounds(space,i);
       }
@@ -305,7 +292,7 @@ namespace embree
       LBBox3fa vlinearBounds(size_t primID, const BBox1f& time_range) const {
         return linearBounds(primID,time_range);
       }
-      
+
       LBBox3fa vlinearBounds(const LinearSpace3fa& space, size_t primID, const BBox1f& time_range) const {
         return linearBounds(space,primID,time_range);
       }

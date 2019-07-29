@@ -28,7 +28,7 @@ namespace embree
     static const Geometry::GTypeMask geom_type = Geometry::MTY_TRIANGLE_MESH;
 
     /*! triangle indices */
-    struct Triangle 
+    struct Triangle
     {
       uint32_t v[3];
 
@@ -41,7 +41,7 @@ namespace embree
   public:
 
     /*! triangle mesh construction */
-    TriangleMesh (Device* device); 
+    TriangleMesh (Device* device);
 
     /* geometry interface */
   public:
@@ -64,7 +64,7 @@ namespace embree
     __forceinline size_t numVertices() const {
       return vertices[0].size();
     }
-    
+
     /*! returns i'th triangle*/
     __forceinline const Triangle& triangle(size_t i) const {
       return triangles[i];
@@ -91,7 +91,7 @@ namespace embree
     }
 
     /*! calculates the bounds of the i'th triangle */
-    __forceinline BBox3fa bounds(size_t i) const 
+    __forceinline BBox3fa bounds(size_t i) const
     {
       const Triangle& tri = triangle(i);
       const Vec3fa v0 = vertex(tri.v[0]);
@@ -164,7 +164,7 @@ namespace embree
           return false;
       }
 
-      if (likely(bbox)) 
+      if (likely(bbox))
         *bbox = bounds(i);
 
       return true;
@@ -185,7 +185,7 @@ namespace embree
       const Vec3fa b0 = vertex(tri.v[0],itime+1); if (unlikely(!isvalid(b0))) return false;
       const Vec3fa b1 = vertex(tri.v[1],itime+1); if (unlikely(!isvalid(b1))) return false;
       const Vec3fa b2 = vertex(tri.v[2],itime+1); if (unlikely(!isvalid(b2))) return false;
-      
+
       /* use bounds of first time step in builder */
       bbox = BBox3fa(min(a0,a1,a2),max(a0,a1,a2));
       return true;
@@ -231,33 +231,6 @@ namespace embree
           if (!buildBounds(j,&bounds)) continue;
           const PrimRef prim(bounds,geomID,unsigned(j));
           pinfo.add_center2(prim);
-          prims[k++] = prim;
-        }
-        return pinfo;
-      }
-
-      PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k) const
-      {
-        PrimInfo pinfo(empty);
-        for (size_t j=r.begin(); j<r.end(); j++)
-        {
-          BBox3fa bounds = empty;
-          if (!buildBounds(j,itime,bounds)) continue;
-          const PrimRef prim(bounds,geomID,unsigned(j));
-          pinfo.add_center2(prim);
-          prims[k++] = prim;
-        }
-        return pinfo;
-      }
-      
-      PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k) const
-      {
-        PrimInfoMB pinfo(empty);
-        for (size_t j=r.begin(); j<r.end(); j++)
-        {
-          if (!valid(j, timeSegmentRange(t0t1))) continue;
-          const PrimRefMB prim(linearBounds(j,t0t1),this->numTimeSegments(),this->time_range,this->numTimeSegments(),this->geomID,unsigned(j));
-          pinfo.add_primref(prim);
           prims[k++] = prim;
         }
         return pinfo;

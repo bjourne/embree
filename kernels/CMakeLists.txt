@@ -47,7 +47,6 @@ SET(EMBREE_LIBRARY_FILES
   common/geometry.cpp
   common/scene_triangle_mesh.cpp
 
-  geometry/primitive4.cpp
   builders/primrefgen.cpp
 
   bvh/bvh.cpp
@@ -55,7 +54,6 @@ SET(EMBREE_LIBRARY_FILES
   bvh/bvh4_factory.cpp
   bvh/bvh8_factory.cpp
 
-  bvh/bvh_rotate.cpp
   bvh/bvh_builder.cpp
   bvh/bvh_builder_sah.cpp
   bvh/bvh_builder_sah_spatial.cpp
@@ -91,7 +89,6 @@ MACRO(embree_files TARGET ISA)
 
   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512KNL} OR ${ISA_LOWEST} EQUAL ${ISA})
     LIST(APPEND ${TARGET}
-      bvh/bvh_rotate.cpp
       builders/primrefgen.cpp)
   ENDIF()
 

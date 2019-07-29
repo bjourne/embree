@@ -16,7 +16,9 @@
 
 #pragma once
 
-#include "primitive.h"
+#include "../common/default.h"
+#include "../common/scene.h"
+#include "../common/primref.h"
 
 // 9.4 mrays, 25% mem
 #define ISECT_EMBREE    0
@@ -26,8 +28,6 @@
 
 #define ISECT_METHOD ISECT_EMBREE
 
-
-
 namespace embree
 {
   /* Precalculated representation for M triangles. Stores for each
@@ -36,7 +36,6 @@ namespace embree
   template<int M>
   struct TriangleM
   {
-  public:
   public:
 
     /* Returns maximum number of stored triangles */
@@ -98,14 +97,16 @@ namespace embree
     __forceinline unsigned int
     geomID(const size_t i) const
     {
-      assert(i<M); return geomIDs[i];
+      assert(i<M);
+      return geomIDs[i];
     }
 
     /* Returns the primitive IDs */
     __forceinline unsigned int
     primID(const size_t i) const
     {
-      assert(i<M); return primIDs[i];
+      assert(i<M);
+      return primIDs[i];
     }
 
     /* Calculate the bounds of the triangle */

@@ -21,7 +21,6 @@
 #include "../common/accel.h"
 #include "../common/device.h"
 #include "../common/scene.h"
-#include "../geometry/primitive.h"
 #include "../common/ray.h"
 
 namespace embree
