@@ -26,7 +26,7 @@
 // 9.4 mrays, 30% mem
 #define ISECT_HH        1
 
-#define ISECT_METHOD ISECT_HH
+#define ISECT_METHOD ISECT_EMBREE
 
 namespace embree
 {
@@ -62,21 +62,22 @@ namespace embree
               const Vec3vf<M>& v2,
               const vuint<M>& geomIDs,
               const vuint<M>& primIDs)
-      : v0(v0),
-        e1(v0-v1),
-        e2(v2-v0),
-        geomIDs(geomIDs),
-        primIDs(primIDs)
     {
+      this->geomIDs = geomIDs;
+      this->primIDs = primIDs;
+
       #if ISECT_METHOD == ISECT_HH
-      Vec3<vfloat<M>> e1p = v1 - v0;
-      n0 = cross(e1p, e2);
+      n0 = cross(v1 - v0, v2 - v0);
       d0 = dot(n0, v0);
       vfloat<M> inv_denom = rcp(dot(n0, n0));
-      n1 = cross(e2, n0) * inv_denom;
+      n1 = cross(v2 - v0, n0) * inv_denom;
       d1 = -dot(n1, v0);
-      n2 = cross(n0, e1p) * inv_denom;
+      n2 = cross(n0, v1 - v0) * inv_denom;
       d2 = -dot(n2, v0);
+      #elif ISECT_METHOD == ISECT_EMBREE
+      this->v0 = v0;
+      this->e1 = v0 - v1;
+      this->e2 = v2 - v0;
       #endif
     }
 
@@ -113,15 +114,6 @@ namespace embree
     __forceinline static void
     store_nt(TriangleM* dst, const TriangleM& src)
     {
-      vfloat<M>::store_nt(&dst->v0.x, src.v0.x);
-      vfloat<M>::store_nt(&dst->v0.y, src.v0.y);
-      vfloat<M>::store_nt(&dst->v0.z, src.v0.z);
-      vfloat<M>::store_nt(&dst->e1.x, src.e1.x);
-      vfloat<M>::store_nt(&dst->e1.y, src.e1.y);
-      vfloat<M>::store_nt(&dst->e1.z, src.e1.z);
-      vfloat<M>::store_nt(&dst->e2.x, src.e2.x);
-      vfloat<M>::store_nt(&dst->e2.y, src.e2.y);
-      vfloat<M>::store_nt(&dst->e2.z, src.e2.z);
       vuint<M>::store_nt(&dst->geomIDs, src.geomIDs);
       vuint<M>::store_nt(&dst->primIDs, src.primIDs);
 
@@ -135,10 +127,19 @@ namespace embree
       vfloat<M>::store_nt(&dst->n2.x, src.n2.x);
       vfloat<M>::store_nt(&dst->n2.y, src.n2.y);
       vfloat<M>::store_nt(&dst->n2.z, src.n2.z);
-
       vfloat<M>::store_nt(&dst->d0, src.d0);
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
+      #elif ISECT_METHOD == ISECT_EMBREE
+      vfloat<M>::store_nt(&dst->v0.x, src.v0.x);
+      vfloat<M>::store_nt(&dst->v0.y, src.v0.y);
+      vfloat<M>::store_nt(&dst->v0.z, src.v0.z);
+      vfloat<M>::store_nt(&dst->e1.x, src.e1.x);
+      vfloat<M>::store_nt(&dst->e1.y, src.e1.y);
+      vfloat<M>::store_nt(&dst->e1.z, src.e1.z);
+      vfloat<M>::store_nt(&dst->e2.x, src.e2.x);
+      vfloat<M>::store_nt(&dst->e2.y, src.e2.y);
+      vfloat<M>::store_nt(&dst->e2.z, src.e2.z);
       #endif
     }
 
@@ -151,7 +152,6 @@ namespace embree
     {
       vuint<M> vgeomID = -1, vprimID = -1;
       Vec3vf<M> v0 = zero, v1 = zero, v2 = zero;
-
       for (size_t i=0; i<M && begin<end; i++, begin++)
       {
         const PrimRef& prim = prims[begin];
@@ -179,15 +179,16 @@ namespace embree
     }
 
   public:
-    Vec3vf<M> v0;      // base vertex of the triangles
-    Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
-    Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
     vuint<M> geomIDs;  // geometry IDs
     vuint<M> primIDs;  // primitive IDs
 
     #if ISECT_METHOD == ISECT_HH
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
+    #elif ISECT_METHOD == ISECT_EMBREE
+    Vec3vf<M> v0;      // base vertex of the triangles
+    Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
+    Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
     #endif
   };
 }

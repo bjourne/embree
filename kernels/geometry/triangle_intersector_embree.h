@@ -23,39 +23,44 @@ intersectKRaysMTris(const RayK<K>& ray,
   const vfloat<K> sgnDen = signmsk(den);
 
   /* test against edge e2 v0 */
-  const vfloat<K> U = dot(e2, R) ^ sgnDen;
-  valid &= U >= 0.0f;
-  if (likely(none(valid)))
+  const vfloat<K> u = dot(e2, R) ^ sgnDen;
+  valid &= u >= 0.0f;
+  if (likely(none(valid))) {
     return false;
+  }
 
   /* test against edge v0 e1 */
-  const vfloat<K> V = dot(e1, R) ^ sgnDen;
-  valid &= V >= 0.0f;
-  if (likely(none(valid)))
+  const vfloat<K> v = dot(e1, R) ^ sgnDen;
+  valid &= v >= 0.0f;
+  if (likely(none(valid))) {
     return false;
+  }
 
   /* test against edge e1 e2 */
-  const vfloat<K> W = absDen-U-V;
-  valid &= W >= 0.0f;
-  if (likely(none(valid)))
+  const vfloat<K> w = absDen-u-v;
+  valid &= w >= 0.0f;
+  if (likely(none(valid))) {
     return false;
+  }
 
   /* perform depth test */
-  const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
-  valid &= (absDen*ray.tnear() < T) & (T <= absDen*ray.tfar);
-  if (unlikely(none(valid)))
+  const vfloat<K> t = dot(tri_Ng,C) ^ sgnDen;
+  valid &= (absDen*ray.tnear() < t) & (t <= absDen*ray.tfar);
+  if (unlikely(none(valid))) {
     return false;
+  }
 
   valid &= den != vfloat<K>(zero);
-  if (unlikely(none(valid)))
+  if (unlikely(none(valid))) {
     return false;
+  }
 
   /* calculate hit information */
   const vfloat<K> rcpAbsDen = rcp(absDen);
   new (&hit) MTHitK<K>(valid,
-                       U * rcpAbsDen,
-                       V * rcpAbsDen,
-                       T * rcpAbsDen,
+                       u * rcpAbsDen,
+                       v * rcpAbsDen,
+                       t * rcpAbsDen,
                        tri_Ng);
   return true;
 }
@@ -78,11 +83,11 @@ intersectKthRayMTris(const RayK<K>& ray,
   const vfloat<M> sgnDen = signmsk(den);
 
   /* perform edge tests */
-  const vfloat<M> U = dot(Vec3vf<M>(tri.e2), R) ^ sgnDen;
-  const vfloat<M> V = dot(Vec3vf<M>(tri.e1), R) ^ sgnDen;
+  const vfloat<M> u = dot(R, Vec3vf<M>(tri.e2)) ^ sgnDen;
+  const vfloat<M> v = dot(R, Vec3vf<M>(tri.e1)) ^ sgnDen;
 
   vbool<M> valid = (den != vfloat<M>(zero)) &
-    (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
+    (u >= 0.0f) & (v >= 0.0f) & (u + v <= absDen);
   if (likely(none(valid)))
     return false;
 
@@ -96,8 +101,8 @@ intersectKthRayMTris(const RayK<K>& ray,
   /* calculate hit information */
   const vfloat<M> rcpAbsDen = rcp(absDen);
   new (&hit) MTHitM<M>(valid,
-                       U * rcpAbsDen,
-                       V * rcpAbsDen,
+                       u * rcpAbsDen,
+                       v * rcpAbsDen,
                        T * rcpAbsDen,
                        tri_Ng);
   return true;
@@ -110,7 +115,6 @@ intersect1RayMTris(Ray& ray,
                    const TriangleM<M>& tri,
                    MTHitM<M>& hit)
 {
-  vbool<M> valid = true;
   const Vec3vf<M> o = Vec3vf<M>(ray.org);
   const Vec3vf<M> d = Vec3vf<M>(ray.dir);
   const Vec3vf<M> C = Vec3vf<M>(tri.v0) - o;
@@ -125,7 +129,7 @@ intersect1RayMTris(Ray& ray,
   const vfloat<M> v = dot(R, Vec3vf<M>(tri.e1)) ^ sgnDen;
 
   /* perform backface culling */
-  valid &= (den != vfloat<M>(zero)) &
+  vbool<M> valid = (den != vfloat<M>(zero)) &
     (u >= 0.0f) & (v >= 0.0f) & (u+v<=absDen);
   if (likely(none(valid)))
     return false;
@@ -148,4 +152,5 @@ intersect1RayMTris(Ray& ray,
 }
 
 
-// Crown 9.33
+// Crown 9.3 viewer
+// Crown 12.9 viewer_ispc

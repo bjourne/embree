@@ -415,7 +415,6 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersector1Moeller::occluded\n");
         STAT3(shadow.trav_prims, 1, 1, 1);
         MTHitM<M> hit;
         if (likely(intersect1RayMTris<M>(ray, tri, hit))) {
@@ -433,20 +432,19 @@ namespace embree
 
       /*! Intersects K rays with M triangles. */
       static __forceinline
-      void intersect(const vbool<K>& valid_i,
+      void intersect(const vbool<K>& valid,
                      RayHitK<K>& ray,
                      IntersectContext* context,
                      const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::intersect %d (packet)\n", filter);
         STAT_USER(0, TriangleM<M>::max_size());
         for (size_t i = 0; i < TriangleM<M>::max_size(); i++)
         {
           if (tri.geomIDs[i] == -1)
             break;
-          STAT3(normal.trav_prims, 1, popcnt(valid_i), K);
+          STAT3(normal.trav_prims, 1, popcnt(valid), K);
           MTHitK<K> hit;
-          if (likely(intersectKRaysMTris(ray, i, valid_i, hit, tri))) {
+          if (likely(intersectKRaysMTris(ray, i, valid, hit, tri))) {
             epilogKRaysMTrisIntersect<M,K,filter>(
               context, ray, i, hit.valid, hit, tri);
           }
@@ -461,7 +459,6 @@ namespace embree
                 IntersectContext* context,
                 const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::intersect %d (one ray)\n", filter);
         STAT3(normal.trav_prims,1,1,1);
         MTHitM<M> hit;
         if (likely(intersectKthRayMTris(ray, k, tri, hit))) {
@@ -478,7 +475,6 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::occluded %d (packet)\n", filter);
         // For occlusion we make a copy...
         vbool<K> valid0 = valid_i;
 
@@ -505,7 +501,6 @@ namespace embree
                IntersectContext* context,
                const TriangleM<M>& tri)
       {
-        //printf("TriangleMIntersectorKMoeller::occluded %d (one ray)\n", filter);
         STAT3(shadow.trav_prims,1,1,1);
         MTHitM<M> hit;
         bool val = intersectKthRayMTris<M, K>(ray, k, tri, hit);
