@@ -56,195 +56,10 @@ namespace embree
     /// Intersector functions
     /////////////////////////////////////////////////////////////////
     #if ISECT_METHOD == ISECT_HH
-    template<int M, int K>
-    static __forceinline bool
-    intersectKRaysMTris(const RayK<K>& ray,
-                        size_t i,
-                        const vbool<K>& valid0,
-                        MTHitK<K>& hit,
-                        const TriangleM<M>& tri)
-    {
-      Vec3vf<K> n0 = broadcast<vfloat<K>>(tri.n0, i);
-      Vec3vf<K> n1 = broadcast<vfloat<K>>(tri.n1, i);
-      Vec3vf<K> n2 = broadcast<vfloat<K>>(tri.n2, i);
-
-      vfloat<K> d0 = vfloat<K>(tri.d0[i]);
-      vfloat<K> d1 = vfloat<K>(tri.d1[i]);
-      vfloat<K> d2 = vfloat<K>(tri.d2[i]);
-
-      vfloat<K> det = dot(n0, ray.org);
-      vfloat<K> dett = d0 - dot(ray.org, n0);
-      Vec3vf<K> wr = ray.org * det + ray.dir * dett;
-
-      vfloat<K> u = dot(wr, n1) + det * d1;
-      vfloat<K> v = dot(wr, n2) + det * d2;
-      vfloat<K> tmpdet0 = det - u - v;
-
-      vfloat<K> pdet0 = (tmpdet0 ^ u) | (u ^ v);
-
-      // Return if negative
-      vfloat<K> rdet = rcp(det);
-      u = u * det;
-      v = v * det;
-      vfloat<K> t = (dett * rdet) | signmsk(pdet0);
-
-      vbool<K> valid = valid0;
-      valid &= (ray.tnear() < t) & (t <= ray.tfar);
-      if (likely(none(valid)))
-        return false;
-      return true;
-    }
-    #else
-
-
-    template<int M, int K>
-    static __forceinline bool
-    intersectKRaysMTris(const RayK<K>& ray,
-                        size_t i,
-                        const vbool<K>& valid0,
-                        MTHitK<K>& hit,
-                        const TriangleM<M>& tri)
-    {
-      // Do broadcasting and cross prod.
-      Vec3<vfloat<K>> v0 = broadcast<vfloat<K>>(tri.v0, i);
-      Vec3<vfloat<K>> e1 = broadcast<vfloat<K>>(tri.e1, i);
-      Vec3<vfloat<K>> e2 = broadcast<vfloat<K>>(tri.e2, i);
-      Vec3<vfloat<K>> tri_Ng = cross(e2, e1);
-
-      /* calculate denominator */
-      vbool<K> valid = valid0;
-      const Vec3vf<K> C = v0 - ray.org;
-      const Vec3vf<K> R = cross(C, ray.dir);
-      const vfloat<K> den = dot(tri_Ng, ray.dir);
-      const vfloat<K> absDen = abs(den);
-      const vfloat<K> sgnDen = signmsk(den);
-
-      /* test against edge e2 v0 */
-      const vfloat<K> U = dot(e2, R) ^ sgnDen;
-      valid &= U >= 0.0f;
-      if (likely(none(valid)))
-        return false;
-
-      /* test against edge v0 e1 */
-      const vfloat<K> V = dot(e1, R) ^ sgnDen;
-      valid &= V >= 0.0f;
-      if (likely(none(valid)))
-        return false;
-
-      /* test against edge e1 e2 */
-      const vfloat<K> W = absDen-U-V;
-      valid &= W >= 0.0f;
-      if (likely(none(valid)))
-        return false;
-
-      /* perform depth test */
-      const vfloat<K> T = dot(tri_Ng,C) ^ sgnDen;
-      valid &= (absDen*ray.tnear() < T) & (T <= absDen*ray.tfar);
-      if (unlikely(none(valid)))
-        return false;
-
-      valid &= den != vfloat<K>(zero);
-      if (unlikely(none(valid)))
-        return false;
-
-      /* calculate hit information */
-      const vfloat<K> rcpAbsDen = rcp(absDen);
-      new (&hit) MTHitK<K>(valid,
-                           U * rcpAbsDen,
-                           V * rcpAbsDen,
-                           T * rcpAbsDen,
-                           tri_Ng);
-      return true;
-    }
+    #include "triangle_intersector_hh.h"
+    #elif ISECT_METHOD == ISECT_EMBREE
+    #include "triangle_intersector_embree.h"
     #endif
-
-    template<int M, int K>
-    static __forceinline bool
-    intersectKthRayMTris(const RayK<K>& ray,
-                         size_t k,
-                         const TriangleM<M>& tri,
-                         MTHitM<M>& hit)
-    {
-      const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
-
-      const Vec3vf<M> O = broadcast<vfloat<M>>(ray.org, k);
-      const Vec3vf<M> D = broadcast<vfloat<M>>(ray.dir, k);
-      const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
-      const Vec3vf<M> R = cross(C,D);
-      const vfloat<M> den = dot(Vec3vf<M>(tri_Ng),D);
-      const vfloat<M> absDen = abs(den);
-      const vfloat<M> sgnDen = signmsk(den);
-
-      /* perform edge tests */
-      const vfloat<M> U = dot(Vec3vf<M>(tri.e2), R) ^ sgnDen;
-      const vfloat<M> V = dot(Vec3vf<M>(tri.e1), R) ^ sgnDen;
-
-      vbool<M> valid = (den != vfloat<M>(zero)) &
-        (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-      if (likely(none(valid)))
-        return false;
-
-      /* perform depth test */
-      const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
-      valid &= (absDen * vfloat<M>(ray.tnear()[k]) < T) &
-        (T <= absDen * vfloat<M>(ray.tfar[k]));
-      if (likely(none(valid)))
-        return false;
-
-      /* calculate hit information */
-      const vfloat<M> rcpAbsDen = rcp(absDen);
-      new (&hit) MTHitM<M>(valid,
-                           U * rcpAbsDen,
-                           V * rcpAbsDen,
-                           T * rcpAbsDen,
-                           tri_Ng);
-      return true;
-    }
-
-    /*! Intersect 1 ray with one of M triangles. */
-    template<int M>
-    static __forceinline bool
-    intersect1RayMTris(const vbool<M>& valid0,
-                       Ray& ray,
-                       const TriangleM<M>& tri,
-                       MTHitM<M>& hit)
-    {
-      vbool<M> valid = valid0;
-      const Vec3vf<M> O = Vec3vf<M>(ray.org);
-      const Vec3vf<M> D = Vec3vf<M>(ray.dir);
-      const Vec3vf<M> C = Vec3vf<M>(tri.v0) - O;
-      const Vec3vf<M> R = cross(C,D);
-      const Vec3vf<M> tri_Ng = cross(tri.e2, tri.e1);
-      const vfloat<M> den = dot(Vec3vf<M>(tri_Ng), D);
-      const vfloat<M> absDen = abs(den);
-      const vfloat<M> sgnDen = signmsk(den);
-
-      /* perform edge tests */
-      const vfloat<M> U = dot(R, Vec3vf<M>(tri.e2)) ^ sgnDen;
-      const vfloat<M> V = dot(R, Vec3vf<M>(tri.e1)) ^ sgnDen;
-
-        /* perform backface culling */
-      valid &= (den != vfloat<M>(zero)) &
-        (U >= 0.0f) & (V >= 0.0f) & (U+V<=absDen);
-      if (likely(none(valid)))
-        return false;
-
-      /* perform depth test */
-      const vfloat<M> T = dot(Vec3vf<M>(tri_Ng),C) ^ sgnDen;
-      valid &= (absDen*vfloat<M>(ray.tnear()) < T) &
-        (T <= absDen*vfloat<M>(ray.tfar));
-      if (likely(none(valid)))
-        return false;
-
-      /* update hit information */
-      const vfloat<M> rcpAbsDen = rcp(absDen);
-      new (&hit) MTHitM<M>(valid,
-                           U * rcpAbsDen,
-                           V * rcpAbsDen,
-                           T * rcpAbsDen,
-                           tri_Ng);
-      return true;
-    }
 
     /////////////////////////////////////////////////////////////////
     /// Epilog functions
@@ -589,8 +404,7 @@ namespace embree
       {
         STAT3(normal.trav_prims, 1, 1, 1);
         MTHitM<M> hit;
-        vbool<M> valid = true;
-        if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
+        if (likely(intersect1RayMTris<M>(ray, tri, hit))) {
           epilog1RayMTrisIntersect<M, Mx>(ray, context, tri, hit);
         }
       }
@@ -604,8 +418,7 @@ namespace embree
         //printf("TriangleMIntersector1Moeller::occluded\n");
         STAT3(shadow.trav_prims, 1, 1, 1);
         MTHitM<M> hit;
-        vbool<M> valid = true;
-        if (likely(intersect1RayMTris<M>(valid, ray, tri, hit))) {
+        if (likely(intersect1RayMTris<M>(ray, tri, hit))) {
           return epilog1RayMTrisOccluded<M, Mx>(ray, context, tri, hit);
         }
         return false;

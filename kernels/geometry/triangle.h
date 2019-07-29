@@ -26,7 +26,7 @@
 // 9.4 mrays, 30% mem
 #define ISECT_HH        1
 
-#define ISECT_METHOD ISECT_EMBREE
+#define ISECT_METHOD ISECT_HH
 
 namespace embree
 {
@@ -137,17 +137,17 @@ namespace embree
     __forceinline static void
     store_nt(TriangleM* dst, const TriangleM& src)
     {
-      vfloat<M>::store_nt(&dst->v0.x,src.v0.x);
-      vfloat<M>::store_nt(&dst->v0.y,src.v0.y);
-      vfloat<M>::store_nt(&dst->v0.z,src.v0.z);
-      vfloat<M>::store_nt(&dst->e1.x,src.e1.x);
-      vfloat<M>::store_nt(&dst->e1.y,src.e1.y);
-      vfloat<M>::store_nt(&dst->e1.z,src.e1.z);
-      vfloat<M>::store_nt(&dst->e2.x,src.e2.x);
-      vfloat<M>::store_nt(&dst->e2.y,src.e2.y);
-      vfloat<M>::store_nt(&dst->e2.z,src.e2.z);
-      vuint<M>::store_nt(&dst->geomIDs,src.geomIDs);
-      vuint<M>::store_nt(&dst->primIDs,src.primIDs);
+      vfloat<M>::store_nt(&dst->v0.x, src.v0.x);
+      vfloat<M>::store_nt(&dst->v0.y, src.v0.y);
+      vfloat<M>::store_nt(&dst->v0.z, src.v0.z);
+      vfloat<M>::store_nt(&dst->e1.x, src.e1.x);
+      vfloat<M>::store_nt(&dst->e1.y, src.e1.y);
+      vfloat<M>::store_nt(&dst->e1.z, src.e1.z);
+      vfloat<M>::store_nt(&dst->e2.x, src.e2.x);
+      vfloat<M>::store_nt(&dst->e2.y, src.e2.y);
+      vfloat<M>::store_nt(&dst->e2.z, src.e2.z);
+      vuint<M>::store_nt(&dst->geomIDs, src.geomIDs);
+      vuint<M>::store_nt(&dst->primIDs, src.primIDs);
 
       #if ISECT_METHOD == ISECT_HH
       vfloat<M>::store_nt(&dst->n0.x, src.n0.x);
