@@ -1,3 +1,5 @@
+// This file contains Embree's default medium build quality triangle
+// intersection algorithm.
 #pragma once
 
 template<int M, int K>

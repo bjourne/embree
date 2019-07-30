@@ -240,7 +240,10 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
 
   __forceinline vfloat8 asFloat(const vint8&   a) { return _mm256_castsi256_ps(a); }
-  __forceinline vint8   asInt  (const vfloat8& a) { return _mm256_castps_si256(a); }
+  __forceinline vint8   asInt  (const vfloat8& a)
+  {
+    return _mm256_castps_si256(a);
+  }
 
   __forceinline vfloat8 operator +(const vfloat8& a) { return a; }
   __forceinline vfloat8 operator -(const vfloat8& a) {
@@ -252,7 +255,10 @@ namespace embree
     return _mm256_and_ps(a, mask);
   }
   __forceinline vfloat8 sign   (const vfloat8& a) { return _mm256_blendv_ps(vfloat8(one), -vfloat8(one), _mm256_cmp_ps(a, vfloat8(zero), _CMP_NGE_UQ)); }
-  __forceinline vfloat8 signmsk(const vfloat8& a) { return _mm256_and_ps(a,_mm256_castsi256_ps(_mm256_set1_epi32(0x80000000))); }
+  __forceinline vfloat8 signmsk(const vfloat8& a)
+  {
+    return _mm256_and_ps(a,_mm256_castsi256_ps(_mm256_set1_epi32(0x80000000)));
+  }
 
 
   __forceinline vfloat8 rcp(const vfloat8& a)

@@ -15,10 +15,9 @@ isectAlgo(Vec3vf<K> o, Vec3vf<K> d,
   vfloat<K> v = dot(wr, n2) + det * d2;
   vfloat<K> tmpdet0 = det - u - v;
   vfloat<K> pdet0 = (tmpdet0 ^ u) | (u ^ v);
-  vfloat<K> msk = signmsk(pdet0);
 
   // This allows early return without hitting the division.
-  vbool<K> valid = valid0 & asInt(msk) == vint<K>(zero);
+  vbool<K> valid = valid0 & asInt(signmsk(pdet0)) == vint<K>(zero);
   if (likely(none(valid))) {
     return false;
   }

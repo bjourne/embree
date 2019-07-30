@@ -112,7 +112,7 @@ namespace embree
 
     /* create a standard window of specified size */
     GLFWwindow* createStandardWindow(int width, int height);
- 
+
     /* GLFW callback functions */
   public:
     virtual void keyboardFunc(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -120,7 +120,7 @@ namespace embree
     virtual void motionFunc(GLFWwindow* window, double x, double y);
     virtual void displayFunc();
     virtual void reshapeFunc(GLFWwindow* window, int width, int height);
-    virtual void drawGUI() {}; 
+    virtual void drawGUI() {};
 
   public:
     std::string tutorialName;
@@ -205,10 +205,8 @@ namespace embree
       CONVERT_BSPLINE_TO_BEZIER,
       CONVERT_FLAT_TO_ROUND_CURVES,
       CONVERT_ROUND_TO_FLAT_CURVES,
-      MERGE_QUADS_TO_GRIDS,
       CONVERT_QUADS_TO_GRIDS,
       CONVERT_GRIDS_TO_QUADS,
-      CONVERT_MBLUR_TO_NONMBLUR,
     };
     std::vector<SceneGraphOperations> sgop;
 
