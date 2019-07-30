@@ -20,11 +20,9 @@
 #include "../common/scene.h"
 #include "../common/primref.h"
 
-// 9.4 mrays, 25% mem
 #define ISECT_EMBREE    0
-
-// 9.4 mrays, 30% mem
 #define ISECT_HH        1
+#define ISECT_SF01      2
 
 #define ISECT_METHOD ISECT_EMBREE
 
@@ -72,6 +70,10 @@ namespace embree
       n2 = cross(n0, v1 - v0) * inv_denom;
       d2 = -dot(n2, v0);
       #elif ISECT_METHOD == ISECT_EMBREE
+      this->v0 = v0;
+      this->e1 = v0 - v1;
+      this->e2 = v2 - v0;
+      #elif ISECT_METHOD == ISECT_SF01
       this->v0 = v0;
       this->e1 = v0 - v1;
       this->e2 = v2 - v0;
@@ -127,7 +129,7 @@ namespace embree
       vfloat<M>::store_nt(&dst->d0, src.d0);
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
-      #elif ISECT_METHOD == ISECT_EMBREE
+      #elif ISECT_METHOD == ISECT_EMBREE || ISECT_METHOD == ISECT_SF01
       vfloat<M>::store_nt(&dst->v0.x, src.v0.x);
       vfloat<M>::store_nt(&dst->v0.y, src.v0.y);
       vfloat<M>::store_nt(&dst->v0.z, src.v0.z);
@@ -182,7 +184,7 @@ namespace embree
     #if ISECT_METHOD == ISECT_HH
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
-    #elif ISECT_METHOD == ISECT_EMBREE
+    #elif ISECT_METHOD == ISECT_EMBREE || ISECT_METHOD == ISECT_SF01
     Vec3vf<M> v0;      // base vertex of the triangles
     Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
