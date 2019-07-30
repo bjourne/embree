@@ -4,7 +4,8 @@
 
 template<int M, int K>
 static __forceinline bool
-intersectKRaysMTris(const RayK<K>& ray,
+intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
+                    vfloat<K> tn, vfloat<K> tf,
                     size_t i,
                     const vbool<K>& valid0,
                     MTHit<K>& hit,
@@ -18,9 +19,9 @@ intersectKRaysMTris(const RayK<K>& ray,
 
   /* calculate denominator */
   vbool<K> valid = valid0;
-  const Vec3vf<K> c = v0 - ray.org;
-  const Vec3vf<K> r = cross(c, ray.dir);
-  const vfloat<K> den = dot(ng, ray.dir);
+  const Vec3vf<K> c = v0 - o;
+  const Vec3vf<K> r = cross(c, d);
+  const vfloat<K> den = dot(ng, d);
   const vfloat<K> absDen = abs(den);
   const vfloat<K> sgnDen = signmsk(den);
 
@@ -46,8 +47,8 @@ intersectKRaysMTris(const RayK<K>& ray,
   }
 
   /* perform depth test */
-  const vfloat<K> t = dot(ng,c) ^ sgnDen;
-  valid &= (absDen*ray.tnear() < t) & (t <= absDen*ray.tfar);
+  const vfloat<K> t = dot(ng, c) ^ sgnDen;
+  valid &= (absDen * tn < t) & (t <= absDen * tf);
   if (unlikely(none(valid))) {
     return false;
   }

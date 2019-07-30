@@ -430,7 +430,13 @@ namespace embree
             break;
           STAT3(normal.trav_prims, 1, popcnt(valid), K);
           MTHit<K> hit;
-          if (likely(intersectKRaysMTris(ray, i, valid, hit, tri))) {
+          Vec3vf<K> o = ray.org;
+          Vec3vf<K> d = ray.dir;
+          vfloat<K> tn = ray.tnear();
+          vfloat<K> tf = ray.tfar;
+          if (likely(intersectKRaysMTris(o, d,
+                                         tn, tf,
+                                         i, valid, hit, tri))) {
             epilogKRaysMTrisIntersect<M,K,filter>(
               context, ray, i, hit.valid, hit, tri);
           }
@@ -449,9 +455,9 @@ namespace embree
         MTHit<M> hit;
         Vec3vf<M> o = broadcast<vfloat<M>>(ray.org, k);
         Vec3vf<M> d = broadcast<vfloat<M>>(ray.dir, k);
-        vfloat<M> tnear = vfloat<M>(ray.tnear()[k]);
-        vfloat<M> tfar = vfloat<M>(ray.tfar[k]);
-        if (likely(intersect1RayMTris(o, d, tnear, tfar, tri, hit))) {
+        vfloat<M> tn = vfloat<M>(ray.tnear()[k]);
+        vfloat<M> tf = vfloat<M>(ray.tfar[k]);
+        if (likely(intersect1RayMTris(o, d, tn, tf, tri, hit))) {
           epilogKthRayMTrisIntersect<M, Mx, K, filter>(
             context, ray, k, hit.valid, hit, tri);
         }
@@ -474,7 +480,11 @@ namespace embree
           STAT3(shadow.trav_prims,1,popcnt(valid0),K);
 
           MTHit<K> hit;
-          if (likely(intersectKRaysMTris(ray, i, valid0, hit, tri))) {
+          Vec3vf<K> o = ray.org;
+          Vec3vf<K> d = ray.dir;
+          vfloat<K> tn = ray.tnear();
+          vfloat<K> tf = ray.tfar;
+          if (likely(intersectKRaysMTris(o, d, tn, tf, i, valid0, hit, tri))) {
             epilogKRaysMTrisOccluded<M, K, filter>(
               context, ray, hit.valid, hit, tri, i);
           }
@@ -495,9 +505,9 @@ namespace embree
         MTHit<M> hit;
         Vec3vf<M> o = broadcast<vfloat<M>>(ray.org, k);
         Vec3vf<M> d = broadcast<vfloat<M>>(ray.dir, k);
-        vfloat<M> tnear = vfloat<M>(ray.tnear()[k]);
-        vfloat<M> tfar = vfloat<M>(ray.tfar[k]);
-        bool val = intersect1RayMTris<M>(o, d, tnear, tfar, tri, hit);
+        vfloat<M> tn = vfloat<M>(ray.tnear()[k]);
+        vfloat<M> tf = vfloat<M>(ray.tfar[k]);
+        bool val = intersect1RayMTris<M>(o, d, tn, tf, tri, hit);
         if (likely(val)) {
           return epilogKthRayMTrisOccluded<M, Mx, K, filter>(
             context, ray, k, hit.valid, hit, tri);
