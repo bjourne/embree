@@ -455,9 +455,6 @@ namespace embree
       {
         ISPCGeometry* geometry = scene_in->geometries[i];
         if (geometry->type == GROUP) {
-          // RTCScene objscene = rtcNewScene(g_device);
-          // ConvertGroup(g_device,(ISPCGroup*) geometry,quality,objscene,i);
-          // //rtcCommitScene(objscene);
         }
         else if (geometry->type == INSTANCE) {
           ConvertInstance(g_device,scene_in, (ISPCInstance*) geometry, scene_out, i);
