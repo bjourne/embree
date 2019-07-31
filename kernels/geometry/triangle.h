@@ -24,8 +24,9 @@
 #define ISECT_HH        1
 #define ISECT_SF01      2
 #define ISECT_MT        3
+#define ISECT_BW12      4
 
-#define ISECT_METHOD ISECT_MT
+#define ISECT_METHOD ISECT_BW12
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -35,6 +36,8 @@
 #define ISECT_NAME "sf01"
 #elif ISECT_METHOD == ISECT_MT
 #define ISECT_NAME "mt"
+#elif ISECT_METHOD == ISECT_BW12
+#define ISECT_NAME "bw12"
 #else
 #error "Wrong ISECT_METHOD!"
 #endif
@@ -77,10 +80,10 @@ namespace embree
       #if ISECT_METHOD == ISECT_HH
       n0 = cross(v1 - v0, v2 - v0);
       d0 = dot(n0, v0);
-      vfloat<M> inv_denom = rcp(dot(n0, n0));
-      n1 = cross(v2 - v0, n0) * inv_denom;
+      vfloat<M> rdenom = rcp(dot(n0, n0));
+      n1 = cross(v2 - v0, n0) * rdenom;
       d1 = -dot(n1, v0);
-      n2 = cross(n0, v1 - v0) * inv_denom;
+      n2 = cross(n0, v1 - v0) * rdenom;
       d2 = -dot(n2, v0);
       #elif ISECT_METHOD == ISECT_EMBREE
       this->v0 = v0;
@@ -94,6 +97,64 @@ namespace embree
       this->v0 = v0;
       this->e1 = v1 - v0;
       this->e2 = v2 - v0;
+      #elif ISECT_METHOD == ISECT_BW12
+
+      Vec3vf<M> e1 = v1 - v0;
+      Vec3vf<M> e2 = v2 - v0;
+      Vec3vf<M> n = cross(e1, e2);
+      vfloat<M> num = dot(v0, n);
+      for (int i = 0; i < M; i++) {
+
+        Vec3fa n0fa, n1fa, n2fa;
+        float d0fa, d1fa, d2fa;
+
+        float nx = n.x[i], ny = n.y[i], nz = n.z[i];
+        float v0x = v0.x[i], v0y = v0.y[i], v0z = v0.z[i];
+        float v1x = v1.x[i], v1y = v1.y[i], v1z = v1.z[i];
+        float v2x = v2.x[i], v2y = v2.y[i], v2z = v2.z[i];
+        float e1x = e1.x[i], e1y = e1.y[i], e1z = e1.z[i];
+        float e2x = e2.x[i], e2y = e2.y[i], e2z = e2.z[i];
+
+        if (fabsf(nx) > fabsf(ny) && fabsf(nx) > fabsf(nz)) {
+          float x1 = v1y * v0z - v1z * v0y;
+          float x2 = v2y * v0z - v2z * v0y;
+
+          n0fa = Vec3fa(0,  e2z / nx, -e2y / nx);
+          n1fa = Vec3fa(0, -e1z / nx,  e1y / nx);
+          n2fa = Vec3fa(1,   ny / nx,   nz / nx);
+
+          d0fa =      x2 / nx;
+          d1fa =     -x1 / nx;
+          d2fa = -num[i] / nx;
+        } else if (fabsf(ny) > fabsf(nz)) {
+          float x1 = v1z * v0x - v1x * v0z;
+          float x2 = v2z * v0x - v2x * v0z;
+
+          n0fa = Vec3fa(-e2z / ny, 0,  e2x / ny);
+          n1fa = Vec3fa( e1z / ny, 0, -e1x / ny);
+          n2fa = Vec3fa(  nx / ny, 1,   nz / ny);
+
+          d0fa =      x2 / ny;
+          d1fa =     -x1 / ny;
+          d2fa = -num[i] / ny;
+        } else {
+          float x1 = v1x * v0y - v1y * v0x;
+          float x2 = v2x * v0y - v2y * v0x;
+
+          n0fa = Vec3fa( e2y / nz, -e2x / nz, 0);
+          n1fa = Vec3fa(-e1y / nz,  e1x / nz, 0);
+          n2fa = Vec3fa(  nx / nz,   ny / nz, 1);
+
+          d0fa =      x2 / nz;
+          d1fa =     -x1 / nz;
+          d2fa = -num[i] / nz;
+        }
+        n0.x[i] = n0fa.x; n0.y[i] = n0fa.y; n0.z[i] = n0fa.z;
+        n1.x[i] = n1fa.x; n1.y[i] = n1fa.y; n1.z[i] = n1fa.z;
+        n2.x[i] = n2fa.x; n2.y[i] = n2fa.y; n2.z[i] = n2fa.z;
+        d0[i] = d0fa; d1[i] = d1fa; d2[i] = d2fa;
+      }
+      this->ng = cross(v1 - v0, v2 - v0);
       #else
       #error "Wrong ISECT_METHOD!"
       #endif
@@ -145,6 +206,22 @@ namespace embree
       vfloat<M>::store_nt(&dst->n2.x, src.n2.x);
       vfloat<M>::store_nt(&dst->n2.y, src.n2.y);
       vfloat<M>::store_nt(&dst->n2.z, src.n2.z);
+      vfloat<M>::store_nt(&dst->d0, src.d0);
+      vfloat<M>::store_nt(&dst->d1, src.d1);
+      vfloat<M>::store_nt(&dst->d2, src.d2);
+      #elif ISECT_METHOD == ISECT_BW12
+      vfloat<M>::store_nt(&dst->n0.x, src.n0.x);
+      vfloat<M>::store_nt(&dst->n0.y, src.n0.y);
+      vfloat<M>::store_nt(&dst->n0.z, src.n0.z);
+      vfloat<M>::store_nt(&dst->n1.x, src.n1.x);
+      vfloat<M>::store_nt(&dst->n1.y, src.n1.y);
+      vfloat<M>::store_nt(&dst->n1.z, src.n1.z);
+      vfloat<M>::store_nt(&dst->n2.x, src.n2.x);
+      vfloat<M>::store_nt(&dst->n2.y, src.n2.y);
+      vfloat<M>::store_nt(&dst->n2.z, src.n2.z);
+      vfloat<M>::store_nt(&dst->ng.x, src.ng.x);
+      vfloat<M>::store_nt(&dst->ng.y, src.ng.y);
+      vfloat<M>::store_nt(&dst->ng.z, src.ng.z);
       vfloat<M>::store_nt(&dst->d0, src.d0);
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
@@ -207,6 +284,10 @@ namespace embree
     #if ISECT_METHOD == ISECT_HH
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
+    #elif ISECT_METHOD == ISECT_BW12
+    Vec3vf<M> n0, n1, n2;
+    vfloat<M> d0, d1, d2;
+    Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
         ISECT_METHOD == ISECT_MT

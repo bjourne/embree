@@ -10,9 +10,6 @@ isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
           MTHit<K>& hit, const vbool<K>& valid0) {
   Vec3vf<K> pvec = cross(d, e2);
   vfloat<K> det = dot(e1, pvec);
-  vbool<K> valid = valid0 & (det != vfloat<K>(zero));
-  if (unlikely(none(valid)))
-    return false;
 
   vfloat<K> rdet = rcp(det);
   Vec3vf<K> tvec = o - v0;
@@ -20,12 +17,10 @@ isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
   vfloat<K> u = dot(tvec, pvec) * rdet;
   Vec3vf<K> qvec = cross(tvec, e1);
   vfloat<K> v = dot(d, qvec) * rdet;
-  valid &= (u >= 0.0f) & (v >= 0.0f) & (u + v <= 1.0f);
-  if (likely(none(valid)))
-    return false;
 
   vfloat<K> t = dot(e2, qvec) * rdet;
-  valid &= (tn < t) & (t <= tf);
+  const vbool<K> valid = (u >= 0.0f) & (v >= 0.0f) & (u + v <= 1.0f)
+    & (tn < t) & (t <= tf);
   if (likely(none(valid)))
     return false;
 

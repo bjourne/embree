@@ -41,6 +41,8 @@ namespace embree
     #include "triangle_intersector_sf01.h"
     #elif ISECT_METHOD == ISECT_MT
     #include "triangle_intersector_mt.h"
+    #elif ISECT_METHOD == ISECT_BW12
+    #include "triangle_intersector_bw12.h"
     #else
     #error "Wrong ISECT_METHOD!"
     #endif
@@ -337,7 +339,9 @@ namespace embree
         Geometry* geometry MAYBE_UNUSED = scene->get(geomID);
 
         /* call intersection filter function */
-        if (unlikely(context->hasContextFilter() || geometry->hasIntersectionFilter())) {
+        if (unlikely(context->hasContextFilter() ||
+                     geometry->hasIntersectionFilter())) {
+          printf("we have intersection filter?\n");
           const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
           HitK<1> h(context->instID,
                     geomID, tri.primIDs[i],
@@ -348,9 +352,10 @@ namespace embree
           const bool found = runIntersectionFilter1(geometry,
                                                     ray,
                                                     context,h);
-          if (!found) ray.tfar = old_t;
+          if (!found)
+            ray.tfar = old_t;
           foundhit |= found;
-          clear(valid,i);
+          clear(valid, i);
           // intersection filters may modify tfar value
           valid &= hit.T <= ray.tfar;
           continue;
