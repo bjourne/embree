@@ -8,42 +8,36 @@ isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
           const Vec3vf<K>& e1,
           const Vec3vf<K>& e2,
           MTHit<K>& hit, const vbool<K>& valid0) {
-  Vec3vf<K> v1 = v0 - e1;
-  Vec3vf<K> v2 = e2 + v0;
-
-  Vec3vf<K> v0o = v0 - o;
-  Vec3vf<K> v1o = v1 - o;
-  Vec3vf<K> v2o = v2 - o;
-
-  vfloat<K> w2 = dot(d, cross(v1o, v0o));
-  vfloat<K> w0 = dot(d, cross(v2o, v1o));
-  vbool<K> s2 = w2 >= vfloat<K>(zero);
-  vbool<K> s0 = w0 >= vfloat<K>(zero);
-
-  vfloat<K> w1 = dot(d, cross(v0o, v2o));
-  vbool<K> s1 = w1 >= vfloat<K>(zero);
-  vbool<K> valid = valid0 & (s2 == s1) & (s0 == s2);
-
-  Vec3vf<K> ng = cross(e2, e1);
-  vfloat<K> den = dot(ng, d);
-  vfloat<K> t = dot(ng, v0o) * rcp(den);
-  valid &= (tn < t) & (t <= tf);
-  if (likely(none(valid))) {
+  Vec3vf<K> pvec = cross(d, e2);
+  vfloat<K> det = dot(e1, pvec);
+  vbool<K> valid = valid0 & (det != vfloat<K>(zero));
+  if (unlikely(none(valid)))
     return false;
-  }
 
-  vfloat<K> rcpSum = rcp(w0 + w1 + w2);
-  vfloat<K> u = w1 * rcpSum;
-  vfloat<K> v = w2 * rcpSum;
+  vfloat<K> rdet = rcp(det);
+  Vec3vf<K> tvec = o - v0;
 
-  new (&hit) MTHit<K>(valid, u, v, t, ng);
+  vfloat<K> u = dot(tvec, pvec) * rdet;
+  Vec3vf<K> qvec = cross(tvec, e1);
+  vfloat<K> v = dot(d, qvec) * rdet;
+  valid &= (u >= 0.0f) & (v >= 0.0f) & (u + v <= 1.0f);
+  if (likely(none(valid)))
+    return false;
+
+  vfloat<K> t = dot(e2, qvec) * rdet;
+  valid &= (tn < t) & (t <= tf);
+  if (likely(none(valid)))
+    return false;
+
+  new (&hit) MTHit<K>(valid, u, v, t, cross(e2, e1));
   return true;
 }
 
 template<int M, int K>
 static __forceinline bool
-intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
-                    vfloat<K> tn, vfloat<K> tf,
+intersectKRaysMTris(const Vec3vf<K>& o,
+                    const Vec3vf<K>& d,
+                    const vfloat<K>& tn, const vfloat<K>& tf,
                     size_t i,
                     const vbool<K>& valid0,
                     MTHit<K>& hit,
@@ -57,8 +51,8 @@ intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
 
 template<int M>
 static __forceinline bool
-intersect1RayMTris(const Vec3vf<M>& o, Vec3vf<M> d,
-                   vfloat<M> tn, vfloat<M> tf,
+intersect1RayMTris(const Vec3vf<M>& o, const Vec3vf<M>& d,
+                   const vfloat<M>& tn, const vfloat<M>& tf,
                    const TriangleM<M>& tri, MTHit<M>& hit)
 {
   return isectAlgo<M>(o, d,

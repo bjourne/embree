@@ -2,7 +2,8 @@
 
 template<int K>
 static __forceinline bool
-isectAlgo(Vec3vf<K> o, Vec3vf<K> d,
+isectAlgo(const Vec3vf<K>& o,
+          const Vec3vf<K>& d,
           vfloat<K> tn, vfloat<K> tf,
           Vec3vf<K> n0, Vec3vf<K> n1, Vec3vf<K> n2,
           vfloat<K> d0, vfloat<K> d1, vfloat<K> d2,
@@ -35,8 +36,8 @@ isectAlgo(Vec3vf<K> o, Vec3vf<K> d,
 
 template<int M, int K>
 static __forceinline bool
-intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
-                    vfloat<K> tn, vfloat<K> tf,
+intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
+                    const vfloat<K>& tn, const vfloat<K>& tf,
                     size_t i,
                     const vbool<K>& valid0,
                     MTHit<K>& hit,
@@ -50,7 +51,7 @@ intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
   vfloat<K> d1 = vfloat<K>(tri.d1[i]);
   vfloat<K> d2 = vfloat<K>(tri.d2[i]);
 
-  return isectAlgo<K>(o, d
+  return isectAlgo<K>(o, d,
                       tn, tf,
                       n0, n1, n2,
                       d0, d1, d2,

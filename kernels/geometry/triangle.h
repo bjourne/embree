@@ -23,8 +23,21 @@
 #define ISECT_EMBREE    0
 #define ISECT_HH        1
 #define ISECT_SF01      2
+#define ISECT_MT        3
 
-#define ISECT_METHOD ISECT_EMBREE
+#define ISECT_METHOD ISECT_MT
+
+#if ISECT_METHOD == ISECT_EMBREE
+#define ISECT_NAME "embree"
+#elif ISECT_METHOD == ISECT_HH
+#define ISECT_NAME "hh"
+#elif ISECT_METHOD == ISECT_SF01
+#define ISECT_NAME "sf01"
+#elif ISECT_METHOD == ISECT_MT
+#define ISECT_NAME "mt"
+#else
+#error "Wrong ISECT_METHOD!"
+#endif
 
 namespace embree
 {
@@ -77,6 +90,12 @@ namespace embree
       this->v0 = v0;
       this->e1 = v0 - v1;
       this->e2 = v2 - v0;
+      #elif ISECT_METHOD == ISECT_MT
+      this->v0 = v0;
+      this->e1 = v1 - v0;
+      this->e2 = v2 - v0;
+      #else
+      #error "Wrong ISECT_METHOD!"
       #endif
     }
 
@@ -129,7 +148,9 @@ namespace embree
       vfloat<M>::store_nt(&dst->d0, src.d0);
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
-      #elif ISECT_METHOD == ISECT_EMBREE || ISECT_METHOD == ISECT_SF01
+      #elif ISECT_METHOD == ISECT_EMBREE || \
+        ISECT_METHOD == ISECT_SF01 || \
+        ISECT_METHOD == ISECT_MT
       vfloat<M>::store_nt(&dst->v0.x, src.v0.x);
       vfloat<M>::store_nt(&dst->v0.y, src.v0.y);
       vfloat<M>::store_nt(&dst->v0.z, src.v0.z);
@@ -139,6 +160,8 @@ namespace embree
       vfloat<M>::store_nt(&dst->e2.x, src.e2.x);
       vfloat<M>::store_nt(&dst->e2.y, src.e2.y);
       vfloat<M>::store_nt(&dst->e2.z, src.e2.z);
+      #else
+      #error "Wrong ISECT_METHOD!"
       #endif
     }
 
@@ -184,10 +207,14 @@ namespace embree
     #if ISECT_METHOD == ISECT_HH
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
-    #elif ISECT_METHOD == ISECT_EMBREE || ISECT_METHOD == ISECT_SF01
+    #elif ISECT_METHOD == ISECT_EMBREE || \
+        ISECT_METHOD == ISECT_SF01 || \
+        ISECT_METHOD == ISECT_MT
     Vec3vf<M> v0;      // base vertex of the triangles
     Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
     Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
+    #else
+    #error "Wrong ISECT_METHOD!"
     #endif
   };
 }

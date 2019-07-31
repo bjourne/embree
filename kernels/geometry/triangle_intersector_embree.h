@@ -18,7 +18,6 @@ intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
   Vec3<vfloat<K>> ng = cross(e2, e1);
 
   /* calculate denominator */
-  vbool<K> valid = valid0;
   const Vec3vf<K> c = v0 - o;
   const Vec3vf<K> r = cross(c, d);
   const vfloat<K> den = dot(ng, d);
@@ -27,7 +26,7 @@ intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
 
   /* test against edge e2 v0 */
   const vfloat<K> u = dot(e2, r) ^ sgnDen;
-  valid &= u >= 0.0f;
+  vbool<K> valid = valid0 & (u >= 0.0f);
   if (likely(none(valid))) {
     return false;
   }
