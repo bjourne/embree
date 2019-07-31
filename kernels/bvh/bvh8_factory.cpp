@@ -94,13 +94,7 @@ namespace embree
            "mesh->quality = %d\n", mesh->quality);
     BVH8Factory* factory = mesh->scene->device->bvh8_factory.get();
     accel = new BVH8(mesh->scene);
-    switch (mesh->quality) {
-    case RTC_BUILD_QUALITY_MEDIUM:
-    case RTC_BUILD_QUALITY_HIGH:
-      builder = factory->BVH8Triangle4MeshBuilderSAH(accel,mesh,0); break;
-    default:
-      throw_RTCError(RTC_ERROR_UNKNOWN,"invalid build quality");
-    }
+    builder = factory->BVH8Triangle4MeshBuilderSAH(accel,mesh,0);
   }
 
   Accel::Intersectors

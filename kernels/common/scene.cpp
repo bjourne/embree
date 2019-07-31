@@ -39,7 +39,6 @@ namespace embree
     : device(device),
       flags_modified(true), enabled_geometry_types(0),
       scene_flags(RTC_SCENE_FLAG_NONE),
-      quality_flags(RTC_BUILD_QUALITY_MEDIUM),
       is_build(false), modified(true),
       progressInterface(this), progress_monitor_function(nullptr), progress_monitor_ptr(nullptr), progress_monitor_counter(0),
       numIntersectionFiltersN(0)
@@ -56,9 +55,6 @@ namespace embree
 
     intersectors = Accel::Intersectors(missing_rtcCommit);
 
-    /* one can overwrite flags through device for debugging */
-    if (device->quality_flags != -1)
-      quality_flags = (RTCBuildQuality) device->quality_flags;
     if (device->scene_flags != -1)
       scene_flags = (RTCSceneFlags) device->scene_flags;
   }
@@ -123,27 +119,24 @@ namespace embree
     }
   }
 
-  // device->tri_accel has to be default and only
-  // RTC_BUILD_QUALITY_MEDIUM is ok.
+  // device->tri_accel has to be default
   void Scene::createTriangleAccel()
   {
-    printf("Scene::createTriangleAccel device->tri_accel = %s\n",
+    printf("Scene::createTriangleAccel "
+           "device->tri_accel = %s",
            device->tri_accel.c_str());
 #if defined (EMBREE_TARGET_SIMD8)
-    if (device->canUseAVX())
-    {
-      if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-        accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-      else
-        accels_add(device->bvh8_factory->BVH8Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+    if (device->canUseAVX()) {
+      accels_add(device->bvh8_factory->BVH8Triangle4(this,
+                                                     BVHFactory::BuildVariant::STATIC,
+                                                     BVHFactory::IntersectVariant::FAST));
     }
     else
 #endif
     {
-      if (quality_flags == RTC_BUILD_QUALITY_HIGH)
-        accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::HIGH_QUALITY,BVHFactory::IntersectVariant::FAST));
-      else
-        accels_add(device->bvh4_factory->BVH4Triangle4(this,BVHFactory::BuildVariant::STATIC,BVHFactory::IntersectVariant::FAST));
+      accels_add(device->bvh4_factory->BVH4Triangle4(this,
+                                                     BVHFactory::BuildVariant::STATIC,
+                                                     BVHFactory::IntersectVariant::FAST));
     }
   }
 
@@ -156,12 +149,14 @@ namespace embree
     if (geomID == RTC_INVALID_GEOMETRY_ID) {
       geomID = id_pool.allocate();
       if (geomID == RTC_INVALID_GEOMETRY_ID)
-        throw_RTCError(RTC_ERROR_INVALID_OPERATION,"too many geometries inside scene");
+        throw_RTCError(RTC_ERROR_INVALID_OPERATION,
+                       "too many geometries inside scene");
     }
     else
     {
       if (!id_pool.add(geomID))
-        throw_RTCError(RTC_ERROR_INVALID_OPERATION,"invalid geometry ID provided");
+        throw_RTCError(RTC_ERROR_INVALID_OPERATION,
+                       "invalid geometry ID provided");
     }
     if (geomID >= geometries.size()) {
       geometries.resize(geomID+1);
@@ -254,17 +249,6 @@ namespace embree
     }
 
     setModified(false);
-  }
-
-  void Scene::setBuildQuality(RTCBuildQuality quality_flags_i)
-  {
-    if (quality_flags == quality_flags_i) return;
-    quality_flags = quality_flags_i;
-    flags_modified = true;
-  }
-
-  RTCBuildQuality Scene::getBuildQuality() const {
-    return quality_flags;
   }
 
   void Scene::setSceneFlags(RTCSceneFlags scene_flags_i)

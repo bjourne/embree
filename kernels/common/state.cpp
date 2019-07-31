@@ -35,7 +35,7 @@ namespace embree
     thread_errors.clear();
   }
 
-  RTCError* State::ErrorHandler::error() 
+  RTCError* State::ErrorHandler::error()
   {
     RTCError* stored_error = (RTCError*) getTls(thread_error);
     if (stored_error) return stored_error;
@@ -47,7 +47,7 @@ namespace embree
     return stored_error;
   }
 
-  State::State () 
+  State::State ()
     : enabled_cpu_features(getCPUFeatures()),
       enabled_builder_cpu_features(enabled_cpu_features),
       frequency_level(FREQUENCY_SIMD256)
@@ -55,7 +55,7 @@ namespace embree
     tri_accel = "default";
     tri_builder = "default";
     tri_traverser = "default";
-    
+
     tri_accel_mb = "default";
     tri_builder_mb = "default";
     tri_traverser_mb = "default";
@@ -75,7 +75,7 @@ namespace embree
     line_accel_mb = "default";
     line_builder_mb = "default";
     line_traverser_mb = "default";
-    
+
     hair_accel = "default";
     hair_builder = "default";
     hair_traverser = "default";
@@ -109,7 +109,7 @@ namespace embree
 
     instancing_open_min = 0;
     instancing_block_size = 0;
-    instancing_open_factor = 8.0f; 
+    instancing_open_factor = 8.0f;
     instancing_open_max_depth = 32;
     instancing_open_max = 50000000;
 
@@ -194,11 +194,11 @@ namespace embree
     FILE* f = fopen(fileName.c_str(),"r");
     if (!f) return false;
     Ref<Stream<int> > file = new FileStream(f,fileName);
-    
+
     std::vector<std::string> syms;
-    for (size_t i=0; i<sizeof(symbols)/sizeof(void*); i++) 
+    for (size_t i=0; i<sizeof(symbols)/sizeof(void*); i++)
       syms.push_back(symbols[i]);
-    
+
     Ref<TokenStream> cin = new TokenStream(new LineCommentFilter(file,"#"),
                                            TokenStream::alpha+TokenStream::ALPHA+TokenStream::numbers+"_.",
                                            TokenStream::separators,syms);
@@ -211,15 +211,15 @@ namespace embree
     if (cfg == nullptr) return;
 
     std::vector<std::string> syms;
-    for (size_t i=0; i<sizeof(symbols)/sizeof(void*); i++) 
+    for (size_t i=0; i<sizeof(symbols)/sizeof(void*); i++)
       syms.push_back(symbols[i]);
-    
+
     Ref<TokenStream> cin = new TokenStream(new StrStream(cfg),
                                            TokenStream::alpha+TokenStream::ALPHA+TokenStream::numbers+"_.",
                                            TokenStream::separators,syms);
     parse(cin);
   }
-  
+
   int string_to_cpufeatures(const std::string& isa)
   {
     if      (isa == "sse" ) return SSE;
@@ -245,18 +245,18 @@ namespace embree
     {
       const Token tok = cin->get();
 
-      if (tok == Token::Id("threads") && cin->trySymbol("=")) 
+      if (tok == Token::Id("threads") && cin->trySymbol("="))
         numThreads = cin->get().Int();
 
-      else if (tok == Token::Id("set_affinity")&& cin->trySymbol("=")) 
+      else if (tok == Token::Id("set_affinity")&& cin->trySymbol("="))
         set_affinity = cin->get().Int();
 
-      else if (tok == Token::Id("affinity")&& cin->trySymbol("=")) 
+      else if (tok == Token::Id("affinity")&& cin->trySymbol("="))
         set_affinity = cin->get().Int();
-      
-      else if (tok == Token::Id("start_threads")&& cin->trySymbol("=")) 
+
+      else if (tok == Token::Id("start_threads")&& cin->trySymbol("="))
         start_threads = cin->get().Int();
-      
+
       else if (tok == Token::Id("isa") && cin->trySymbol("=")) {
         std::string isa = toLowerCase(cin->get().Identifier());
         enabled_cpu_features = string_to_cpufeatures(isa);
@@ -290,7 +290,7 @@ namespace embree
 
       else if (tok == Token::Id("ignore_config_files") && cin->trySymbol("="))
         ignore_config_files = cin->get().Int();
-      else if (tok == Token::Id("float_exceptions") && cin->trySymbol("=")) 
+      else if (tok == Token::Id("float_exceptions") && cin->trySymbol("="))
         float_exceptions = cin->get().Int();
 
       else if ((tok == Token::Id("tri_accel") || tok == Token::Id("accel")) && cin->trySymbol("="))
@@ -299,7 +299,7 @@ namespace embree
         tri_builder = cin->get().Identifier();
       else if ((tok == Token::Id("tri_traverser") || tok == Token::Id("traverser")) && cin->trySymbol("="))
         tri_traverser = cin->get().Identifier();
-     
+
       else if ((tok == Token::Id("tri_accel_mb") || tok == Token::Id("accel_mb")) && cin->trySymbol("="))
         tri_accel_mb = cin->get().Identifier();
       else if ((tok == Token::Id("tri_builder_mb") || tok == Token::Id("builder_mb")) && cin->trySymbol("="))
@@ -334,7 +334,7 @@ namespace embree
         line_builder_mb = cin->get().Identifier();
       else if ((tok == Token::Id("line_traverser_mb")) && cin->trySymbol("="))
         line_traverser_mb = cin->get().Identifier();
-      
+
       else if (tok == Token::Id("hair_accel") && cin->trySymbol("="))
         hair_accel = cin->get().Identifier();
       else if (tok == Token::Id("hair_builder") && cin->trySymbol("="))
@@ -391,18 +391,16 @@ namespace embree
         grid_accel = cin->get().Identifier();
       else if (tok == Token::Id("grid_accel_mb") && cin->trySymbol("="))
         grid_accel_mb = cin->get().Identifier();
-      
+
       else if (tok == Token::Id("verbose") && cin->trySymbol("="))
         verbose = cin->get().Int();
       else if (tok == Token::Id("benchmark") && cin->trySymbol("="))
         benchmark = cin->get().Int();
-      
+
       else if (tok == Token::Id("quality")) {
         if (cin->trySymbol("=")) {
           Token flag = cin->get();
-          if      (flag == Token::Id("low"))    quality_flags = RTC_BUILD_QUALITY_LOW;
-          else if (flag == Token::Id("medium")) quality_flags = RTC_BUILD_QUALITY_MEDIUM;
-          else if (flag == Token::Id("high"))   quality_flags = RTC_BUILD_QUALITY_HIGH;
+          quality_flags = RTC_BUILD_QUALITY_MEDIUM;
         }
       }
 
@@ -417,7 +415,7 @@ namespace embree
           } while (cin->trySymbol("|"));
         }
       }
-      
+
       else if (tok == Token::Id("max_spatial_split_replications") && cin->trySymbol("="))
         max_spatial_split_replications = cin->get().Float();
 
@@ -459,7 +457,7 @@ namespace embree
     case FREQUENCY_SIMD512: std::cout << "simd512" << std::endl; break;
     default: std::cout << "error" << std::endl; break;
     }
-    
+
     std::cout << "  hugepages     = ";
     if (!hugepages) std::cout << "disabled" << std::endl;
     else if (hugepages_success) std::cout << "enabled" << std::endl;
@@ -468,12 +466,12 @@ namespace embree
     std::cout << "  verbosity     = " << verbose << std::endl;
     std::cout << "  cache_size    = " << float(tessellation_cache_size)*1E-6 << " MB" << std::endl;
     std::cout << "  max_spatial_split_replications = " << max_spatial_split_replications << std::endl;
-    
+
     std::cout << "triangles:" << std::endl;
     std::cout << "  accel         = " << tri_accel << std::endl;
     std::cout << "  builder       = " << tri_builder << std::endl;
     std::cout << "  traverser     = " << tri_traverser << std::endl;
-        
+
     std::cout << "motion blur triangles:" << std::endl;
     std::cout << "  accel         = " << tri_accel_mb << std::endl;
     std::cout << "  builder       = " << tri_builder_mb << std::endl;
@@ -498,7 +496,7 @@ namespace embree
     std::cout << "  accel         = " << line_accel_mb << std::endl;
     std::cout << "  builder       = " << line_builder_mb << std::endl;
     std::cout << "  traverser     = " << line_traverser_mb << std::endl;
-    
+
     std::cout << "hair:" << std::endl;
     std::cout << "  accel         = " << hair_accel << std::endl;
     std::cout << "  builder       = " << hair_builder << std::endl;
@@ -508,7 +506,7 @@ namespace embree
     std::cout << "  accel         = " << hair_accel_mb << std::endl;
     std::cout << "  builder       = " << hair_builder_mb << std::endl;
     std::cout << "  traverser     = " << hair_traverser_mb << std::endl;
-    
+
     std::cout << "subdivision surfaces:" << std::endl;
     std::cout << "  accel         = " << subdiv_accel << std::endl;
 

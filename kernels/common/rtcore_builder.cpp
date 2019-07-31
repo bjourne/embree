@@ -278,11 +278,7 @@ RTC_NAMESPACE_BEGIN
       bvh->allocator.reset();
 
       /* switch between differnet builders based on quality level */
-      if (arguments->buildQuality == RTC_BUILD_QUALITY_LOW) {
-      } else if (arguments->buildQuality == RTC_BUILD_QUALITY_MEDIUM)
-        return rtcBuildBVHBinnedSAH(arguments);
-      else
-        throw_RTCError(RTC_ERROR_INVALID_OPERATION,"invalid build quality");
+      return rtcBuildBVHBinnedSAH(arguments);
 
       RTC_CATCH_END(bvh->device);
       return nullptr;

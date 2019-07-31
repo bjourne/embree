@@ -159,9 +159,6 @@ namespace embree
     /*! detaches some geometry */
     void detachGeometry(size_t geomID);
 
-    void setBuildQuality(RTCBuildQuality quality_flags);
-    RTCBuildQuality getBuildQuality() const;
-
     void setSceneFlags(RTCSceneFlags scene_flags);
     RTCSceneFlags getSceneFlags() const;
 
@@ -258,7 +255,6 @@ namespace embree
     unsigned int enabled_geometry_types;
 
     RTCSceneFlags scene_flags;
-    RTCBuildQuality quality_flags;
     MutexSys buildMutex;
     SpinLock geometriesMutex;
     bool is_build;

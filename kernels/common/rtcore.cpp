@@ -190,20 +190,6 @@ RTC_NAMESPACE_BEGIN;
     RTC_CATCH_END2(scene);
   }
 
-  RTC_API void rtcSetSceneBuildQuality (RTCScene hscene, RTCBuildQuality quality)
-  {
-    Scene* scene = (Scene*) hscene;
-    RTC_CATCH_BEGIN;
-    RTC_TRACE(rtcSetSceneBuildQuality);
-    RTC_VERIFY_HANDLE(hscene);
-    if (quality != RTC_BUILD_QUALITY_LOW &&
-        quality != RTC_BUILD_QUALITY_MEDIUM &&
-        quality != RTC_BUILD_QUALITY_HIGH)
-      throw std::runtime_error("invalid build quality");
-    scene->setBuildQuality(quality);
-    RTC_CATCH_END2(scene);
-  }
-
   RTC_API void rtcSetSceneFlags (RTCScene hscene, RTCSceneFlags flags)
   {
     Scene* scene = (Scene*) hscene;
@@ -1153,22 +1139,6 @@ rtcIntersect1M (RTCScene hscene,
     RTC_TRACE(rtcSetGeometryTopologyCount);
     RTC_VERIFY_HANDLE(hgeometry);
     geometry->setTopologyCount(N);
-    RTC_CATCH_END2(geometry);
-  }
-
-  /*! sets the build quality of the geometry */
-  RTC_API void rtcSetGeometryBuildQuality (RTCGeometry hgeometry, RTCBuildQuality quality)
-  {
-    Geometry* geometry = (Geometry*) hgeometry;
-    RTC_CATCH_BEGIN;
-    RTC_TRACE(rtcSetGeometryBuildQuality);
-    RTC_VERIFY_HANDLE(hgeometry);
-    if (quality != RTC_BUILD_QUALITY_LOW &&
-        quality != RTC_BUILD_QUALITY_MEDIUM &&
-        quality != RTC_BUILD_QUALITY_HIGH &&
-        quality != RTC_BUILD_QUALITY_REFIT)
-      throw std::runtime_error("invalid build quality");
-    geometry->setBuildQuality(quality);
     RTC_CATCH_END2(geometry);
   }
 

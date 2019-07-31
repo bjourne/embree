@@ -26,6 +26,7 @@
 
 #include "../../common/tasking/taskscheduler.h"
 #include "../../common/sys/alloc.h"
+#include "../geometry/triangle.h"
 
 namespace embree
 {
@@ -44,6 +45,7 @@ namespace embree
   Device::Device (const char* cfg)
   {
     printf("Device::Device\n");
+    printf("Running with triangle intersector %s\n", ISECT_NAME);
     /* check CPU */
     if (!hasISA(ISA))
       throw_RTCError(RTC_ERROR_UNSUPPORTED_CPU,"CPU does not support " ISA_STR);
@@ -56,15 +58,14 @@ namespace embree
       State::parseFile(FileName::homeFolder()+FileName(".embree" TOSTRING(RTC_VERSION_MAJOR)));
     State::verify();
 
-    /*! do some internal tests */
-    assert(isa::Cylinder::verify());
-
     /*! enable huge page support if desired */
 #if defined(__WIN32__)
     if (State::enable_selockmemoryprivilege)
-      State::hugepages_success &= win_enable_selockmemoryprivilege(State::verbosity(3));
+      State::hugepages_success &= win_enable_selockmemoryprivilege(
+        State::verbosity(3));
 #endif
-    State::hugepages_success &= os_init(State::hugepages,State::verbosity(3));
+    State::hugepages_success &= os_init(
+      State::hugepages,State::verbosity(3));
 
     /*! set tessellation cache size */
     setCacheSize( State::tessellation_cache_size );
@@ -89,11 +90,13 @@ namespace embree
       State::print();
 
     /* register all algorithms */
-    bvh4_factory = make_unique(new BVH4Factory(enabled_builder_cpu_features, enabled_cpu_features));
+    bvh4_factory = make_unique(new BVH4Factory(enabled_builder_cpu_features,
+                                               enabled_cpu_features));
 
 #if defined(EMBREE_TARGET_SIMD8)
     printf("EMBREE_TARGET_SIMD8 is defined\n");
-    bvh8_factory = make_unique(new BVH8Factory(enabled_builder_cpu_features, enabled_cpu_features));
+    bvh8_factory = make_unique(new BVH8Factory(enabled_builder_cpu_features,
+                                               enabled_cpu_features));
 #endif
 
     /* setup tasking system */
