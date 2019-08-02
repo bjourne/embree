@@ -597,10 +597,7 @@ namespace embree
       for (size_t i=0; i<skipBenchmarkFrames; i++)
       {
         initRayStats();
-        double t0 = getSeconds();
         device_render(pixels,width,height,0.0f,ispccamera);
-        double t1 = getSeconds();
-        std::cout << "frame [" << std::setw(3) << i << " / " << std::setw(3) << numTotalFrames << "]: " <<  std::setw(8) << 1.0/(t1-t0) << " fps (skipped)" << std::endl << std::flush;
       }
 
       for (size_t i=skipBenchmarkFrames; i<numTotalFrames; i++)

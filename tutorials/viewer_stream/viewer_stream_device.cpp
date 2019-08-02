@@ -331,7 +331,9 @@ renderTileStandard(int taskIndex,
   /* trace stream of rays */
 #if USE_INTERFACE == 0
   //printf("Streaming %d rays...\n", N);
-  rtcIntersect1M(g_scene,&context,(RTCRayHit*)&rays[0],N,sizeof(Ray));
+  rtcIntersect1M(g_scene,
+                 &context,
+                 (RTCRayHit*)&rays[0], N, sizeof(Ray));
 #elif USE_INTERFACE == 1
   for (unsigned int i=0; i<N; i++)
     rtcIntersect1(g_scene,&context,RTCRayHit_(rays[i]));
