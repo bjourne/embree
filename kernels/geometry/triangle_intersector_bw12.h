@@ -14,7 +14,8 @@ isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
   Vec3vf<K> wr = o + d * t;
   vfloat<K> u = dot(wr, n0) + d0;
   vfloat<K> v = dot(wr, n1) + d1;
-  const vbool<K> valid = (u >= 0.0f) & (v >= 0.0f) & (u + v <= 1.0f)
+  const vbool<K> valid = valid0
+    & (u >= 0.0f) & (v >= 0.0f) & (u + v <= 1.0f)
     & (tn < t) & (t <= tf);
   if (likely(none(valid)))
     return false;

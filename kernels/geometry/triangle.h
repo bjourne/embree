@@ -25,8 +25,9 @@
 #define ISECT_SF01      2
 #define ISECT_MT        3
 #define ISECT_BW12      4
+#define ISECT_BW9       5
 
-#define ISECT_METHOD ISECT_BW12
+#define ISECT_METHOD ISECT_BW9
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -38,6 +39,8 @@
 #define ISECT_NAME "mt"
 #elif ISECT_METHOD == ISECT_BW12
 #define ISECT_NAME "bw12"
+#elif ISECT_METHOD == ISECT_BW9
+#define ISECT_NAME "bw9"
 #else
 #error "Wrong ISECT_METHOD!"
 #endif
@@ -155,6 +158,75 @@ namespace embree
         d0[i] = d0fa; d1[i] = d1fa; d2[i] = d2fa;
       }
       this->ng = cross(v1 - v0, v2 - v0);
+      #elif ISECT_METHOD == ISECT_BW9
+      Vec3vf<M> e1 = v1 - v0;
+      Vec3vf<M> e2 = v2 - v0;
+      Vec3vf<M> n = cross(e1, e2);
+      vfloat<M> num = dot(v0, n);
+
+      for (int i = 0; i < M; i++) {
+
+        float nx = n.x[i], ny = n.y[i], nz = n.z[i];
+        float v0x = v0.x[i], v0y = v0.y[i], v0z = v0.z[i];
+        float v1x = v1.x[i], v1y = v1.y[i], v1z = v1.z[i];
+        float v2x = v2.x[i], v2y = v2.y[i], v2z = v2.z[i];
+        float e1x = e1.x[i], e1y = e1.y[i], e1z = e1.z[i];
+        float e2x = e2.x[i], e2y = e2.y[i], e2z = e2.z[i];
+
+        if (fabsf(nx) > fabsf(ny) && fabsf(nx) > fabsf(nz)) {
+          float x1 = v1y * v0z - v1z * v0y;
+          float x2 = v2y * v0z - v2z * v0y;
+
+          aa[i] =  e2z / nx;
+          bb[i] = -e2y / nx;
+          cc[i] =   x2 / nx;
+
+          dd[i] = -e1z / nx;
+          ee[i] =  e1y / nx;
+          ff[i] =  -x1 / nx;
+
+          gg[i] =       ny / nx;
+          hh[i] =       nz / nx;
+          ii[i] =  -num[i] / nx;
+          ci[i] = 0;
+        } else if (fabsf(ny) > fabsf(nz)) {
+
+          float x1 = v1z * v0x - v1x * v0z;
+          float x2 = v2z * v0x - v2x * v0z;
+
+          aa[i] = -e2z / ny;
+          bb[i] =  e2x / ny;
+          cc[i] =   x2 / ny;
+
+          dd[i] =  e1z / ny;
+          ee[i] = -e1x / ny;
+          ff[i] =  -x1 / ny;
+
+          gg[i] =   nx / ny;
+          hh[i] =   nz / ny;
+          ii[i] =  -num[i] / ny;
+
+          ci[i] = 1;
+        } else {
+          float x1 = v1x * v0y - v1y * v0x;
+          float x2 = v2x * v0y - v2y * v0x;
+
+          aa[i] =  e2y / nz;
+          bb[i] = -e2x / nz;
+          cc[i] =   x2 / nz;
+
+          dd[i] = -e1y / nz;
+          ee[i] =  e1x / nz;
+          ff[i] = -x1 / nz;
+
+          gg[i] = nx / nz;
+          hh[i] = ny / nz;
+          ii[i] =  -num[i] / nz;
+
+          ci[i] = 2;
+        }
+      }
+      this->ng = cross(v1 - v0, v2 - v0);
       #else
       #error "Wrong ISECT_METHOD!"
       #endif
@@ -225,6 +297,20 @@ namespace embree
       vfloat<M>::store_nt(&dst->d0, src.d0);
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
+      #elif ISECT_METHOD == ISECT_BW9
+      vfloat<M>::store_nt(&dst->aa, src.aa);
+      vfloat<M>::store_nt(&dst->bb, src.bb);
+      vfloat<M>::store_nt(&dst->cc, src.cc);
+      vfloat<M>::store_nt(&dst->dd, src.dd);
+      vfloat<M>::store_nt(&dst->ee, src.ee);
+      vfloat<M>::store_nt(&dst->ff, src.ff);
+      vfloat<M>::store_nt(&dst->gg, src.gg);
+      vfloat<M>::store_nt(&dst->hh, src.hh);
+      vfloat<M>::store_nt(&dst->ii, src.ii);
+      vint<M>::store_nt(&dst->ci, src.ci);
+      vfloat<M>::store_nt(&dst->ng.x, src.ng.x);
+      vfloat<M>::store_nt(&dst->ng.y, src.ng.y);
+      vfloat<M>::store_nt(&dst->ng.z, src.ng.z);
       #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
         ISECT_METHOD == ISECT_MT
@@ -287,6 +373,10 @@ namespace embree
     #elif ISECT_METHOD == ISECT_BW12
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
+    Vec3vf<M> ng;
+    #elif ISECT_METHOD == ISECT_BW9
+    vfloat<M> aa, bb, cc, dd, ee, ff, gg, hh, ii;
+    vint<M> ci;
     Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
