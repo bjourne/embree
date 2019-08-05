@@ -35,7 +35,7 @@ namespace embree
      * has to be smaller than far */
     __forceinline
     RayK(const Vec3vf<K>& org, const Vec3vf<K>& dir,
-         const vfloat<K>& tnear = zero, const vfloat<K>& tfar = inf,
+         const vfloat<K>& tnear = zero, const vfloat<K>& tfar = 10000.0,
          const vfloat<K>& time = zero, const vint<K>& mask = -1,
          const vint<K>& id = 0, const vint<K>& flags = 0)
       : org(org), dir(dir),
@@ -132,7 +132,7 @@ namespace embree
     /* Constructs a ray from origin, direction, and ray segment. Near
      * has to be smaller than far */
     __forceinline RayHitK(const Vec3vf<K>& org, const Vec3vf<K>& dir,
-                          const vfloat<K>& tnear = zero, const vfloat<K>& tfar = inf,
+                          const vfloat<K>& tnear = zero, const vfloat<K>& tfar = 10000.0,
                           const vfloat<K>& time = zero, const vint<K>& mask = -1, const vint<K>& id = 0, const vint<K>& flags = 0)
       : RayK<K>(org, dir, tnear, tfar, time, mask, id, flags),
         geomID(RTC_INVALID_GEOMETRY_ID) {}
@@ -281,7 +281,7 @@ namespace embree
     RayK(const Vec3fa& org,
          const Vec3fa& dir,
          float tnear = zero,
-         float tfar = inf,
+         float tfar = 10000.0f,
          float time = zero,
          int mask = -1,
          int id = 0,
@@ -335,7 +335,7 @@ namespace embree
 
     /* Constructs a ray from origin, direction, and ray segment. Near
      *  has to be smaller than far */
-    __forceinline RayHitK(const Vec3fa& org, const Vec3fa& dir, float tnear = zero, float tfar = inf, float time = zero, int mask = -1, int id = 0, int flags = 0)
+    __forceinline RayHitK(const Vec3fa& org, const Vec3fa& dir, float tnear = zero, float tfar = 10000.0, float time = zero, int mask = -1, int id = 0, int flags = 0)
       : RayK<1>(org, dir, tnear, tfar, time, mask, id, flags),
         geomID(RTC_INVALID_GEOMETRY_ID) {}
 
