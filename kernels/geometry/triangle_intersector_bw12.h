@@ -43,16 +43,16 @@ intersect1RayMTris(const Vec3vf<M>& o, const Vec3vf<M>& d,
                    const TriangleM<M>& tri, MTHit<M>& hit)
 {
 
-  vfloat<K> t_o = dot(o, tri.n2) + d2;
-  vfloat<K> t_d = dot(d, tri.n2);
-  vfloat<K> t = -t_o * rcp(t_d);
-  Vec3vf<K> wr = o + d * t;
-  vfloat<K> u = dot(wr, tri.n0) + tri.d0;
-  vfloat<K> v = dot(wr, tri.n1) + tri.d1;
-  const vbool<K> valid = (u >= 0.0f) & (v >= 0.0f)
+  vfloat<M> t_o = dot(o, tri.n2) + tri.d2;
+  vfloat<M> t_d = dot(d, tri.n2);
+  vfloat<M> t = -t_o * rcp(t_d);
+  Vec3vf<M> wr = o + d * t;
+  vfloat<M> u = dot(wr, tri.n0) + tri.d0;
+  vfloat<M> v = dot(wr, tri.n1) + tri.d1;
+  const vbool<M> valid = (u >= 0.0f) & (v >= 0.0f)
     & (u + v <= 1.0f) & (tn < t) & (t <= tf);
   if (likely(none(valid)))
     return false;
-  new (&hit) MTHit<K>(valid, u, v, t, ng);
+  new (&hit) MTHit<M>(valid, u, v, t, tri.ng);
   return true;
 }
