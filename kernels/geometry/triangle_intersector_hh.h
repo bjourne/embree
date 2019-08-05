@@ -4,33 +4,33 @@ template<int K>
 static __forceinline bool
 isectAlgo(const Vec3vf<K>& o,
           const Vec3vf<K>& d,
-          vfloat<K> tn, vfloat<K> tf,
-          Vec3vf<K> n0, Vec3vf<K> n1, Vec3vf<K> n2,
-          vfloat<K> d0, vfloat<K> d1, vfloat<K> d2,
+          const vfloat<K>& tn, const vfloat<K>& tf,
+          const Vec3vf<K>& n0, const Vec3vf<K>& n1, const Vec3vf<K>& n2,
+          const vfloat<K>& d0, const vfloat<K>& d1, const vfloat<K>& d2,
           MTHit<K>& hit, const vbool<K>& valid0) {
+
   vfloat<K> det = dot(n0, d);
-  vfloat<K> dett = d0 - dot(o, n0);
-  Vec3vf<K> wr = o * det + d * dett;
 
-  vfloat<K> u = dot(wr, n1) + det * d1;
-  vfloat<K> v = dot(wr, n2) + det * d2;
-  vfloat<K> tmpdet0 = det - u - v;
-  vfloat<K> pdet0 = (tmpdet0 ^ u) | (u ^ v);
-
-  // This allows early return without hitting the division.
-  vbool<K> valid = valid0 & asInt(signmsk(pdet0)) == vint<K>(zero);
-  if (likely(none(valid))) {
-    return false;
-  }
-  vfloat<K> rdet = rcp(det);
-  u = u * rdet;
-  v = v * rdet;
-  vfloat<K> t = dett * rdet;
-  valid &= (tn < t) & (t <= tf);
+  vbool<K> valid = det != vfloat<K>(zero);
   if (unlikely(none(valid))) {
     return false;
   }
-  new (&hit) MTHit<K>(valid, u, v, t, n0);
+
+  vfloat<K> t = d0 - dot(o, n0);
+  Vec3vf<K> wr = o * det + d * t;
+
+  vfloat<K> u = dot(wr, n1) + det * d1;
+  vfloat<K> v = dot(wr, n2) + det * d2;
+  vfloat<K> p0 = ((det - u - v) ^ u) | (u ^ v) | ((tf * det - t) ^ t);
+
+  // This allows early return without hitting the division.
+  valid &= asInt(signmsk(p0)) == vint<K>(zero);
+  if (likely(none(valid))) {
+    return false;
+  }
+
+  vfloat<K> rdet = rcp(det);
+  new (&hit) MTHit<K>(valid, u * rdet, v * rdet, t * rdet, n0);
   return true;
 }
 
