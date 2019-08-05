@@ -70,14 +70,14 @@ intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
 /*! Intersect 1 ray with one of M triangles. */
 template<int M>
 static __forceinline bool
-intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
-                   vfloat<M> tn, vfloat<M> tf,
+intersect1RayMTris(const Vec3vf<M>& o, const Vec3vf<M>& d,
+                   const vfloat<M>& tn, const vfloat<M>& tf,
                    const TriangleM<M>& tri, MTHit<M>& hit)
 {
-  const Vec3vf<M> c = Vec3vf<M>(tri.v0) - o;
+  const Vec3vf<M> c = tri.v0 - o;
   const Vec3vf<M> r = cross(c,d);
   const Vec3vf<M> ng = cross(tri.e2, tri.e1);
-  const vfloat<M> den = dot(Vec3vf<M>(ng), d);
+  const vfloat<M> den = dot(ng, d);
   const vfloat<M> absDen = abs(den);
   const vfloat<M> sgnDen = signmsk(den);
 
@@ -85,9 +85,8 @@ intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
   const vfloat<M> u = dot(r, tri.e2) ^ sgnDen;
   const vfloat<M> v = dot(r, tri.e1) ^ sgnDen;
 
-  /* perform backface culling */
   vbool<M> valid = (den != vfloat<M>(zero)) &
-    (u >= 0.0f) & (v >= 0.0f) & (u+v<=absDen);
+    (u >= 0.0f) & (v >= 0.0f) & (u + v <= absDen);
   if (likely(none(valid)))
     return false;
 
@@ -106,7 +105,3 @@ intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
                       ng);
   return true;
 }
-
-
-// Crown 9.3 viewer
-// Crown 12.9 viewer_ispc

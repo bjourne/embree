@@ -4,35 +4,35 @@ template<int K>
 static __forceinline bool
 isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
           const vfloat<K>& tn, const vfloat<K>& tf,
-          const vfloat<K>& aa, const vfloat<K>& bb, const vfloat<K>& cc,
-          const vfloat<K>& dd, const vfloat<K>& ee, const vfloat<K>& ff,
-          const vfloat<K>& gg, const vfloat<K>& hh, const vfloat<K>& ii,
+          const vfloat<K>& t0, const vfloat<K>& t1, const vfloat<K>& t2,
+          const vfloat<K>& t3, const vfloat<K>& t4, const vfloat<K>& t5,
+          const vfloat<K>& t6, const vfloat<K>& t7, const vfloat<K>& t8,
           int ci,
           const Vec3vf<K> ng,
           MTHit<K>& hit, const vbool<K>& valid0) {
 
   vfloat<K> u, v, t;
-  if (ci == 0) {
-    vfloat<K> t_o = o.x + gg * o.y + hh * o.z + ii;
-    vfloat<K> t_d = d.x + gg * d.y + hh * d.z;
+  if (ci == 1) {
+    vfloat<K> t_o = o.x + t6 * o.y + t7 * o.z + t8;
+    vfloat<K> t_d = d.x + t6 * d.y + t7 * d.z;
     t = -t_o * rcp(t_d);
     Vec3vf<K> wr = o + d * t;
-    u = aa * wr.y + bb * wr.z + cc;
-    v = dd * wr.y + ee * wr.z + ff;
-  } else if (ci == 1) {
-    vfloat<K> t_o = gg * o.x + o.y + hh * o.z + ii;
-    vfloat<K> t_d = gg * d.x + d.y + hh * d.z;
+    u = t0 * wr.y + t1 * wr.z + t2;
+    v = t3 * wr.y + t4 * wr.z + t5;
+  } else if (ci == 2) {
+    vfloat<K> t_o = t6 * o.x + o.y + t7 * o.z + t8;
+    vfloat<K> t_d = t6 * d.x + d.y + t7 * d.z;
     t = -t_o * rcp(t_d);
     Vec3vf<K> wr = o + d * t;
-    u = aa * wr.x + bb * wr.z + cc;
-    v = dd * wr.x + ee * wr.z + ff;
-  } else {
-    vfloat<K> t_o = o.x * gg + o.y * hh + o.z + ii;
-    vfloat<K> t_d = d.x * gg + d.y * hh + d.z;
+    u = t0 * wr.x + t1 * wr.z + t2;
+    v = t3 * wr.x + t4 * wr.z + t5;
+  } else if (ci == 3) {
+    vfloat<K> t_o = t6 * o.x + t7 * o.y + o.z + t8;
+    vfloat<K> t_d = t6 * d.x + t7 * d.y + d.z;
     t = -t_o * rcp(t_d);
     Vec3vf<K> wr = o + d * t;
-    u = aa * wr.x + bb * wr.y + cc;
-    v = dd * wr.x + ee * wr.y + ff;
+    u = t0 * wr.x + t1 * wr.y + t2;
+    v = t3 * wr.x + t4 * wr.y + t5;
   }
   const vbool<K> valid = valid0
     & (u >= 0.0f) & (v >= 0.0f) & (u + v <= 1.0f)
@@ -52,21 +52,22 @@ intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
                     MTHit<K>& hit,
                     const TriangleM<M>& tri)
 {
-  vfloat<K> aa = vfloat<K>(tri.aa[i]);
-  vfloat<K> bb = vfloat<K>(tri.bb[i]);
-  vfloat<K> cc = vfloat<K>(tri.cc[i]);
-  vfloat<K> dd = vfloat<K>(tri.dd[i]);
-  vfloat<K> ee = vfloat<K>(tri.ee[i]);
-  vfloat<K> ff = vfloat<K>(tri.ff[i]);
-  vfloat<K> gg = vfloat<K>(tri.gg[i]);
-  vfloat<K> hh = vfloat<K>(tri.hh[i]);
-  vfloat<K> ii = vfloat<K>(tri.ii[i]);
+  vfloat<K> t0 = vfloat<K>(tri.T[i][0]);
+  vfloat<K> t1 = vfloat<K>(tri.T[i][1]);
+  vfloat<K> t2 = vfloat<K>(tri.T[i][2]);
+  vfloat<K> t3 = vfloat<K>(tri.T[i][3]);
+  vfloat<K> t4 = vfloat<K>(tri.T[i][4]);
+  vfloat<K> t5 = vfloat<K>(tri.T[i][5]);
+  vfloat<K> t6 = vfloat<K>(tri.T[i][6]);
+  vfloat<K> t7 = vfloat<K>(tri.T[i][7]);
+  vfloat<K> t8 = vfloat<K>(tri.T[i][8]);
+  Vec3vf<K> ng = broadcast<vfloat<K>>(tri.ng, i);
   return isectAlgo<K>(o, d,
                       tn, tf,
-                      aa, bb, cc,
-                      dd, ee, ff,
-                      gg, hh, ii,
-                      tri.ci[i], tri.ng,
+                      t0, t1, t2,
+                      t3, t4, t5,
+                      t6, t7, t8,
+                      tri.ci[i], ng,
                       hit, valid0);
 }
 
@@ -77,7 +78,6 @@ intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
                    vfloat<M> tn, vfloat<M> tf,
                    const TriangleM<M>& tri, MTHit<M>& hit)
 {
-  printf("Shouldn't be here!!!\n");
   assert(false);
   return false;
 }

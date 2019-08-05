@@ -100,6 +100,7 @@ namespace embree
       this->v0 = v0;
       this->e1 = v1 - v0;
       this->e2 = v2 - v0;
+
       #elif ISECT_METHOD == ISECT_BW12
 
       Vec3vf<M> e1 = v1 - v0;
@@ -118,7 +119,7 @@ namespace embree
         float e1x = e1.x[i], e1y = e1.y[i], e1z = e1.z[i];
         float e2x = e2.x[i], e2y = e2.y[i], e2z = e2.z[i];
 
-        if (fabsf(nx) > fabsf(ny) && fabsf(nx) > fabsf(nz)) {
+        if (std::fabs(nx) > std::fabs(ny) && std::fabs(nx) > std::fabs(nz)) {
           float x1 = v1y * v0z - v1z * v0y;
           float x2 = v2y * v0z - v2z * v0y;
 
@@ -129,7 +130,7 @@ namespace embree
           d0fa =      x2 / nx;
           d1fa =     -x1 / nx;
           d2fa = -num[i] / nx;
-        } else if (fabsf(ny) > fabsf(nz)) {
+        } else if (std::fabs(ny) > std::fabs(nz)) {
           float x1 = v1z * v0x - v1x * v0z;
           float x2 = v2z * v0x - v2x * v0z;
 
@@ -158,11 +159,13 @@ namespace embree
         d0[i] = d0fa; d1[i] = d1fa; d2[i] = d2fa;
       }
       this->ng = cross(v1 - v0, v2 - v0);
+
       #elif ISECT_METHOD == ISECT_BW9
+
       Vec3vf<M> e1 = v1 - v0;
       Vec3vf<M> e2 = v2 - v0;
       Vec3vf<M> n = cross(e1, e2);
-      vfloat<M> num = dot(v0, n);
+      vfloat<M> nums = dot(v0, n);
 
       for (int i = 0; i < M; i++) {
 
@@ -172,58 +175,57 @@ namespace embree
         float v2x = v2.x[i], v2y = v2.y[i], v2z = v2.z[i];
         float e1x = e1.x[i], e1y = e1.y[i], e1z = e1.z[i];
         float e2x = e2.x[i], e2y = e2.y[i], e2z = e2.z[i];
-
-        if (fabsf(nx) > fabsf(ny) && fabsf(nx) > fabsf(nz)) {
+        float num = nums[i];
+        if (std::fabs(nx) > std::fabs(ny) && std::fabs(nx) > fabs(nz)) {
           float x1 = v1y * v0z - v1z * v0y;
           float x2 = v2y * v0z - v2z * v0y;
 
-          aa[i] =  e2z / nx;
-          bb[i] = -e2y / nx;
-          cc[i] =   x2 / nx;
+          T[i][0] =  e2z / nx;
+          T[i][1] = -e2y / nx;
+          T[i][2] =   x2 / nx;
 
-          dd[i] = -e1z / nx;
-          ee[i] =  e1y / nx;
-          ff[i] =  -x1 / nx;
+          T[i][3] = -e1z / nx;
+          T[i][4] =  e1y / nx;
+          T[i][5] =  -x1 / nx;
 
-          gg[i] =       ny / nx;
-          hh[i] =       nz / nx;
-          ii[i] =  -num[i] / nx;
-          ci[i] = 0;
-        } else if (fabsf(ny) > fabsf(nz)) {
-
+          T[i][6] =   ny / nx;
+          T[i][7] =   nz / nx;
+          T[i][8] = -num / nx;
+          this->ci[i] = 1;
+        } else if (std::fabs(ny) > std::fabs(nz)) {
           float x1 = v1z * v0x - v1x * v0z;
           float x2 = v2z * v0x - v2x * v0z;
 
-          aa[i] = -e2z / ny;
-          bb[i] =  e2x / ny;
-          cc[i] =   x2 / ny;
+          T[i][0] = -e2z / ny;
+          T[i][1] =  e2x / ny;
+          T[i][2] =   x2 / ny;
 
-          dd[i] =  e1z / ny;
-          ee[i] = -e1x / ny;
-          ff[i] =  -x1 / ny;
+          T[i][3] =  e1z / ny;
+          T[i][4] = -e1x / ny;
+          T[i][5] =  -x1 / ny;
 
-          gg[i] =   nx / ny;
-          hh[i] =   nz / ny;
-          ii[i] =  -num[i] / ny;
+          T[i][6] =   nx / ny;
+          T[i][7] =   nz / ny;
+          T[i][8] = -num / ny;
 
-          ci[i] = 1;
+          this->ci[i] = 2;
         } else {
           float x1 = v1x * v0y - v1y * v0x;
           float x2 = v2x * v0y - v2y * v0x;
 
-          aa[i] =  e2y / nz;
-          bb[i] = -e2x / nz;
-          cc[i] =   x2 / nz;
+          T[i][0] =  e2y / nz;
+          T[i][1] = -e2x / nz;
+          T[i][2] =   x2 / nz;
 
-          dd[i] = -e1y / nz;
-          ee[i] =  e1x / nz;
-          ff[i] = -x1 / nz;
+          T[i][3] = -e1y / nz;
+          T[i][4] =  e1x / nz;
+          T[i][5] =  -x1 / nz;
 
-          gg[i] = nx / nz;
-          hh[i] = ny / nz;
-          ii[i] =  -num[i] / nz;
+          T[i][6] =   nx / nz;
+          T[i][7] =   ny / nz;
+          T[i][8] = -num / nz;
 
-          ci[i] = 2;
+          this->ci[i] = 3;
         }
       }
       this->ng = cross(v1 - v0, v2 - v0);
@@ -298,16 +300,8 @@ namespace embree
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
       #elif ISECT_METHOD == ISECT_BW9
-      vfloat<M>::store_nt(&dst->aa, src.aa);
-      vfloat<M>::store_nt(&dst->bb, src.bb);
-      vfloat<M>::store_nt(&dst->cc, src.cc);
-      vfloat<M>::store_nt(&dst->dd, src.dd);
-      vfloat<M>::store_nt(&dst->ee, src.ee);
-      vfloat<M>::store_nt(&dst->ff, src.ff);
-      vfloat<M>::store_nt(&dst->gg, src.gg);
-      vfloat<M>::store_nt(&dst->hh, src.hh);
-      vfloat<M>::store_nt(&dst->ii, src.ii);
-      vint<M>::store_nt(&dst->ci, src.ci);
+      memcpy(dst->T, src.T, sizeof(src.T));
+      memcpy(dst->ci, src.ci, sizeof(ci));
       vfloat<M>::store_nt(&dst->ng.x, src.ng.x);
       vfloat<M>::store_nt(&dst->ng.y, src.ng.y);
       vfloat<M>::store_nt(&dst->ng.z, src.ng.z);
@@ -375,8 +369,8 @@ namespace embree
     vfloat<M> d0, d1, d2;
     Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_BW9
-    vfloat<M> aa, bb, cc, dd, ee, ff, gg, hh, ii;
-    vint<M> ci;
+    float T[4][9];
+    int ci[4];
     Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \

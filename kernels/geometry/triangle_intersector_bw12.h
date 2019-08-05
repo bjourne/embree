@@ -17,6 +17,12 @@ isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
   const vbool<K> valid = valid0
     & (u >= 0.0f) & (v >= 0.0f) & (u + v <= 1.0f)
     & (tn < t) & (t <= tf);
+  for (int j = 0; j < K; j++) {
+    printf("ray [%.2f, %.2f, %.2f] [%.2f, %.2f, %.2f], %d\n",
+           o.x[j], o.y[j], o.z[j],
+           d.x[j], d.y[j], d.z[j],
+           valid[j]);
+  }
   if (likely(none(valid)))
     return false;
 
