@@ -1140,7 +1140,11 @@ inline Vec3fa derivBSpline(const ISPCHairSet* mesh, const unsigned int primID, c
   return Vec3fa(n0*p00 + n1*p01 + n2*p02 + n3*p03);
 }
 
-void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometry* geometry, int& materialID)
+void
+postIntersectGeometry(const Ray& ray,
+                      DifferentialGeometry& dg,
+                      ISPCGeometry* geometry,
+                      int& materialID)
 {
   if (geometry->type == TRIANGLE_MESH)
   {
@@ -1187,159 +1191,6 @@ void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometr
         const float u = ray.u, v = ray.v, w = 1.0f-ray.u-ray.v;
         dg.Ns = w*n0 + u*n1 + v*n2;
       }
-    }
-  }
-  else if (geometry->type == QUAD_MESH)
-  {
-    ISPCQuadMesh* mesh = (ISPCQuadMesh*) geometry;
-    materialID = mesh->geom.materialID;
-    if (mesh->texcoords)
-    {
-      ISPCQuad* quad = &mesh->quads[dg.primID];
-      const Vec2f st0 = mesh->texcoords[quad->v0];
-      const Vec2f st1 = mesh->texcoords[quad->v1];
-      const Vec2f st2 = mesh->texcoords[quad->v2];
-      const Vec2f st3 = mesh->texcoords[quad->v3];
-      if (ray.u+ray.v < 1.0f) {
-        const float u = ray.u, v = ray.v; const float w = 1.0f-u-v;
-        const Vec2f st = w*st0 + u*st1 + v*st3;
-        dg.u = st.x;
-        dg.v = st.y;
-      } else {
-        const float u = 1.0f-ray.u, v = 1.0f-ray.v; const float w = 1.0f-u-v;
-        const Vec2f st = w*st2 + u*st3 + v*st1;
-        dg.u = st.x;
-        dg.v = st.y;
-      }
-    }
-    if (mesh->normals)
-    {
-      if (mesh->numTimeSteps == 1)
-      {
-        ISPCQuad* quad = &mesh->quads[dg.primID];
-        const Vec3fa n0 = Vec3fa(mesh->normals[0][quad->v0]);
-        const Vec3fa n1 = Vec3fa(mesh->normals[0][quad->v1]);
-        const Vec3fa n2 = Vec3fa(mesh->normals[0][quad->v2]);
-        const Vec3fa n3 = Vec3fa(mesh->normals[0][quad->v3]);
-        if (ray.u+ray.v < 1.0f) {
-          const float u = ray.u, v = ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n0 + u*n1 + v*n3;
-        } else {
-          const float u = 1.0f-ray.u, v = 1.0f-ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n2 + u*n3 + v*n1;
-        }
-      }
-      else
-      {
-        ISPCQuad* quad = &mesh->quads[dg.primID];
-        float f = mesh->numTimeSteps*ray.time();
-        int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-        float t1 = f-itime;
-        float t0 = 1.0f-t1;
-        const Vec3fa a0 = Vec3fa(mesh->normals[itime+0][quad->v0]);
-        const Vec3fa a1 = Vec3fa(mesh->normals[itime+0][quad->v1]);
-        const Vec3fa a2 = Vec3fa(mesh->normals[itime+0][quad->v2]);
-        const Vec3fa a3 = Vec3fa(mesh->normals[itime+0][quad->v3]);
-        const Vec3fa b0 = Vec3fa(mesh->normals[itime+1][quad->v0]);
-        const Vec3fa b1 = Vec3fa(mesh->normals[itime+1][quad->v1]);
-        const Vec3fa b2 = Vec3fa(mesh->normals[itime+1][quad->v2]);
-        const Vec3fa b3 = Vec3fa(mesh->normals[itime+1][quad->v3]);
-        const Vec3fa n0 = t0*a0 + t1*b0;
-        const Vec3fa n1 = t0*a1 + t1*b1;
-        const Vec3fa n2 = t0*a2 + t1*b2;
-        const Vec3fa n3 = t0*a3 + t1*b3;
-        if (ray.u+ray.v < 1.0f) {
-          const float u = ray.u, v = ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n0 + u*n1 + v*n3;
-        } else {
-          const float u = 1.0f-ray.u, v = 1.0f-ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n2 + u*n3 + v*n1;
-        }
-      }
-    }
-  }
-  else if (geometry->type == SUBDIV_MESH)
-  {
-    ISPCSubdivMesh* mesh = (ISPCSubdivMesh*) geometry;
-    materialID = mesh->geom.materialID;
-
-    if (g_use_smooth_normals)
-    {
-      Vec3fa dPdu,dPdv;
-      rtcInterpolate1(mesh->geom.geometry,dg.primID,dg.u,dg.v,RTC_BUFFER_TYPE_VERTEX,0,nullptr,&dPdu.x,&dPdv.x,3);
-      dg.Ns = normalize(cross(dPdv,dPdu));
-    }
-
-    const Vec2f st = getTextureCoordinatesSubdivMesh(mesh,dg.primID,ray.u,ray.v);
-    dg.u = st.x;
-    dg.v = st.y;
-  }
-  else if (geometry->type == GRID_MESH)
-  {
-    ISPCGridMesh* mesh = (ISPCGridMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == CURVES)
-  {
-    ISPCHairSet* mesh = (ISPCHairSet*) geometry;
-    materialID = mesh->geom.materialID;
-
-    if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE)
-    {
-      dg.Tx = normalize(dg.Ng);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = normalize(cross(dg.Ty,dg.Tx));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE)
-    {
-      Vec3fa dp = derivBezier(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(Vec3fa(dp));
-      dg.Ty = normalize(cross(Vec3fa(dp),dg.Ng));
-      dg.Ng = dg.Ns = normalize(dg.Ng);
-      dg.eps = 1024.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE)
-    {
-      Vec3fa dp = derivBezier(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(dp);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = dg.Ns = normalize(cross(dg.Ty,dg.Tx));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE)
-    {
-      Vec3fa dp = derivBSpline(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(Vec3fa(dp));
-      dg.Ty = normalize(cross(Vec3fa(dp),dg.Ng));
-      dg.Ng = dg.Ns = normalize(dg.Ng);
-      dg.eps = 1024.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE)
-    {
-      Vec3fa dp = derivBSpline(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(dp);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = dg.Ns = normalize(cross(dg.Ty,dg.Tx));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_ROUND_HERMITE_CURVE)
-    {
-      Vec3fa dp = derivHermite(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(Vec3fa(dp));
-      dg.Ty = normalize(cross(Vec3fa(dp),dg.Ng));
-      dg.Ng = dg.Ns = normalize(dg.Ng);
-      dg.eps = 1024.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE)
-    {
-      Vec3fa dp = derivHermite(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(dp);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = dg.Ns = normalize(cross(dg.Ty,dg.Tx));
     }
   }
   else if (geometry->type == GROUP) {
@@ -1412,7 +1263,8 @@ void intersectionFilterReject(const RTCFilterFunctionNArguments* args)
   if (!valid) return;
 }
 
-void intersectionFilterOBJ(const RTCFilterFunctionNArguments* args)
+void
+intersectionFilterOBJ(const RTCFilterFunctionNArguments* args)
 {
   int* valid_i = args->valid;
   struct RTCRayHitN* _ray = (struct RTCRayHitN*)args->ray;
@@ -1586,7 +1438,7 @@ renderPixelFunction(float x, float y,
 
   /* initialize ray */
   Ray ray(Vec3fa(camera.xfm.p),
-          Vec3fa(normalize(x*camera.xfm.l.vx + y*camera.xfm.l.vy + camera.xfm.l.vz)),
+          Vec3fa(normalize(x * camera.xfm.l.vx + y * camera.xfm.l.vy + camera.xfm.l.vz)),
           0.0f, inf, time);
 
   DifferentialGeometry dg;
@@ -1675,9 +1527,18 @@ renderPixelFunction(float x, float y,
     Lw = Lw*c/wi1.pdf;
 
     /* setup secondary ray */
-    float sign = dot(wi1.v,dg.Ng) < 0.0f ? -1.0f : 1.0f;
+    float sign = dot(wi1.v, dg.Ng) < 0.0f ? -1.0f : 1.0f;
     dg.P = dg.P + sign*dg.eps*dg.Ng;
-    init_Ray(ray, dg.P,normalize(wi1.v),dg.eps,inf,time);
+
+    ray = Ray(dg.P,
+              normalize(wi1.v),
+              dg.eps,
+              inf,
+              time,
+              -1,
+              RTC_INVALID_GEOMETRY_ID,
+              RTC_INVALID_GEOMETRY_ID,
+              RTC_INVALID_GEOMETRY_ID);
   }
   return L;
 }

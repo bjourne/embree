@@ -41,14 +41,14 @@
 
     /*! Constructs a ray from origin, direction, and ray segment. Near
      *  has to be smaller than far. */
-    __forceinline Ray(const embree::Vec3fa& org, 
-                      const embree::Vec3fa& dir, 
-                      float tnear = embree::zero, 
-                      float tfar = embree::inf, 
-                      float time = embree::zero, 
+    __forceinline Ray(const embree::Vec3fa& org,
+                      const embree::Vec3fa& dir,
+                      float tnear = embree::zero,
+                      float tfar = embree::inf,
+                      float time = embree::zero,
                       int mask = -1,
-                      unsigned int geomID = RTC_INVALID_GEOMETRY_ID, 
-                      unsigned int primID = RTC_INVALID_GEOMETRY_ID, 
+                      unsigned int geomID = RTC_INVALID_GEOMETRY_ID,
+                      unsigned int primID = RTC_INVALID_GEOMETRY_ID,
                       unsigned int instID = RTC_INVALID_GEOMETRY_ID)
       : org(org,tnear), dir(dir,time), tfar(tfar), mask(mask), primID(primID), geomID(geomID), instID(instID)  {}
 
@@ -81,16 +81,17 @@
   };
 
 
-__forceinline void init_Ray(Ray &ray,
-                            const embree::Vec3fa& org, 
-                            const embree::Vec3fa& dir, 
-                            float tnear = embree::zero, 
-                            float tfar = embree::inf, 
-                            float time = embree::zero, 
-                            int mask = -1,
-                            unsigned int geomID = RTC_INVALID_GEOMETRY_ID, 
-                            unsigned int primID = RTC_INVALID_GEOMETRY_ID, 
-                            unsigned int instID = RTC_INVALID_GEOMETRY_ID)
+__forceinline void
+init_Ray(Ray &ray,
+         const embree::Vec3fa& org,
+         const embree::Vec3fa& dir,
+         float tnear = embree::zero,
+         float tfar = embree::inf,
+         float time = embree::zero,
+         int mask = -1,
+         unsigned int geomID = RTC_INVALID_GEOMETRY_ID,
+         unsigned int primID = RTC_INVALID_GEOMETRY_ID,
+         unsigned int instID = RTC_INVALID_GEOMETRY_ID)
 {
   ray = Ray(org,dir,tnear,tfar,time,mask,geomID,primID,instID);
 }
@@ -119,9 +120,9 @@ __forceinline RTCRay* RTCRay1_(Ray& ray) {
   return (RTCRay*)&ray;
 }
 
-  /*! Outputs ray to stream. */ 
+  /*! Outputs ray to stream. */
   inline std::ostream& operator<<(std::ostream& cout, const Ray& ray) {
-    return cout << "{ " << 
+    return cout << "{ " <<
       "org = " << ray.org << ", dir = " << ray.dir << ", near = " << ray.tnear() << ", far = " << ray.tfar << ", time = " << ray.time() << ", " <<
       "instID = " << ray.instID <<  ", geomID = " << ray.geomID << ", primID = " << ray.primID <<  ", " << "u = " << ray.u <<  ", v = " << ray.v << ", Ng = " << ray.Ng << " }";
   }
