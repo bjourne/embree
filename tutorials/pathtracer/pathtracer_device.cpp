@@ -1012,134 +1012,6 @@ inline Vec3fa face_forward(const Vec3fa& dir, const Vec3fa& _Ng) {
   return dot(dir,Ng) < 0.0f ? Ng : neg(Ng);
 }
 
-inline Vec3fa derivBezier(const ISPCHairSet* mesh, const unsigned int primID, const float t, const float time)
-{
-  Vec3fa p00, p01, p02, p03;
-  const int i = mesh->hairs[primID].vertex;
-
-  if (mesh->numTimeSteps == 1)
-  {
-    p00 = mesh->positions[0][i+0];
-    p01 = mesh->positions[0][i+1];
-    p02 = mesh->positions[0][i+2];
-    p03 = mesh->positions[0][i+3];
-  }
-  else
-  {
-    float f = mesh->numTimeSteps*time;
-    int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-    float t1 = f-itime;
-    float t0 = 1.0f-t1;
-    const Vec3fa a0 = mesh->positions[itime+0][i+0];
-    const Vec3fa a1 = mesh->positions[itime+0][i+1];
-    const Vec3fa a2 = mesh->positions[itime+0][i+2];
-    const Vec3fa a3 = mesh->positions[itime+0][i+3];
-    const Vec3fa b0 = mesh->positions[itime+1][i+0];
-    const Vec3fa b1 = mesh->positions[itime+1][i+1];
-    const Vec3fa b2 = mesh->positions[itime+1][i+2];
-    const Vec3fa b3 = mesh->positions[itime+1][i+3];
-    p00 = t0*a0 + t1*b0;
-    p01 = t0*a1 + t1*b1;
-    p02 = t0*a2 + t1*b2;
-    p03 = t0*a3 + t1*b3;
-  }
-
-  const float t0 = 1.0f - t, t1 = t;
-  const Vec3fa p10 = p00 * t0 + p01 * t1;
-  const Vec3fa p11 = p01 * t0 + p02 * t1;
-  const Vec3fa p12 = p02 * t0 + p03 * t1;
-  const Vec3fa p20 = p10 * t0 + p11 * t1;
-  const Vec3fa p21 = p11 * t0 + p12 * t1;
-  //const Vec3fa p30 = p20 * t0 + p21 * t1;
-  return Vec3fa(3.0f*(p21-p20));
-}
-
-inline Vec3fa derivHermite(const ISPCHairSet* mesh, const unsigned int primID, const float u, const float time)
-{
-  Vec3fa p0, p1, t0, t1;
-  const int i = mesh->hairs[primID].vertex;
-
-  if (mesh->numTimeSteps == 1)
-  {
-    p0 = mesh->positions[0][i+0];
-    p1 = mesh->positions[0][i+1];
-    t0 = mesh->tangents[0][i+0];
-    t1 = mesh->tangents[0][i+1];
-  }
-  else
-  {
-    float f = mesh->numTimeSteps*time;
-    int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-    float time1 = f-itime;
-    float time0 = 1.0f-time1;
-    const Vec3fa ap0 = mesh->positions[itime+0][i+0];
-    const Vec3fa ap1 = mesh->positions[itime+0][i+1];
-    const Vec3fa at0 = mesh->tangents[itime+0][i+0];
-    const Vec3fa at1 = mesh->tangents[itime+0][i+1];
-    const Vec3fa bp0 = mesh->positions[itime+1][i+0];
-    const Vec3fa bp1 = mesh->positions[itime+1][i+1];
-    const Vec3fa bt0 = mesh->tangents[itime+1][i+0];
-    const Vec3fa bt1 = mesh->tangents[itime+1][i+1];
-    p0 = time0*ap0 + time1*bp0;
-    p1 = time0*ap1 + time1*bp1;
-    t0 = time0*at0 + time1*bt0;
-    t1 = time0*at1 + time1*bt1;
-  }
-  const Vec3fa p00 = p0;
-  const Vec3fa p01 = p0+(1.0f/3.0f)*t0;
-  const Vec3fa p02 = p1-(1.0f/3.0f)*t1;
-  const Vec3fa p03 = p1;
-
-  const float u0 = 1.0f - u, u1 = u;
-  const Vec3fa p10 = p00 * u0 + p01 * u1;
-  const Vec3fa p11 = p01 * u0 + p02 * u1;
-  const Vec3fa p12 = p02 * u0 + p03 * u1;
-  const Vec3fa p20 = p10 * u0 + p11 * u1;
-  const Vec3fa p21 = p11 * u0 + p12 * u1;
-  //const Vec3fa p30 = p20 * u0 + p21 * u1;
-  return Vec3fa(3.0f*(p21-p20));
-}
-
-inline Vec3fa derivBSpline(const ISPCHairSet* mesh, const unsigned int primID, const float t, const float time)
-{
-  Vec3fa p00, p01, p02, p03;
-  const int i = mesh->hairs[primID].vertex;
-
-  if (mesh->numTimeSteps == 1)
-  {
-    p00 = mesh->positions[0][i+0];
-    p01 = mesh->positions[0][i+1];
-    p02 = mesh->positions[0][i+2];
-    p03 = mesh->positions[0][i+3];
-  }
-  else
-  {
-    float f = mesh->numTimeSteps*time;
-    int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-    float t1 = f-itime;
-    float t0 = 1.0f-t1;
-    const Vec3fa a0 = mesh->positions[itime+0][i+0];
-    const Vec3fa a1 = mesh->positions[itime+0][i+1];
-    const Vec3fa a2 = mesh->positions[itime+0][i+2];
-    const Vec3fa a3 = mesh->positions[itime+0][i+3];
-    const Vec3fa b0 = mesh->positions[itime+1][i+0];
-    const Vec3fa b1 = mesh->positions[itime+1][i+1];
-    const Vec3fa b2 = mesh->positions[itime+1][i+2];
-    const Vec3fa b3 = mesh->positions[itime+1][i+3];
-    p00 = t0*a0 + t1*b0;
-    p01 = t0*a1 + t1*b1;
-    p02 = t0*a2 + t1*b2;
-    p03 = t0*a3 + t1*b3;
-  }
-
-  const float t0 = 1.0f - t, t1 = t;
-  const float n0 = -0.5f*t1*t1;
-  const float n1 = -0.5f*t0*t0 - 2.0f*(t0*t1);
-  const float n2 =  0.5f*t1*t1 + 2.0f*(t1*t0);
-  const float n3 =  0.5f*t0*t0;
-  return Vec3fa(n0*p00 + n1*p01 + n2*p02 + n3*p03);
-}
-
 void
 postIntersectGeometry(const Ray& ray,
                       DifferentialGeometry& dg,
@@ -1221,7 +1093,8 @@ AffineSpace3fa calculate_interpolated_space (ISPCInstance* instance, float gtime
 typedef ISPCInstance* ISPCInstancePtr;
 
 inline int
-postIntersect(const Ray& ray, DifferentialGeometry& dg)
+postIntersect(const Ray& ray,
+              DifferentialGeometry& dg)
 {
   dg.eps = 32.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
 
@@ -1247,7 +1120,6 @@ postIntersect(const Ray& ray, DifferentialGeometry& dg)
       ISPCInstance* instance = (ISPCInstancePtr) g_ispc_scene->geometries[instID];
 
       /* convert normals */
-      //AffineSpace3fa space = (1.0f-ray.time())*AffineSpace3fa(instance->space0) + ray.time()*AffineSpace3fa(instance->space1);
       AffineSpace3fa space = calculate_interpolated_space(instance, 0.0);
       dg.Ng = xfmVector(space,dg.Ng);
       dg.Ns = xfmVector(space,dg.Ns);
@@ -1429,7 +1301,8 @@ void occlusionFilterHair(const RTCFilterFunctionNArguments* args)
 Vec3fa
 renderPixelFunction(float x, float y,
                     RandomSampler& sampler,
-                    const ISPCCamera& camera, RayStats& stats)
+                    const ISPCCamera& camera,
+                    RayStats& stats)
 {
   /* radiance accumulator and weight */
   Vec3fa L = Vec3fa(0.0f);
@@ -1531,10 +1404,16 @@ renderPixelFunction(float x, float y,
     float sign = dot(wi1.v, dg.Ng) < 0.0f ? -1.0f : 1.0f;
     dg.P = dg.P + sign*dg.eps*dg.Ng;
 
-    ray = Ray(dg.P,
-              normalize(wi1.v),
-              dg.eps,
-              inf,
+
+    Vec3fa dir = normalize(wi1.v);
+    Vec3fa org = dg.P;
+    float tnear = dg.eps;
+    float tfar = inf;
+
+    ray = Ray(org,
+              dir,
+              tnear,
+              tfar,
               time,
               -1,
               RTC_INVALID_GEOMETRY_ID,

@@ -99,7 +99,10 @@ init_Ray(Ray &ray,
          unsigned int primID = RTC_INVALID_GEOMETRY_ID,
          unsigned int instID = RTC_INVALID_GEOMETRY_ID)
 {
-  ray = Ray(org,dir,tnear,tfar,time,mask,geomID,primID,instID);
+  ray = Ray(org, dir,
+            tnear, tfar,
+            0.0f, mask,
+            geomID,primID,instID);
 }
 
 typedef Ray Ray1;
