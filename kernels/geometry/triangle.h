@@ -430,7 +430,6 @@ namespace embree
     #elif ISECT_METHOD == ISECT_BW9
     float T[M][9];
     vint<M> ci;
-    //int ci[4];
     Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_SHEV
     #elif ISECT_METHOD == ISECT_EMBREE || \

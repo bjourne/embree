@@ -12,10 +12,10 @@ namespace embree
     {
       __forceinline MTHit() {}
       __forceinline MTHit(const vbool<M>& valid,
-                           const vfloat<M>& u,
-                           const vfloat<M>& v,
-                           const vfloat<M>& t,
-                           const Vec3vf<M>& ng)
+                          const vfloat<M>& u,
+                          const vfloat<M>& v,
+                          const vfloat<M>& t,
+                          const Vec3vf<M>& ng)
         : valid(valid), u(v), v(v), t(t), ng(ng) {}
 
       __forceinline Vec3fa Ng(const size_t i) const
@@ -337,7 +337,7 @@ namespace embree
       while (true)
       {
         if (unlikely(none(valid))) return foundhit;
-        i = select_min(valid,hit.t);
+        i = select_min(valid, hit.t);
 
         geomID = tri.geomIDs[i];
       entry:
@@ -346,11 +346,10 @@ namespace embree
         /* call intersection filter function */
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasIntersectionFilter())) {
-          printf("we have intersection filter?\n");
           const Vec2f uv = Vec2f(hit.u[i], hit.v[i]);
           HitK<1> h(context->instID,
                     geomID, tri.primIDs[i],
-                    uv.x,uv.y,
+                    uv.x, uv.y,
                     hit.Ng(i));
           const float old_t = ray.tfar;
           ray.tfar = hit.t[i];
@@ -402,7 +401,8 @@ namespace embree
         Vec3vf<M> d = Vec3vf<M>(ray.dir);
         vfloat<M> tnear = vfloat<M>(ray.tnear());
         vfloat<M> tfar = vfloat<M>(ray.tfar);
-        if (likely(intersect1RayMTris<M>(o, d, tnear, tfar, tri, hit))) {
+        bool res = intersect1RayMTris<M>(o, d, tnear, tfar, tri, hit);
+        if (likely(res)) {
           epilog1RayMTrisIntersect<M, Mx>(ray, context, tri, hit);
         }
       }
