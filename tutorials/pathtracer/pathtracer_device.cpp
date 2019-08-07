@@ -1175,7 +1175,7 @@ postIntersectGeometry(const Ray& ray,
       else
       {
         ISPCTriangle* tri = &mesh->triangles[dg.primID];
-        float f = mesh->numTimeSteps*ray.time();
+        float f = mesh->numTimeSteps* 0.0;
         int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
         float t1 = f-itime;
         float t0 = 1.0f-t1;
@@ -1220,7 +1220,8 @@ AffineSpace3fa calculate_interpolated_space (ISPCInstance* instance, float gtime
 
 typedef ISPCInstance* ISPCInstancePtr;
 
-inline int postIntersect(const Ray& ray, DifferentialGeometry& dg)
+inline int
+postIntersect(const Ray& ray, DifferentialGeometry& dg)
 {
   dg.eps = 32.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
 
@@ -1247,7 +1248,7 @@ inline int postIntersect(const Ray& ray, DifferentialGeometry& dg)
 
       /* convert normals */
       //AffineSpace3fa space = (1.0f-ray.time())*AffineSpace3fa(instance->space0) + ray.time()*AffineSpace3fa(instance->space1);
-      AffineSpace3fa space = calculate_interpolated_space(instance,ray.time());
+      AffineSpace3fa space = calculate_interpolated_space(instance, 0.0);
       dg.Ng = xfmVector(space,dg.Ng);
       dg.Ns = xfmVector(space,dg.Ns);
     }

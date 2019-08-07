@@ -34,51 +34,57 @@
 #include "../../../common/simd/simd.h"
 
   /*! Ray structure. */
-  struct __aligned(16) Ray
+struct __aligned(16) Ray
+{
+  /*! Default construction does nothing. */
+  __forceinline Ray() {}
+
+  /*! Constructs a ray from origin, direction, and ray segment. Near
+  *  has to be smaller than far. */
+  __forceinline Ray(const embree::Vec3fa& org,
+                    const embree::Vec3fa& dir,
+                    float tnear = embree::zero,
+                    float tfar = embree::inf,
+                    float time = embree::zero,
+                    int mask = -1,
+                    unsigned int geomID = RTC_INVALID_GEOMETRY_ID,
+                    unsigned int primID = RTC_INVALID_GEOMETRY_ID,
+                    unsigned int instID = RTC_INVALID_GEOMETRY_ID)
+    : org(org, tnear),
+    dir(dir,time),
+    tfar(tfar),
+    mask(mask),
+    primID(primID),
+    geomID(geomID),
+    instID(instID)
   {
-    /*! Default construction does nothing. */
-    __forceinline Ray() {}
+  }
 
-    /*! Constructs a ray from origin, direction, and ray segment. Near
-     *  has to be smaller than far. */
-    __forceinline Ray(const embree::Vec3fa& org,
-                      const embree::Vec3fa& dir,
-                      float tnear = embree::zero,
-                      float tfar = embree::inf,
-                      float time = embree::zero,
-                      int mask = -1,
-                      unsigned int geomID = RTC_INVALID_GEOMETRY_ID,
-                      unsigned int primID = RTC_INVALID_GEOMETRY_ID,
-                      unsigned int instID = RTC_INVALID_GEOMETRY_ID)
-      : org(org,tnear), dir(dir,time), tfar(tfar), mask(mask), primID(primID), geomID(geomID), instID(instID)  {}
+  /*! Tests if we hit something. */
+  __forceinline operator bool() const
+  {
+    return geomID != RTC_INVALID_GEOMETRY_ID;
+  }
 
-    /*! Tests if we hit something. */
-    __forceinline operator bool() const { return geomID != RTC_INVALID_GEOMETRY_ID; }
+ public:
+  embree::Vec3fa org;       //!< Ray origin + tnear
+  embree::Vec3fa dir;        //!< Ray direction + time
+  float tfar;               //!< End of ray segment
+  unsigned int mask;        //!< used to mask out objects during traversal
+  unsigned int id;          //!< ray ID
+  unsigned int flags;       //!< ray flags
 
-  public:
-    embree::Vec3fa org;       //!< Ray origin + tnear
-    //float tnear;              //!< Start of ray segment
-    embree::Vec3fa dir;        //!< Ray direction + tfar
-    //float time;               //!< Time of this ray for motion blur.
-    float tfar;               //!< End of ray segment
-    unsigned int mask;        //!< used to mask out objects during traversal
-    unsigned int id;          //!< ray ID
-    unsigned int flags;       //!< ray flags
+ public:
+  embree::Vec3f Ng;         //!< Not normalized geometry normal
+  float u;                  //!< Barycentric u coordinate of hit
+  float v;                  //!< Barycentric v coordinate of hit
+  unsigned int primID;           //!< primitive ID
+  unsigned int geomID;           //!< geometry ID
+  unsigned int instID;           //!< instance ID
 
-  public:
-    embree::Vec3f Ng;         //!< Not normalized geometry normal
-    float u;                  //!< Barycentric u coordinate of hit
-    float v;                  //!< Barycentric v coordinate of hit
-    unsigned int primID;           //!< primitive ID
-    unsigned int geomID;           //!< geometry ID
-    unsigned int instID;           //!< instance ID
-
-    __forceinline float &tnear() { return org.w; };
-    __forceinline float &time()  { return dir.w; };
-    __forceinline float const &tnear() const { return org.w; };
-    __forceinline float const &time()  const { return dir.w; };
-
-  };
+  __forceinline float &tnear() { return org.w; };
+  __forceinline float const &tnear() const { return org.w; };
+};
 
 
 __forceinline void
@@ -123,7 +129,7 @@ __forceinline RTCRay* RTCRay1_(Ray& ray) {
   /*! Outputs ray to stream. */
   inline std::ostream& operator<<(std::ostream& cout, const Ray& ray) {
     return cout << "{ " <<
-      "org = " << ray.org << ", dir = " << ray.dir << ", near = " << ray.tnear() << ", far = " << ray.tfar << ", time = " << ray.time() << ", " <<
+      "org = " << ray.org << ", dir = " << ray.dir << ", near = " << ray.tnear() << ", far = " << ray.tfar << ", " <<
       "instID = " << ray.instID <<  ", geomID = " << ray.geomID << ", primID = " << ray.primID <<  ", " << "u = " << ray.u <<  ", v = " << ray.v << ", Ng = " << ray.Ng << " }";
   }
 
