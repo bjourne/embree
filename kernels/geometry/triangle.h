@@ -28,7 +28,7 @@
 #define ISECT_BW9       6
 #define ISECT_SHEV      7
 
-#define ISECT_METHOD ISECT_BW9
+#define ISECT_METHOD ISECT_SHEV
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -73,6 +73,25 @@ namespace embree
     __forceinline TriangleM() {}
 
     #if ISECT_METHOD == ISECT_SHEV
+
+    vfloat<M> nu, nv, pu, pv, np, e1u, e1v, e2u, e2v;
+    vint<M> ci;
+
+    __forceinline static void
+    do_store_nt(TriangleM* dst, const TriangleM& src)
+    {
+      vfloat<M>::store_nt(&dst->nu, src.nu);
+      vfloat<M>::store_nt(&dst->nv, src.nv);
+      vfloat<M>::store_nt(&dst->pu, src.pu);
+      vfloat<M>::store_nt(&dst->pv, src.pv);
+      vfloat<M>::store_nt(&dst->np, src.np);
+      vfloat<M>::store_nt(&dst->e1u, src.e1u);
+      vfloat<M>::store_nt(&dst->e1v, src.e1v);
+      vfloat<M>::store_nt(&dst->e2u, src.e2u);
+      vfloat<M>::store_nt(&dst->e2v, src.e2v);
+      vint<M>::store_nt(&dst->ci, src.ci);
+    }
+
     void
     init_shev(const Vec3vf<M>& v0,
               const Vec3vf<M>& v1,
@@ -104,10 +123,22 @@ namespace embree
       }
     }
     #elif ISECT_METHOD == ISECT_BW9
+
+    __forceinline static void
+    do_store_nt(TriangleM* dst, const TriangleM& src)
+    {
+      memcpy(dst->T, src.T, sizeof(src.T));
+      vint<M>::store_nt(&dst->ci, src.ci);
+      vfloat<M>::store_nt(&dst->ng.x, src.ng.x);
+      vfloat<M>::store_nt(&dst->ng.y, src.ng.y);
+      vfloat<M>::store_nt(&dst->ng.z, src.ng.z);
+    }
+
     void
     init_bw9(const Vec3vf<M>& v0,
              const Vec3vf<M>& v1,
-             const Vec3vf<M>& v2) {
+             const Vec3vf<M>& v2)
+    {
       Vec3vf<M> e1 = v1 - v0;
       Vec3vf<M> e2 = v2 - v0;
       this->ng = cross(e1, e2);
@@ -330,22 +361,9 @@ namespace embree
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
       #elif ISECT_METHOD == ISECT_BW9
-      memcpy(dst->T, src.T, sizeof(src.T));
-      vint<M>::store_nt(&dst->ci, src.ci);
-      vfloat<M>::store_nt(&dst->ng.x, src.ng.x);
-      vfloat<M>::store_nt(&dst->ng.y, src.ng.y);
-      vfloat<M>::store_nt(&dst->ng.z, src.ng.z);
+      do_store_nt(dst, src);
       #elif ISECT_METHOD == ISECT_SHEV
-      vfloat<M>::store_nt(&dst->nu, src.nu);
-      vfloat<M>::store_nt(&dst->nv, src.nv);
-      vfloat<M>::store_nt(&dst->pu, src.pu);
-      vfloat<M>::store_nt(&dst->pv, src.pv);
-      vfloat<M>::store_nt(&dst->np, src.np);
-      vfloat<M>::store_nt(&dst->e1u, src.e1u);
-      vfloat<M>::store_nt(&dst->e1v, src.e1v);
-      vfloat<M>::store_nt(&dst->e2u, src.e2u);
-      vfloat<M>::store_nt(&dst->e2v, src.e2v);
-      memcpy(dst->ci, src.ci, sizeof(ci));
+      do_store_nt(dst, src);
       #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
         ISECT_METHOD == ISECT_MT
@@ -415,9 +433,6 @@ namespace embree
     //int ci[4];
     Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_SHEV
-    vfloat<M> nu, nv, pu, pv, np, e1u, e1v, e2u, e2v;
-    vint<M> ci;
-    //int ci[4];
     #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
         ISECT_METHOD == ISECT_MT
