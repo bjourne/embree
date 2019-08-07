@@ -12,23 +12,23 @@ namespace embree
     {
       __forceinline MTHit() {}
       __forceinline MTHit(const vbool<M>& valid,
-                           const vfloat<M>& U,
-                           const vfloat<M>& V,
-                           const vfloat<M>& T,
-                           const Vec3vf<M>& N)
-        : valid(valid), U(U), V(V), T(T), N(N) {}
+                           const vfloat<M>& u,
+                           const vfloat<M>& v,
+                           const vfloat<M>& t,
+                           const Vec3vf<M>& ng)
+        : valid(valid), u(v), v(v), t(t), ng(ng) {}
 
       __forceinline Vec3fa Ng(const size_t i) const
       {
-        return Vec3fa(N.x[i], N.y[i], N.z[i]);
+        return Vec3fa(ng.x[i], ng.y[i], ng.z[i]);
       }
 
     public:
       vbool<M> valid;
-      vfloat<M> U;
-      vfloat<M> V;
-      vfloat<M> T;
-      Vec3vf<M> N;
+      vfloat<M> u;
+      vfloat<M> v;
+      vfloat<M> t;
+      Vec3vf<M> ng;
     };
     /////////////////////////////////////////////////////////////////
     /// Intersector functions
@@ -76,9 +76,9 @@ namespace embree
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasIntersectionFilter())) {
           HitK<K> h(context->instID, geomID, primID,
-                    hit.U, hit.V, hit.N);
+                    hit.u, hit.v, hit.ng);
           const vfloat<K> old_t = ray.tfar;
-          ray.tfar = select(valid2, hit.T, ray.tfar);
+          ray.tfar = select(valid2, hit.t, ray.tfar);
           const vbool<K> m_accept = runIntersectionFilter(valid2,
                                                           geometry,
                                                           ray,
@@ -91,12 +91,12 @@ namespace embree
 #endif
 
       /* update hit information */
-      vfloat<K>::store(valid2, &ray.tfar, hit.T);
-      vfloat<K>::store(valid2, &ray.Ng.x, hit.N.x);
-      vfloat<K>::store(valid2, &ray.Ng.y, hit.N.y);
-      vfloat<K>::store(valid2, &ray.Ng.z, hit.N.z);
-      vfloat<K>::store(valid2, &ray.u, hit.U);
-      vfloat<K>::store(valid2, &ray.v, hit.V);
+      vfloat<K>::store(valid2, &ray.tfar, hit.t);
+      vfloat<K>::store(valid2, &ray.Ng.x, hit.ng.x);
+      vfloat<K>::store(valid2, &ray.Ng.y, hit.ng.y);
+      vfloat<K>::store(valid2, &ray.Ng.z, hit.ng.z);
+      vfloat<K>::store(valid2, &ray.u, hit.u);
+      vfloat<K>::store(valid2, &ray.v, hit.v);
       vuint<K>::store(valid2, &ray.primID, primID);
       vuint<K>::store(valid2, &ray.geomID, geomID);
       vuint<K>::store(valid2, &ray.instID, context->instID);
@@ -127,9 +127,9 @@ namespace embree
                      geometry->hasOcclusionFilter())) {
           HitK<K> h(context->instID,
                     geomID, primID,
-                    hit.U, hit.V, hit.N);
+                    hit.u, hit.v, hit.ng);
           const vfloat<K> old_t = ray.tfar;
-          ray.tfar = select(valid2, hit.T, ray.tfar);
+          ray.tfar = select(valid2, hit.t, ray.tfar);
           valid2 = runOcclusionFilter(valid2, geometry, ray, context, h);
           ray.tfar = select(valid2, ray.tfar, old_t);
         }
@@ -172,9 +172,9 @@ namespace embree
           if (unlikely(context->hasContextFilter() ||
                        geometry->hasOcclusionFilter()))
           {
-            const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
+            const Vec2f uv = Vec2f(hit.u[i], hit.v[i]);
             const float old_t = ray.tfar[k];
-            ray.tfar[k] = hit.T[i];
+            ray.tfar[k] = hit.t[i];
             HitK<K> h(context->instID,
                       geomID, tri.primIDs[i],
                       uv.x, uv.y,
@@ -209,7 +209,7 @@ namespace embree
       vbool<Mx> valid2 = valid_i;
       if (Mx > M)
         valid2 &= (1<<M)-1;
-      size_t i = select_min(valid2, hit.T);
+      size_t i = select_min(valid2, hit.t);
       assert(i<M);
       unsigned int geomID = tri.geomIDs[i];
 
@@ -221,7 +221,7 @@ namespace embree
       {
         if (unlikely(none(valid2)))
           return;
-        i = select_min(valid2, hit.T);
+        i = select_min(valid2, hit.t);
         assert(i<M);
         geomID = tri.geomIDs[i];
       entry:
@@ -232,19 +232,20 @@ namespace embree
           if (unlikely(context->hasContextFilter() ||
                        geometry->hasIntersectionFilter())) {
             assert(i<M);
-            const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
+            const Vec2f uv = Vec2f(hit.u[i], hit.v[i]);
             HitK<K> h(context->instID,
                       geomID, tri.primIDs[i],
                       uv.x,uv.y,
                       hit.Ng(i));
             const float old_t = ray.tfar[k];
-            ray.tfar[k] = hit.T[i];
-            const bool found = any(runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
+            ray.tfar[k] = hit.t[i];
+            const bool found = any(
+              runIntersectionFilter(vbool<K>(1<<k),geometry,ray,context,h));
             if (!found) ray.tfar[k] = old_t;
             foundhit = foundhit | found;
             clear(valid2, i);
             // intersection filters may modify tfar value
-            valid2 &= hit.T <= ray.tfar[k];
+            valid2 &= hit.t <= ray.tfar[k];
             continue;
           }
         }
@@ -253,11 +254,11 @@ namespace embree
 #endif
       assert(i<M);
       /* update hit information */
-      const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
-      ray.tfar[k] = hit.T[i];
-      ray.Ng.x[k] = hit.N.x[i];
-      ray.Ng.y[k] = hit.N.y[i];
-      ray.Ng.z[k] = hit.N.z[i];
+      const Vec2f uv = Vec2f(hit.u[i], hit.v[i]);
+      ray.tfar[k] = hit.t[i];
+      ray.Ng.x[k] = hit.ng.x[i];
+      ray.Ng.y[k] = hit.ng.y[i];
+      ray.Ng.z[k] = hit.ng.z[i];
       ray.u[k] = uv.x;
       ray.v[k] = uv.y;
       ray.primID[k] = tri.primIDs[i];
@@ -294,14 +295,14 @@ namespace embree
         /* if we have no filter then the test passed */
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasOcclusionFilter())) {
-          const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
+          const Vec2f uv = Vec2f(hit.u[i], hit.v[i]);
           HitK<1> h(context->instID,
                     geomID,
                     tri.primIDs[i],
                     uv.x, uv.y,
                     hit.Ng(i));
           const float old_t = ray.tfar;
-          ray.tfar = hit.T[i];
+          ray.tfar = hit.t[i];
           if (runOcclusionFilter1(geometry,ray,context,h))
             return true;
           ray.tfar = old_t;
@@ -326,7 +327,7 @@ namespace embree
       vbool<Mx> valid = hit.valid;
       if (Mx > M)
         valid &= (1<<M)-1;
-      size_t i = select_min(valid, hit.T);
+      size_t i = select_min(valid, hit.t);
       unsigned int geomID = tri.geomIDs[i];
 
       /* intersection filter test */
@@ -336,7 +337,7 @@ namespace embree
       while (true)
       {
         if (unlikely(none(valid))) return foundhit;
-        i = select_min(valid,hit.T);
+        i = select_min(valid,hit.t);
 
         geomID = tri.geomIDs[i];
       entry:
@@ -346,13 +347,13 @@ namespace embree
         if (unlikely(context->hasContextFilter() ||
                      geometry->hasIntersectionFilter())) {
           printf("we have intersection filter?\n");
-          const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
+          const Vec2f uv = Vec2f(hit.u[i], hit.v[i]);
           HitK<1> h(context->instID,
                     geomID, tri.primIDs[i],
                     uv.x,uv.y,
                     hit.Ng(i));
           const float old_t = ray.tfar;
-          ray.tfar = hit.T[i];
+          ray.tfar = hit.t[i];
           const bool found = runIntersectionFilter1(geometry,
                                                     ray,
                                                     context,h);
@@ -361,7 +362,7 @@ namespace embree
           foundhit |= found;
           clear(valid, i);
           // intersection filters may modify tfar value
-          valid &= hit.T <= ray.tfar;
+          valid &= hit.t <= ray.tfar;
           continue;
         }
         break;
@@ -369,11 +370,11 @@ namespace embree
 #endif
 
       /* update hit information */
-      const Vec2f uv = Vec2f(hit.U[i], hit.V[i]);
-      ray.tfar = hit.T[i];
-      ray.Ng.x = hit.N.x[i];
-      ray.Ng.y = hit.N.y[i];
-      ray.Ng.z = hit.N.z[i];
+      const Vec2f uv = Vec2f(hit.u[i], hit.v[i]);
+      ray.tfar = hit.t[i];
+      ray.Ng.x = hit.ng.x[i];
+      ray.Ng.y = hit.ng.y[i];
+      ray.Ng.z = hit.ng.z[i];
       ray.u = uv.x;
       ray.v = uv.y;
       ray.primID = tri.primIDs[i];
