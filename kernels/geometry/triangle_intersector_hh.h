@@ -10,7 +10,6 @@ isectAlgo(const Vec3vf<K>& o,
           MTHit<K>& hit, const vbool<K>& valid0) {
 
   vfloat<K> det = dot(n0, d);
-
   vbool<K> valid = det != vfloat<K>(zero);
   if (unlikely(none(valid))) {
     return false;

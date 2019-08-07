@@ -3,12 +3,12 @@
 
 template<int K, int M>
 static __forceinline bool
-isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
-          const vfloat<K>& tn, const vfloat<K>& tf,
-          size_t i,
-          const vbool<K>& valid0,
-          MTHit<K>& hit,
-          const TriangleM<M>& tri) {
+isect(const Vec3vf<K>& o, const Vec3vf<K>& d,
+      const vfloat<K>& tn, const vfloat<K>& tf,
+      size_t i,
+      const vbool<K>& valid0,
+      MTHit<K>& hit,
+      const TriangleM<M>& tri) {
 
   vfloat<K> t0 = vfloat<K>(tri.T[i][0]);
   vfloat<K> t1 = vfloat<K>(tri.T[i][1]);
@@ -63,7 +63,7 @@ intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
                     MTHit<K>& hit,
                     const TriangleM<M>& tri)
 {
-  return isectAlgo(o, d, tn, tf, i, valid0, hit, tri);
+  return isect(o, d, tn, tf, i, valid0, hit, tri);
 }
 
 /*! Intersect 1 ray with one of M triangles. */
