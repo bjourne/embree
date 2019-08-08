@@ -1,6 +1,5 @@
 #pragma once
 
-
 template<int K, int M>
 static __forceinline bool
 isect(const Vec3vf<K>& o, const Vec3vf<K>& d,
@@ -19,16 +18,17 @@ isect(const Vec3vf<K>& o, const Vec3vf<K>& d,
   vfloat<K> t6 = vfloat<K>(tri.T[i][6]);
   vfloat<K> t7 = vfloat<K>(tri.T[i][7]);
   vfloat<K> t8 = vfloat<K>(tri.T[i][8]);
+  int ci = tri.ci[i];
 
   vfloat<K> u, v, t;
-  if (tri.ci[i] == 0) {
+  if (ci == 0) {
     vfloat<K> t_o = o.x + t6 * o.y + t7 * o.z + t8;
     vfloat<K> t_d = d.x + t6 * d.y + t7 * d.z;
     t = -t_o * rcp(t_d);
     Vec3vf<K> wr = o + d * t;
     u = t0 * wr.y + t1 * wr.z + t2;
     v = t3 * wr.y + t4 * wr.z + t5;
-  } else if (tri.ci[i] == 1) {
+  } else if (ci == 1) {
     vfloat<K> t_o = t6 * o.x + o.y + t7 * o.z + t8;
     vfloat<K> t_d = t6 * d.x + d.y + t7 * d.z;
     t = -t_o * rcp(t_d);
@@ -48,12 +48,21 @@ isect(const Vec3vf<K>& o, const Vec3vf<K>& d,
     & (tn < t) & (t <= tf);
   if (likely(none(valid)))
     return false;
-  new (&hit) MTHit<K>(valid, u, v, t,
-                      broadcast<vfloat<K>>(tri.ng, i));
+
+  // Reconstruct the normal
+  vfloat<K> x, y, z;
+  if (ci == 0) {
+    x = vfloat<K>(1), y = t6, z = t7;
+  } else if (ci == 1) {
+    x = t6, y = vfloat<K>(1), z = t7;
+  } else {
+    x = t6, y = t7, z = vfloat<K>(1);
+  }
+  Vec3vf<K> ng = Vec3vf<K>(x, y, z);
+  new (&hit) MTHit<K>(valid, u, v, t, ng);
   return true;
 }
 
-// ~14.5 for crown
 template<int M, int K>
 static __forceinline bool
 intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
