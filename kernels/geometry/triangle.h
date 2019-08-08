@@ -28,7 +28,7 @@
 #define ISECT_BW9       6
 #define ISECT_SHEV      7
 
-#define ISECT_METHOD ISECT_BW9
+#define ISECT_METHOD ISECT_BW12
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -148,7 +148,7 @@ namespace embree
         float x2 = v2[wn][i] * v0[wp][i] - v2[wp][i] * v0[wn][i];
         float sign = w == 1 ? -1.0f : 1.0f;
         float nw = n[w][i];
-        T[i][0] =  sign * e2[v][i] / n[w][i];
+        T[i][0] = sign * e2[v][i] / n[w][i];
         T[i][1] = -sign * e2[u][i] / nw;
         T[i][2] = x2 / nw;
         T[i][3] = -sign * e1[v][i] / nw;
@@ -159,6 +159,48 @@ namespace embree
         T[i][8] = -nums[i] / nw;
         ci[i] = w;
       }
+    }
+    #elif ISECT_METHOD == ISECT_BW12
+    void
+    init_bw12(const Vec3vf<M>& v0,
+              const Vec3vf<M>& v1,
+              const Vec3vf<M>& v2)
+    {
+      Vec3vf<M> e1 = v1 - v0;
+      Vec3vf<M> e2 = v2 - v0;
+      Vec3vf<M> n = cross(e1, e2);
+      vfloat<M> num = dot(v0, n);
+      for (int i = 0; i < M; i++) {
+        int u, v, w, wp, wn;
+        if (fabsf(n.x[i]) > fabsf(n.y[i]) && fabsf(n.x[i]) > fabsf(n.z[i])) {
+          w = 0, u = 1, v = 2, wp = 2, wn = 1;
+        } else if (fabsf(n.y[i]) > fabsf(n.z[i])) {
+          w = 1, u = 0, v = 2, wp = 0, wn = 2;
+        } else {
+          w = 2, u = 0, v = 1, wp = 1, wn = 0;
+        }
+        float x1 = v1[wn][i] * v0[wp][i] - v1[wp][i] * v0[wn][i];
+        float x2 = v2[wn][i] * v0[wp][i] - v2[wp][i] * v0[wn][i];
+        float nw = n[w][i];
+
+        float sign = w == 1 ? -1.0f : 1.0f;
+        n0[w][i] = 0;
+        n0[u][i] = sign * e2[v][i] / nw;
+        n0[v][i] = -sign * e2[u][i] / nw;
+
+        n1[w][i] = 0;
+        n1[u][i] = -sign * e1[v][i] / nw;
+        n1[v][i] = sign * e1[u][i] / nw;
+
+        n2[w][i] = 1;
+        n2[u][i] = n[u][i] / nw;
+        n2[v][i] = n[v][i] / nw;
+
+        d0[i] = x2 / nw;
+        d1[i] = -x1 / nw;
+        d2[i] = -num[i] / nw;
+      }
+      this->ng = n;
     }
     #endif
 
@@ -195,64 +237,7 @@ namespace embree
       this->e2 = v2 - v0;
 
       #elif ISECT_METHOD == ISECT_BW12
-
-      Vec3vf<M> e1 = v1 - v0;
-      Vec3vf<M> e2 = v2 - v0;
-      Vec3vf<M> n = cross(e1, e2);
-      vfloat<M> num = dot(v0, n);
-      for (int i = 0; i < M; i++) {
-
-        Vec3fa n0fa, n1fa, n2fa;
-        float d0fa, d1fa, d2fa;
-
-        float nx = n.x[i], ny = n.y[i], nz = n.z[i];
-        float v0x = v0.x[i], v0y = v0.y[i], v0z = v0.z[i];
-        float v1x = v1.x[i], v1y = v1.y[i], v1z = v1.z[i];
-        float v2x = v2.x[i], v2y = v2.y[i], v2z = v2.z[i];
-        float e1x = e1.x[i], e1y = e1.y[i], e1z = e1.z[i];
-        float e2x = e2.x[i], e2y = e2.y[i], e2z = e2.z[i];
-
-        if (std::fabs(nx) > std::fabs(ny) && std::fabs(nx) > std::fabs(nz)) {
-          float x1 = v1y * v0z - v1z * v0y;
-          float x2 = v2y * v0z - v2z * v0y;
-
-          n0fa = Vec3fa(0,  e2z / nx, -e2y / nx);
-          n1fa = Vec3fa(0, -e1z / nx,  e1y / nx);
-          n2fa = Vec3fa(1,   ny / nx,   nz / nx);
-
-          d0fa =      x2 / nx;
-          d1fa =     -x1 / nx;
-          d2fa = -num[i] / nx;
-        } else if (std::fabs(ny) > std::fabs(nz)) {
-          float x1 = v1z * v0x - v1x * v0z;
-          float x2 = v2z * v0x - v2x * v0z;
-
-          n0fa = Vec3fa(-e2z / ny, 0,  e2x / ny);
-          n1fa = Vec3fa( e1z / ny, 0, -e1x / ny);
-          n2fa = Vec3fa(  nx / ny, 1,   nz / ny);
-
-          d0fa =      x2 / ny;
-          d1fa =     -x1 / ny;
-          d2fa = -num[i] / ny;
-        } else {
-          float x1 = v1x * v0y - v1y * v0x;
-          float x2 = v2x * v0y - v2y * v0x;
-
-          n0fa = Vec3fa( e2y / nz, -e2x / nz, 0);
-          n1fa = Vec3fa(-e1y / nz,  e1x / nz, 0);
-          n2fa = Vec3fa(  nx / nz,   ny / nz, 1);
-
-          d0fa =      x2 / nz;
-          d1fa =     -x1 / nz;
-          d2fa = -num[i] / nz;
-        }
-        n0.x[i] = n0fa.x; n0.y[i] = n0fa.y; n0.z[i] = n0fa.z;
-        n1.x[i] = n1fa.x; n1.y[i] = n1fa.y; n1.z[i] = n1fa.z;
-        n2.x[i] = n2fa.x; n2.y[i] = n2fa.y; n2.z[i] = n2fa.z;
-        d0[i] = d0fa; d1[i] = d1fa; d2[i] = d2fa;
-      }
-      this->ng = cross(v1 - v0, v2 - v0);
-
+      init_bw12(v0, v1, v2);
       #elif ISECT_METHOD == ISECT_BW9
       init_bw9(v0, v1, v2);
       #elif ISECT_METHOD == ISECT_SHEV
