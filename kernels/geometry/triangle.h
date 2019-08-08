@@ -27,8 +27,9 @@
 #define ISECT_BW12      5
 #define ISECT_BW9       6
 #define ISECT_SHEV      7
+#define ISECT_DS        8
 
-#define ISECT_METHOD ISECT_EMBREE
+#define ISECT_METHOD ISECT_DS
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -44,6 +45,8 @@
 #define ISECT_NAME "bw9"
 #elif ISECT_METHOD == ISECT_SHEV
 #define ISECT_NAME "shev"
+#elif ISECT_METHOD == ISECT_DS
+#define ISECT_NAME "ds"
 #else
 #error "Wrong ISECT_METHOD!"
 #endif
@@ -241,6 +244,10 @@ namespace embree
       init_bw9(v0, v1, v2);
       #elif ISECT_METHOD == ISECT_SHEV
       init_shev(v0, v1, v2);
+      #elif ISECT_METHOD == ISECT_DS
+      this->v0 = v0;
+      this->e1 = v1 - v0;
+      this->e2 = v2 - v0;
       #else
       #error "Wrong ISECT_METHOD!"
       #endif
@@ -314,7 +321,8 @@ namespace embree
       do_store_nt(dst, src);
       #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
-        ISECT_METHOD == ISECT_MT
+        ISECT_METHOD == ISECT_MT || \
+        ISECT_METHOD == ISECT_DS
       vfloat<M>::store_nt(&dst->v0.x, src.v0.x);
       vfloat<M>::store_nt(&dst->v0.y, src.v0.y);
       vfloat<M>::store_nt(&dst->v0.z, src.v0.z);
@@ -382,10 +390,11 @@ namespace embree
     vint<M> ci;
     #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
-        ISECT_METHOD == ISECT_MT
+        ISECT_METHOD == ISECT_MT || \
+        ISECT_METHOD == ISECT_DS
     Vec3vf<M> v0;      // base vertex of the triangles
-    Vec3vf<M> e1;      // 1st edge of the triangles (v0-v1)
-    Vec3vf<M> e2;      // 2nd edge of the triangles (v2-v0)
+    Vec3vf<M> e1;      // 1st edge of the triangles
+    Vec3vf<M> e2;      // 2nd edge of the triangles
     #else
     #error "Wrong ISECT_METHOD!"
     #endif
