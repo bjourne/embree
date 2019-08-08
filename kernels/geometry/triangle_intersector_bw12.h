@@ -31,7 +31,7 @@ intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
     return false;
 
   new (&hit) MTHit<K>(valid, u, v, t,
-                      broadcast<vfloat<K>>(tri.ng, i));
+                      broadcast<vfloat<K>>(tri.n2, i));
   return true;
 }
 
@@ -53,6 +53,6 @@ intersect1RayMTris(const Vec3vf<M>& o, const Vec3vf<M>& d,
     & (u + v <= 1.0f) & (tn < t) & (t <= tf);
   if (likely(none(valid)))
     return false;
-  new (&hit) MTHit<M>(valid, u, v, t, tri.ng);
+  new (&hit) MTHit<M>(valid, u, v, t, tri.n2);
   return true;
 }

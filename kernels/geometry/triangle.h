@@ -28,7 +28,7 @@
 #define ISECT_BW9       6
 #define ISECT_SHEV      7
 
-#define ISECT_METHOD ISECT_BW12
+#define ISECT_METHOD ISECT_EMBREE
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -200,7 +200,6 @@ namespace embree
         d1[i] = -x1 / nw;
         d2[i] = -num[i] / nw;
       }
-      this->ng = n;
     }
     #endif
 
@@ -306,9 +305,6 @@ namespace embree
       vfloat<M>::store_nt(&dst->n2.x, src.n2.x);
       vfloat<M>::store_nt(&dst->n2.y, src.n2.y);
       vfloat<M>::store_nt(&dst->n2.z, src.n2.z);
-      vfloat<M>::store_nt(&dst->ng.x, src.ng.x);
-      vfloat<M>::store_nt(&dst->ng.y, src.ng.y);
-      vfloat<M>::store_nt(&dst->ng.z, src.ng.z);
       vfloat<M>::store_nt(&dst->d0, src.d0);
       vfloat<M>::store_nt(&dst->d1, src.d1);
       vfloat<M>::store_nt(&dst->d2, src.d2);
@@ -378,7 +374,6 @@ namespace embree
     #elif ISECT_METHOD == ISECT_BW12
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
-    Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_BW9
     float T[M][9];
     vint<M> ci;
