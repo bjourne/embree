@@ -136,35 +136,19 @@ namespace embree
       Vec3vf<M> n = cross(e1, e2);
       vfloat<M> nums = dot(v0, n);
       for (int i = 0; i < M; i++) {
-        float v0x = v0.x[i], v0y = v0.y[i], v0z = v0.z[i];
-        float v1x = v1.x[i], v1y = v1.y[i], v1z = v1.z[i];
-        float v2x = v2.x[i], v2y = v2.y[i], v2z = v2.z[i];
-        float e1x = e1.x[i], e1y = e1.y[i], e1z = e1.z[i];
-        float e2x = e2.x[i], e2y = e2.y[i], e2z = e2.z[i];
-        int u, v, w;
+        int u, v, w, wp, wn;
         if (fabsf(n.x[i]) > fabsf(n.y[i]) && fabsf(n.x[i]) > fabsf(n.z[i])) {
-          w = 0, u = 1, v = 2;
+          w = 0, u = 1, v = 2, wp = 2, wn = 1;
         } else if (fabsf(n.y[i]) > fabsf(n.z[i])) {
-          w = 1, u = 0, v = 2;
+          w = 1, u = 0, v = 2, wp = 0, wn = 2;
         } else {
-          w = 2, u = 0, v = 1;
+          w = 2, u = 0, v = 1, wp = 1, wn = 0;
         }
-        float x1, x2;
-        if (fabsf(n.x[i]) > fabsf(n.y[i]) && fabsf(n.x[i]) > fabsf(n.z[i])) {
-          x1 = v1y * v0z - v1z * v0y;
-          x2 = v2y * v0z - v2z * v0y;
-          T[i][0] =  e2z / n[w][i];
-        } else if (fabsf(n.y[i]) > fabsf(n.z[i])) {
-          x1 = v1z * v0x - v1x * v0z;
-          x2 = v2z * v0x - v2x * v0z;
-          T[i][0] = -e2z / n[w][i];
-        } else {
-          x1 = v1x * v0y - v1y * v0x;
-          x2 = v2x * v0y - v2y * v0x;
-          T[i][0] =  e2y / n[w][i];
-        }
+        float x1 = v1[wn][i] * v0[wp][i] - v1[wp][i] * v0[wn][i];
+        float x2 = v2[wn][i] * v0[wp][i] - v2[wp][i] * v0[wn][i];
         float sign = w == 1 ? -1.0f : 1.0f;
         float nw = n[w][i];
+        T[i][0] =  sign * e2[v][i] / n[w][i];
         T[i][1] = -sign * e2[u][i] / nw;
         T[i][2] = x2 / nw;
         T[i][3] = -sign * e1[v][i] / nw;
