@@ -28,7 +28,7 @@
 #define ISECT_BW9       6
 #define ISECT_SHEV      7
 
-#define ISECT_METHOD ISECT_SHEV
+#define ISECT_METHOD ISECT_BW9
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -73,10 +73,6 @@ namespace embree
     __forceinline TriangleM() {}
 
     #if ISECT_METHOD == ISECT_SHEV
-
-    vfloat<M> nu, nv, pu, pv, np, e1u, e1v, e2u, e2v;
-    vint<M> ci;
-
     __forceinline static void
     do_store_nt(TriangleM* dst, const TriangleM& src)
     {
@@ -123,15 +119,11 @@ namespace embree
       }
     }
     #elif ISECT_METHOD == ISECT_BW9
-
     __forceinline static void
     do_store_nt(TriangleM* dst, const TriangleM& src)
     {
       memcpy(dst->T, src.T, sizeof(src.T));
       vint<M>::store_nt(&dst->ci, src.ci);
-      vfloat<M>::store_nt(&dst->ng.x, src.ng.x);
-      vfloat<M>::store_nt(&dst->ng.y, src.ng.y);
-      vfloat<M>::store_nt(&dst->ng.z, src.ng.z);
     }
 
     void
@@ -141,56 +133,47 @@ namespace embree
     {
       Vec3vf<M> e1 = v1 - v0;
       Vec3vf<M> e2 = v2 - v0;
-      this->ng = cross(e1, e2);
-      vfloat<M> nums = dot(v0, ng);
+      Vec3vf<M> n = cross(e1, e2);
+      vfloat<M> nums = dot(v0, n);
       for (int i = 0; i < M; i++) {
-        float nx = ng.x[i], ny = ng.y[i], nz = ng.z[i];
         float v0x = v0.x[i], v0y = v0.y[i], v0z = v0.z[i];
         float v1x = v1.x[i], v1y = v1.y[i], v1z = v1.z[i];
         float v2x = v2.x[i], v2y = v2.y[i], v2z = v2.z[i];
         float e1x = e1.x[i], e1y = e1.y[i], e1z = e1.z[i];
         float e2x = e2.x[i], e2y = e2.y[i], e2z = e2.z[i];
-        float num = nums[i];
-        if (fabsf(nx) > fabsf(ny) && fabsf(nx) > fabsf(nz)) {
-          float x1 = v1y * v0z - v1z * v0y;
-          float x2 = v2y * v0z - v2z * v0y;
-          T[i][0] =  e2z / nx;
-          T[i][1] = -e2y / nx;
-          T[i][2] =   x2 / nx;
-          T[i][3] = -e1z / nx;
-          T[i][4] =  e1y / nx;
-          T[i][5] =  -x1 / nx;
-          T[i][6] =   ny / nx;
-          T[i][7] =   nz / nx;
-          T[i][8] = -num / nx;
-          this->ci[i] = 0;
-        } else if (fabsf(ny) > fabsf(nz)) {
-          float x1 = v1z * v0x - v1x * v0z;
-          float x2 = v2z * v0x - v2x * v0z;
-          T[i][0] = -e2z / ny;
-          T[i][1] =  e2x / ny;
-          T[i][2] =   x2 / ny;
-          T[i][3] =  e1z / ny;
-          T[i][4] = -e1x / ny;
-          T[i][5] =  -x1 / ny;
-          T[i][6] =   nx / ny;
-          T[i][7] =   nz / ny;
-          T[i][8] = -num / ny;
-          this->ci[i] = 1;
+        int u, v, w;
+        if (fabsf(n.x[i]) > fabsf(n.y[i]) && fabsf(n.x[i]) > fabsf(n.z[i])) {
+          w = 0, u = 1, v = 2;
+        } else if (fabsf(n.y[i]) > fabsf(n.z[i])) {
+          w = 1, u = 0, v = 2;
         } else {
-          float x1 = v1x * v0y - v1y * v0x;
-          float x2 = v2x * v0y - v2y * v0x;
-          T[i][0] =  e2y / nz;
-          T[i][1] = -e2x / nz;
-          T[i][2] =   x2 / nz;
-          T[i][3] = -e1y / nz;
-          T[i][4] =  e1x / nz;
-          T[i][5] =  -x1 / nz;
-          T[i][6] =   nx / nz;
-          T[i][7] =   ny / nz;
-          T[i][8] = -num / nz;
-          this->ci[i] = 2;
+          w = 2, u = 0, v = 1;
         }
+        float x1, x2;
+        if (fabsf(n.x[i]) > fabsf(n.y[i]) && fabsf(n.x[i]) > fabsf(n.z[i])) {
+          x1 = v1y * v0z - v1z * v0y;
+          x2 = v2y * v0z - v2z * v0y;
+          T[i][0] =  e2z / n[w][i];
+        } else if (fabsf(n.y[i]) > fabsf(n.z[i])) {
+          x1 = v1z * v0x - v1x * v0z;
+          x2 = v2z * v0x - v2x * v0z;
+          T[i][0] = -e2z / n[w][i];
+        } else {
+          x1 = v1x * v0y - v1y * v0x;
+          x2 = v2x * v0y - v2y * v0x;
+          T[i][0] =  e2y / n[w][i];
+        }
+        float sign = w == 1 ? -1.0f : 1.0f;
+        float nw = n[w][i];
+        T[i][1] = -sign * e2[u][i] / nw;
+        T[i][2] = x2 / nw;
+        T[i][3] = -sign * e1[v][i] / nw;
+        T[i][4] = sign * e1[u][i] / nw;
+        T[i][5] = -x1 / nw;
+        T[i][6] = n[u][i] / nw;
+        T[i][7] = n[v][i] / nw;
+        T[i][8] = -nums[i] / nw;
+        ci[i] = w;
       }
     }
     #endif
@@ -430,8 +413,9 @@ namespace embree
     #elif ISECT_METHOD == ISECT_BW9
     float T[M][9];
     vint<M> ci;
-    Vec3vf<M> ng;
     #elif ISECT_METHOD == ISECT_SHEV
+    vfloat<M> nu, nv, pu, pv, np, e1u, e1v, e2u, e2v;
+    vint<M> ci;
     #elif ISECT_METHOD == ISECT_EMBREE || \
         ISECT_METHOD == ISECT_SF01 || \
         ISECT_METHOD == ISECT_MT
