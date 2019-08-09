@@ -1,3 +1,4 @@
+// Copyright (C) 2019 Björn Lindqvist <bjourne@gmail.com>
 #pragma once
 
 template<int K, int M>
@@ -19,7 +20,6 @@ isect(const Vec3vf<K>& o, const Vec3vf<K>& d,
   vfloat<K> t7 = vfloat<K>(tri.T[i][7]);
   vfloat<K> t8 = vfloat<K>(tri.T[i][8]);
   int ci = tri.ci[i];
-
   vfloat<K> u, v, t;
   if (ci == 0) {
     vfloat<K> t_o = o.x + t6 * o.y + t7 * o.z + t8;
@@ -48,18 +48,14 @@ isect(const Vec3vf<K>& o, const Vec3vf<K>& d,
     & (tn < t) & (t <= tf);
   if (likely(none(valid)))
     return false;
-
-  // Reconstruct the normal
   vfloat<K> x, y, z;
-  if (ci == 0) {
-    x = vfloat<K>(1), y = t6, z = t7;
-  } else if (ci == 1) {
-    x = t6, y = vfloat<K>(1), z = t7;
-  } else {
-    x = t6, y = t7, z = vfloat<K>(1);
-  }
-  Vec3vf<K> ng = Vec3vf<K>(x, y, z);
-  new (&hit) MTHit<K>(valid, u, v, t, ng);
+  if (ci == 0)
+    x = 1, y = t6, z = t7;
+  else if (ci == 1)
+    x = t6, y = 1, z = t7;
+  else
+    x = t6, y = t7, z = 1;
+  new (&hit) MTHit<K>(valid, u, v, t, Vec3vf<K>(x, y, z));
   return true;
 }
 
@@ -75,13 +71,11 @@ intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
   return isect(o, d, tn, tf, i, valid0, hit, tri);
 }
 
-/*! Intersect 1 ray with one of M triangles. */
 template<int M>
 static __forceinline bool
 intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
                    vfloat<M> tn, vfloat<M> tf,
                    const TriangleM<M>& tri, MTHit<M>& hit)
 {
-  assert(false);
   return false;
 }

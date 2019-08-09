@@ -52,18 +52,16 @@ isect1(float ox, float oy, float oz,
   }
   float rdet = 1 / det;
   *t = dett * rdet;
-  if (*t <= tn || *t > tf) {
+  if (*t <= tn || *t > tf)
     return false;
-  }
   *u = *u * rdet;
   *v = *v * rdet;
-  if (ci == 0) {
+  if (ci == 0)
     *nx = 1, *ny = nu, *nz = nv;
-  } else if (ci == 1) {
+  else if (ci == 1)
     *nx = nu, *ny = 1, *nz = nv;
-  } else {
+  else
     *nx = nu, *ny = nv, *nz = 1;
-  }
   return true;
 }
 
@@ -75,13 +73,17 @@ isectK(const Vec3vf<K>& o,
        size_t i,
        const vbool<K>& valid0,
        MTHit<K>& hit,
-       const TriangleM<M>& tri) {
-
+       const TriangleM<M>& tri)
+{
   vfloat<K> np = vfloat<K>(tri.np[i]);
   vfloat<K> nu = vfloat<K>(tri.nu[i]);
   vfloat<K> nv = vfloat<K>(tri.nv[i]);
   vfloat<K> pu = vfloat<K>(tri.pu[i]);
   vfloat<K> pv = vfloat<K>(tri.pv[i]);
+  vfloat<K> e1u = vfloat<K>(tri.e1u[i]);
+  vfloat<K> e1v = vfloat<K>(tri.e1v[i]);
+  vfloat<K> e2u = vfloat<K>(tri.e2u[i]);
+  vfloat<K> e2v = vfloat<K>(tri.e2v[i]);
   vfloat<K> dett, det, du, dv;
   int ci = tri.ci[i];
   if (ci == 0) {
@@ -100,8 +102,8 @@ isectK(const Vec3vf<K>& o,
     du = d.x * dett - (pu - o.x) * det;
     dv = d.y * dett - (pv - o.y) * det;
   }
-  vfloat<K> u = tri.e2v[i] * du - tri.e2u[i] * dv;
-  vfloat<K> v = tri.e1u[i] * dv - tri.e1v[i] * du;
+  vfloat<K> u = e2v * du - e2u * dv;
+  vfloat<K> v = e1u * dv - e1v * du;
   vfloat<K> p0 = ((det - u - v) ^ u) | (u ^ v);
   vbool<K> valid = valid0 & asInt(signmsk(p0)) == vint<K>(zero);
   if (likely(none(valid)))
@@ -135,7 +137,6 @@ intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
   return isectK(o, d, tn, tf, i, valid0, hit, tri);
 }
 
-/*! Intersect 1 ray with one of M triangles. */
 template<int M>
 static __forceinline bool
 intersect1RayMTris(const Vec3vf<M>& o, const Vec3vf<M>& d,

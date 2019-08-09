@@ -40,11 +40,9 @@ intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
   Vec3vf<K> n0 = broadcast<vfloat<K>>(tri.n0, i);
   Vec3vf<K> n1 = broadcast<vfloat<K>>(tri.n1, i);
   Vec3vf<K> n2 = broadcast<vfloat<K>>(tri.n2, i);
-
   vfloat<K> d0 = vfloat<K>(tri.d0[i]);
   vfloat<K> d1 = vfloat<K>(tri.d1[i]);
   vfloat<K> d2 = vfloat<K>(tri.d2[i]);
-
   return isect<K>(o, d,
                   tn, tf,
                   n0, n1, n2,
