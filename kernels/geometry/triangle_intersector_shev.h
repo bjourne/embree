@@ -1,3 +1,4 @@
+// Copyright (C) 2019 Björn Lindqvist <bjourne@gmail.com>
 #pragma once
 
 typedef union {
@@ -99,31 +100,26 @@ isectK(const Vec3vf<K>& o,
     du = d.x * dett - (pu - o.x) * det;
     dv = d.y * dett - (pv - o.y) * det;
   }
-
   vfloat<K> u = tri.e2v[i] * du - tri.e2u[i] * dv;
   vfloat<K> v = tri.e1u[i] * dv - tri.e1v[i] * du;
   vfloat<K> p0 = ((det - u - v) ^ u) | (u ^ v);
-  vbool<K> valid = asInt(signmsk(p0)) == vint<K>(zero);
-  if (likely(none(valid))) {
+  vbool<K> valid = valid0 & asInt(signmsk(p0)) == vint<K>(zero);
+  if (likely(none(valid)))
     return false;
-  }
   vfloat<K> rdet = rcp(det);
   vfloat<K> t = dett * rdet;
   valid &= (tn < t) & (t <= tf);
-  if (likely(none(valid))) {
+  if (likely(none(valid)))
     return false;
-  }
-  // Reconstruct the normal
-  float x, y, z;
-  if (ci == 0) {
-    x = 1.0, y = nu[i], z = nv[i];
-  } else if (ci == 1) {
-    x = nu[i], y = 1.0, z = nv[i];
-  } else {
-    x = nu[i], y = nv[i], z = 1.0;
-  }
-  Vec3vf<K> ng = Vec3vf<K>(vfloat<K>(x), vfloat<K>(y), vfloat<K>(z));
-  new (&hit) MTHit<K>(valid, u * rdet, v * rdet, t, ng);
+  vfloat<K> x, y, z;
+  if (ci == 0)
+    x = 1, y = nu, z = nv;
+  else if (ci == 1)
+    x = nu, y = 1, z = nv;
+  else
+    x = nu, y = nv, z = 1;
+  new (&hit) MTHit<K>(valid, u * rdet, v * rdet, t,
+                      Vec3vf<K>(x, y, z));
   return true;
 }
 

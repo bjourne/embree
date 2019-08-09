@@ -1,6 +1,5 @@
 #pragma once
 
-// 14.6 for crown
 template<int M, int K>
 static __forceinline bool
 intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
@@ -35,7 +34,6 @@ intersectKRaysMTris(const Vec3vf<K>& o, const Vec3vf<K>& d,
   return true;
 }
 
-// 7.05 for crown
 template<int M>
 static __forceinline bool
 intersect1RayMTris(const Vec3vf<M>& o, const Vec3vf<M>& d,

@@ -1,5 +1,6 @@
 // ======================================================================== //
 // Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2019 Björn Lindqvist <bjourne@gmail.com>                       //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -29,7 +30,7 @@
 #define ISECT_SHEV      7
 #define ISECT_DS        8
 
-#define ISECT_METHOD ISECT_DS
+#define ISECT_METHOD ISECT_SHEV
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
@@ -220,10 +221,10 @@ namespace embree
       #if ISECT_METHOD == ISECT_HH
       n0 = cross(v1 - v0, v2 - v0);
       d0 = dot(n0, v0);
-      vfloat<M> rdenom = rcp(dot(n0, n0));
-      n1 = cross(v2 - v0, n0) * rdenom;
+      vfloat<M> rden = rcp(dot(n0, n0));
+      n1 = cross(v2 - v0, n0) * rden;
       d1 = -dot(n1, v0);
-      n2 = cross(n0, v1 - v0) * rdenom;
+      n2 = cross(n0, v1 - v0) * rden;
       d2 = -dot(n2, v0);
       #elif ISECT_METHOD == ISECT_EMBREE
       this->v0 = v0;
