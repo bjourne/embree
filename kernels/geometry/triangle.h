@@ -23,19 +23,22 @@
 
 #define ISECT_EMBREE    1
 #define ISECT_HH        2
-#define ISECT_SF01      3
-#define ISECT_MT        4
-#define ISECT_BW12      5
-#define ISECT_BW9       6
-#define ISECT_SHEV      7
-#define ISECT_DS        8
+#define ISECT_HH2       3
+#define ISECT_SF01      4
+#define ISECT_MT        5
+#define ISECT_BW12      6
+#define ISECT_BW9       7
+#define ISECT_SHEV      8
+#define ISECT_DS        9
 
-#define ISECT_METHOD ISECT_HH
+#define ISECT_METHOD ISECT_HH2
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
 #elif ISECT_METHOD == ISECT_HH
 #define ISECT_NAME "hh"
+#elif ISECT_METHOD == ISECT_HH2
+#define ISECT_NAME "hh2"
 #elif ISECT_METHOD == ISECT_SF01
 #define ISECT_NAME "sf01"
 #elif ISECT_METHOD == ISECT_MT
@@ -218,7 +221,7 @@ namespace embree
       this->geomIDs = geomIDs;
       this->primIDs = primIDs;
 
-      #if ISECT_METHOD == ISECT_HH
+      #if ISECT_METHOD == ISECT_HH || ISECT_METHOD == ISECT_HH2
       n0 = cross(v1 - v0, v2 - v0);
       d0 = dot(n0, v0);
       vfloat<M> rden = rcp(dot(n0, n0));
@@ -290,7 +293,9 @@ namespace embree
       vuint<M>::store_nt(&dst->geomIDs, src.geomIDs);
       vuint<M>::store_nt(&dst->primIDs, src.primIDs);
 
-      #if ISECT_METHOD == ISECT_BW12 || ISECT_METHOD == ISECT_HH
+      #if ISECT_METHOD == ISECT_BW12 \
+        || ISECT_METHOD == ISECT_HH \
+        || ISECT_METHOD == ISECT_HH2
       vfloat<M>::store_nt(&dst->n0.x, src.n0.x);
       vfloat<M>::store_nt(&dst->n0.y, src.n0.y);
       vfloat<M>::store_nt(&dst->n0.z, src.n0.z);
@@ -363,7 +368,9 @@ namespace embree
   public:
     vuint<M> geomIDs;  // geometry IDs
     vuint<M> primIDs;  // primitive IDs
-    #if ISECT_METHOD == ISECT_HH || ISECT_METHOD == ISECT_BW12
+    #if ISECT_METHOD == ISECT_HH \
+        || ISECT_METHOD == ISECT_HH2 \
+        || ISECT_METHOD == ISECT_BW12
     Vec3vf<M> n0, n1, n2;
     vfloat<M> d0, d1, d2;
     #elif ISECT_METHOD == ISECT_BW9
