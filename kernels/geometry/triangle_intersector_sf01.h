@@ -1,3 +1,4 @@
+// Copyright (C) 2019 Björn Lindqvist <bjourne@gmail.com>
 #pragma once
 
 template<int K>
@@ -24,19 +25,18 @@ isectAlgo(const Vec3vf<K>& o, const Vec3vf<K>& d,
   vbool<K> s1 = w1 >= vfloat<K>(zero);
   vbool<K> valid = valid0 & (s2 == s1) & (s0 == s2);
 
-  Vec3vf<K> ng = cross(e2, e1);
-  vfloat<K> den = dot(ng, d);
-  vfloat<K> t = dot(ng, v0o) * rcp(den);
+  Vec3vf<K> n = cross(e2, e1);
+  vfloat<K> den = dot(n, d);
+  vfloat<K> t = dot(n, v0o) * rcp(den);
   valid &= (tn < t) & (t <= tf);
-  if (likely(none(valid))) {
+  if (likely(none(valid)))
     return false;
-  }
 
   vfloat<K> rcpSum = rcp(w0 + w1 + w2);
   vfloat<K> u = w1 * rcpSum;
   vfloat<K> v = w2 * rcpSum;
 
-  new (&hit) MTHit<K>(valid, u, v, t, ng);
+  new (&hit) MTHit<K>(valid, u, v, t, n);
   return true;
 }
 
@@ -52,7 +52,9 @@ intersectKRaysMTris(Vec3vf<K> o, Vec3vf<K> d,
   Vec3vf<K> v0 = broadcast<vfloat<K>>(tri.v0, i);
   Vec3vf<K> e1 = broadcast<vfloat<K>>(tri.e1, i);
   Vec3vf<K> e2 = broadcast<vfloat<K>>(tri.e2, i);
-  return isectAlgo(o, d, tn, tf, v0, e1, e2, hit, valid0);
+  return isectAlgo(o, d, tn, tf,
+                   v0, e1, e2,
+                   hit, valid0);
 }
 
 template<int M>
@@ -61,8 +63,7 @@ intersect1RayMTris(const Vec3vf<M>& o, Vec3vf<M> d,
                    vfloat<M> tn, vfloat<M> tf,
                    const TriangleM<M>& tri, MTHit<M>& hit)
 {
-  return isectAlgo<M>(o, d,
-                      tn, tf,
+  return isectAlgo<M>(o, d, tn, tf,
                       tri.v0, tri.e1, tri.e2,
                       hit, true);
 }

@@ -30,7 +30,7 @@
 #define ISECT_SHEV      7
 #define ISECT_DS        8
 
-#define ISECT_METHOD ISECT_BW12
+#define ISECT_METHOD ISECT_HH
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
