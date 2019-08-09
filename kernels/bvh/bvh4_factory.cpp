@@ -41,7 +41,6 @@ namespace embree
 
   BVH4Factory::BVH4Factory(int bfeatures, int ifeatures)
   {
-    printf("BVH4Factory::BVH4Factory\n");
     selectBuilders(bfeatures);
     selectIntersectors(ifeatures);
   }
@@ -78,7 +77,6 @@ namespace embree
   Accel::Intersectors
   BVH4Factory::BVH4Triangle4Intersectors(BVH4* bvh, IntersectVariant ivariant)
   {
-    printf("BVH4Factory::BVH4Triangle4Intersectors\n");
     assert(ivariant == IntersectVariant::FAST);
     Accel::Intersectors intersectors;
     intersectors.ptr = bvh;
@@ -110,8 +108,6 @@ namespace embree
                                            AccelData*& accel,
                                            Builder*& builder)
   {
-    printf("BVH4Factory::createTriangleMeshTriangle4 "
-           "mesh->quality = %d\n", mesh->quality);
     BVH4Factory* factory = mesh->scene->device->bvh4_factory.get();
     accel = new BVH4(mesh->scene);
     builder = factory->BVH4Triangle4MeshBuilderSAH(accel,mesh,0);
@@ -122,11 +118,6 @@ namespace embree
                              BuildVariant bvariant,
                              IntersectVariant ivariant)
   {
-    printf("BVH4Factory::BVH4Triangle4 "
-           "tri_traverser = %s "
-           "bvariant = %d",
-           scene->device->tri_traverser.c_str(),
-           bvariant);
     BVH4* accel = new BVH4(scene);
 
     Accel::Intersectors intersectors;

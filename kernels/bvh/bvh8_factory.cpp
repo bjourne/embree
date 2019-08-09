@@ -131,10 +131,6 @@ namespace embree
                              BuildVariant bvariant,
                              IntersectVariant ivariant)
   {
-    printf("BVH8Factory::BVH8Triangle4 bvariant "
-           "bvariant = %d tri_builder = %s\n",
-           bvariant,
-           scene->device->tri_builder.c_str());
     BVH8* accel = new BVH8(scene);
     Accel::Intersectors intersectors= BVH8Triangle4Intersectors(accel,ivariant);
     Builder* builder = nullptr;
