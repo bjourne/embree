@@ -131,7 +131,7 @@ namespace embree
           prims(bvh->device,0),
           settings(sahBlockSize,
                    minLeafSize,
-                   min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks),
+                   min(maxLeafSize, Primitive::max_size()*BVH::maxLeafBlocks),
                    travCost, intCost,
                    DEFAULT_SINGLE_THREAD_THRESHOLD),
           primrefarrayalloc(false) {}
@@ -181,7 +181,8 @@ namespace embree
 
             /* initialize allocator */
             const size_t node_bytes = numPrimitives*sizeof(typename BVH::AlignedNodeMB)/(4*N);
-            const size_t leaf_bytes = size_t(1.2*Primitive::blocks(numPrimitives)*sizeof(Primitive));
+            const size_t leaf_bytes =
+              size_t(1.2 * Primitive::blocks(numPrimitives) * sizeof(TriangleM<4>));
             bvh->alloc.init_estimate(node_bytes+leaf_bytes);
             settings.singleThreadThreshold =
               bvh->alloc.fixSingleThreadThreshold(N,
@@ -205,7 +206,7 @@ namespace embree
             /* call BVH builder */
             NodeRef root = BVHNBuilderVirtual<N>::build(
               &bvh->alloc,
-              CreateLeaf<N,Primitive>(bvh),
+              CreateLeaf<N,TriangleM<4>>(bvh),
               bvh->scene->progressInterface,
               prims.data(),
               pinfo,
@@ -238,12 +239,16 @@ namespace embree
     Builder*
     BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode)
     {
-      return new BVHNBuilderSAH<4,TriangleMesh,TriangleM<4>>((BVH4*)bvh,mesh,4,1.0f,4,inf,mode);
+      return new BVHNBuilderSAH<4,TriangleMesh,TriangleM<4>>(
+        (BVH4*)bvh,
+        mesh, 4, 1.0f, 4, inf, mode);
     }
     Builder*
     BVH4Triangle4SceneBuilderSAH  (void* bvh, Scene* scene, size_t mode)
     {
-      return new BVHNBuilderSAH<4,TriangleMesh,TriangleM<4>>((BVH4*)bvh,scene,4,1.0f,4,inf,mode);
+      return new BVHNBuilderSAH<4,TriangleMesh,TriangleM<4>>(
+        (BVH4*)bvh,
+        scene, 4, 1.0f, 4, inf, mode);
     }
 
 

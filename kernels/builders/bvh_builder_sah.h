@@ -323,14 +323,15 @@ namespace embree
         typename CreateLeafFunc,
         typename ProgressMonitor>
 
-        __noinline static ReductionTy build(Heuristic& heuristic,
-                                            PrimRef* prims,
-                                 const Set& set,
-                                 CreateAllocFunc createAlloc,
-                                 CreateNodeFunc createNode, UpdateNodeFunc updateNode,
-                                 const CreateLeafFunc& createLeaf,
-                                 const ProgressMonitor& progressMonitor,
-                                 const Settings& settings)
+        __noinline static ReductionTy
+      build(Heuristic& heuristic,
+            PrimRef* prims,
+            const Set& set,
+            CreateAllocFunc createAlloc,
+            CreateNodeFunc createNode, UpdateNodeFunc updateNode,
+            const CreateLeafFunc& createLeaf,
+            const ProgressMonitor& progressMonitor,
+            const Settings& settings)
       {
         typedef BuildRecordT<Set,typename Heuristic::Split> BuildRecord;
 
@@ -458,7 +459,10 @@ namespace embree
           Heuristic heuristic(splitPrimitive,prims,pinfo);
 
           /* calculate total surface area */ // FIXME: this sum is not deterministic
-          const float A = (float) parallel_reduce(size_t(0),pinfo.size(),0.0, [&] (const range<size_t>& r) -> double {
+          const float A = (float) parallel_reduce(
+            size_t(0),
+            pinfo.size(),0.0,
+            [&] (const range<size_t>& r) -> double {
 
               double A = 0.0f;
               for (size_t i=r.begin(); i<r.end(); i++)
@@ -499,53 +503,6 @@ namespace embree
             progressMonitor,
             settings);
         }
-    };
-
-    /* Open/Merge SAH builder that operates on an array of BuildRecords */
-    struct BVHBuilderBinnedOpenMergeSAH
-    {
-      static const size_t NUM_OBJECT_BINS_HQ = 32;
-      typedef PrimInfoExtRange Set;
-      typedef BinSplit<NUM_OBJECT_BINS_HQ> Split;
-      typedef GeneralBVHBuilder::BuildRecordT<Set,Split> BuildRecord;
-      typedef GeneralBVHBuilder::Settings Settings;
-      
-      /*! special builder that propagates reduction over the tree */
-      template<
-        typename ReductionTy, 
-        typename BuildRef,
-        typename CreateAllocFunc, 
-        typename CreateNodeFunc, 
-        typename UpdateNodeFunc, 
-        typename CreateLeafFunc, 
-        typename NodeOpenerFunc, 
-        typename ProgressMonitor>
-        
-        static ReductionTy build(CreateAllocFunc createAlloc, 
-                                 CreateNodeFunc createNode, 
-                                 UpdateNodeFunc updateNode, 
-                                 const CreateLeafFunc& createLeaf, 
-                                 NodeOpenerFunc nodeOpenerFunc,
-                                 ProgressMonitor progressMonitor,
-                                 BuildRef* prims, 
-                                 const size_t extSize,
-                                 const PrimInfo& pinfo, 
-                                 const Settings& settings)
-      {
-        typedef HeuristicArrayOpenMergeSAH<NodeOpenerFunc,BuildRef,NUM_OBJECT_BINS_HQ> Heuristic;
-        Heuristic heuristic(nodeOpenerFunc,prims,settings.branchingFactor);
-
-        return GeneralBVHBuilder::build<ReductionTy,Heuristic,Set,BuildRef>(
-          heuristic,
-          prims,
-          PrimInfoExtRange(0,pinfo.size(),extSize,pinfo),
-          createAlloc,
-          createNode,
-          updateNode,
-          createLeaf,
-          progressMonitor,
-          settings);
-      }
     };
   }
 }

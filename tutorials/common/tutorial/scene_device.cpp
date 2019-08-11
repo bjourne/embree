@@ -29,13 +29,6 @@ namespace embree
   {
     switch (geom->type) {
     case TRIANGLE_MESH: delete (ISPCTriangleMesh*) geom; break;
-    case SUBDIV_MESH  : delete (ISPCSubdivMesh*) geom; break;
-    case INSTANCE: delete (ISPCInstance*) geom; break;
-    case GROUP: delete (ISPCGroup*) geom; break;
-    case QUAD_MESH: delete (ISPCQuadMesh*) geom; break;
-    case CURVES: delete (ISPCHairSet*) geom; break;
-    case GRID_MESH: delete (ISPCGridMesh*) geom; break;
-    case POINTS: delete (ISPCPointSet*) geom; break;
     default: assert(false); break;
     }
   }
@@ -126,7 +119,8 @@ namespace embree
     return (Light*)out;
   }
 
-  ISPCTriangleMesh::ISPCTriangleMesh (TutorialScene* scene_in, Ref<SceneGraph::TriangleMeshNode> in)
+  ISPCTriangleMesh::ISPCTriangleMesh (TutorialScene* scene_in,
+                                      Ref<SceneGraph::TriangleMeshNode> in)
     : geom(TRIANGLE_MESH), positions(nullptr), normals(nullptr)
   {
     positions = new Vec3fa*[in->numTimeSteps()];
@@ -154,198 +148,6 @@ namespace embree
     if (normals) delete[] normals;
   }
 
-  ISPCQuadMesh::ISPCQuadMesh (TutorialScene* scene_in, Ref<SceneGraph::QuadMeshNode> in)
-    : geom(QUAD_MESH), positions(nullptr), normals(nullptr)
-  {
-    positions = new Vec3fa*[in->numTimeSteps()];
-    for (size_t i=0; i<in->numTimeSteps(); i++)
-      positions[i] = in->positions[i].data();
-
-    if (in->normals.size()) {
-      normals = new Vec3fa*[in->numTimeSteps()];
-      for (size_t i=0; i<in->numTimeSteps(); i++)
-        normals[i] = in->normals[i].data();
-    }
-
-    texcoords = in->texcoords.data();
-    quads = (ISPCQuad*) in->quads.data();
-    startTime = in->time_range.lower;
-    endTime   = in->time_range.upper;
-    numTimeSteps = (unsigned) in->numTimeSteps();
-    numVertices = (unsigned) in->numVertices();
-    numQuads = (unsigned) in->numPrimitives();
-    geom.materialID = scene_in->materialID(in->material);
-  }
-
-  ISPCQuadMesh::~ISPCQuadMesh () {
-    if (positions) delete[] positions;
-    if (normals) delete[] normals;
-  }
-
-
-  ISPCGridMesh::ISPCGridMesh (TutorialScene* scene_in, Ref<SceneGraph::GridMeshNode> in)
-    : geom(GRID_MESH), positions(nullptr)
-  {
-    positions = new Vec3fa*[in->numTimeSteps()];
-    for (size_t i=0; i<in->numTimeSteps(); i++)
-      positions[i] = in->positions[i].data();
-
-    grids = (ISPCGrid*) in->grids.data();
-    startTime = in->time_range.lower;
-    endTime   = in->time_range.upper;
-    numTimeSteps = (unsigned) in->numTimeSteps();
-    numVertices = (unsigned) in->numVertices();
-    numGrids = (unsigned) in->numPrimitives();
-    geom.materialID = scene_in->materialID(in->material);
-  }
-
-  ISPCGridMesh::~ISPCGridMesh () {
-    if (positions) delete[] positions;
-  }
-
-
-  ISPCSubdivMesh::ISPCSubdivMesh (TutorialScene* scene_in, Ref<SceneGraph::SubdivMeshNode> in)
-    : geom(SUBDIV_MESH), positions(nullptr), normals(nullptr)
-  {
-    positions = new Vec3fa*[in->numTimeSteps()];
-    for (size_t i=0; i<in->numTimeSteps(); i++)
-      positions[i] = in->positions[i].data();
-
-    if (in->normals.size()) {
-      normals = new Vec3fa*[in->numTimeSteps()];
-      for (size_t i=0; i<in->numTimeSteps(); i++)
-        normals[i] = in->normals[i].data();
-    }
-
-    texcoords = in->texcoords.data();
-    position_indices = in->position_indices.data();
-    normal_indices = in->normal_indices.data();
-    texcoord_indices = in->texcoord_indices.data();
-    position_subdiv_mode =  in->position_subdiv_mode;
-    normal_subdiv_mode = in->normal_subdiv_mode;
-    texcoord_subdiv_mode = in->texcoord_subdiv_mode;
-    verticesPerFace = in->verticesPerFace.data();
-    holes = in->holes.data();
-    edge_creases = in->edge_creases.data();
-    edge_crease_weights = in->edge_crease_weights.data();
-    vertex_creases = in->vertex_creases.data();
-    vertex_crease_weights = in->vertex_crease_weights.data();
-    startTime = in->time_range.lower;
-    endTime   = in->time_range.upper;
-    numTimeSteps = unsigned(in->numTimeSteps());
-    numVertices = unsigned(in->numPositions());
-    numFaces = unsigned(in->numPrimitives());
-    numEdges = unsigned(in->position_indices.size());
-    numEdgeCreases = unsigned(in->edge_creases.size());
-    numVertexCreases = unsigned(in->vertex_creases.size());
-    numHoles = unsigned(in->holes.size());
-    numNormals = unsigned(in->numNormals());
-    numTexCoords = unsigned(in->texcoords.size());
-    geom.materialID = scene_in->materialID(in->material);
-    size_t numEdges = in->position_indices.size();
-    size_t numFaces = in->verticesPerFace.size();
-    subdivlevel = new float[numEdges];
-    face_offsets = new unsigned[numFaces];
-    for (size_t i=0; i<numEdges; i++) subdivlevel[i] = 1.0f;
-    int offset = 0;
-    for (size_t i=0; i<numFaces; i++)
-    {
-      face_offsets[i] = offset;
-      offset+=verticesPerFace[i];
-    }
-  }
-
-  ISPCSubdivMesh::~ISPCSubdivMesh ()
-  {
-    if (positions) delete[] positions;
-    if (normals) delete[] normals;
-    if (subdivlevel) delete[] subdivlevel;
-    if (face_offsets) delete[] face_offsets;
-  }
-
-  ISPCHairSet::ISPCHairSet (TutorialScene* scene_in, RTCGeometryType type, Ref<SceneGraph::HairSetNode> in)
-    : geom(CURVES), normals(nullptr), tangents(nullptr), dnormals(nullptr), type(type)
-  {
-    positions = new Vec3fa*[in->numTimeSteps()];
-    for (size_t i=0; i<in->numTimeSteps(); i++)
-      positions[i] = in->positions[i].data();
-
-    if (in->normals.size()) {
-      normals = new Vec3fa*[in->numTimeSteps()];
-      for (size_t i=0; i<in->numTimeSteps(); i++)
-        normals[i] = in->normals[i].data();
-    }
-
-    if (in->tangents.size()) {
-      tangents = new Vec3fa*[in->numTimeSteps()];
-      for (size_t i=0; i<in->numTimeSteps(); i++)
-        tangents[i] = in->tangents[i].data();
-    }
-
-    if (in->dnormals.size()) {
-      dnormals = new Vec3fa*[in->numTimeSteps()];
-      for (size_t i=0; i<in->numTimeSteps(); i++)
-        dnormals[i] = in->dnormals[i].data();
-    }
-
-    hairs = (ISPCHair*) in->hairs.data();
-    flags = (unsigned char*)in->flags.data();
-    startTime = in->time_range.lower;
-    endTime   = in->time_range.upper;
-    numTimeSteps = (unsigned) in->numTimeSteps();
-    numVertices = (unsigned) in->numVertices();
-    numHairs = (unsigned)in->numPrimitives();
-    geom.materialID = scene_in->materialID(in->material);
-    tessellation_rate = in->tessellation_rate;
-  }
-
-  ISPCHairSet::~ISPCHairSet() {
-    delete[] positions;
-    delete[] normals;
-    delete[] tangents;
-    delete[] dnormals;
-  }
-
-  ISPCPointSet::ISPCPointSet (TutorialScene* scene_in, RTCGeometryType type, Ref<SceneGraph::PointSetNode> in)
-    : geom(POINTS), positions(nullptr), normals(nullptr), type(type)
-  {
-    positions = new Vec3fa*[in->numTimeSteps()];
-    for (size_t i=0; i<in->numTimeSteps(); i++)
-      positions[i] = in->positions[i].data();
-
-    if (in->normals.size()) {
-      normals = new Vec3fa*[in->numTimeSteps()];
-      for (size_t i=0; i<in->numTimeSteps(); i++)
-        normals[i] = in->normals[i].data();
-    }
-
-    numTimeSteps = (unsigned) in->numTimeSteps();
-    numVertices = (unsigned) in->numVertices();
-    geom.materialID = scene_in->materialID(in->material);
-  }
-
-  ISPCPointSet::~ISPCPointSet () {
-    if (positions) delete[] positions;
-    if (normals) delete[] normals;
-  }
-
-
-  ISPCInstance::ISPCInstance (TutorialScene* scene, Ref<SceneGraph::TransformNode> in)
-    : geom(INSTANCE), numTimeSteps(unsigned(in->spaces.size()))
-  {
-    spaces = (AffineSpace3fa*) alignedMalloc(in->spaces.size()*sizeof(AffineSpace3fa),16);
-    geom.geomID = scene->geometryID(in->child);
-    child = ISPCScene::convertGeometry(scene,in->child);
-    startTime = in->spaces.time_range.lower;
-    endTime   = in->spaces.time_range.upper;
-    for (size_t i=0; i<numTimeSteps; i++)
-      spaces[i] = in->spaces[i];
-  }
-
-  ISPCInstance::~ISPCInstance() {
-    alignedFree(spaces);
-  }
-
   ISPCGroup::ISPCGroup (TutorialScene* scene, Ref<SceneGraph::GroupNode> in)
     : geom(GROUP)
   {
@@ -371,20 +173,6 @@ namespace embree
       return (ISPCGeometry*) in->geometry;
     else if (Ref<SceneGraph::TriangleMeshNode> mesh = in.dynamicCast<SceneGraph::TriangleMeshNode>())
       geom = (ISPCGeometry*) new ISPCTriangleMesh(scene,mesh);
-    else if (Ref<SceneGraph::QuadMeshNode> mesh = in.dynamicCast<SceneGraph::QuadMeshNode>())
-      geom = (ISPCGeometry*) new ISPCQuadMesh(scene,mesh);
-    else if (Ref<SceneGraph::SubdivMeshNode> mesh = in.dynamicCast<SceneGraph::SubdivMeshNode>())
-      geom = (ISPCGeometry*) new ISPCSubdivMesh(scene,mesh);
-    else if (Ref<SceneGraph::HairSetNode> mesh = in.dynamicCast<SceneGraph::HairSetNode>())
-      geom = (ISPCGeometry*) new ISPCHairSet(scene,mesh->type,mesh);
-    else if (Ref<SceneGraph::GridMeshNode> mesh = in.dynamicCast<SceneGraph::GridMeshNode>())
-      geom = (ISPCGeometry*) new ISPCGridMesh(scene,mesh);
-    else if (Ref<SceneGraph::TransformNode> mesh = in.dynamicCast<SceneGraph::TransformNode>())
-      geom = (ISPCGeometry*) new ISPCInstance(scene,mesh);
-    else if (Ref<SceneGraph::GroupNode> mesh = in.dynamicCast<SceneGraph::GroupNode>())
-      geom = (ISPCGeometry*) new ISPCGroup(scene,mesh);
-    else if (Ref<SceneGraph::PointSetNode> mesh = in.dynamicCast<SceneGraph::PointSetNode>())
-      geom = (ISPCGeometry*) new ISPCPointSet(scene, mesh->type, mesh);
     else
       THROW_RUNTIME_ERROR("unknown geometry type");
 
@@ -392,13 +180,22 @@ namespace embree
     return geom;
   }
 
-  unsigned int ConvertTriangleMesh(RTCDevice device, ISPCTriangleMesh* mesh, RTCBuildQuality quality, RTCScene scene_out, unsigned int geomID)
+  unsigned int
+  ConvertTriangleMesh(RTCDevice device,
+                      ISPCTriangleMesh* mesh,
+                      RTCBuildQuality quality,
+                      RTCScene scene_out,
+                      unsigned int geomID)
   {
+    printf("ConvertTriangleMesh\n");
     RTCGeometry geom = rtcNewGeometry (device, RTC_GEOMETRY_TYPE_TRIANGLE);
     rtcSetGeometryTimeStepCount(geom,mesh->numTimeSteps);
     rtcSetGeometryTimeRange(geom,mesh->startTime,mesh->endTime);
     for (unsigned int t=0; t<mesh->numTimeSteps; t++) {
-      rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, t, RTC_FORMAT_FLOAT3, mesh->positions[t], 0, sizeof(Vec3fa), mesh->numVertices);
+      rtcSetSharedGeometryBuffer(geom,
+                                 RTC_BUFFER_TYPE_VERTEX, t,
+                                 RTC_FORMAT_FLOAT3, mesh->positions[t],
+                                 0, sizeof(Vec3fa), mesh->numVertices);
     }
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, mesh->triangles, 0, sizeof(ISPCTriangle), mesh->numTriangles);
     rtcCommitGeometry(geom);
@@ -444,7 +241,8 @@ namespace embree
   typedef ISPCInstance* ISPCInstance_ptr;
   typedef ISPCGeometry* ISPCGeometry_ptr;
 
-  extern "C" RTCScene ConvertScene(RTCDevice g_device, ISPCScene* scene_in, RTCBuildQuality quality)
+  extern "C" RTCScene
+  ConvertScene(RTCDevice g_device, ISPCScene* scene_in, RTCBuildQuality quality)
   {
     RTCScene scene_out = rtcNewScene(g_device);
 
@@ -463,15 +261,13 @@ namespace embree
           assert(false);
       }
     }
-
     /* no instancing */
     else
     {
       for (unsigned int i=0; i<scene_in->numGeometries; i++)
       {
         ISPCGeometry* geometry = scene_in->geometries[i];
-        if (geometry->type == SUBDIV_MESH) {
-        } else if (geometry->type == TRIANGLE_MESH)
+        if (geometry->type == TRIANGLE_MESH)
           ConvertTriangleMesh(g_device,(ISPCTriangleMesh*) geometry, quality, scene_out, i);
         else
           assert(false);

@@ -59,15 +59,15 @@ namespace embree
     BBox3fa bounds;
   };
 
-  template<typename NodeRef>
-  struct BVHNodeRecordMB
-  {
-    __forceinline BVHNodeRecordMB() {}
-    __forceinline BVHNodeRecordMB(NodeRef ref, const LBBox3fa& lbounds) : ref(ref), lbounds(lbounds) {}
+  // template<typename NodeRef>
+  // struct BVHNodeRecordMB
+  // {
+  //   __forceinline BVHNodeRecordMB() {}
+  //   __forceinline BVHNodeRecordMB(NodeRef ref, const LBBox3fa& lbounds) : ref(ref), lbounds(lbounds) {}
 
-    NodeRef ref;
-    LBBox3fa lbounds;
-  };
+  //   NodeRef ref;
+  //   LBBox3fa lbounds;
+  // };
 
   template<typename NodeRef>
   struct BVHNodeRecordMB4D
@@ -107,7 +107,7 @@ namespace embree
 
     /*! Masks the bits that store the number of items per leaf. */
     static const size_t align_mask = byteAlignment-1;
-    static const size_t items_mask = byteAlignment-1;
+    static const size_t items_mask = byteAlignment - 1;
 
     /*! different supported node types */
     static const size_t tyAlignedNode = 0;
@@ -130,8 +130,8 @@ namespace embree
     static const size_t maxBuildDepthLeaf = maxBuildDepth+8;
     static const size_t maxDepth = 2*maxBuildDepthLeaf; // 2x because of two level builder
 
-    /*! Maximum number of primitive blocks in a leaf. */
-    static const size_t maxLeafBlocks = items_mask-tyLeaf;
+    /*! Maximum number of primitive blocks in a leaf. 15 - 8 = 7 */
+    static const size_t maxLeafBlocks = items_mask - tyLeaf;
 
   public:
 
@@ -372,7 +372,7 @@ namespace embree
     };
 
     typedef BVHNodeRecord<NodeRef>     NodeRecord;
-    typedef BVHNodeRecordMB<NodeRef>   NodeRecordMB;
+  //typedef BVHNodeRecordMB<NodeRef>   NodeRecordMB;
     typedef BVHNodeRecordMB4D<NodeRef> NodeRecordMB4D;
 
     /*! BVHN Base Node */
@@ -600,43 +600,43 @@ namespace embree
         }
       };
 
-      struct Set2
-      {
-        template<typename BuildRecord>
-        __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
-        {
-          AlignedNodeMB* node = ref.alignedNodeMB();
+      // struct Set2
+      // {
+      //   template<typename BuildRecord>
+      //   __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
+      //   {
+      //     AlignedNodeMB* node = ref.alignedNodeMB();
 
-          LBBox3fa bounds = empty;
-          for (size_t i=0; i<num; i++) {
-            node->setRef(i,children[i].ref);
-            node->setBounds(i,children[i].lbounds);
-            bounds.extend(children[i].lbounds);
-          }
-          return NodeRecordMB(ref,bounds);
-        }
-      };
+      //     LBBox3fa bounds = empty;
+      //     for (size_t i=0; i<num; i++) {
+      //       node->setRef(i,children[i].ref);
+      //       node->setBounds(i,children[i].lbounds);
+      //       bounds.extend(children[i].lbounds);
+      //     }
+      //     return NodeRecordMB(ref,bounds);
+      //   }
+      // };
 
-      struct Set2TimeRange
-      {
-        __forceinline Set2TimeRange(BBox1f tbounds) : tbounds(tbounds) {}
+      // struct Set2TimeRange
+      // {
+      //   __forceinline Set2TimeRange(BBox1f tbounds) : tbounds(tbounds) {}
 
-        template<typename BuildRecord>
-        __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
-        {
-          AlignedNodeMB* node = ref.alignedNodeMB();
+      //   template<typename BuildRecord>
+      //   __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
+      //   {
+      //     AlignedNodeMB* node = ref.alignedNodeMB();
 
-          LBBox3fa bounds = empty;
-          for (size_t i=0; i<num; i++) {
-            node->setRef(i, children[i].ref);
-            node->setBounds(i, children[i].lbounds, tbounds);
-            bounds.extend(children[i].lbounds);
-          }
-          return NodeRecordMB(ref,bounds);
-        }
+      //     LBBox3fa bounds = empty;
+      //     for (size_t i=0; i<num; i++) {
+      //       node->setRef(i, children[i].ref);
+      //       node->setBounds(i, children[i].lbounds, tbounds);
+      //       bounds.extend(children[i].lbounds);
+      //     }
+      //     return NodeRecordMB(ref,bounds);
+      //   }
 
-        BBox1f tbounds;
-      };
+      //   BBox1f tbounds;
+      // };
 
       /*! Clears the node. */
       __forceinline void clear()  {
@@ -653,7 +653,8 @@ namespace embree
       }
 
       /*! Sets bounding box of child. */
-      __forceinline void setBounds(size_t i, const BBox3fa& bounds0_i, const BBox3fa& bounds1_i)
+      __forceinline void
+      setBounds(size_t i, const BBox3fa& bounds0_i, const BBox3fa& bounds1_i)
       {
         /*! for empty bounds we have to avoid inf-inf=nan */
         BBox3fa bounds0(min(bounds0_i.lower,Vec3fa(+FLT_MAX)),max(bounds0_i.upper,Vec3fa(-FLT_MAX)));
@@ -1532,11 +1533,13 @@ namespace embree
     /*! data arrays for special builders */
   public:
     std::vector<BVHN*> objects;
-    vector_t<char,aligned_allocator<char,32>> subdiv_patches;
   };
 
   template<>
-  __forceinline void BVHN<4>::AlignedNode::bounds(BBox<vfloat4>& bounds0, BBox<vfloat4>& bounds1, BBox<vfloat4>& bounds2, BBox<vfloat4>& bounds3) const {
+  __forceinline void BVHN<4>::AlignedNode::bounds(BBox<vfloat4>& bounds0,
+                                                  BBox<vfloat4>& bounds1,
+                                                  BBox<vfloat4>& bounds2,
+                                                  BBox<vfloat4>& bounds3) const {
     transpose(lower_x,lower_y,lower_z,vfloat4(zero),bounds0.lower,bounds1.lower,bounds2.lower,bounds3.lower);
     transpose(upper_x,upper_y,upper_z,vfloat4(zero),bounds0.upper,bounds1.upper,bounds2.upper,bounds3.upper);
   }

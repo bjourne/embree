@@ -131,7 +131,8 @@ void device_key_pressed_handler(int key)
   else device_key_pressed_default(key);
 }
 
-RTCScene convertScene(ISPCScene* scene_in)
+RTCScene
+convertScene(ISPCScene* scene_in)
 {
   for (unsigned int i=0; i<scene_in->numGeometries; i++)
   {
@@ -320,13 +321,14 @@ void renderTileStandard(int taskIndex,
 }
 
 /* task that renders a single screen tile */
-void renderTileTask (int taskIndex, int threadIndex, int* pixels,
-                         const unsigned int width,
-                         const unsigned int height,
-                         const float time,
-                         const ISPCCamera& camera,
-                         const int numTilesX,
-                         const int numTilesY)
+void
+renderTileTask (int taskIndex, int threadIndex, int* pixels,
+                const unsigned int width,
+                const unsigned int height,
+                const float time,
+                const ISPCCamera& camera,
+                const int numTilesX,
+                const int numTilesY)
 {
   renderTile(taskIndex,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
 }
@@ -343,11 +345,12 @@ extern "C" void device_init (char* cfg)
 }
 
 /* called by the C++ code to render */
-extern "C" void device_render (int* pixels,
-                           const unsigned int width,
-                           const unsigned int height,
-                           const float time,
-                           const ISPCCamera& camera)
+extern "C" void
+device_render (int* pixels,
+               const unsigned int width,
+               const unsigned int height,
+               const float time,
+               const ISPCCamera& camera)
 {
   bool camera_changed = g_changed; g_changed = false;
 
