@@ -95,24 +95,18 @@ namespace embree
         STAT3(normal.trav_leaves, 1, 1, 1);
         size_t num; Primitive* prim = (Primitive*)cur.leaf(num);
 
-        size_t lazy_node = 0;
-        PrimitiveIntersectorK::intersect(This, ray, k, context, prim, num, tray1, lazy_node);
+        PrimitiveIntersectorK::intersect(ray, k, context, prim, num);
 
         tray1.tfar = ray.tfar[k];
-
-        if (unlikely(lazy_node)) {
-          stackPtr->ptr = lazy_node;
-          stackPtr->dist = neg_inf;
-          stackPtr++;
-        }
       }
     }
 
     template<int N, int K, int types, bool robust, typename PrimitiveIntersectorK, bool single>
-    void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::intersect(vint<K>* __restrict__ valid_i,
-                                                                                               Accel::Intersectors* __restrict__ This,
-                                                                                               RayHitK<K>& __restrict__ ray,
-                                                                                               IntersectContext* __restrict__ context)
+    void BVHNIntersectorKHybrid<N, K, types, robust, PrimitiveIntersectorK, single>::
+    intersect(vint<K>* __restrict__ valid_i,
+              Accel::Intersectors* __restrict__ This,
+              RayHitK<K>& __restrict__ ray,
+              IntersectContext* __restrict__ context)
     {
       BVH* __restrict__ bvh = (BVH*)This->ptr;
 
@@ -362,14 +356,8 @@ namespace embree
           if (unlikely(none(valid_leaf))) continue;
           size_t items; const Primitive* prim = (Primitive*)cur.leaf(items);
 
-          size_t lazy_node = 0;
-          PrimitiveIntersectorK::intersect(valid_leaf, This, ray, context, prim, items, tray, lazy_node);
+          PrimitiveIntersectorK::intersect(valid_leaf, ray, context, prim, items);
           tray.tfar = select(valid_leaf, ray.tfar, tray.tfar);
-
-          if (unlikely(lazy_node)) {
-            *sptr_node = lazy_node; sptr_node++;
-            *sptr_near = neg_inf;   sptr_near++;
-          }
         }
       } while(valid_bits);
     }
@@ -511,20 +499,13 @@ namespace embree
           if (unlikely(none(valid_leaf))) continue;
           size_t items; const Primitive* prim = (Primitive*)cur.leaf(items);
 
-          size_t lazy_node = 0;
-          PrimitiveIntersectorK::intersect(valid_leaf, This, ray, context, prim, items, tray, lazy_node);
+          PrimitiveIntersectorK::intersect(valid_leaf, ray, context, prim, items);
 
           /* reduce max distance interval on successful intersection */
           if (likely(any((ray.tfar < tray.tfar) & valid_leaf)))
           {
             tray.tfar = select(valid_leaf, ray.tfar, tray.tfar);
             frustum.updateMaxDist(tray.tfar);
-          }
-
-          if (unlikely(lazy_node)) {
-            stackPtr->ptr = lazy_node;
-            stackPtr->dist = neg_inf;
-            stackPtr++;
           }
         }
 
@@ -590,20 +571,18 @@ namespace embree
           STAT3(shadow.trav_leaves, 1, 1, 1);
           size_t num; Primitive* prim = (Primitive*)cur.leaf(num);
 
-          size_t lazy_node = 0;
-          if (PrimitiveIntersectorK::occluded(This,
-                                              ray, k,
+          //size_t lazy_node = 0;
+          if (PrimitiveIntersectorK::occluded(ray, k,
                                               context,
-                                              prim, num,
-                                              tray1, lazy_node)) {
+                                              prim, num)) {
 	    ray.tfar[k] = neg_inf;
 	    return true;
 	  }
 
-          if (unlikely(lazy_node)) {
-            *stackPtr = lazy_node;
-            stackPtr++;
-          }
+          // if (unlikely(lazy_node)) {
+          //   *stackPtr = lazy_node;
+          //   stackPtr++;
+          // }
 	}
 	return false;
       }
@@ -783,15 +762,11 @@ namespace embree
         if (unlikely(none(valid_leaf))) continue;
         size_t items; const Primitive* prim = (Primitive*) cur.leaf(items);
 
-        size_t lazy_node = 0;
-        terminated |= PrimitiveIntersectorK::occluded(!terminated, This, ray, context, prim, items, tray, lazy_node);
+        //size_t lazy_node = 0;
+        terminated |= PrimitiveIntersectorK::occluded(!terminated, ray, context, prim, items);
         if (all(terminated)) break;
-        tray.tfar = select(terminated, vfloat<K>(neg_inf), tray.tfar); // ignore node intersections for terminated rays
-
-        if (unlikely(lazy_node)) {
-          *sptr_node = lazy_node; sptr_node++;
-          *sptr_near = neg_inf;   sptr_near++;
-        }
+        // ignore node intersections for terminated rays
+        tray.tfar = select(terminated, vfloat<K>(neg_inf), tray.tfar);
       }
 
       vfloat<K>::store(valid & terminated, &ray.tfar, neg_inf);
@@ -915,17 +890,12 @@ namespace embree
           if (unlikely(!m_active)) continue;
           size_t items; const Primitive* prim = (Primitive*)cur.leaf(items);
 
-          size_t lazy_node = 0;
-          terminated |= PrimitiveIntersectorK::occluded(!terminated, This, ray, context, prim, items, tray, lazy_node);
+          //size_t lazy_node = 0;
+          terminated |= PrimitiveIntersectorK::occluded(!terminated, ray, context, prim, items);
           octant_valid &= !terminated;
           if (unlikely(none(octant_valid))) break;
-          tray.tfar = select(terminated, vfloat<K>(neg_inf), tray.tfar); // ignore node intersections for terminated rays
-
-          if (unlikely(lazy_node)) {
-            stackPtr->ptr  = lazy_node;
-            stackPtr->mask = movemask(octant_valid);
-            stackPtr++;
-          }
+          // ignore node intersections for terminated rays
+          tray.tfar = select(terminated, vfloat<K>(neg_inf), tray.tfar);
         }
       } while(valid_bits);
 

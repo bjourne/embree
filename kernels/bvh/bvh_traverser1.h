@@ -55,11 +55,12 @@ namespace embree
     }
 
     template<int N, int Nx, int types, class NodeRef, class BaseNode>
-    __forceinline void traverseClosestHitAVX512(NodeRef& cur,
-                                                size_t mask,
-                                                const vfloat<Nx>& tNear,
-                                                StackItemT<NodeRef>*& stackPtr,
-                                                StackItemT<NodeRef>* stackEnd)
+    __forceinline void
+    traverseClosestHitAVX512(NodeRef& cur,
+                             size_t mask,
+                             const vfloat<Nx>& tNear,
+                             StackItemT<NodeRef>*& stackPtr,
+                             StackItemT<NodeRef>* stackEnd)
     {
       assert(mask != 0);
       const BaseNode* node = cur.baseNode(types);
@@ -74,7 +75,8 @@ namespace embree
 
 
       mask &= mask-1;
-      if (likely(mask == 0)) return;
+      if (likely(mask == 0))
+        return;
 
       /* 2 hits: order A0 B0 */
       const vllong8 c0(children);
@@ -308,11 +310,12 @@ namespace embree
 
     public:
       /* Traverses a node with at least one hit child. Optimized for finding the closest hit (intersection). */
-      static __forceinline void traverseClosestHit(NodeRef& cur,
-                                                   size_t mask,
-                                                   const vfloat<Nx>& tNear,
-                                                   StackItemT<NodeRef>*& stackPtr,
-                                                   StackItemT<NodeRef>* stackEnd)
+      static __forceinline
+      void traverseClosestHit(NodeRef& cur,
+                              size_t mask,
+                              const vfloat<Nx>& tNear,
+                              StackItemT<NodeRef>*& stackPtr,
+                              StackItemT<NodeRef>* stackEnd)
       {
         assert(mask != 0);
 #if defined(__AVX512ER__)
@@ -340,15 +343,21 @@ namespace embree
         assert(c1 != BVH::emptyNode);
         if (likely(mask == 0)) {
           assert(stackPtr < stackEnd);
-          if (d0 < d1) { stackPtr->ptr = c1; stackPtr->dist = d1; stackPtr++; cur = c0; return; }
-          else         { stackPtr->ptr = c0; stackPtr->dist = d0; stackPtr++; cur = c1; return; }
+          if (d0 < d1)
+          {
+            stackPtr->ptr = c1; stackPtr->dist = d1; stackPtr++; cur = c0; return;
+          }
+          else
+          {
+            stackPtr->ptr = c0; stackPtr->dist = d0; stackPtr++; cur = c1; return;
+          }
         }
 
 #if NEW_SORTING_CODE == 1
         vint4 s0((size_t)c0,(size_t)d0);
         vint4 s1((size_t)c1,(size_t)d1);
         r = bscf(mask);
-        NodeRef c2 = node->child(r); c2.prefetch(types); unsigned int d2 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c2 = node->child(r); c2.prefetch(types); unsigned int d2 = ((unsigned int*)&tNear)[r];
         vint4 s2((size_t)c2,(size_t)d2);
         /* 3 hits */
         if (likely(mask == 0)) {
@@ -359,7 +368,7 @@ namespace embree
           return;
         }
         r = bscf(mask);
-        NodeRef c3 = node->child(r); c3.prefetch(types); unsigned int d3 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c3 = node->child(r); c3.prefetch(types); unsigned int d3 = ((unsigned int*)&tNear)[r];
         vint4 s3((size_t)c3,(size_t)d3);
         /* 4 hits */
         StackItemT<NodeRef>::sort4(s0,s1,s2,s3);
@@ -407,7 +416,7 @@ namespace embree
 
         /*! one child is hit, continue with that child */
         size_t r = bscf(mask);
-        cur = node->child(r); 
+        cur = node->child(r);
         cur.prefetch(types);
 
         /* simpler in sequence traversal order */
@@ -435,7 +444,7 @@ namespace embree
       typedef BVH8 BVH;
       typedef BVH8::NodeRef NodeRef;
       typedef BVH8::BaseNode BaseNode;
-      
+
 #if defined(__AVX512VL__)
       template<class NodeRef, class BaseNode>
         static __forceinline void traverseClosestHitAVX512VL8(NodeRef& cur,
@@ -483,7 +492,7 @@ namespace embree
         const vint8 dist_A1     = min(dist_A0,d2);
         const vint8 dist_tmp_B1 = max(dist_A0,d2);
         const vint8 dist_B1     = min(dist_B0,dist_tmp_B1);
-        const vint8 dist_C1     = max(dist_B0,dist_tmp_B1);        
+        const vint8 dist_C1     = max(dist_B0,dist_tmp_B1);
 
         mask &= mask-1;
         if (likely(mask == 0)) {
@@ -600,7 +609,7 @@ namespace embree
         vint4 s1((size_t)c1,(size_t)d1);
 
         r = bscf(mask);
-        NodeRef c2 = node->child(r); c2.prefetch(types); unsigned int d2 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c2 = node->child(r); c2.prefetch(types); unsigned int d2 = ((unsigned int*)&tNear)[r];
         vint4 s2((size_t)c2,(size_t)d2);
         /* 3 hits */
         if (likely(mask == 0)) {
@@ -611,7 +620,7 @@ namespace embree
           return;
         }
         r = bscf(mask);
-        NodeRef c3 = node->child(r); c3.prefetch(types); unsigned int d3 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c3 = node->child(r); c3.prefetch(types); unsigned int d3 = ((unsigned int*)&tNear)[r];
         vint4 s3((size_t)c3,(size_t)d3);
         /* 4 hits */
         if (likely(mask == 0)) {
@@ -624,12 +633,12 @@ namespace embree
         *(vint4*)&stackPtr[0] = s0; *(vint4*)&stackPtr[1] = s1; *(vint4*)&stackPtr[2] = s2; *(vint4*)&stackPtr[3] = s3;
         /*! fallback case if more than 4 children are hit */
         StackItemT<NodeRef>* stackFirst = stackPtr;
-        stackPtr+=4;      
+        stackPtr+=4;
         while (1)
         {
           assert(stackPtr < stackEnd);
           r = bscf(mask);
-          NodeRef c = node->child(r); c.prefetch(types); unsigned int d = *(unsigned int*)&tNear[r]; 
+          NodeRef c = node->child(r); c.prefetch(types); unsigned int d = *(unsigned int*)&tNear[r];
           const vint4 s((size_t)c,(size_t)d);
           *(vint4*)stackPtr++ = s;
           assert(c != BVH::emptyNode);

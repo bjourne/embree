@@ -30,30 +30,22 @@ namespace embree
     {
       typedef typename Intersector::Primitive Primitive;
 
-      template<int N, int Nx, bool robust>
       static __forceinline void
-      intersect(const Accel::Intersectors* This,
-                RayHit& ray,
+      intersect(RayHit& ray,
                 IntersectContext* context,
                 const Primitive* prim,
-                size_t num,
-                const TravRay<N,Nx,robust> &tray,
-                size_t& lazy_node)
+                size_t num)
       {
         for (size_t i = 0; i < num; i++) {
           Intersector::intersect(ray, context, prim[i]);
         }
       }
 
-      template<int N, int Nx, bool robust>
       static __forceinline
-      bool occluded(const Accel::Intersectors* This,
-                    Ray& ray,
+      bool occluded(Ray& ray,
                     IntersectContext* context,
                     const Primitive* prim,
-                    size_t num,
-                    const TravRay<N,Nx,robust> &tray,
-                    size_t& lazy_node)
+                    size_t num)
       {
         for (size_t i=0; i<num; i++) {
           if (Intersector::occluded(ray,context,prim[i]))
@@ -68,8 +60,7 @@ namespace embree
                  RayHitK<K>& ray,
                  IntersectContext* context,
                  const Primitive* prim,
-                 size_t num,
-                 size_t& lazy_node)
+                 size_t num)
       {
       }
 
@@ -79,8 +70,7 @@ namespace embree
                 RayK<K>& ray,
                 IntersectContext* context,
                 const Primitive* prim,
-                size_t num,
-                size_t& lazy_node)
+                size_t num)
       {
         return valid;
       }
@@ -91,32 +81,24 @@ namespace embree
     {
       typedef typename Intersector::Primitive Primitive;
 
-      template<bool robust>
       static __forceinline void
       intersect(const vbool<K>& valid,
-                const Accel::Intersectors* This,
                 RayHitK<K>& ray,
                 IntersectContext* context,
                 const Primitive* prim,
-                size_t num,
-                const TravRayK<K, robust> &tray,
-                size_t& lazy_node)
+                size_t num)
       {
         for (size_t i = 0; i < num; i++) {
           Intersector::intersect(valid,ray,context,prim[i]);
         }
       }
 
-      template<bool robust>
       static __forceinline vbool<K>
       occluded(const vbool<K>& valid,
-               const Accel::Intersectors* This,
                RayK<K>& ray,
                IntersectContext* context,
                const Primitive* prim,
-               size_t num,
-               const TravRayK<K, robust> &tray,
-               size_t& lazy_node)
+               size_t num)
       {
         vbool<K> valid0 = valid;
         for (size_t i=0; i < num; i++) {
@@ -126,16 +108,12 @@ namespace embree
         return !valid0;
       }
 
-      template<int N, int Nx, bool robust>
       static __forceinline void
-      intersect(const Accel::Intersectors* This,
-                RayHitK<K>& ray,
+      intersect(RayHitK<K>& ray,
                 size_t k,
                 IntersectContext* context,
                 const Primitive* prim,
-                size_t num,
-                const TravRay<N,Nx,robust> &tray,
-                size_t& lazy_node)
+                size_t num)
       {
         for (size_t i=0; i<num; i++) {
           Intersector::intersect(ray, k, context, prim[i]);
@@ -143,16 +121,12 @@ namespace embree
       }
 
       // Occlusin for the k:th ray, I think.
-      template<int N, int Nx, bool robust>
       static __forceinline bool
-      occluded(const Accel::Intersectors* This,
-               RayK<K>& ray,
+      occluded(RayK<K>& ray,
                size_t k,
                IntersectContext* context,
                const Primitive* prim,
-               size_t num,
-               const TravRay<N,Nx,robust> &tray,
-               size_t& lazy_node)
+               size_t num)
       {
         for (size_t i=0; i<num; i++) {
           if (Intersector::occluded(ray, k, context, prim[i]))
@@ -169,12 +143,10 @@ namespace embree
 
       static __forceinline void
       intersectK(const vbool<K>& valid,
-                 const Accel::Intersectors* This,
                  RayHitK<K>& ray,
                  IntersectContext* context,
                  const PrimitiveK* prim,
-                 size_t num,
-                 size_t& lazy_node)
+                 size_t num)
       {
         for (size_t i=0; i<num; i++) {
           IntersectorK::intersect(valid, ray, context, prim[i]);
@@ -183,12 +155,10 @@ namespace embree
 
       static __forceinline vbool<K>
       occludedK(const vbool<K>& valid,
-                const Accel::Intersectors* This,
-                /* PrecalculationsK& pre, */ RayK<K>& ray,
+                RayK<K>& ray,
                 IntersectContext* context,
                 const PrimitiveK* prim,
-                size_t num,
-                size_t& lazy_node)
+                size_t num)
       {
         vbool<K> valid0 = valid;
         for (size_t i=0; i<num; i++) {
@@ -199,12 +169,10 @@ namespace embree
       }
 
       static __forceinline void
-      intersect(const Accel::Intersectors* This,
-                RayHitK<K>& ray, size_t k,
+      intersect(RayHitK<K>& ray, size_t k,
                 IntersectContext* context,
                 const PrimitiveK* prim,
-                size_t num,
-                size_t& lazy_node)
+                size_t num)
       {
         for (size_t i=0; i<num; i++) {
           IntersectorK::intersect(ray,k,context,prim[i]);
@@ -212,13 +180,11 @@ namespace embree
       }
 
       static __forceinline bool
-      occluded(const Accel::Intersectors* This,
-               RayK<K>& ray,
+      occluded(RayK<K>& ray,
                size_t k,
                IntersectContext* context,
                const PrimitiveK* prim,
-               size_t num,
-               size_t& lazy_node)
+               size_t num)
       {
         for (size_t i=0; i<num; i++) {
           if (IntersectorK::occluded(ray,k,context,prim[i]))
@@ -228,13 +194,11 @@ namespace embree
       }
 
       static __forceinline size_t
-      occluded(const Accel::Intersectors* This,
-               size_t cur_mask,
+      occluded(size_t cur_mask,
                RayK<K>** __restrict__ inputPackets,
                IntersectContext* context,
                const PrimitiveK* prim,
-               size_t num,
-               size_t& lazy_node)
+               size_t num)
       {
         size_t m_occluded = 0;
         for (size_t i=0; i<num; i++) {

@@ -137,7 +137,7 @@ namespace embree
         size_t bits = m_trav_active;
 
         /*! intersect stream of rays with all primitives */
-        size_t lazy_node = 0;
+        //size_t lazy_node = 0;
 #if defined(__SSE4_2__)
         STAT_USER(1,(popcnt(bits)+K-1)/K*4);
 #endif
@@ -150,7 +150,7 @@ namespace embree
 
           TravRayKStream<K, robust>& p = packets[i];
           vbool<K> m_valid = p.tnear <= p.tfar;
-          PrimitiveIntersectorK<K>::intersectK(m_valid, This, *inputPackets[i], context, prim, num, lazy_node);
+          PrimitiveIntersectorK<K>::intersectK(m_valid, *inputPackets[i], context, prim, num);
           p.tfar = min(p.tfar, inputPackets[i]->tfar);
         };
 
@@ -266,7 +266,6 @@ namespace embree
 
         size_t bits = m_trav_active & m_active;
         /*! intersect stream of rays with all primitives */
-        size_t lazy_node = 0;
 #if defined(__SSE4_2__)
         STAT_USER(1,(popcnt(bits)+K-1)/K*4);
 #endif
@@ -278,7 +277,7 @@ namespace embree
           bits &= ~m_isec;
           TravRayKStream<K, robust>& p = packets[i];
           vbool<K> m_valid = p.tnear <= p.tfar;
-          vbool<K> m_hit = PrimitiveIntersectorK<K>::occludedK(m_valid, This, *inputPackets[i], context, prim, num, lazy_node);
+          vbool<K> m_hit = PrimitiveIntersectorK<K>::occludedK(m_valid, *inputPackets[i], context, prim, num);
           inputPackets[i]->tfar = select(m_hit & m_valid, vfloat<K>(neg_inf), inputPackets[i]->tfar);
           m_active &= ~((size_t)movemask(m_hit) << (i*K));
         }
@@ -386,26 +385,16 @@ namespace embree
         size_t num; PrimitiveK<K>* prim = (PrimitiveK<K>*)cur.leaf(num);
 
         size_t bits = cur_mask;
-        size_t lazy_node = 0;
-
         for (; bits != 0;)
         {
           const size_t rayID = bscf(bits);
 
           RayK<K> &ray = *inputPackets[rayID / K];
           const size_t k = rayID % K;
-          if (PrimitiveIntersectorK<K>::occluded(This, ray, k, context, prim, num, lazy_node))
+          if (PrimitiveIntersectorK<K>::occluded(ray, k, context, prim, num))
           {
             ray.tfar[k] = neg_inf;
             terminated |= (size_t)1 << rayID;
-          }
-
-          /* lazy node */
-          if (unlikely(lazy_node))
-          {
-            stackPtr->ptr = lazy_node;
-            stackPtr->mask = cur_mask;
-            stackPtr++;
           }
         }
 

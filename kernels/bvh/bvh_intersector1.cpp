@@ -110,17 +110,8 @@ namespace embree
         STAT3(normal.trav_leaves,1,1,1);
         size_t num;
         TriangleM<4>* prim = (TriangleM<4>*)cur.leaf(num);
-        size_t lazy_node = 0;
-        PrimitiveIntersector1::intersect(This, ray, context, prim,
-                                         num, tray, lazy_node);
+        PrimitiveIntersector1::intersect(ray, context, prim, num);
         tray.tfar = ray.tfar;
-
-        /* push lazy node onto stack */
-        if (unlikely(lazy_node)) {
-          stackPtr->ptr = lazy_node;
-          stackPtr->dist = neg_inf;
-          stackPtr++;
-        }
       }
     }
 
@@ -193,17 +184,11 @@ namespace embree
         /* this is a leaf node */
         assert(cur != BVH::emptyNode);
         STAT3(shadow.trav_leaves,1,1,1);
-        size_t num; Primitive* prim = (Primitive*)cur.leaf(num);
-        size_t lazy_node = 0;
-        if (PrimitiveIntersector1::occluded(This,  ray, context, prim, num, tray, lazy_node)) {
+        size_t num;
+        Primitive* prim = (Primitive*)cur.leaf(num);
+        if (PrimitiveIntersector1::occluded(ray, context, prim, num)) {
           ray.tfar = neg_inf;
           break;
-        }
-
-        /* push lazy node onto stack */
-        if (unlikely(lazy_node)) {
-          *stackPtr = (NodeRef)lazy_node;
-          stackPtr++;
         }
       }
     }
