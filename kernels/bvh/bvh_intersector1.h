@@ -32,7 +32,6 @@ namespace embree
       typedef BVHN<N> BVH;
       typedef typename BVH::NodeRef NodeRef;
       typedef typename BVH::AlignedNode AlignedNode;
-      typedef typename BVH::AlignedNodeMB4D AlignedNodeMB4D;
 
       static const size_t stackSize = 1+(N-1)*BVH::maxDepth+3; // +3 due to 16-wide store
 
@@ -40,8 +39,12 @@ namespace embree
       static const size_t Nx = (types == BVH_AN1 || types == BVH_QN1) ? vextend<N>::size : N;
 
     public:
-      static void intersect(const Accel::Intersectors* This, RayHit& ray, IntersectContext* context);
-      static void occluded (const Accel::Intersectors* This, Ray& ray, IntersectContext* context);
+      static void intersect(const Accel::Intersectors* This,
+                            RayHit& ray,
+                            IntersectContext* context);
+      static void occluded (const Accel::Intersectors* This,
+                            Ray& ray,
+                            IntersectContext* context);
     };
   }
 }

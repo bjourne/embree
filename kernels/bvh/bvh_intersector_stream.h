@@ -22,7 +22,7 @@
 
 namespace embree
 {
-  namespace isa 
+  namespace isa
   {
     /*! BVH ray stream intersector. */
     template<int N, int Nx, int types, bool robust, typename PrimitiveIntersector>
@@ -37,7 +37,6 @@ namespace embree
       typedef typename BVH::NodeRef NodeRef;
       typedef typename BVH::BaseNode BaseNode;
       typedef typename BVH::AlignedNode AlignedNode;
-      typedef typename BVH::AlignedNodeMB AlignedNodeMB;
 
       template<int K>
       __forceinline static size_t initPacketsAndFrustum(RayK<K>** inputPackets, size_t numOctantRays,
@@ -83,7 +82,7 @@ namespace embree
 
         m_active &= (numOctantRays == (8 * sizeof(size_t))) ? (size_t)-1 : (((size_t)1 << numOctantRays)-1);
 
-        
+
         const Vec3fa reduced_min_rdir(reduce_min(tmp_min_rdir.x),
                                       reduce_min(tmp_min_rdir.y),
                                       reduce_min(tmp_min_rdir.z));
@@ -104,7 +103,7 @@ namespace embree
           (reduced_max_rdir.x < 0.0f || reduced_min_rdir.x >= 0.0f) &&
           (reduced_max_rdir.y < 0.0f || reduced_min_rdir.y >= 0.0f) &&
           (reduced_max_rdir.z < 0.0f || reduced_min_rdir.z >= 0.0f);
-        
+
         const float frustum_min_dist = reduce_min(tmp_min_dist);
         const float frustum_max_dist = reduce_max(tmp_max_dist);
 
@@ -112,7 +111,7 @@ namespace embree
                      reduced_min_rdir, reduced_max_rdir,
                      frustum_min_dist, frustum_max_dist,
                      N);
-        
+
         return m_active;
       }
 
@@ -131,10 +130,10 @@ namespace embree
         {
           const size_t m_hit = intersectNodeK<N>(node, boxID, packets[i], nf);
           m_trav_active |= m_hit << (i*K);
-        } 
+        }
         return m_trav_active;
       }
-      
+
       template<int K>
       __forceinline static size_t traverseCoherentStream(size_t m_active,
                                                          TravRayKStream<K, robust>* packets,
@@ -160,7 +159,7 @@ namespace embree
         }
         return m_node_hit;
       }
-      
+
       // TODO: explicit 16-wide path for KNL
       template<int K>
       __forceinline static vint<Nx> traverseIncoherentStream(size_t m_active,
@@ -178,7 +177,7 @@ namespace embree
         assert(m_active);
         vint<Nx> vmask(zero);
         do
-        {   
+        {
           STAT3(shadow.trav_nodes,1,1,1);
           const size_t rayID = bscf(m_active);
           assert(rayID < MAX_INTERNAL_STREAM_SIZE);
@@ -190,9 +189,9 @@ namespace embree
           const vfloat<Nx> tNearZ = msub(bminZ, p.rdir.z[i], p.org_rdir.z[i]);
           const vfloat<Nx> tFarX  = msub(bmaxX, p.rdir.x[i], p.org_rdir.x[i]);
           const vfloat<Nx> tFarY  = msub(bmaxY, p.rdir.y[i], p.org_rdir.y[i]);
-          const vfloat<Nx> tFarZ  = msub(bmaxZ, p.rdir.z[i], p.org_rdir.z[i]); 
+          const vfloat<Nx> tFarZ  = msub(bmaxZ, p.rdir.z[i], p.org_rdir.z[i]);
           const vfloat<Nx> tNear  = maxi(tNearX, tNearY, tNearZ, vfloat<Nx>(p.tnear[i]));
-          const vfloat<Nx> tFar   = mini(tFarX , tFarY , tFarZ,  vfloat<Nx>(p.tfar[i]));      
+          const vfloat<Nx> tFar   = mini(tFarX , tFarY , tFarZ,  vfloat<Nx>(p.tfar[i]));
 
 #if defined(__AVX512ER__)
           const vboolx m_node((1 << N)-1);
@@ -207,7 +206,7 @@ namespace embree
 #endif
 #endif
         } while(m_active);
-        return vmask;        
+        return vmask;
       }
 
       template<int K>
@@ -226,7 +225,7 @@ namespace embree
         assert(m_active);
         vint<Nx> vmask(zero);
         do
-        {   
+        {
           STAT3(shadow.trav_nodes,1,1,1);
           const size_t rayID = bscf(m_active);
           assert(rayID < MAX_INTERNAL_STREAM_SIZE);
@@ -258,7 +257,7 @@ namespace embree
         } while(m_active);
         return vmask;
       }
-                                                         
+
 
       static const size_t stackSizeSingle = 1+(N-1)*BVH::maxDepth;
 

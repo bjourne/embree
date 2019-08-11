@@ -180,7 +180,7 @@ namespace embree
               bvh->alloc.setOSallocation(true);
 
             /* initialize allocator */
-            const size_t node_bytes = numPrimitives*sizeof(typename BVH::AlignedNodeMB)/(4*N);
+            const size_t node_bytes = numPrimitives*sizeof(typename BVH::AlignedNode)/(4*N);
             const size_t leaf_bytes =
               size_t(1.2 * Primitive::blocks(numPrimitives) * sizeof(TriangleM<4>));
             bvh->alloc.init_estimate(node_bytes+leaf_bytes);

@@ -774,43 +774,6 @@ namespace embree
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
-    // Fast UnalignedNodeMB intersection
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    template<int N, bool robust>
-      __forceinline size_t intersectNode(
-        const typename BVHN<N>::UnalignedNodeMB* node,
-        const TravRay<N,N,robust>& ray,
-        const float time, vfloat<N>& dist)
-    {
-      const AffineSpace3vf<N> xfm = node->space0;
-      const Vec3vf<N> b0_lower = zero;
-      const Vec3vf<N> b0_upper = one;
-      const Vec3vf<N> lower = lerp(b0_lower,node->b1.lower,vfloat<N>(time));
-      const Vec3vf<N> upper = lerp(b0_upper,node->b1.upper,vfloat<N>(time));
-
-      const BBox3vf<N> bounds(lower,upper);
-      const Vec3vf<N> dir = xfmVector(xfm,ray.dir);
-      const Vec3vf<N> rdir = rcp_safe(dir);
-      const Vec3vf<N> org = xfmPoint(xfm,ray.org);
-
-      const Vec3vf<N> tLowerXYZ = (bounds.lower - org) * rdir;
-      const Vec3vf<N> tUpperXYZ = (bounds.upper - org) * rdir;
-
-      const vfloat<N> tNearX = mini(tLowerXYZ.x,tUpperXYZ.x);
-      const vfloat<N> tNearY = mini(tLowerXYZ.y,tUpperXYZ.y);
-      const vfloat<N> tNearZ = mini(tLowerXYZ.z,tUpperXYZ.z);
-      const vfloat<N> tFarX  = maxi(tLowerXYZ.x,tUpperXYZ.x);
-      const vfloat<N> tFarY  = maxi(tLowerXYZ.y,tUpperXYZ.y);
-      const vfloat<N> tFarZ  = maxi(tLowerXYZ.z,tUpperXYZ.z);
-      const vfloat<N> tNear  = max(ray.tnear, tNearX,tNearY,tNearZ);
-      const vfloat<N> tFar   = min(ray.tfar,  tFarX ,tFarY ,tFarZ );
-      const vbool<N> vmask = tNear <= tFar;
-      dist = tNear;
-      return movemask(vmask);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////
     // Node intersectors used in ray traversal
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -823,19 +786,9 @@ namespace embree
     {
       static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,false>& ray, float time, vfloat<Nx>& dist, size_t& mask)
       {
-        if (unlikely(node.isLeaf())) return false;
+        if (unlikely(node.isLeaf()))
+          return false;
         mask = intersectNode(node.alignedNode(), ray, dist);
-        return true;
-      }
-    };
-
-    template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_AN1, true>
-    {
-      static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,true>& ray, float time, vfloat<Nx>& dist, size_t& mask)
-      {
-        if (unlikely(node.isLeaf())) return false;
-        mask = intersectNodeRobust(node.alignedNode(), ray, dist);
         return true;
       }
     };
@@ -852,17 +805,6 @@ namespace embree
     };
 
     template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_AN2, true>
-    {
-      static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,true>& ray, float time, vfloat<Nx>& dist, size_t& mask)
-      {
-        if (unlikely(node.isLeaf())) return false;
-        mask = intersectNodeRobust(node.alignedNodeMB(), ray, time, dist);
-        return true;
-      }
-    };
-
-    template<int N, int Nx>
     struct BVHNNodeIntersector1<N, Nx, BVH_AN1_UN1, false>
     {
       static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,false>& ray, float time, vfloat<Nx>& dist, size_t& mask)
@@ -873,19 +815,6 @@ namespace embree
         return true;
       }
     };
-
-    template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_AN2_UN2, false>
-    {
-      static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,false>& ray, float time, vfloat<Nx>& dist, size_t& mask)
-      {
-        if (likely(node.isAlignedNodeMB()))           mask = intersectNode(node.alignedNodeMB(), ray, time, dist);
-        else if (unlikely(node.isUnalignedNodeMB()))  mask = intersectNode(node.unalignedNodeMB(), ray, time, dist);
-        else return false;
-        return true;
-      }
-    };
-
     template<int N, int Nx>
     struct BVHNNodeIntersector1<N, Nx, BVH_QN1, false>
     {
@@ -896,17 +825,6 @@ namespace embree
       {
         if (unlikely(node.isLeaf())) return false;
         mask = intersectNode((const typename BVHN<N>::QuantizedNode*)node.quantizedNode(), ray, dist);
-        return true;
-      }
-    };
-
-    template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_QN1, true>
-    {
-      static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,true>& ray, float time, vfloat<Nx>& dist, size_t& mask)
-      {
-        if (unlikely(node.isLeaf())) return false;
-        mask = intersectNodeRobust((const typename BVHN<N>::QuantizedNode*)node.quantizedNode(), ray, dist);
         return true;
       }
     };

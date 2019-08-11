@@ -27,25 +27,22 @@ namespace embree
     typedef BVHN<N> BVH;
     typedef typename BVH::AlignedNode AlignedNode;
     typedef typename BVH::UnalignedNode UnalignedNode;
-    typedef typename BVH::AlignedNodeMB AlignedNodeMB;
-    typedef typename BVH::AlignedNodeMB4D AlignedNodeMB4D;
-    typedef typename BVH::UnalignedNodeMB UnalignedNodeMB;
     typedef typename BVH::QuantizedNode QuantizedNode;
 
     typedef typename BVH::NodeRef NodeRef;
 
-    struct Statistics 
+    struct Statistics
     {
       template<typename Node>
         struct NodeStat
       {
         NodeStat ( double nodeSAH = 0,
-                   size_t numNodes = 0, 
+                   size_t numNodes = 0,
                    size_t numChildren = 0)
         : nodeSAH(nodeSAH),
-          numNodes(numNodes), 
+          numNodes(numNodes),
           numChildren(numChildren) {}
-        
+
         double sah(BVH* bvh) const {
           return nodeSAH/bvh->getLinearBounds().expectedHalfArea();
         }
@@ -74,7 +71,7 @@ namespace embree
           std::ostringstream stream;
           stream.setf(std::ios::fixed, std::ios::floatfield);
           stream << "sah = " << std::setw(7) << std::setprecision(3) << sah(bvh);
-          stream << " (" << std::setw(6) << std::setprecision(2) << 100.0*sah(bvh)/sahTotal << "%), ";          
+          stream << " (" << std::setw(6) << std::setprecision(2) << 100.0*sah(bvh)/sahTotal << "%), ";
           stream << "#bytes = " << std::setw(7) << std::setprecision(2) << bytes()/1E6  << " MB ";
           stream << "(" << std::setw(6) << std::setprecision(2) << 100.0*double(bytes())/double(bytesTotal) << "%), ";
           stream << "#nodes = " << std::setw(7) << numNodes << " (" << std::setw(6) << std::setprecision(2) << 100.0*fillRate() << "% filled), ";
@@ -92,7 +89,7 @@ namespace embree
       {
         static const int NHIST = 8;
 
-        LeafStat ( double leafSAH = 0.0f, 
+        LeafStat ( double leafSAH = 0.0f,
                    size_t numLeaves = 0,
                    size_t numPrimsActive = 0,
                    size_t numPrimsTotal = 0,
@@ -161,7 +158,7 @@ namespace embree
             stream << std::setw(6) << std::setprecision(2) << 100.0f*float(numPrimBlocksHistogram[i])/float(numLeaves) << "% ";
           return stream.str();
         }
-     
+
       public:
         double leafSAH;                    //!< SAH of the leaves only
         size_t numLeaves;                  //!< Number of leaf nodes.
@@ -177,67 +174,46 @@ namespace embree
                   LeafStat statLeaf = LeafStat(),
                   NodeStat<AlignedNode> statAlignedNodes = NodeStat<AlignedNode>(),
                   NodeStat<UnalignedNode> statUnalignedNodes = NodeStat<UnalignedNode>(),
-                  NodeStat<AlignedNodeMB> statAlignedNodesMB = NodeStat<AlignedNodeMB>(),
-                  NodeStat<AlignedNodeMB4D> statAlignedNodesMB4D = NodeStat<AlignedNodeMB4D>(),
-                  NodeStat<UnalignedNodeMB> statUnalignedNodesMB = NodeStat<UnalignedNodeMB>(),
                   NodeStat<QuantizedNode> statQuantizedNodes = NodeStat<QuantizedNode>())
 
-      : depth(depth), 
+      : depth(depth),
         statLeaf(statLeaf),
         statAlignedNodes(statAlignedNodes),
         statUnalignedNodes(statUnalignedNodes),
-        statAlignedNodesMB(statAlignedNodesMB),
-        statAlignedNodesMB4D(statAlignedNodesMB4D),
-        statUnalignedNodesMB(statUnalignedNodesMB),
         statQuantizedNodes(statQuantizedNodes) {}
 
-      double sah(BVH* bvh) const 
+      double sah(BVH* bvh) const
       {
         return statLeaf.sah(bvh) +
-          statAlignedNodes.sah(bvh) + 
-          statUnalignedNodes.sah(bvh) + 
-          statAlignedNodesMB.sah(bvh) + 
-          statAlignedNodesMB4D.sah(bvh) + 
-          statUnalignedNodesMB.sah(bvh) + 
+          statAlignedNodes.sah(bvh) +
+          statUnalignedNodes.sah(bvh) +
           statQuantizedNodes.sah(bvh);
       }
-      
+
       size_t bytes(BVH* bvh) const {
         return statLeaf.bytes(bvh) +
-          statAlignedNodes.bytes() + 
-          statUnalignedNodes.bytes() + 
-          statAlignedNodesMB.bytes() + 
-          statAlignedNodesMB4D.bytes() + 
-          statUnalignedNodesMB.bytes() + 
+          statAlignedNodes.bytes() +
+          statUnalignedNodes.bytes() +
           statQuantizedNodes.bytes();
       }
 
-      size_t size() const 
+      size_t size() const
       {
         return statLeaf.size() +
-          statAlignedNodes.size() + 
-          statUnalignedNodes.size() + 
-          statAlignedNodesMB.size() + 
-          statAlignedNodesMB4D.size() + 
-          statUnalignedNodesMB.size() + 
+          statAlignedNodes.size() +
+          statUnalignedNodes.size() +
           statQuantizedNodes.size();
       }
 
-      double fillRate (BVH* bvh) const 
+      double fillRate (BVH* bvh) const
       {
         double nom = statLeaf.fillRateNom(bvh) +
-          statAlignedNodes.fillRateNom() + 
-          statUnalignedNodes.fillRateNom() + 
-          statAlignedNodesMB.fillRateNom() + 
-          statAlignedNodesMB4D.fillRateNom() + 
-          statUnalignedNodesMB.fillRateNom() + 
+          statAlignedNodes.fillRateNom() +
+          statUnalignedNodes.fillRateNom() +
           statQuantizedNodes.fillRateNom();
         double den = statLeaf.fillRateDen(bvh) +
-          statAlignedNodes.fillRateDen() + 
-          statUnalignedNodes.fillRateDen() + 
-          statAlignedNodesMB.fillRateDen() + 
-          statAlignedNodesMB4D.fillRateDen() + 
-          statUnalignedNodesMB.fillRateDen() + 
+          statAlignedNodes.fillRateDen() +
+          statUnalignedNodes.fillRateDen() +
           statQuantizedNodes.fillRateDen();
         return nom/den;
       }
@@ -248,9 +224,6 @@ namespace embree
                           a.statLeaf + b.statLeaf,
                           a.statAlignedNodes + b.statAlignedNodes,
                           a.statUnalignedNodes + b.statUnalignedNodes,
-                          a.statAlignedNodesMB + b.statAlignedNodesMB,
-                          a.statAlignedNodesMB4D + b.statAlignedNodesMB4D,
-                          a.statUnalignedNodesMB + b.statUnalignedNodesMB,
                           a.statQuantizedNodes + b.statQuantizedNodes);
       }
 
@@ -263,9 +236,6 @@ namespace embree
       LeafStat statLeaf;
       NodeStat<AlignedNode> statAlignedNodes;
       NodeStat<UnalignedNode> statUnalignedNodes;
-      NodeStat<AlignedNodeMB> statAlignedNodesMB;
-      NodeStat<AlignedNodeMB4D> statAlignedNodesMB4D;
-      NodeStat<UnalignedNodeMB> statUnalignedNodesMB;
       NodeStat<QuantizedNode> statQuantizedNodes;
     };
 
@@ -277,8 +247,8 @@ namespace embree
     /*! Convert statistics into a string */
     std::string str();
 
-    double sah() const { 
-      return stat.sah(bvh); 
+    double sah() const {
+      return stat.sah(bvh);
     }
 
     size_t bytesUsed() const {

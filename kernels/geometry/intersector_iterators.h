@@ -40,8 +40,9 @@ namespace embree
                 const TravRay<N,Nx,robust> &tray,
                 size_t& lazy_node)
       {
-        for (size_t i=0; i<num; i++)
-          Intersector::intersect(ray,context,prim[i]);
+        for (size_t i = 0; i < num; i++) {
+          Intersector::intersect(ray, context, prim[i]);
+        }
       }
 
       template<int N, int Nx, bool robust>
@@ -198,7 +199,12 @@ namespace embree
       }
 
       static __forceinline void
-      intersect(const Accel::Intersectors* This, RayHitK<K>& ray, size_t k, IntersectContext* context, const PrimitiveK* prim, size_t num, size_t& lazy_node)
+      intersect(const Accel::Intersectors* This,
+                RayHitK<K>& ray, size_t k,
+                IntersectContext* context,
+                const PrimitiveK* prim,
+                size_t num,
+                size_t& lazy_node)
       {
         for (size_t i=0; i<num; i++) {
           IntersectorK::intersect(ray,k,context,prim[i]);

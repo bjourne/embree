@@ -41,8 +41,6 @@ namespace embree
     stream << "#bytes/prim = " << std::setw(6) << std::setprecision(2) << double(totalBytes)/double(bvh->numPrimitives) << std::endl;
     if (stat.statAlignedNodes.numNodes    ) stream << "  alignedNodes     : "  << stat.statAlignedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statUnalignedNodes.numNodes  ) stream << "  unalignedNodes   : "  << stat.statUnalignedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
-    if (stat.statAlignedNodesMB.numNodes  ) stream << "  alignedNodesMB   : "  << stat.statAlignedNodesMB.toString(bvh,totalSAH,totalBytes) << std::endl;
-    if (stat.statUnalignedNodesMB.numNodes) stream << "  unalignedNodesMB : "  << stat.statUnalignedNodesMB.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statQuantizedNodes.numNodes  ) stream << "  quantizedNodes   : "  << stat.statQuantizedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (true)                               stream << "  leaves           : "  << stat.statLeaf.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (true)                               stream << "    histogram      : "  << stat.statLeaf.histToString() << std::endl;
@@ -50,7 +48,8 @@ namespace embree
   }
 
   template<int N>
-  typename BVHNStatistics<N>::Statistics BVHNStatistics<N>::statistics(NodeRef node, const double A, const BBox1f t0t1)
+  typename BVHNStatistics<N>::Statistics
+  BVHNStatistics<N>::statistics(NodeRef node, const double A, const BBox1f t0t1)
   {
     Statistics s;
     assert(t0t1.size() > 0.0f);
@@ -81,48 +80,6 @@ namespace embree
         }, Statistics::add);
       s.statUnalignedNodes.numNodes++;
       s.statUnalignedNodes.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isAlignedNodeMB())
-    {
-      AlignedNodeMB* n = node.alignedNodeMB();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const double Ai = max(0.0f,n->expectedHalfArea(i,t0t1));
-          Statistics s = statistics(n->child(i),Ai,t0t1);
-          s.statAlignedNodesMB.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statAlignedNodesMB.numNodes++;
-      s.statAlignedNodesMB.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isUnalignedNodeMB())
-    {
-      UnalignedNodeMB* n = node.unalignedNodeMB();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const double Ai = max(0.0f,halfArea(n->extent0(i)));
-          Statistics s = statistics(n->child(i),Ai,t0t1);
-          s.statUnalignedNodesMB.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statUnalignedNodesMB.numNodes++;
-      s.statUnalignedNodesMB.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isQuantizedNode())
-    {
-      QuantizedNode* n = node.quantizedNode();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const double Ai = max(0.0f,halfArea(n->extent(i)));
-          Statistics s = statistics(n->child(i),Ai,t0t1);
-          s.statQuantizedNodes.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statQuantizedNodes.numNodes++;
-      s.statQuantizedNodes.nodeSAH += dt*A;
       s.depth++;
     }
     else if (node.isLeaf())
