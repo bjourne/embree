@@ -68,21 +68,35 @@ namespace embree
         : bvh(bvh), scene(scene), mesh(nullptr), prims0(scene->device,0), settings(sahBlockSize, minLeafSize, min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks), travCost, intCost, DEFAULT_SINGLE_THREAD_THRESHOLD),
           splitFactor(scene->device->max_spatial_split_replications) {}
 
-      BVHNBuilderFastSpatialSAH (BVH* bvh, Mesh* mesh, const size_t sahBlockSize, const float intCost, const size_t minLeafSize, const size_t maxLeafSize, const size_t mode)
-        : bvh(bvh), scene(nullptr), mesh(mesh), prims0(bvh->device,0), settings(sahBlockSize, minLeafSize, min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks), travCost, intCost, DEFAULT_SINGLE_THREAD_THRESHOLD),
+      BVHNBuilderFastSpatialSAH (BVH* bvh,
+                                 Mesh* mesh,
+                                 const size_t sahBlockSize,
+                                 const float intCost,
+                                 const size_t minLeafSize,
+                                 const size_t maxLeafSize,
+                                 const size_t mode)
+        : bvh(bvh),
+          scene(nullptr),
+          mesh(mesh), prims0(bvh->device,0),
+          settings(sahBlockSize, minLeafSize,
+                   min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks),
+                   travCost, intCost, DEFAULT_SINGLE_THREAD_THRESHOLD),
           splitFactor(scene->device->max_spatial_split_replications) {}
 
       // FIXME: shrink bvh->alloc in destructor here and in other builders too
 
       void build()
       {
+        printf("BVHNBuilderFastSpatialSAH::build\n");
         /* we reset the allocator when the mesh size changed */
         if (mesh && mesh->numPrimitivesChanged) {
           bvh->alloc.clear();
         }
 
 	/* skip build for empty scene */
-        const size_t numOriginalPrimitives = mesh ? mesh->size() : scene->getNumPrimitives<Mesh,false>();
+        const size_t numOriginalPrimitives =
+          mesh ? mesh->size() : (size_t)scene->world.numTriangles;
+        //mesh ? mesh->size() : scene->getNumPrimitives<Mesh,false>();
         if (numOriginalPrimitives == 0) {
           prims0.clear();
           bvh->clear();

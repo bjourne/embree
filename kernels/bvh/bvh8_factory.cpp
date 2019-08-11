@@ -44,7 +44,9 @@ namespace embree
 
   DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4SceneBuilderSAH,void* COMMA Scene* COMMA size_t);
 
-  DECLARE_ISA_FUNCTION(Builder*,BVH8Triangle4MeshBuilderSAH,void* COMMA TriangleMesh* COMMA size_t);
+  DECLARE_ISA_FUNCTION(Builder*,
+                       BVH8Triangle4MeshBuilderSAH,
+                       void* COMMA TriangleMesh* COMMA size_t);
 
   BVH8Factory::BVH8Factory(int bfeatures, int ifeatures)
   {

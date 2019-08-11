@@ -61,7 +61,8 @@ namespace embree
       }
 
       __forceinline size_t numPrimitives() const {
-        return scene->getNumPrimitives<Ty,mblur>();
+        return scene->world.numTriangles;
+        //return scene->getNumPrimitives<Ty,mblur>();
       }
 
       __forceinline size_t maxPrimitivesPerGeometry()
@@ -290,36 +291,22 @@ namespace embree
   public:
     struct GeometryCounts
     {
-      __forceinline GeometryCounts()
-        : numTriangles(0), numQuads(0), numBezierCurves(0), numLineSegments(0), numSubdivPatches(0), numUserGeometries(0), numInstances(0), numGrids(0), numPoints(0) {}
+      __forceinline GeometryCounts() : numTriangles(0)
+      {
+      }
 
       __forceinline size_t size() const {
-        return numTriangles + numQuads + numBezierCurves + numLineSegments + numSubdivPatches + numUserGeometries + numInstances + numGrids + numPoints;
+        return numTriangles;
       }
 
       __forceinline unsigned int enabledGeometryTypesMask() const
       {
         unsigned int mask = 0;
         if (numTriangles) mask |= 1 << 0;
-        if (numQuads) mask |= 1 << 1;
-        if (numBezierCurves+numLineSegments) mask |= 1 << 2;
-        if (numSubdivPatches) mask |= 1 << 3;
-        if (numUserGeometries) mask |= 1 << 4;
-        if (numInstances) mask |= 1 << 5;
-        if (numGrids) mask |= 1 << 6;
-        if (numPoints) mask |= 1 << 7;
         return mask;
       }
 
       std::atomic<size_t> numTriangles;             //!< number of enabled triangles
-      std::atomic<size_t> numQuads;                 //!< number of enabled quads
-      std::atomic<size_t> numBezierCurves;          //!< number of enabled curves
-      std::atomic<size_t> numLineSegments;          //!< number of enabled line segments
-      std::atomic<size_t> numSubdivPatches;         //!< number of enabled subdivision patches
-      std::atomic<size_t> numUserGeometries;        //!< number of enabled user geometries
-      std::atomic<size_t> numInstances;             //!< number of enabled instances
-      std::atomic<size_t> numGrids;                 //!< number of enabled grid geometries
-      std::atomic<size_t> numPoints;                //!< number of enabled points
     };
 
      __forceinline unsigned int enabledGeometryTypesMask() const {
@@ -335,7 +322,7 @@ namespace embree
       return world.size() + worldMB.size();
     }
 
-    template<typename Mesh, bool mblur> __forceinline size_t getNumPrimitives() const;
+    //template<typename Mesh, bool mblur> __forceinline size_t getNumPrimitives() const;
 
     template<typename Mesh, bool mblur>
     __forceinline unsigned getNumTimeSteps()
@@ -356,7 +343,4 @@ namespace embree
 
     std::atomic<size_t> numIntersectionFiltersN;   //!< number of enabled intersection/occlusion filters for N-wide ray packets
   };
-
-  template<> __forceinline size_t Scene::getNumPrimitives<TriangleMesh,false>() const { return world.numTriangles; }
-  template<> __forceinline size_t Scene::getNumPrimitives<TriangleMesh,true>() const { return worldMB.numTriangles; }
 }

@@ -64,7 +64,7 @@ namespace embree
       template<int K>
       static __forceinline void
       intersectK(const vbool<K>& valid,
-                 /* PrecalculationsK& pre, */ RayHitK<K>& ray,
+                 RayHitK<K>& ray,
                  IntersectContext* context,
                  const Primitive* prim,
                  size_t num,
@@ -74,7 +74,12 @@ namespace embree
 
       template<int K>
       static __forceinline vbool<K>
-      occludedK(const vbool<K>& valid, /* PrecalculationsK& pre, */ RayK<K>& ray, IntersectContext* context, const Primitive* prim, size_t num, size_t& lazy_node)
+      occludedK(const vbool<K>& valid,
+                RayK<K>& ray,
+                IntersectContext* context,
+                const Primitive* prim,
+                size_t num,
+                size_t& lazy_node)
       {
         return valid;
       }
@@ -84,7 +89,6 @@ namespace embree
     struct ArrayIntersectorK_1
     {
       typedef typename Intersector::Primitive Primitive;
-      //typedef typename Intersector::Precalculations Precalculations;
 
       template<bool robust>
       static __forceinline void
@@ -97,7 +101,7 @@ namespace embree
                 const TravRayK<K, robust> &tray,
                 size_t& lazy_node)
       {
-        for (size_t i=0; i<num; i++) {
+        for (size_t i = 0; i < num; i++) {
           Intersector::intersect(valid,ray,context,prim[i]);
         }
       }
@@ -114,7 +118,7 @@ namespace embree
                size_t& lazy_node)
       {
         vbool<K> valid0 = valid;
-        for (size_t i=0; i<num; i++) {
+        for (size_t i=0; i < num; i++) {
           valid0 &= !Intersector::occluded(valid0, ray, context, prim[i]);
           if (none(valid0)) break;
         }

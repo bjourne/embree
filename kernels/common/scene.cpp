@@ -215,7 +215,8 @@ namespace embree
           if (geometries[i]) geometries[i]->setModified();
         });
 
-      if (getNumPrimitives<TriangleMesh,false>()) createTriangleAccel();
+      if (world.numTriangles)
+        createTriangleAccel();
 
       flags_modified = false;
       enabled_geometry_types = new_enabled_geometry_types;

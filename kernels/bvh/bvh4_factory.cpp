@@ -118,6 +118,9 @@ namespace embree
                              BuildVariant bvariant,
                              IntersectVariant ivariant)
   {
+    printf("BVH4Factory::BVH4Triangle4\n");
+
+
     BVH4* accel = new BVH4(scene);
 
     Accel::Intersectors intersectors;
