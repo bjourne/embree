@@ -1303,68 +1303,6 @@ namespace embree
 
     };
 
-
-    /*! BVHN Quantized Node */
-    struct __aligned(8) QuantizedBaseNodeMB
-    {
-      QuantizedBaseNode node0;
-      QuantizedBaseNode node1;
-
-      /*! Clears the node. */
-      __forceinline void clear() {
-        node0.clear();
-        node1.clear();
-      }
-
-      /*! Returns bounds of specified child. */
-      __forceinline BBox3fa bounds(size_t i) const
-      {
-        assert(i < N);
-        BBox3fa bounds0 = node0.bounds(i);
-        BBox3fa bounds1 = node1.bounds(i);
-        bounds0.extend(bounds1);
-        return bounds0;
-      }
-
-      /*! Returns extent of bounds of specified child. */
-      __forceinline Vec3fa extent(size_t i) const {
-        return bounds(i).size();
-      }
-
-      __forceinline vbool<N> validMask() const { return node0.validMask(); }
-
-      template<typename T>
-      __forceinline vfloat<N> dequantizeLowerX(const T t) const { return lerp(node0.dequantizeLowerX(),node1.dequantizeLowerX(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeUpperX(const T t) const { return lerp(node0.dequantizeUpperX(),node1.dequantizeUpperX(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeLowerY(const T t) const { return lerp(node0.dequantizeLowerY(),node1.dequantizeLowerY(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeUpperY(const T t) const { return lerp(node0.dequantizeUpperY(),node1.dequantizeUpperY(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeLowerZ(const T t) const { return lerp(node0.dequantizeLowerZ(),node1.dequantizeLowerZ(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeUpperZ(const T t) const { return lerp(node0.dequantizeUpperZ(),node1.dequantizeUpperZ(),t); }
-
-
-      template<int M>
-        __forceinline vfloat<M> dequantizeLowerX(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeLowerX()[i]),vfloat<M>(node1.dequantizeLowerX()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeUpperX(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeUpperX()[i]),vfloat<M>(node1.dequantizeUpperX()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeLowerY(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeLowerY()[i]),vfloat<M>(node1.dequantizeLowerY()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeUpperY(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeUpperY()[i]),vfloat<M>(node1.dequantizeUpperY()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeLowerZ(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeLowerZ()[i]),vfloat<M>(node1.dequantizeLowerZ()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeUpperZ(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeUpperZ()[i]),vfloat<M>(node1.dequantizeUpperZ()[i]),t); }
-
-
-
-    };
-
-
     /*! swap the children of two nodes */
     __forceinline static void swap(AlignedNode* a, size_t i, AlignedNode* b, size_t j)
     {
