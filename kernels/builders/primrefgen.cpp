@@ -23,7 +23,9 @@ namespace embree
 {
   namespace isa
   {
-    PrimInfo createPrimRefArray(Geometry* geometry, mvector<PrimRef>& prims, BuildProgressMonitor& progressMonitor)
+    PrimInfo createPrimRefArray(Geometry* geometry,
+                                mvector<PrimRef>& prims,
+                                BuildProgressMonitor& progressMonitor)
     {
       ParallelPrefixSumState<PrimInfo> pstate;
 
@@ -66,11 +68,5 @@ namespace embree
       }
       return pinfo;
     }
-
-    // ====================================================================================================
-    // ====================================================================================================
-    // ====================================================================================================
-
-    // template for grid meshes
   }
 }

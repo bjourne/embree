@@ -56,7 +56,6 @@ SET(EMBREE_LIBRARY_FILES
 
   bvh/bvh_builder.cpp
   bvh/bvh_builder_sah.cpp
-  bvh/bvh_builder_sah_spatial.cpp
 
   bvh/bvh_intersector1_bvh4.cpp
   )
@@ -80,8 +79,7 @@ MACRO(embree_files TARGET ISA)
       common/scene_triangle_mesh.cpp
 
       bvh/bvh_builder.cpp
-      bvh/bvh_builder_sah.cpp
-      bvh/bvh_builder_sah_spatial.cpp)
+      bvh/bvh_builder_sah.cpp)
 
   ENDIF()
 

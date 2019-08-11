@@ -62,7 +62,6 @@ namespace embree
 
       __forceinline size_t numPrimitives() const {
         return scene->world.numTriangles;
-        //return scene->getNumPrimitives<Ty,mblur>();
       }
 
       __forceinline size_t maxPrimitivesPerGeometry()
@@ -310,16 +309,15 @@ namespace embree
     };
 
      __forceinline unsigned int enabledGeometryTypesMask() const {
-       return (world.enabledGeometryTypesMask() << 8) + worldMB.enabledGeometryTypesMask();
+       return (world.enabledGeometryTypesMask() << 8);
      }
 
     GeometryCounts world;               //!< counts for non-motion blurred geometry
-    GeometryCounts worldMB;             //!< counts for motion blurred geometry
 
     std::atomic<size_t> numSubdivEnableDisableEvents; //!< number of enable/disable calls for any subdiv geometry
 
     __forceinline size_t numPrimitives() const {
-      return world.size() + worldMB.size();
+      return world.size();
     }
 
     //template<typename Mesh, bool mblur> __forceinline size_t getNumPrimitives() const;
