@@ -339,7 +339,7 @@ namespace embree
     {
       vuint<M> vgeomID = -1, vprimID = -1;
       Vec3vf<M> v0 = zero, v1 = zero, v2 = zero;
-      for (size_t i=0; i<M && begin<end; i++, begin++)
+      for (size_t i=0; i < M && begin < end; i++, begin++)
       {
         const PrimRef& prim = prims[begin];
         const unsigned geomID = prim.geomID();

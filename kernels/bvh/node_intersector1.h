@@ -817,10 +817,11 @@ namespace embree
     template<int N, int Nx>
     struct BVHNNodeIntersector1<N, Nx, BVH_QN1>
     {
-      static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node,
-                                          const TravRay<N,Nx,false>& ray,
-                                          float time,
-                                          vfloat<Nx>& dist, size_t& mask)
+      static __forceinline bool
+      intersect(const typename BVHN<N>::NodeRef& node,
+                const TravRay<N,Nx,false>& ray,
+                float time,
+                vfloat<Nx>& dist, size_t& mask)
       {
         if (unlikely(node.isLeaf())) return false;
         mask = intersectNode((const typename BVHN<N>::QuantizedNode*)node.quantizedNode(), ray, dist);

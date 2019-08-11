@@ -132,7 +132,9 @@ namespace embree
         {
           SPLIT_OBJECT   = 0,
           SPLIT_FALLBACK = 1,
-          SPLIT_ENFORCE  = 2, // splits with larger ID are enforced in createLargeLeaf even if we could create a leaf already
+          // splits with larger ID are enforced in createLargeLeaf
+          // even if we could create a leaf already
+          SPLIT_ENFORCE  = 2,
           SPLIT_TEMPORAL = 2,
           SPLIT_GEOMID   = 3,
         };

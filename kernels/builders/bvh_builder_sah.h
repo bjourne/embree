@@ -38,7 +38,9 @@ namespace embree
     struct GeneralBVHBuilder
     {
       static const size_t MAX_BRANCHING_FACTOR = 8;        //!< maximum supported BVH branching factor
-      static const size_t MIN_LARGE_LEAF_LEVELS = 8;        //!< create balanced tree of we are that many levels before the maximum tree depth
+      //!< create balanced tree of we are that many levels before the
+      //!maximum tree depth
+      static const size_t MIN_LARGE_LEAF_LEVELS = 8;
 
       /*! settings for SAH builder */
       struct Settings
@@ -50,21 +52,50 @@ namespace embree
 
         /*! initialize settings from API settings */
         Settings (const RTCBuildArguments& settings)
-        : branchingFactor(2), maxDepth(32), logBlockSize(0), minLeafSize(1), maxLeafSize(8),
-          travCost(1.0f), intCost(1.0f), singleThreadThreshold(1024), primrefarrayalloc(inf)
+        : branchingFactor(2),
+          maxDepth(32),
+          logBlockSize(0),
+          minLeafSize(1), maxLeafSize(8),
+          travCost(1.0f), intCost(1.0f),
+          singleThreadThreshold(1024),
+          primrefarrayalloc(inf)
         {
-          if (RTC_BUILD_ARGUMENTS_HAS(settings,maxBranchingFactor)) branchingFactor = settings.maxBranchingFactor;
-          if (RTC_BUILD_ARGUMENTS_HAS(settings,maxDepth          )) maxDepth        = settings.maxDepth;
-          if (RTC_BUILD_ARGUMENTS_HAS(settings,sahBlockSize      )) logBlockSize    = bsr(settings.sahBlockSize);
-          if (RTC_BUILD_ARGUMENTS_HAS(settings,minLeafSize       )) minLeafSize     = settings.minLeafSize;
-          if (RTC_BUILD_ARGUMENTS_HAS(settings,maxLeafSize       )) maxLeafSize     = settings.maxLeafSize;
-          if (RTC_BUILD_ARGUMENTS_HAS(settings,traversalCost     )) travCost        = settings.traversalCost;
-          if (RTC_BUILD_ARGUMENTS_HAS(settings,intersectionCost  )) intCost         = settings.intersectionCost;
+          if (RTC_BUILD_ARGUMENTS_HAS(settings, maxBranchingFactor))
+            branchingFactor = settings.maxBranchingFactor;
+          if (RTC_BUILD_ARGUMENTS_HAS(settings, maxDepth          ))
+            maxDepth        = settings.maxDepth;
+          if (RTC_BUILD_ARGUMENTS_HAS(settings, sahBlockSize      ))
+            logBlockSize    = bsr(settings.sahBlockSize);
+          if (RTC_BUILD_ARGUMENTS_HAS(settings, minLeafSize       ))
+            minLeafSize = settings.minLeafSize;
+          if (RTC_BUILD_ARGUMENTS_HAS(settings, maxLeafSize))
+            maxLeafSize = settings.maxLeafSize;
+          if (RTC_BUILD_ARGUMENTS_HAS(settings, traversalCost     ))
+            travCost = settings.traversalCost;
+          if (RTC_BUILD_ARGUMENTS_HAS(settings, intersectionCost  ))
+            intCost = settings.intersectionCost;
+          // minLeafSize = 16;
+          // maxLeafSize = 256;
+
+          printf("maxLeafSize %ld\n", maxLeafSize);
         }
 
-        Settings (size_t sahBlockSize, size_t minLeafSize, size_t maxLeafSize, float travCost, float intCost, size_t singleThreadThreshold, size_t primrefarrayalloc = inf)
-        : branchingFactor(2), maxDepth(32), logBlockSize(bsr(sahBlockSize)), minLeafSize(minLeafSize), maxLeafSize(maxLeafSize),
-          travCost(travCost), intCost(intCost), singleThreadThreshold(singleThreadThreshold), primrefarrayalloc(primrefarrayalloc) {}
+        Settings (size_t sahBlockSize,
+                  size_t minLeafSize,
+                  size_t maxLeafSize,
+                  float travCost,
+                  float intCost,
+                  size_t singleThreadThreshold,
+                  size_t primrefarrayalloc = inf)
+        : branchingFactor(2),
+          maxDepth(32),
+          logBlockSize(bsr(sahBlockSize)),
+          minLeafSize(minLeafSize), maxLeafSize(maxLeafSize),
+          travCost(travCost), intCost(intCost),
+          singleThreadThreshold(singleThreadThreshold),
+          primrefarrayalloc(primrefarrayalloc)
+        {
+        }
 
       public:
         size_t branchingFactor;  //!< branching factor of BVH to build
@@ -130,16 +161,18 @@ namespace embree
                     const Settings& settings)
 
             : cfg(settings),
-            prims(prims),
-            heuristic(heuristic),
-            createAlloc(createAlloc), createNode(createNode), updateNode(updateNode), createLeaf(createLeaf),
-            progressMonitor(progressMonitor)
+              prims(prims),
+              heuristic(heuristic),
+              createAlloc(createAlloc), createNode(createNode),
+              updateNode(updateNode), createLeaf(createLeaf),
+              progressMonitor(progressMonitor)
           {
             if (cfg.branchingFactor > MAX_BRANCHING_FACTOR)
               throw_RTCError(RTC_ERROR_UNKNOWN,"bvh_builder: branching factor too large");
           }
 
-          const ReductionTy createLargeLeaf(const BuildRecord& current, Allocator alloc)
+          const ReductionTy
+          createLargeLeaf(const BuildRecord& current, Allocator alloc)
           {
             /* this should never occur but is a fatal error */
             if (current.depth > cfg.maxDepth)
@@ -202,7 +235,8 @@ namespace embree
             return updateNode(current,children,node,values,numChildren);
           }
 
-          const ReductionTy recurse(BuildRecord& current, Allocator alloc, bool toplevel)
+          const ReductionTy
+          recurse(BuildRecord& current, Allocator alloc, bool toplevel)
           {
             /* get thread local allocator */
             if (!alloc)
@@ -221,7 +255,10 @@ namespace embree
             assert((current.prims.size() == 0) || ((leafSAH >= 0) && (splitSAH >= 0)));
 
             /*! create a leaf node when threshold reached or SAH tells us to stop */
-            if (current.prims.size() <= cfg.minLeafSize || current.depth+MIN_LARGE_LEAF_LEVELS >= cfg.maxDepth || (current.prims.size() <= cfg.maxLeafSize && leafSAH <= splitSAH)) {
+            if (current.prims.size() <= cfg.minLeafSize ||
+                current.depth+MIN_LARGE_LEAF_LEVELS >= cfg.maxDepth ||
+                (current.prims.size() <= cfg.maxLeafSize && leafSAH <= splitSAH))
+            {
               heuristic.deterministic_order(current.prims);
               return createLargeLeaf(current,alloc);
             }
@@ -382,15 +419,16 @@ namespace embree
         typename UpdateNodeFunc,
         typename CreateLeafFunc,
         typename ProgressMonitor>
-
-        static ReductionTy build(CreateAllocFunc createAlloc,
-                                 CreateNodeFunc createNode, UpdateNodeFunc updateNode,
-                                 const CreateLeafFunc& createLeaf,
-                                 const ProgressMonitor& progressMonitor,
-                                 PrimRef* prims, const PrimInfo& pinfo,
-                                 const Settings& settings)
+      static ReductionTy
+      build(CreateAllocFunc createAlloc,
+            CreateNodeFunc createNode, UpdateNodeFunc updateNode,
+            const CreateLeafFunc& createLeaf,
+            const ProgressMonitor& progressMonitor,
+            PrimRef* prims, const PrimInfo& pinfo,
+            const Settings& settings)
       {
         Heuristic heuristic(prims);
+        printf("pinfo.size() %ld\n", pinfo.size());
         return GeneralBVHBuilder::build<ReductionTy,Heuristic,Set,PrimRef>(
           heuristic,
           prims,
@@ -402,107 +440,6 @@ namespace embree
           progressMonitor,
           settings);
       }
-    };
-
-    /* Spatial SAH builder that operates on an double-buffered array of BuildRecords */
-    struct BVHBuilderBinnedFastSpatialSAH
-    {
-      typedef PrimInfoExtRange Set;
-      typedef Split2<BinSplit<NUM_OBJECT_BINS>,SpatialBinSplit<NUM_SPATIAL_BINS> > Split;
-      typedef GeneralBVHBuilder::BuildRecordT<Set,Split> BuildRecord;
-      typedef GeneralBVHBuilder::Settings Settings;
-
-      static const unsigned int GEOMID_MASK = 0xFFFFFFFF >>     RESERVED_NUM_SPATIAL_SPLITS_GEOMID_BITS;
-      static const unsigned int SPLITS_MASK = 0xFFFFFFFF << (32-RESERVED_NUM_SPATIAL_SPLITS_GEOMID_BITS);
-
-      template<typename ReductionTy, typename UserCreateLeaf>
-      struct CreateLeafExt
-      {
-        __forceinline CreateLeafExt (const UserCreateLeaf userCreateLeaf)
-          : userCreateLeaf(userCreateLeaf) {}
-
-        // __noinline is workaround for ICC2016 compiler bug
-        template<typename Allocator>
-        __noinline ReductionTy operator() (PrimRef* prims, const range<size_t>& range, Allocator alloc) const
-        {
-          for (size_t i=range.begin(); i<range.end(); i++)
-            prims[i].lower.u &= GEOMID_MASK;
-
-          return userCreateLeaf(prims,range,alloc);
-        }
-
-        const UserCreateLeaf userCreateLeaf;
-      };
-
-      /*! special builder that propagates reduction over the tree */
-      template<
-      typename ReductionTy,
-        typename CreateAllocFunc,
-        typename CreateNodeFunc,
-        typename UpdateNodeFunc,
-        typename CreateLeafFunc,
-        typename SplitPrimitiveFunc,
-        typename ProgressMonitor>
-
-        static ReductionTy build(CreateAllocFunc createAlloc,
-                                 CreateNodeFunc createNode,
-                                 UpdateNodeFunc updateNode,
-                                 const CreateLeafFunc& createLeaf,
-                                 SplitPrimitiveFunc splitPrimitive,
-                                 ProgressMonitor progressMonitor,
-                                 PrimRef* prims,
-                                 const size_t extSize,
-                                 const PrimInfo& pinfo,
-                                 const Settings& settings)
-        {
-          typedef HeuristicArraySpatialSAH<SplitPrimitiveFunc,PrimRef,NUM_OBJECT_BINS,NUM_SPATIAL_BINS> Heuristic;
-          Heuristic heuristic(splitPrimitive,prims,pinfo);
-
-          /* calculate total surface area */ // FIXME: this sum is not deterministic
-          const float A = (float) parallel_reduce(
-            size_t(0),
-            pinfo.size(),0.0,
-            [&] (const range<size_t>& r) -> double {
-
-              double A = 0.0f;
-              for (size_t i=r.begin(); i<r.end(); i++)
-              {
-                PrimRef& prim = prims[i];
-                A += area(prim.bounds());
-              }
-              return A;
-            },std::plus<double>());
-
-
-          /* calculate maximum number of spatial splits per primitive */
-          const unsigned int maxSplits = ((size_t)1 << RESERVED_NUM_SPATIAL_SPLITS_GEOMID_BITS)-1;
-          const float f = 10.0f;
-
-          const float invA = 1.0f / A;
-          parallel_for( size_t(0), pinfo.size(), [&](const range<size_t>& r) {
-
-              for (size_t i=r.begin(); i<r.end(); i++)
-              {
-                PrimRef& prim = prims[i];
-                assert((prim.geomID() & SPLITS_MASK) == 0);
-                // FIXME: is there a better general heuristic ?
-                const float nf = ceilf(f*pinfo.size()*area(prim.bounds()) * invA);
-                unsigned int n = 4+min((int)maxSplits-4, max(1, (int)(nf)));
-                prim.lower.u |= n << (32-RESERVED_NUM_SPATIAL_SPLITS_GEOMID_BITS);
-              }
-            });
-
-          return GeneralBVHBuilder::build<ReductionTy,Heuristic,Set,PrimRef>(
-            heuristic,
-            prims,
-            PrimInfoExtRange(0,pinfo.size(),extSize,pinfo),
-            createAlloc,
-            createNode,
-            updateNode,
-            CreateLeafExt<ReductionTy,CreateLeafFunc>(createLeaf),
-            progressMonitor,
-            settings);
-        }
     };
   }
 }

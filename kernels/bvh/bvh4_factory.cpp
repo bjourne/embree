@@ -130,7 +130,9 @@ namespace embree
       intersectors = BVH4Triangle4Intersectors(accel,
                                                IntersectVariant::FAST);
     else
-      throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,"unknown traverser "+scene->device->tri_traverser+" for BVH4<Triangle4>");
+      throw_RTCError(RTC_ERROR_INVALID_ARGUMENT,
+                     "unknown traverser " + scene->device->tri_traverser +
+                     " for BVH4<Triangle4>");
 
     Builder* builder = nullptr;
     if (scene->device->tri_builder == "default") {

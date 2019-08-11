@@ -24,13 +24,18 @@ namespace embree
     template<int N>
     struct BVHNBuilderVirtual
     {
-      typedef BVHN<N> BVH;
-      typedef typename BVH::NodeRef NodeRef;
+      typedef typename BVHN<N>::NodeRef NodeRef;
       typedef FastAllocator::CachedAllocator Allocator;
 
       struct BVHNBuilderV {
-        NodeRef build(FastAllocator* allocator, BuildProgressMonitor& progress, PrimRef* prims, const PrimInfo& pinfo, GeneralBVHBuilder::Settings settings);
-        virtual NodeRef createLeaf (const PrimRef* prims, const range<size_t>& set, const Allocator& alloc) = 0;
+        NodeRef build(FastAllocator* allocator,
+                      BuildProgressMonitor& progress,
+                      PrimRef* prims,
+                      const PrimInfo& pinfo,
+                      GeneralBVHBuilder::Settings settings);
+        virtual NodeRef createLeaf (const PrimRef* prims,
+                                    const range<size_t>& set,
+                                    const Allocator& alloc) = 0;
       };
 
       template<typename CreateLeafFunc>

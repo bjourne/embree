@@ -32,53 +32,34 @@ namespace embree
 {
   namespace isa
   {
-    template<int N, typename Primitive>
+    template<int N>
     struct CreateLeaf
     {
-      typedef BVHN<N> BVH;
-      typedef typename BVH::NodeRef NodeRef;
+      typedef typename BVHN<N>::NodeRef NodeRef;
 
-      __forceinline CreateLeaf (BVH* bvh) : bvh(bvh) {}
+      __forceinline CreateLeaf (BVHN<N>* bvh) : bvh(bvh)
+      {
+      }
 
-      __forceinline NodeRef operator() (const PrimRef* prims, const range<size_t>& set, const FastAllocator::CachedAllocator& alloc) const
+      __forceinline NodeRef
+      operator() (const PrimRef* prims,
+                  const range<size_t>& set,
+                  const FastAllocator::CachedAllocator& alloc) const
       {
         size_t n = set.size();
-        size_t items = Primitive::blocks(n);
+        //printf("CreateLeaf::operator() %ld\n", n);
+        size_t items = TriangleM<4>::blocks(n);
         size_t start = set.begin();
-        Primitive* accel = (Primitive*) alloc.malloc1(items*sizeof(Primitive),BVH::byteAlignment);
-        typename BVH::NodeRef node = BVH::encodeLeaf((char*)accel,items);
-        for (size_t i=0; i<items; i++) {
-          accel[i].fill(prims,start,set.end(),bvh->scene);
+        TriangleM<4>* accel = (TriangleM<4>*)
+          alloc.malloc1(items*sizeof(TriangleM<4>),BVHN<N>::byteAlignment);
+        typename BVHN<N>::NodeRef node = BVHN<N>::encodeLeaf((char*)accel,items);
+        for (size_t i=0; i < items; i++) {
+          accel[i].fill(prims, start, set.end(), bvh->scene);
         }
         return node;
       }
 
-      BVH* bvh;
-    };
-
-
-    template<int N, typename Primitive>
-    struct CreateLeafQuantized
-    {
-      typedef BVHN<N> BVH;
-      typedef typename BVH::NodeRef NodeRef;
-
-      __forceinline CreateLeafQuantized (BVH* bvh) : bvh(bvh) {}
-
-      __forceinline NodeRef operator() (const PrimRef* prims, const range<size_t>& set, const FastAllocator::CachedAllocator& alloc) const
-      {
-        size_t n = set.size();
-        size_t items = Primitive::blocks(n);
-        size_t start = set.begin();
-        Primitive* accel = (Primitive*) alloc.malloc1(items*sizeof(Primitive),BVH::byteAlignment);
-        typename BVH::NodeRef node = BVH::encodeLeaf((char*)accel,items);
-        for (size_t i=0; i<items; i++) {
-          accel[i].fill(prims,start,set.end(),bvh->scene);
-        }
-        return node;
-      }
-
-      BVH* bvh;
+      BVHN<N>* bvh;
     };
 
     /************************************************************************************/
@@ -111,7 +92,7 @@ namespace embree
           prims(scene->device,0),
           settings(sahBlockSize,
                    minLeafSize,
-                   min(maxLeafSize,Primitive::max_size()*BVH::maxLeafBlocks),
+                   min(maxLeafSize, Primitive::max_size() * BVH::maxLeafBlocks),
                    travCost, intCost,
                    DEFAULT_SINGLE_THREAD_THRESHOLD),
           primrefarrayalloc(primrefarrayalloc)
@@ -206,7 +187,7 @@ namespace embree
             /* call BVH builder */
             NodeRef root = BVHNBuilderVirtual<N>::build(
               &bvh->alloc,
-              CreateLeaf<N,TriangleM<4>>(bvh),
+              CreateLeaf<N>(bvh),
               bvh->scene->progressInterface,
               prims.data(),
               pinfo,

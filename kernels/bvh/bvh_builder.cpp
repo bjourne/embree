@@ -28,6 +28,7 @@ namespace embree
       const PrimInfo& pinfo,
       GeneralBVHBuilder::Settings settings)
     {
+      printf("NodeRef BVHNBuilderVirtual<N>::BVHNBuilderV::build\n");
       auto createLeafFunc = [&] (const PrimRef* prims,
                                  const range<size_t>& set,
                                  const Allocator& alloc) -> NodeRef {
@@ -35,9 +36,15 @@ namespace embree
       };
 
       settings.branchingFactor = N;
-      settings.maxDepth = BVH::maxBuildDepthLeaf;
+      settings.maxDepth = BVHN<N>::maxBuildDepthLeaf;
       return BVHBuilderBinnedSAH::build<NodeRef>
-        (FastAllocator::Create(allocator),typename BVH::AlignedNode::Create2(),typename BVH::AlignedNode::Set3(allocator,prims),createLeafFunc,progressFunc,prims,pinfo,settings);
+        (FastAllocator::Create(allocator),
+         typename BVHN<N>::AlignedNode::Create2(),
+         typename BVHN<N>::AlignedNode::Set3(allocator,prims),
+         createLeafFunc,
+         progressFunc,
+         prims, pinfo,
+         settings);
     }
 
     template struct BVHNBuilderVirtual<4>;

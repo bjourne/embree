@@ -60,7 +60,7 @@ namespace embree
 
       /* load the ray into SIMD registers */
       TravRay<N,Nx,false> tray(ray.org, ray.dir,
-                                max(ray.tnear(), 0.0f), max(ray.tfar, 0.0f));
+                               max(ray.tnear(), 0.0f), max(ray.tfar, 0.0f));
 
       /* initialize the node traverser */
       BVHNNodeTraverser1Hit<N, Nx, types> nodeTraverser;
@@ -87,7 +87,8 @@ namespace embree
         while (true)
         {
           /* intersect node */
-          size_t mask; vfloat<Nx> tNear;
+          size_t mask;
+          vfloat<Nx> tNear;
           STAT3(normal.trav_nodes,1,1,1);
           bool nodeIntersected =
             BVHNNodeIntersector1<N, Nx, types>::intersect(
@@ -107,7 +108,7 @@ namespace embree
 
         /* this is a leaf node */
         assert(cur != BVH::emptyNode);
-        STAT3(normal.trav_leaves,1,1,1);
+        STAT3(normal.trav_leaves, 1, 1, 1);
         size_t num;
         TriangleM<4>* prim = (TriangleM<4>*)cur.leaf(num);
         PrimitiveIntersector1::intersect(ray, context, prim, num);

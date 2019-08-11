@@ -307,40 +307,16 @@ namespace embree
       }
     };
 
-    template<int N, int K>
-    struct BVHNNodeIntersectorK<N, K, BVH_AN1, true>
-    {
-      static __forceinline bool
-      intersect(const typename BVHN<N>::NodeRef& node, size_t i,
-                const TravRayKRobust<K>& ray,
-                const vfloat<K>& time,
-                vfloat<K>& dist, vbool<K>& vmask)
-      {
-        vmask = intersectNodeKRobust<N,K>(node.alignedNode(), i, ray, dist);
-        return true;
-      }
-    };
-
     // template<int N, int K>
-    // struct BVHNNodeIntersectorK<N, K, BVH_AN2, false>
+    // struct BVHNNodeIntersectorK<N, K, BVH_AN1, true>
     // {
     //   static __forceinline bool
     //   intersect(const typename BVHN<N>::NodeRef& node, size_t i,
-    //             const TravRayKFast<K>& ray, const vfloat<K>& time,
+    //             const TravRayKRobust<K>& ray,
+    //             const vfloat<K>& time,
     //             vfloat<K>& dist, vbool<K>& vmask)
     //   {
-    //     vmask = intersectNodeK<N,K>(node.alignedNodeMB(), i, ray, time, dist);
-    //     return true;
-    //   }
-    // };
-
-    // template<int N, int K>
-    // struct BVHNNodeIntersectorK<N, K, BVH_AN2, true>
-    // {
-    //   static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, size_t i,
-    //                                       const TravRayKRobust<K>& ray, const vfloat<K>& time, vfloat<K>& dist, vbool<K>& vmask)
-    //   {
-    //     vmask = intersectNodeKRobust<N,K>(node.alignedNodeMB(), i, ray, time, dist);
+    //     vmask = intersectNodeKRobust<N,K>(node.alignedNode(), i, ray, dist);
     //     return true;
     //   }
     // };
