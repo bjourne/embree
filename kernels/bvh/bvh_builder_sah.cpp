@@ -237,7 +237,7 @@ namespace embree
     };
 
     Builder*
-    BVH4Triangle4MeshBuilderSAH  (void* bvh, TriangleMesh* mesh, size_t mode)
+    BVH4Triangle4MeshBuilderSAH(void* bvh, TriangleMesh* mesh, size_t mode)
     {
       return new BVHNBuilderSAH<4,TriangleMesh,TriangleM<4>>(
         (BVH4*)bvh,
@@ -250,8 +250,6 @@ namespace embree
         (BVH4*)bvh,
         scene, 4, 1.0f, 4, inf, mode);
     }
-
-
 #if defined(__AVX__)
     Builder*
     BVH8Triangle4MeshBuilderSAH(void* bvh, TriangleMesh* mesh, size_t mode)

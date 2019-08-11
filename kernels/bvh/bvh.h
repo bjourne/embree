@@ -336,10 +336,6 @@ namespace embree
       __forceinline       AlignedNodeMB* alignedNodeMB()       { assert(isAlignedNodeMB() || isAlignedNodeMB4D()); return (      AlignedNodeMB*)(ptr & ~(size_t)align_mask); }
       __forceinline const AlignedNodeMB* alignedNodeMB() const { assert(isAlignedNodeMB() || isAlignedNodeMB4D()); return (const AlignedNodeMB*)(ptr & ~(size_t)align_mask); }
 
-      /*! returns 4D motion blur node pointer */
-      __forceinline       AlignedNodeMB4D* alignedNodeMB4D()       { assert(isAlignedNodeMB4D()); return (      AlignedNodeMB4D*)(ptr & ~(size_t)align_mask); }
-      __forceinline const AlignedNodeMB4D* alignedNodeMB4D() const { assert(isAlignedNodeMB4D()); return (const AlignedNodeMB4D*)(ptr & ~(size_t)align_mask); }
-
       /*! returns unaligned node pointer */
       __forceinline       UnalignedNode* unalignedNode()       { assert(isUnalignedNode()); return (      UnalignedNode*)(ptr & ~(size_t)align_mask); }
       __forceinline const UnalignedNode* unalignedNode() const { assert(isUnalignedNode()); return (const UnalignedNode*)(ptr & ~(size_t)align_mask); }
@@ -574,15 +570,6 @@ namespace embree
     {
       using BaseNode::children;
 
-      struct Create
-      {
-        __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc) const
-        {
-          AlignedNodeMB* node = (AlignedNodeMB*) alloc.malloc0(sizeof(AlignedNodeMB),byteNodeAlignment); node->clear();
-          return BVHN::encodeNode(node);
-        }
-      };
-
       struct Set
       {
         __forceinline void operator() (NodeRef node, size_t i, const NodeRecordMB4D& child) const {
@@ -599,44 +586,6 @@ namespace embree
           return encodeNode(node);
         }
       };
-
-      // struct Set2
-      // {
-      //   template<typename BuildRecord>
-      //   __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
-      //   {
-      //     AlignedNodeMB* node = ref.alignedNodeMB();
-
-      //     LBBox3fa bounds = empty;
-      //     for (size_t i=0; i<num; i++) {
-      //       node->setRef(i,children[i].ref);
-      //       node->setBounds(i,children[i].lbounds);
-      //       bounds.extend(children[i].lbounds);
-      //     }
-      //     return NodeRecordMB(ref,bounds);
-      //   }
-      // };
-
-      // struct Set2TimeRange
-      // {
-      //   __forceinline Set2TimeRange(BBox1f tbounds) : tbounds(tbounds) {}
-
-      //   template<typename BuildRecord>
-      //   __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
-      //   {
-      //     AlignedNodeMB* node = ref.alignedNodeMB();
-
-      //     LBBox3fa bounds = empty;
-      //     for (size_t i=0; i<num; i++) {
-      //       node->setRef(i, children[i].ref);
-      //       node->setBounds(i, children[i].lbounds, tbounds);
-      //       bounds.extend(children[i].lbounds);
-      //     }
-      //     return NodeRecordMB(ref,bounds);
-      //   }
-
-      //   BBox1f tbounds;
-      // };
 
       /*! Clears the node. */
       __forceinline void clear()  {
@@ -787,7 +736,7 @@ namespace embree
         }
         cout << "}";
         return cout;
-  }
+      }
 
     public:
       vfloat<N> lower_x;        //!< X dimension of lower bounds of all N children.
@@ -823,35 +772,6 @@ namespace embree
       using AlignedNodeMB::upper_dx;
       using AlignedNodeMB::upper_dy;
       using AlignedNodeMB::upper_dz;
-
-      struct Create
-      {
-        __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc, bool hasTimeSplits = true) const
-        {
-          if (hasTimeSplits)
-          {
-            AlignedNodeMB4D* node = (AlignedNodeMB4D*) alloc.malloc0(sizeof(AlignedNodeMB4D),byteNodeAlignment); node->clear();
-            return encodeNode(node);
-          }
-          else
-          {
-            AlignedNodeMB* node = (AlignedNodeMB*) alloc.malloc0(sizeof(AlignedNodeMB),byteNodeAlignment); node->clear();
-            return encodeNode(node);
-          }
-        }
-      };
-
-      struct Set
-      {
-        __forceinline void operator() (NodeRef ref, size_t i, const NodeRecordMB4D& child) const
-        {
-          if (likely(ref.isAlignedNodeMB())) {
-            ref.alignedNodeMB()->set(i, child);
-          } else {
-            ref.alignedNodeMB4D()->set(i, child);
-          }
-        }
-      };
 
       /*! Clears the node. */
       __forceinline void clear()  {
@@ -1032,14 +952,14 @@ namespace embree
     {
       using BaseNode::children;
 
-      struct Create
-      {
-        __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc) const
-        {
-          UnalignedNodeMB* node = (UnalignedNodeMB*) alloc.malloc0(sizeof(UnalignedNodeMB),byteNodeAlignment); node->clear();
-          return encodeNode(node);
-        }
-      };
+      // struct Create
+      // {
+      //   __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc) const
+      //   {
+      //     UnalignedNodeMB* node = (UnalignedNodeMB*) alloc.malloc0(sizeof(UnalignedNodeMB),byteNodeAlignment); node->clear();
+      //     return encodeNode(node);
+      //   }
+      // };
 
       struct Set
       {
@@ -1375,7 +1295,9 @@ namespace embree
 
     /*! lays out num large nodes of the BVH */
     void layoutLargeNodes(size_t num);
-    NodeRef layoutLargeNodesRecursion(NodeRef& node, const FastAllocator::CachedAllocator& allocator);
+    NodeRef
+    layoutLargeNodesRecursion(NodeRef& node,
+                              const FastAllocator::CachedAllocator& allocator);
 
     /*! called by all builders before build starts */
     double preBuild(const std::string& builderName);
@@ -1409,29 +1331,29 @@ namespace embree
       return NodeRef((size_t) node);
     }
 
-    static __forceinline unsigned int encodeQuantizedNode(size_t base, size_t node) {
-      assert(!((size_t)node & align_mask));
-      ssize_t node_offset = (ssize_t)node-(ssize_t)base;
-      assert(node_offset != 0);
-      assert((int64_t)node_offset >= -int64_t(0x80000000) && (int64_t)node_offset <= (int64_t)0x7fffffff);
-      return (unsigned int)node_offset | tyQuantizedNode;
-    }
+    // static __forceinline unsigned int encodeQuantizedNode(size_t base, size_t node) {
+    //   assert(!((size_t)node & align_mask));
+    //   ssize_t node_offset = (ssize_t)node-(ssize_t)base;
+    //   assert(node_offset != 0);
+    //   assert((int64_t)node_offset >= -int64_t(0x80000000) && (int64_t)node_offset <= (int64_t)0x7fffffff);
+    //   return (unsigned int)node_offset | tyQuantizedNode;
+    // }
 
-    static __forceinline int encodeQuantizedLeaf(size_t base, size_t node) {
-      ssize_t leaf_offset = (ssize_t)node-(ssize_t)base;
-      assert((int64_t)leaf_offset >= -int64_t(0x80000000) && (int64_t)leaf_offset <= (int64_t)0x7fffffff);
-      return (int)leaf_offset;
-    }
+    // static __forceinline int encodeQuantizedLeaf(size_t base, size_t node) {
+    //   ssize_t leaf_offset = (ssize_t)node-(ssize_t)base;
+    //   assert((int64_t)leaf_offset >= -int64_t(0x80000000) && (int64_t)leaf_offset <= (int64_t)0x7fffffff);
+    //   return (int)leaf_offset;
+    // }
 
-    static __forceinline NodeRef encodeNode(AlignedNodeMB* node) {
-      assert(!((size_t)node & align_mask));
-      return NodeRef((size_t) node | tyAlignedNodeMB);
-    }
+    // static __forceinline NodeRef encodeNode(AlignedNodeMB* node) {
+    //   assert(!((size_t)node & align_mask));
+    //   return NodeRef((size_t) node | tyAlignedNodeMB);
+    // }
 
-    static __forceinline NodeRef encodeNode(AlignedNodeMB4D* node) {
-      assert(!((size_t)node & align_mask));
-      return NodeRef((size_t) node | tyAlignedNodeMB4D);
-    }
+    // static __forceinline NodeRef encodeNode(AlignedNodeMB4D* node) {
+    //   assert(!((size_t)node & align_mask));
+    //   return NodeRef((size_t) node | tyAlignedNodeMB4D);
+    // }
 
     /*! Encodes an unaligned node */
     static __forceinline NodeRef encodeNode(UnalignedNode* node) {
@@ -1439,9 +1361,9 @@ namespace embree
     }
 
     /*! Encodes an unaligned motion blur node */
-    static __forceinline NodeRef encodeNode(UnalignedNodeMB* node) {
-      return NodeRef((size_t) node | tyUnalignedNodeMB);
-    }
+    // static __forceinline NodeRef encodeNode(UnalignedNodeMB* node) {
+    //   return NodeRef((size_t) node | tyUnalignedNodeMB);
+    // }
 
     /*! Encodes a leaf */
     static __forceinline NodeRef encodeLeaf(void* tri, size_t num) {
@@ -1478,8 +1400,10 @@ namespace embree
                                                   BBox<vfloat4>& bounds1,
                                                   BBox<vfloat4>& bounds2,
                                                   BBox<vfloat4>& bounds3) const {
-    transpose(lower_x,lower_y,lower_z,vfloat4(zero),bounds0.lower,bounds1.lower,bounds2.lower,bounds3.lower);
-    transpose(upper_x,upper_y,upper_z,vfloat4(zero),bounds0.upper,bounds1.upper,bounds2.upper,bounds3.upper);
+    transpose(lower_x, lower_y, lower_z, vfloat4(zero),
+              bounds0.lower,bounds1.lower,bounds2.lower,bounds3.lower);
+    transpose(upper_x,upper_y,upper_z,vfloat4(zero),
+              bounds0.upper,bounds1.upper,bounds2.upper,bounds3.upper);
   }
   typedef BVHN<4> BVH4;
   typedef BVHN<8> BVH8;

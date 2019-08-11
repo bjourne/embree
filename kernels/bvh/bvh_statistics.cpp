@@ -42,7 +42,6 @@ namespace embree
     if (stat.statAlignedNodes.numNodes    ) stream << "  alignedNodes     : "  << stat.statAlignedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statUnalignedNodes.numNodes  ) stream << "  unalignedNodes   : "  << stat.statUnalignedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statAlignedNodesMB.numNodes  ) stream << "  alignedNodesMB   : "  << stat.statAlignedNodesMB.toString(bvh,totalSAH,totalBytes) << std::endl;
-    if (stat.statAlignedNodesMB4D.numNodes) stream << "  alignedNodesMB4D : "  << stat.statAlignedNodesMB4D.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statUnalignedNodesMB.numNodes) stream << "  unalignedNodesMB : "  << stat.statUnalignedNodesMB.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statQuantizedNodes.numNodes  ) stream << "  quantizedNodes   : "  << stat.statQuantizedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (true)                               stream << "  leaves           : "  << stat.statLeaf.toString(bvh,totalSAH,totalBytes) << std::endl;
@@ -96,22 +95,6 @@ namespace embree
         }, Statistics::add);
       s.statAlignedNodesMB.numNodes++;
       s.statAlignedNodesMB.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isAlignedNodeMB4D())
-    {
-      AlignedNodeMB4D* n = node.alignedNodeMB4D();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const BBox1f t0t1i = intersect(t0t1,n->timeRange(i));
-          assert(!t0t1i.empty());
-          const double Ai = n->AlignedNodeMB::expectedHalfArea(i,t0t1i);
-          Statistics s =  statistics(n->child(i),Ai,t0t1i);
-          s.statAlignedNodesMB4D.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statAlignedNodesMB4D.numNodes++;
-      s.statAlignedNodesMB4D.nodeSAH += dt*A;
       s.depth++;
     }
     else if (node.isUnalignedNodeMB())

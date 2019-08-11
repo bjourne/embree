@@ -90,7 +90,10 @@ namespace embree
 #endif
   }
 
-  void BVH8Factory::createTriangleMeshTriangle4(TriangleMesh* mesh, AccelData*& accel, Builder*& builder)
+  void
+  BVH8Factory::createTriangleMeshTriangle4(TriangleMesh* mesh,
+                                           AccelData*& accel,
+                                           Builder*& builder)
   {
     printf("BVH8Factory::createTriangleMeshTriangle4 "
            "mesh->quality = %d\n", mesh->quality);

@@ -23,10 +23,12 @@ namespace embree
 {
   namespace isa
   {
-    PrimInfo createPrimRefArray(Geometry* geometry,
-                                mvector<PrimRef>& prims,
-                                BuildProgressMonitor& progressMonitor)
+    PrimInfo
+    createPrimRefArray(Geometry* geometry,
+                       mvector<PrimRef>& prims,
+                       BuildProgressMonitor& progressMonitor)
     {
+      printf("createPrimRefArray\n");
       ParallelPrefixSumState<PrimInfo> pstate;
 
       /* first try */

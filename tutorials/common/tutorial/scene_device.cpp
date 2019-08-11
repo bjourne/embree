@@ -187,7 +187,6 @@ namespace embree
                       RTCScene scene_out,
                       unsigned int geomID)
   {
-    printf("ConvertTriangleMesh\n");
     RTCGeometry geom = rtcNewGeometry (device, RTC_GEOMETRY_TYPE_TRIANGLE);
     rtcSetGeometryTimeStepCount(geom,mesh->numTimeSteps);
     rtcSetGeometryTimeRange(geom,mesh->startTime,mesh->endTime);

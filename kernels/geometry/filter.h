@@ -87,7 +87,10 @@ namespace embree
 #endif
     }
 
-    __forceinline bool runOcclusionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
+    __forceinline bool
+    runOcclusionFilter1Helper(RTCFilterFunctionNArguments* args,
+                              const Geometry* const geometry,
+                              IntersectContext* context)
     {
       if (geometry->occlusionFilterN)
       {
@@ -142,7 +145,10 @@ namespace embree
     }
 
     template<int K>
-      __forceinline vbool<K> runIntersectionFilterHelper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
+      __forceinline vbool<K>
+    runIntersectionFilterHelper(RTCFilterFunctionNArguments* args,
+                                const Geometry* const geometry,
+                                IntersectContext* context)
     {
       vint<K>* mask = (vint<K>*) args->valid;
       if (geometry->intersectionFilterN)

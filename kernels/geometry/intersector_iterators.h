@@ -161,8 +161,6 @@ namespace embree
       }
     };
 
-    // =============================================================================================
-
     template<int K, typename IntersectorK>
     struct ArrayIntersectorKStream
     {
@@ -171,7 +169,7 @@ namespace embree
       static __forceinline void
       intersectK(const vbool<K>& valid,
                  const Accel::Intersectors* This,
-                 /* PrecalculationsK& pre, */ RayHitK<K>& ray,
+                 RayHitK<K>& ray,
                  IntersectContext* context,
                  const PrimitiveK* prim,
                  size_t num,
