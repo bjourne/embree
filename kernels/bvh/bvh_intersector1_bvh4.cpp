@@ -24,6 +24,8 @@ namespace embree
       return VerifyMultiTargetLinking::getISA();
     }
 
-    IF_ENABLED_TRIS(DEFINE_INTERSECTOR1(BVH4Triangle4Intersector1Moeller,  BVHNIntersector1<4 COMMA BVH_AN1 COMMA false COMMA ArrayIntersector1<TriangleMIntersector1Moeller  <SIMD_MODE(4)> > >));
+    IF_ENABLED_TRIS(DEFINE_INTERSECTOR1(
+                      BVH4Triangle4Intersector1Moeller,
+                      BVHNIntersector1<4 COMMA BVH_AN1 COMMA ArrayIntersector1<TriangleMIntersector1Moeller  <SIMD_MODE(4)> > >));
   }
 }

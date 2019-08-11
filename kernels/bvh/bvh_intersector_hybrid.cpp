@@ -80,7 +80,7 @@ namespace embree
           /* intersect node */
           size_t mask = 0;
           vfloat<Nx> tNear;
-          BVHNNodeIntersector1<N, Nx, types, robust>::intersect(cur, tray1, ray.time()[k], tNear, mask);
+          BVHNNodeIntersector1<N, Nx, types>::intersect(cur, tray1, ray.time()[k], tNear, mask);
 
           /* if no child is hit, pop next node */
           if (unlikely(mask == 0))
@@ -531,10 +531,6 @@ namespace embree
       } while(valid_bits);
     }
 
-    // ===================================================================================================================================================================
-    // ===================================================================================================================================================================
-    // ===================================================================================================================================================================
-
     template<int N, int K,
              int types, bool robust,
              typename PrimitiveIntersectorK,
@@ -557,7 +553,8 @@ namespace embree
         stack[0] = root;
 
         /* load the ray into SIMD registers */
-        TravRay<N,Nx,robust> tray1(k, tray.org, tray.dir, tray.rdir, tray.nearXYZ, tray.tnear[k], tray.tfar[k]);
+        TravRay<N,Nx,robust> tray1(
+          k, tray.org, tray.dir, tray.rdir, tray.nearXYZ, tray.tnear[k], tray.tfar[k]);
 
 	/* pop loop */
 	while (true) pop:
@@ -577,7 +574,8 @@ namespace embree
             /* intersect node */
             size_t mask = 0;
             vfloat<Nx> tNear;
-            BVHNNodeIntersector1<N, Nx, types, robust>::intersect(cur, tray1, ray.time()[k], tNear, mask);
+            BVHNNodeIntersector1<N, Nx, types>::intersect(
+              cur, tray1, ray.time()[k], tNear, mask);
 
             /* if no child is hit, pop next node */
             if (unlikely(mask == 0))

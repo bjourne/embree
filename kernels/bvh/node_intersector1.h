@@ -26,8 +26,7 @@ namespace embree
     // Ray structure used in single-ray traversal
     //////////////////////////////////////////////////////////////////////////////////////
 
-    template<int N, int Nx, bool robust>
-      struct TravRayBase;
+    template<int N, int Nx, bool robust> struct TravRayBase;
 
     /* Base (without tnear and tfar) */
     template<int N, int Nx>
@@ -778,11 +777,11 @@ namespace embree
     //////////////////////////////////////////////////////////////////////////////////////
 
     /*! Intersects N nodes with 1 ray */
-    template<int N, int Nx, int types, bool robust>
+    template<int N, int Nx, int types>
     struct BVHNNodeIntersector1;
 
     template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_AN1, false>
+    struct BVHNNodeIntersector1<N, Nx, BVH_AN1>
     {
       static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,false>& ray, float time, vfloat<Nx>& dist, size_t& mask)
       {
@@ -794,7 +793,7 @@ namespace embree
     };
 
     template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_AN2, false>
+    struct BVHNNodeIntersector1<N, Nx, BVH_AN2>
     {
       static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,false>& ray, float time, vfloat<Nx>& dist, size_t& mask)
       {
@@ -805,7 +804,7 @@ namespace embree
     };
 
     template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_AN1_UN1, false>
+    struct BVHNNodeIntersector1<N, Nx, BVH_AN1_UN1>
     {
       static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node, const TravRay<N,Nx,false>& ray, float time, vfloat<Nx>& dist, size_t& mask)
       {
@@ -816,7 +815,7 @@ namespace embree
       }
     };
     template<int N, int Nx>
-    struct BVHNNodeIntersector1<N, Nx, BVH_QN1, false>
+    struct BVHNNodeIntersector1<N, Nx, BVH_QN1>
     {
       static __forceinline bool intersect(const typename BVHN<N>::NodeRef& node,
                                           const TravRay<N,Nx,false>& ray,
