@@ -30,7 +30,8 @@
 
 namespace embree
 {
-  /*! some global variables that can be set via rtcSetParameter1i for debugging purposes */
+  /*! some global variables that can be set via rtcSetParameter1i for
+  debugging purposes */
   ssize_t Device::debug_int0 = 0;
   ssize_t Device::debug_int1 = 0;
   ssize_t Device::debug_int2 = 0;
@@ -44,8 +45,8 @@ namespace embree
 
   Device::Device (const char* cfg)
   {
-    printf("Device::Device\n");
-    printf("Running with triangle intersector %s\n", ISECT_NAME);
+    printf("Triangle intersector: %s\n", ISECT_NAME);
+    printf("Triangle size:        %ld\n", sizeof(TriangleM<4>));
     /* check CPU */
     if (!hasISA(ISA))
       throw_RTCError(RTC_ERROR_UNSUPPORTED_CPU,"CPU does not support " ISA_STR);

@@ -22,19 +22,22 @@
 #include "../common/primref.h"
 
 #define ISECT_EMBREE    1
-#define ISECT_HH        2
-#define ISECT_HH2       3
-#define ISECT_SF01      4
-#define ISECT_MT        5
-#define ISECT_BW12      6
-#define ISECT_BW9       7
-#define ISECT_SHEV      8
-#define ISECT_DS        9
+#define ISECT_EMBREE2   2
+#define ISECT_HH        3
+#define ISECT_HH2       4
+#define ISECT_SF01      5
+#define ISECT_MT        6
+#define ISECT_BW12      7
+#define ISECT_BW9       8
+#define ISECT_SHEV      9
+#define ISECT_DS        10
 
-#define ISECT_METHOD ISECT_SHEV
+#define ISECT_METHOD ISECT_EMBREE2
 
 #if ISECT_METHOD == ISECT_EMBREE
 #define ISECT_NAME "embree"
+#elif ISECT_METHOD == ISECT_EMBREE2
+#define ISECT_NAME "embree2"
 #elif ISECT_METHOD == ISECT_HH
 #define ISECT_NAME "hh"
 #elif ISECT_METHOD == ISECT_HH2
@@ -233,6 +236,11 @@ namespace embree
       this->v0 = v0;
       this->e1 = v0 - v1;
       this->e2 = v2 - v0;
+      #elif ISECT_METHOD == ISECT_EMBREE2
+      this->v0 = v0;
+      this->e1 = v0 - v1;
+      this->e2 = v2 - v0;
+      this->tmp = v0;
       #elif ISECT_METHOD == ISECT_SF01
       this->v0 = v0;
       this->e1 = v0 - v1;
@@ -325,6 +333,19 @@ namespace embree
       vfloat<M>::store_nt(&dst->e2.x, src.e2.x);
       vfloat<M>::store_nt(&dst->e2.y, src.e2.y);
       vfloat<M>::store_nt(&dst->e2.z, src.e2.z);
+      #elif ISECT_METHOD == ISECT_EMBREE2
+      vfloat<M>::store_nt(&dst->v0.x, src.v0.x);
+      vfloat<M>::store_nt(&dst->v0.y, src.v0.y);
+      vfloat<M>::store_nt(&dst->v0.z, src.v0.z);
+      vfloat<M>::store_nt(&dst->e1.x, src.e1.x);
+      vfloat<M>::store_nt(&dst->e1.y, src.e1.y);
+      vfloat<M>::store_nt(&dst->e1.z, src.e1.z);
+      vfloat<M>::store_nt(&dst->e2.x, src.e2.x);
+      vfloat<M>::store_nt(&dst->e2.y, src.e2.y);
+      vfloat<M>::store_nt(&dst->e2.z, src.e2.z);
+      vfloat<M>::store_nt(&dst->tmp.x, src.tmp.x);
+      vfloat<M>::store_nt(&dst->tmp.y, src.tmp.y);
+      vfloat<M>::store_nt(&dst->tmp.z, src.tmp.z);
       #else
       #error "Wrong ISECT_METHOD!"
       #endif
@@ -386,6 +407,11 @@ namespace embree
     Vec3vf<M> v0;      // base vertex of the triangles
     Vec3vf<M> e1;      // 1st edge of the triangles
     Vec3vf<M> e2;      // 2nd edge of the triangles
+    #elif ISECT_METHOD == ISECT_EMBREE2
+    Vec3vf<M> tmp;
+    Vec3vf<M> v0;
+    Vec3vf<M> e1;
+    Vec3vf<M> e2;
     #else
     #error "Wrong ISECT_METHOD!"
     #endif

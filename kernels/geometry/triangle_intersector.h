@@ -37,7 +37,7 @@ namespace embree
     #include "triangle_intersector_hh.h"
     #elif ISECT_METHOD == ISECT_HH2
     #include "triangle_intersector_hh2.h"
-    #elif ISECT_METHOD == ISECT_EMBREE
+    #elif ISECT_METHOD == ISECT_EMBREE || ISECT_METHOD == ISECT_EMBREE2
     #include "triangle_intersector_embree.h"
     #elif ISECT_METHOD == ISECT_SF01
     #include "triangle_intersector_sf01.h"
