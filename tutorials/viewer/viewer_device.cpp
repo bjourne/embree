@@ -37,11 +37,11 @@ bool g_subdiv_mode = false;
 #define MIN_EDGE_LEVEL  4.0f
 #define LEVEL_FACTOR   64.0f
 
-bool monitorProgressFunction(void* ptr, double dn) 
+bool monitorProgressFunction(void* ptr, double dn)
 {
   return true;
 }
-  
+
 inline float updateEdgeLevel( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, const unsigned int e0, const unsigned int e1)
 {
   const Vec3fa v0 = mesh->positions[0][mesh->position_indices[e0]];
@@ -100,7 +100,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateMeshEdgeLevelBufferTask((int)i,threadIndex,scene_in,cam_pos);
-  }); 
+  });
 #endif
 
   /* now update large meshes */
@@ -115,7 +115,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateSubMeshEdgeLevelBufferTask((int)i,threadIndex,mesh,cam_pos);
-  }); 
+  });
 #else
     updateEdgeLevelBuffer(mesh,cam_pos,0,mesh->numFaces);
 #endif
@@ -131,7 +131,8 @@ void device_key_pressed_handler(int key)
   else device_key_pressed_default(key);
 }
 
-RTCScene convertScene(ISPCScene* scene_in)
+RTCScene
+convertScene(ISPCScene* scene_in)
 {
   for (unsigned int i=0; i<scene_in->numGeometries; i++)
   {
@@ -164,36 +165,6 @@ void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometr
   {
     ISPCTriangleMesh* mesh = (ISPCTriangleMesh*) geometry;
     materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == QUAD_MESH)
-  {
-    ISPCQuadMesh* mesh = (ISPCQuadMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == SUBDIV_MESH)
-  {
-    ISPCSubdivMesh* mesh = (ISPCSubdivMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == CURVES)
-  {
-    ISPCHairSet* mesh = (ISPCHairSet*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == GRID_MESH)
-  {
-    ISPCGridMesh* mesh = (ISPCGridMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == POINTS)
-  {
-    ISPCPointSet* set = (ISPCPointSet*) geometry;
-    materialID = set->geom.materialID;
-  }
-  else if (geometry->type == GROUP) {
-    unsigned int geomID = ray.geomID; {
-      postIntersectGeometry(ray,dg,((ISPCGroup*) geometry)->geometries[geomID],materialID);
-    }
   }
   else
     assert(false);
@@ -237,9 +208,12 @@ inline int postIntersect(const Ray& ray, DifferentialGeometry& dg)
       /* get instance and geometry pointers */
       ISPCInstance* instance = (ISPCInstancePtr) g_ispc_scene->geometries[instID];
 
+
+      printf("time used here?");
+
       /* convert normals */
       //AffineSpace3fa space = (1.0f-ray.time())*AffineSpace3fa(instance->space0) + ray.time()*AffineSpace3fa(instance->space1);
-      AffineSpace3fa space = calculate_interpolated_space(instance,ray.time());
+      AffineSpace3fa space = calculate_interpolated_space(instance,0);
       dg.Ng = xfmVector(space,dg.Ng);
       dg.Ns = xfmVector(space,dg.Ns);
     }
@@ -267,7 +241,7 @@ Vec3fa renderPixelStandard(float x, float y, const ISPCCamera& camera, RayStats&
   RTCIntersectContext context;
   rtcInitIntersectContext(&context);
   context.flags = g_iflags_coherent;
-  rtcIntersect1(g_scene,&context,RTCRayHit_(ray));
+  rtcIntersect1(g_scene, &context, RTCRayHit_(ray));
   RayStats_addRay(stats);
 
   /* shade background black */
@@ -284,7 +258,7 @@ Vec3fa renderPixelStandard(float x, float y, const ISPCCamera& camera, RayStats&
   dg.primID = ray.primID;
   dg.u = ray.u;
   dg.v = ray.v;
-  dg.P  = ray.org+ray.tfar*ray.dir;
+  dg.P  = ray.org + ray.tfar * ray.dir;
   dg.Ng = ray.Ng;
   dg.Ns = ray.Ng;
 
@@ -293,7 +267,11 @@ Vec3fa renderPixelStandard(float x, float y, const ISPCCamera& camera, RayStats&
     {
       Vec3fa dPdu,dPdv;
       unsigned int geomID = ray.geomID; {
-        rtcInterpolate1(rtcGetGeometry(g_scene,geomID),ray.primID,ray.u,ray.v,RTC_BUFFER_TYPE_VERTEX,0,nullptr,&dPdu.x,&dPdv.x,3);
+        rtcInterpolate1(rtcGetGeometry(g_scene,geomID),
+                        ray.primID, ray.u, ray.v,
+                        RTC_BUFFER_TYPE_VERTEX, 0,
+                        nullptr,
+                        &dPdu.x,&dPdv.x,3);
       }
       dg.Ns = cross(dPdv,dPdu);
     }
@@ -343,13 +321,14 @@ void renderTileStandard(int taskIndex,
 }
 
 /* task that renders a single screen tile */
-void renderTileTask (int taskIndex, int threadIndex, int* pixels,
-                         const unsigned int width,
-                         const unsigned int height,
-                         const float time,
-                         const ISPCCamera& camera,
-                         const int numTilesX,
-                         const int numTilesY)
+void
+renderTileTask (int taskIndex, int threadIndex, int* pixels,
+                const unsigned int width,
+                const unsigned int height,
+                const float time,
+                const ISPCCamera& camera,
+                const int numTilesX,
+                const int numTilesY)
 {
   renderTile(taskIndex,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
 }
@@ -366,11 +345,12 @@ extern "C" void device_init (char* cfg)
 }
 
 /* called by the C++ code to render */
-extern "C" void device_render (int* pixels,
-                           const unsigned int width,
-                           const unsigned int height,
-                           const float time,
-                           const ISPCCamera& camera)
+extern "C" void
+device_render (int* pixels,
+               const unsigned int width,
+               const unsigned int height,
+               const float time,
+               const ISPCCamera& camera)
 {
   bool camera_changed = g_changed; g_changed = false;
 
@@ -404,7 +384,7 @@ extern "C" void device_render (int* pixels,
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       renderTileTask((int)i,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
-  }); 
+  });
   //rtcDebug();
 }
 

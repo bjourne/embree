@@ -39,7 +39,11 @@ RTCScene g_scene = nullptr;
 #define MIN_EDGE_LEVEL  4.0f
 #define LEVEL_FACTOR   64.0f
 
-inline float updateEdgeLevel( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, const unsigned int e0, const unsigned int e1)
+inline float
+updateEdgeLevel(ISPCSubdivMesh* mesh,
+                const Vec3fa& cam_pos,
+                const unsigned int e0,
+                const unsigned int e1)
 {
   const Vec3fa v0 = mesh->positions[0][mesh->position_indices[e0]];
   const Vec3fa v1 = mesh->positions[0][mesh->position_indices[e1]];
@@ -50,7 +54,11 @@ inline float updateEdgeLevel( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, const
 }
 
 
-void updateEdgeLevelBuffer( ISPCSubdivMesh* mesh, const Vec3fa& cam_pos, unsigned int startID, unsigned int endID )
+void
+updateEdgeLevelBuffer(ISPCSubdivMesh* mesh,
+                      const Vec3fa& cam_pos,
+                      unsigned int startID,
+                      unsigned int endID )
 {
   for (unsigned int f=startID; f<endID;f++) {
     unsigned int e = mesh->face_offsets[f];
@@ -97,7 +105,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateMeshEdgeLevelBufferTask((int)i,threadIndex,scene_in,cam_pos);
-  }); 
+  });
 #endif
 
   /* now update large meshes */
@@ -112,7 +120,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateSubMeshEdgeLevelBufferTask((int)i,threadIndex,mesh,cam_pos);
-  }); 
+  });
 #else
     updateEdgeLevelBuffer(mesh,cam_pos,0,mesh->numFaces);
 #endif
@@ -201,37 +209,16 @@ Vec3fa ambientOcclusionShading(int x, int y, Ray& ray, RayStats& stats)
 }
 
 
-void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometry* geometry, int& materialID)
+void
+postIntersectGeometry(const Ray& ray,
+                      DifferentialGeometry& dg,
+                      ISPCGeometry* geometry,
+                      int& materialID)
 {
   if (geometry->type == TRIANGLE_MESH)
   {
     ISPCTriangleMesh* mesh = (ISPCTriangleMesh*) geometry;
     materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == QUAD_MESH)
-  {
-    ISPCQuadMesh* mesh = (ISPCQuadMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == GRID_MESH)
-  {
-    ISPCGridMesh* mesh = (ISPCGridMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == SUBDIV_MESH)
-  {
-    ISPCSubdivMesh* mesh = (ISPCSubdivMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == CURVES)
-  {
-    ISPCHairSet* mesh = (ISPCHairSet*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == GROUP) {
-    unsigned int geomID = ray.geomID; {
-      postIntersectGeometry(ray,dg,((ISPCGroup*) geometry)->geometries[geomID],materialID);
-    }
   }
   else
     assert(false);
@@ -252,7 +239,8 @@ AffineSpace3fa calculate_interpolated_space (ISPCInstance* instance, float gtime
 
 typedef ISPCInstance* ISPCInstancePtr;
 
-inline int postIntersect(const Ray& ray, DifferentialGeometry& dg)
+inline int
+postIntersect(const Ray& ray, DifferentialGeometry& dg)
 {
   int materialID = 0;
   unsigned int instID = ray.instID; {
@@ -276,8 +264,7 @@ inline int postIntersect(const Ray& ray, DifferentialGeometry& dg)
       ISPCInstance* instance = (ISPCInstancePtr) g_ispc_scene->geometries[instID];
 
       /* convert normals */
-      //AffineSpace3fa space = (1.0f-ray.time())*AffineSpace3fa(instance->space0) + ray.time()*AffineSpace3fa(instance->space1);
-      AffineSpace3fa space = calculate_interpolated_space(instance,ray.time());
+      AffineSpace3fa space = calculate_interpolated_space(instance,0.0);
       dg.Ng = xfmVector(space,dg.Ng);
       dg.Ns = xfmVector(space,dg.Ns);
     }
@@ -292,15 +279,16 @@ inline Vec3fa face_forward(const Vec3fa& dir, const Vec3fa& _Ng) {
 }
 
 /* renders a single screen tile */
-void renderTileStandard(int taskIndex,
-                        int threadIndex,
-                        int* pixels,
-                        const unsigned int width,
-                        const unsigned int height,
-                        const float time,
-                        const ISPCCamera& camera,
-                        const int numTilesX,
-                        const int numTilesY)
+void
+renderTileStandard(int taskIndex,
+                   int threadIndex,
+                   int* pixels,
+                   const unsigned int width,
+                   const unsigned int height,
+                   const float time,
+                   const ISPCCamera& camera,
+                   const int numTilesX,
+                   const int numTilesY)
 {
   const unsigned int tileY = taskIndex / numTilesX;
   const unsigned int tileX = taskIndex - tileY * numTilesX;
@@ -315,24 +303,26 @@ void renderTileStandard(int taskIndex,
 
   /* generate stream of primary rays */
   int N = 0;
-  for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
-  {
-    /* ISPC workaround for mask == 0 */
-    
+  for (unsigned int y=y0; y<y1; y++)
+    for (unsigned int x=x0; x<x1; x++) {
+      /* ISPC workaround for mask == 0 */
+      RandomSampler sampler;
+      RandomSampler_init(sampler, x, y, 0);
 
-    RandomSampler sampler;
-    RandomSampler_init(sampler, x, y, 0);
+      /* initialize ray */
+      Ray& ray = rays[N++];
+      bool mask = 1; { // invalidates inactive rays
+        ray.tnear() = mask ? 0.0f         : (float)(pos_inf);
+        ray.tfar  = mask ? (float)(inf) : (float)(neg_inf);
+      }
+      init_Ray(ray,
+               Vec3fa(camera.xfm.p),
+               Vec3fa(normalize((float)x*camera.xfm.l.vx + (float)y*camera.xfm.l.vy + camera.xfm.l.vz)),
+               ray.tnear(), ray.tfar,
+               RandomSampler_get1D(sampler));
 
-    /* initialize ray */
-    Ray& ray = rays[N++];
-    bool mask = 1; { // invalidates inactive rays
-      ray.tnear() = mask ? 0.0f         : (float)(pos_inf);
-      ray.tfar  = mask ? (float)(inf) : (float)(neg_inf);
+      RayStats_addRay(stats);
     }
-    init_Ray(ray, Vec3fa(camera.xfm.p), Vec3fa(normalize((float)x*camera.xfm.l.vx + (float)y*camera.xfm.l.vy + camera.xfm.l.vz)), ray.tnear(), ray.tfar, RandomSampler_get1D(sampler));
-
-    RayStats_addRay(stats);
-  }
 
   RTCIntersectContext context;
   rtcInitIntersectContext(&context);
@@ -340,7 +330,10 @@ void renderTileStandard(int taskIndex,
 
   /* trace stream of rays */
 #if USE_INTERFACE == 0
-  rtcIntersect1M(g_scene,&context,(RTCRayHit*)&rays[0],N,sizeof(Ray));
+  //printf("Streaming %d rays...\n", N);
+  rtcIntersect1M(g_scene,
+                 &context,
+                 (RTCRayHit*)&rays[0], N, sizeof(Ray));
 #elif USE_INTERFACE == 1
   for (unsigned int i=0; i<N; i++)
     rtcIntersect1(g_scene,&context,RTCRayHit_(rays[i]));
@@ -351,42 +344,42 @@ void renderTileStandard(int taskIndex,
 
   /* shade stream of rays */
   N = 0;
-  for (unsigned int y=y0; y<y1; y++) for (unsigned int x=x0; x<x1; x++)
-  {
-    /* ISPC workaround for mask == 0 */
-    
-    Ray& ray = rays[N++];
+  for (unsigned int y=y0; y<y1; y++)
+    for (unsigned int x=x0; x<x1; x++) {
+      /* ISPC workaround for mask == 0 */
 
-    /* eyelight shading */
-    Vec3fa color = Vec3fa(0.0f);
-    if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
+      Ray& ray = rays[N++];
+
+      /* eyelight shading */
+      Vec3fa color = Vec3fa(0.0f);
+      if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
 #if SIMPLE_SHADING == 1
-    {
+      {
 #if OBJ_MATERIAL == 1
-      Vec3fa Kd = Vec3fa(0.5f);
-      DifferentialGeometry dg;
-      dg.geomID = ray.geomID;
-      dg.primID = ray.primID;
-      dg.u = ray.u;
-      dg.v = ray.v;
-      dg.P  = ray.org+ray.tfar*ray.dir;
-      dg.Ng = ray.Ng;
-      dg.Ns = ray.Ng;
-      int materialID = postIntersect(ray,dg);
-      dg.Ng = face_forward(ray.dir,normalize(dg.Ng));
-      dg.Ns = face_forward(ray.dir,normalize(dg.Ns));
-      
-      /* shade */
-      if (g_ispc_scene->materials[materialID]->type == MATERIAL_OBJ) {
-        ISPCOBJMaterial* material = (ISPCOBJMaterial*) g_ispc_scene->materials[materialID];
-        Kd = Vec3fa(material->Kd);
-      }
-      
-      color = Kd*dot(neg(ray.dir),dg.Ns);
+        Vec3fa Kd = Vec3fa(0.5f);
+        DifferentialGeometry dg;
+        dg.geomID = ray.geomID;
+        dg.primID = ray.primID;
+        dg.u = ray.u;
+        dg.v = ray.v;
+        dg.P  = ray.org+ray.tfar*ray.dir;
+        dg.Ng = ray.Ng;
+        dg.Ns = ray.Ng;
+        int materialID = postIntersect(ray,dg);
+        dg.Ng = face_forward(ray.dir,normalize(dg.Ng));
+        dg.Ns = face_forward(ray.dir,normalize(dg.Ns));
+
+        /* shade */
+        if (g_ispc_scene->materials[materialID]->type == MATERIAL_OBJ) {
+          ISPCOBJMaterial* material = (ISPCOBJMaterial*) g_ispc_scene->materials[materialID];
+          Kd = Vec3fa(material->Kd);
+        }
+
+        color = Kd*dot(neg(ray.dir),dg.Ns);
 #else
-      color = Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))));
+        color = Vec3fa(abs(dot(ray.dir,normalize(ray.Ng))));
 #endif
-    }
+      }
 #else
       color = ambientOcclusionShading(x,y,ray,g_stats[threadIndex]);
 #endif
@@ -400,13 +393,16 @@ void renderTileStandard(int taskIndex,
 }
 
 /* task that renders a single screen tile */
-void renderTileTask (int taskIndex, int threadIndex, int* pixels,
-                         const unsigned int width,
-                         const unsigned int height,
-                         const float time,
-                         const ISPCCamera& camera,
-                         const int numTilesX,
-                         const int numTilesY)
+void
+renderTileTask (int taskIndex,
+                int threadIndex,
+                int* pixels,
+                const unsigned int width,
+                const unsigned int height,
+                const float time,
+                const ISPCCamera& camera,
+                const int numTilesX,
+                const int numTilesY)
 {
   renderTile(taskIndex,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
 }
@@ -432,7 +428,7 @@ extern "C" void device_render (int* pixels,
     updateEdgeLevels(g_ispc_scene, camera.xfm.p);
     rtcCommitScene (g_scene);
   }
-  
+
   /* render image */
   const int numTilesX = (width +TILE_SIZE_X-1)/TILE_SIZE_X;
   const int numTilesY = (height+TILE_SIZE_Y-1)/TILE_SIZE_Y;
@@ -440,7 +436,7 @@ extern "C" void device_render (int* pixels,
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       renderTileTask((int)i,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
-  }); 
+  });
 }
 
 /* called by the C++ code for cleanup */

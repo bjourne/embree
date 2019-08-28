@@ -35,12 +35,16 @@ uniform bool g_subdiv_mode = false;
 #define MIN_EDGE_LEVEL  4.0f
 #define LEVEL_FACTOR   64.0f
 
-unmasked uniform bool monitorProgressFunction(void* uniform ptr, uniform double dn) 
+unmasked uniform bool monitorProgressFunction(void* uniform ptr, uniform double dn)
 {
   return true;
 }
 
-inline uniform float updateEdgeLevel( uniform ISPCSubdivMesh* uniform mesh, const uniform Vec3fa& cam_pos, const uniform unsigned int e0, const uniform unsigned int e1)
+inline uniform float
+updateEdgeLevel(uniform ISPCSubdivMesh* uniform mesh,
+                const uniform Vec3fa& cam_pos,
+                const uniform unsigned int e0,
+                const uniform unsigned int e1)
 {
   const uniform Vec3fa v0 = mesh->positions[0][mesh->position_indices[e0]];
   const uniform Vec3fa v1 = mesh->positions[0][mesh->position_indices[e1]];
@@ -244,14 +248,21 @@ inline Vec3f face_forward(const Vec3f& dir, const Vec3f& _Ng) {
 }
 
 /* task that renders a single screen tile */
-Vec3f renderPixelStandard(float x, float y, const uniform ISPCCamera& camera, uniform RayStats& stats)
+Vec3f
+renderPixelStandard(float x, float y,
+                    const uniform ISPCCamera& camera,
+                    uniform RayStats& stats)
 {
   /* initialize sampler */
   RandomSampler sampler;
   RandomSampler_init(sampler, (int)x, (int)y, 0);
 
   /* initialize ray */
-  Ray ray = make_Ray(make_Vec3f(camera.xfm.p), make_Vec3f(normalize(x*camera.xfm.l.vx + y*camera.xfm.l.vy + camera.xfm.l.vz)), 0.0f, inf, RandomSampler_get1D(sampler));
+  Ray ray = make_Ray(make_Vec3f(camera.xfm.p),
+                     make_Vec3f(normalize(x*camera.xfm.l.vx + y*camera.xfm.l.vy + camera.xfm.l.vz)),
+                     0.0f,
+                     inf,
+                     RandomSampler_get1D(sampler));
 
   /* intersect ray with scene */
   uniform RTCIntersectContext context;

@@ -17,27 +17,21 @@
 #include "device.h"
 #include "../hash.h"
 #include "scene_triangle_mesh.h"
-#include "scene_user_geometry.h"
-#include "scene_instance.h"
-#include "scene_curves.h"
-#include "scene_subdiv_mesh.h"
-
-#include "../subdiv/tessellation_cache.h"
 
 #include "acceln.h"
 #include "geometry.h"
-
-#include "../geometry/cylinder.h"
 
 #include "../bvh/bvh4_factory.h"
 #include "../bvh/bvh8_factory.h"
 
 #include "../../common/tasking/taskscheduler.h"
 #include "../../common/sys/alloc.h"
+#include "../geometry/triangle.h"
 
 namespace embree
 {
-  /*! some global variables that can be set via rtcSetParameter1i for debugging purposes */
+  /*! some global variables that can be set via rtcSetParameter1i for
+  debugging purposes */
   ssize_t Device::debug_int0 = 0;
   ssize_t Device::debug_int1 = 0;
   ssize_t Device::debug_int2 = 0;
@@ -51,8 +45,10 @@ namespace embree
 
   Device::Device (const char* cfg)
   {
+    printf("Triangle intersector: %s\n", ISECT_NAME);
+    printf("Triangle size:        %ld\n", sizeof(TriangleM<4>));
     /* check CPU */
-    if (!hasISA(ISA)) 
+    if (!hasISA(ISA))
       throw_RTCError(RTC_ERROR_UNSUPPORTED_CPU,"CPU does not support " ISA_STR);
 
     /* initialize global state */
@@ -63,16 +59,15 @@ namespace embree
       State::parseFile(FileName::homeFolder()+FileName(".embree" TOSTRING(RTC_VERSION_MAJOR)));
     State::verify();
 
-    /*! do some internal tests */
-    assert(isa::Cylinder::verify());
-
     /*! enable huge page support if desired */
 #if defined(__WIN32__)
     if (State::enable_selockmemoryprivilege)
-      State::hugepages_success &= win_enable_selockmemoryprivilege(State::verbosity(3));
+      State::hugepages_success &= win_enable_selockmemoryprivilege(
+        State::verbosity(3));
 #endif
-    State::hugepages_success &= os_init(State::hugepages,State::verbosity(3));
-    
+    State::hugepages_success &= os_init(
+      State::hugepages,State::verbosity(3));
+
     /*! set tessellation cache size */
     setCacheSize( State::tessellation_cache_size );
 
@@ -92,14 +87,17 @@ namespace embree
     /* print info header */
     if (State::verbosity(1))
       print();
-    if (State::verbosity(2)) 
+    if (State::verbosity(2))
       State::print();
 
     /* register all algorithms */
-    bvh4_factory = make_unique(new BVH4Factory(enabled_builder_cpu_features, enabled_cpu_features));
+    bvh4_factory = make_unique(new BVH4Factory(enabled_builder_cpu_features,
+                                               enabled_cpu_features));
 
 #if defined(EMBREE_TARGET_SIMD8)
-    bvh8_factory = make_unique(new BVH8Factory(enabled_builder_cpu_features, enabled_cpu_features));
+    printf("EMBREE_TARGET_SIMD8 is defined\n");
+    bvh8_factory = make_unique(new BVH8Factory(enabled_builder_cpu_features,
+                                               enabled_cpu_features));
 #endif
 
     /* setup tasking system */
@@ -198,23 +196,23 @@ namespace embree
     std::cout << std::endl;
 
     /* check of FTZ and DAZ flags are set in CSR */
-    if (!hasFTZ || !hasDAZ) 
+    if (!hasFTZ || !hasDAZ)
     {
 #if !defined(_DEBUG)
-      if (State::verbosity(1)) 
+      if (State::verbosity(1))
 #endif
       {
         std::cout << std::endl;
         std::cout << "================================================================================" << std::endl;
-        std::cout << "  WARNING: \"Flush to Zero\" or \"Denormals are Zero\" mode not enabled "         << std::endl 
+        std::cout << "  WARNING: \"Flush to Zero\" or \"Denormals are Zero\" mode not enabled "         << std::endl
                   << "           in the MXCSR control and status register. This can have a severe "     << std::endl
                   << "           performance impact. Please enable these modes for each application "   << std::endl
                   << "           thread the following way:" << std::endl
-                  << std::endl 
-                  << "           #include \"xmmintrin.h\"" << std::endl 
-                  << "           #include \"pmmintrin.h\"" << std::endl 
-                  << std::endl 
-                  << "           _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);" << std::endl 
+                  << std::endl
+                  << "           #include \"xmmintrin.h\"" << std::endl
+                  << "           #include \"pmmintrin.h\"" << std::endl
+                  << std::endl
+                  << "           _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);" << std::endl
                   << "           _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);" << std::endl;
         std::cout << "================================================================================" << std::endl;
         std::cout << std::endl;
@@ -254,13 +252,13 @@ namespace embree
   }
 
   void Device::process_error(Device* device, RTCError error, const char* str)
-  { 
+  {
     /* store global error code when device construction failed */
     if (!device)
       return setThreadErrorCode(error);
 
     /* print error when in verbose mode */
-    if (device->verbosity(1)) 
+    if (device->verbosity(1))
     {
       switch (error) {
       case RTC_ERROR_NONE         : std::cerr << "Embree: No error"; break;
@@ -269,15 +267,15 @@ namespace embree
       case RTC_ERROR_INVALID_OPERATION: std::cerr << "Embree: Invalid operation"; break;
       case RTC_ERROR_OUT_OF_MEMORY    : std::cerr << "Embree: Out of memory"; break;
       case RTC_ERROR_UNSUPPORTED_CPU  : std::cerr << "Embree: Unsupported CPU"; break;
-      default                   : std::cerr << "Embree: Invalid error code"; break;                   
+      default                   : std::cerr << "Embree: Invalid error code"; break;
       };
       if (str) std::cerr << ", (" << str << ")";
       std::cerr << std::endl;
     }
 
     /* call user specified error callback */
-    if (device->error_function) 
-      device->error_function(device->error_function_userptr,error,str); 
+    if (device->error_function)
+      device->error_function(device->error_function_userptr,error,str);
 
     /* record error code */
     device->setDeviceErrorCode(error);
@@ -311,25 +309,25 @@ namespace embree
       maxCacheSize = max(maxCacheSize, (*i).second);
     return maxCacheSize;
   }
- 
-  void Device::setCacheSize(size_t bytes) 
+
+  void Device::setCacheSize(size_t bytes)
   {
 #if defined(EMBREE_GEOMETRY_SUBDIVISION)
     Lock<MutexSys> lock(g_mutex);
     if (bytes == 0) g_cache_size_map.erase(this);
     else            g_cache_size_map[this] = bytes;
-    
+
     size_t maxCacheSize = getMaxCacheSize();
     resizeTessellationCache(maxCacheSize);
 #endif
   }
 
-  void Device::initTaskingSystem(size_t numThreads) 
+  void Device::initTaskingSystem(size_t numThreads)
   {
     Lock<MutexSys> lock(g_mutex);
-    if (numThreads == 0) 
+    if (numThreads == 0)
       g_num_threads_map[this] = std::numeric_limits<size_t>::max();
-    else 
+    else
       g_num_threads_map[this] = numThreads;
 
     /* create task scheduler */
@@ -340,7 +338,7 @@ namespace embree
 #endif
   }
 
-  void Device::exitTaskingSystem() 
+  void Device::exitTaskingSystem()
   {
     Lock<MutexSys> lock(g_mutex);
     g_num_threads_map.erase(this);
@@ -348,7 +346,7 @@ namespace embree
     /* terminate tasking system */
     if (g_num_threads_map.size() == 0) {
       TaskScheduler::destroy();
-    } 
+    }
     /* or configure new number of threads */
     else {
       size_t maxNumThreads = getMaxNumThreads();
@@ -394,12 +392,16 @@ namespace embree
     }
 
     /* documented properties */
-    switch (prop) 
+    switch (prop)
     {
-    case RTC_DEVICE_PROPERTY_VERSION_MAJOR: return RTC_VERSION_MAJOR;
-    case RTC_DEVICE_PROPERTY_VERSION_MINOR: return RTC_VERSION_MINOR;
-    case RTC_DEVICE_PROPERTY_VERSION_PATCH: return RTC_VERSION_PATCH;
-    case RTC_DEVICE_PROPERTY_VERSION      : return RTC_VERSION;
+    case RTC_DEVICE_PROPERTY_VERSION_MAJOR:
+      return RTC_VERSION_MAJOR;
+    case RTC_DEVICE_PROPERTY_VERSION_MINOR:
+      return RTC_VERSION_MINOR;
+    case RTC_DEVICE_PROPERTY_VERSION_PATCH:
+      return RTC_VERSION_PATCH;
+    case RTC_DEVICE_PROPERTY_VERSION      :
+      return RTC_VERSION;
 
 #if defined(EMBREE_TARGET_SIMD4) && defined(EMBREE_RAY_PACKETS)
     case RTC_DEVICE_PROPERTY_NATIVE_RAY4_SUPPORTED:  return hasISA(SSE2);
@@ -424,7 +426,7 @@ namespace embree
 #else
     case RTC_DEVICE_PROPERTY_RAY_STREAM_SUPPORTED:  return 0;
 #endif
-    
+
 #if defined(EMBREE_RAY_MASK)
     case RTC_DEVICE_PROPERTY_RAY_MASK_SUPPORTED: return 1;
 #else
@@ -466,7 +468,7 @@ namespace embree
 #else
     case RTC_DEVICE_PROPERTY_TRIANGLE_GEOMETRY_SUPPORTED: return 0;
 #endif
-        
+
 #if defined(EMBREE_GEOMETRY_QUAD)
     case RTC_DEVICE_PROPERTY_QUAD_GEOMETRY_SUPPORTED: return 1;
 #else

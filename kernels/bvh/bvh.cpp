@@ -20,9 +20,9 @@
 namespace embree
 {
   template<int N>
-  BVHN<N>::BVHN (const PrimitiveType& primTy, Scene* scene)
+  BVHN<N>::BVHN (Scene* scene)
     : AccelData((N==4) ? AccelData::TY_BVH4 : (N==8) ? AccelData::TY_BVH8 : AccelData::TY_UNKNOWN),
-      primTy(&primTy), device(scene->device), scene(scene),
+      device(scene->device), scene(scene),
       root(emptyNode), alloc(scene->device,scene->isStaticAccel()), numPrimitives(0), numVertices(0)
   {
   }
@@ -30,7 +30,7 @@ namespace embree
   template<int N>
   BVHN<N>::~BVHN ()
   {
-    for (size_t i=0; i<objects.size(); i++) 
+    for (size_t i=0; i<objects.size(); i++)
       delete objects[i];
   }
 
@@ -47,7 +47,7 @@ namespace embree
     this->root = root;
     this->bounds = bounds;
     this->numPrimitives = numPrimitives;
-  }	
+  }
 
   template<int N>
   void BVHN<N>::clearBarrier(NodeRef& node)
@@ -65,7 +65,7 @@ namespace embree
   void BVHN<N>::layoutLargeNodes(size_t num)
   {
 #if defined(__X86_64__) // do not use tree rotations on 32 bit platforms, barrier bit in NodeRef will cause issues
-    struct NodeArea 
+    struct NodeArea
     {
       __forceinline NodeArea() {}
 
@@ -98,11 +98,11 @@ namespace embree
 
     for (size_t i=0; i<lst.size(); i++)
       lst[i].node->setBarrier();
-      
+
     root = layoutLargeNodesRecursion(root,alloc.getCachedAllocator());
 #endif
   }
-  
+
   template<int N>
   typename BVHN<N>::NodeRef BVHN<N>::layoutLargeNodesRecursion(NodeRef& node, const FastAllocator::CachedAllocator& allocator)
   {
@@ -110,7 +110,7 @@ namespace embree
       node.clearBarrier();
       return node;
     }
-    else if (node.isAlignedNode()) 
+    else if (node.isAlignedNode())
     {
       AlignedNode* oldnode = node.alignedNode();
       AlignedNode* newnode = (BVHN::AlignedNode*) allocator.malloc0(sizeof(BVHN::AlignedNode),byteNodeAlignment);
@@ -125,13 +125,15 @@ namespace embree
   template<int N>
   double BVHN<N>::preBuild(const std::string& builderName)
   {
-    if (builderName == "") 
+    if (builderName == "")
       return inf;
 
     if (device->verbosity(2))
     {
       Lock<MutexSys> lock(g_printMutex);
-      std::cout << "building BVH" << N << (builderName.find("MBlur") != std::string::npos ? "MB" : "") << "<" << primTy->name() << "> using " << builderName << " ..." << std::endl << std::flush;
+      std::cout
+        << "building BVH" << N << (builderName.find("MBlur") != std::string::npos ? "MB" : "")
+        << "<" << "triangle4" << "> using " << builderName << " ..." << std::endl << std::flush;
     }
 
     double t0 = 0.0;
@@ -144,9 +146,9 @@ namespace embree
   {
     if (t0 == double(inf))
       return;
-    
+
     double dt = 0.0;
-    if (device->benchmark || device->verbosity(2)) 
+    if (device->benchmark || device->verbosity(2))
       dt = getSeconds()-t0;
 
     std::unique_ptr<BVHNStatistics<N>> stat;
@@ -157,8 +159,10 @@ namespace embree
       if (!stat) stat.reset(new BVHNStatistics<N>(this));
       const size_t usedBytes = alloc.getUsedBytes();
       Lock<MutexSys> lock(g_printMutex);
-      std::cout << "finished BVH" << N << "<" << primTy->name() << "> : " << 1000.0f*dt << "ms, " << 1E-6*double(numPrimitives)/dt << " Mprim/s, " << 1E-9*double(usedBytes)/dt << " GB/s" << std::endl;
-    
+      std::cout
+        << "finished BVH" << N << "<" << "triangle4" << "> : "
+        << 1000.0f*dt << "ms, " << 1E-6*double(numPrimitives)/dt << " Mprim/s, " << 1E-9*double(usedBytes)/dt << " GB/s" << std::endl;
+
       if (device->verbosity(2))
         std::cout << stat->str();
 
@@ -176,7 +180,7 @@ namespace embree
       {
         alloc.print_blocks();
         for (size_t i=0; i<objects.size(); i++)
-          if (objects[i]) 
+          if (objects[i])
             objects[i]->alloc.print_blocks();
       }
 
@@ -188,7 +192,9 @@ namespace embree
     {
       if (!stat) stat.reset(new BVHNStatistics<N>(this));
       Lock<MutexSys> lock(g_printMutex);
-      std::cout << "BENCHMARK_BUILD " << dt << " " << double(numPrimitives)/dt << " " << stat->sah() << " " << stat->bytesUsed() << " BVH" << N << "<" << primTy->name() << ">" << std::endl << std::flush;
+      std::cout
+        << "BENCHMARK_BUILD " << dt << " " << double(numPrimitives)/dt << " "
+        << stat->sah() << " " << stat->bytesUsed() << " BVH" << N << "<" << "triangle4" << ">" << std::endl << std::flush;
     }
   }
 
@@ -200,4 +206,3 @@ namespace embree
   template class BVHN<4>;
 #endif
 }
-

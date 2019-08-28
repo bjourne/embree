@@ -48,7 +48,7 @@ typedef int ssize_t;
 #endif
 #endif
 
-#if defined(_WIN32) 
+#if defined(_WIN32)
 #  define RTC_FORCEINLINE __forceinline
 #else
 #  define RTC_FORCEINLINE inline __attribute__((always_inline))
@@ -163,10 +163,7 @@ enum RTCFormat
 /* Build quality levels */
 enum RTCBuildQuality
 {
-  RTC_BUILD_QUALITY_LOW    = 0,
-  RTC_BUILD_QUALITY_MEDIUM = 1,
-  RTC_BUILD_QUALITY_HIGH   = 2,
-  RTC_BUILD_QUALITY_REFIT  = 3,
+  RTC_BUILD_QUALITY_MEDIUM = 1
 };
 
 /* Axis-aligned bounding box representation */
@@ -220,5 +217,5 @@ RTC_FORCEINLINE void rtcInitIntersectContext(struct RTCIntersectContext* context
   context->filter = NULL;
   context->instID[0] = RTC_INVALID_GEOMETRY_ID;
 }
-  
+
 RTC_NAMESPACE_END

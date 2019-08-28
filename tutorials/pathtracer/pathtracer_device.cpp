@@ -1012,135 +1012,11 @@ inline Vec3fa face_forward(const Vec3fa& dir, const Vec3fa& _Ng) {
   return dot(dir,Ng) < 0.0f ? Ng : neg(Ng);
 }
 
-inline Vec3fa derivBezier(const ISPCHairSet* mesh, const unsigned int primID, const float t, const float time)
-{
-  Vec3fa p00, p01, p02, p03;
-  const int i = mesh->hairs[primID].vertex;
-  
-  if (mesh->numTimeSteps == 1)
-  {
-    p00 = mesh->positions[0][i+0];
-    p01 = mesh->positions[0][i+1];
-    p02 = mesh->positions[0][i+2];
-    p03 = mesh->positions[0][i+3];
-  }
-  else
-  {
-    float f = mesh->numTimeSteps*time;
-    int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-    float t1 = f-itime;
-    float t0 = 1.0f-t1;
-    const Vec3fa a0 = mesh->positions[itime+0][i+0];
-    const Vec3fa a1 = mesh->positions[itime+0][i+1];
-    const Vec3fa a2 = mesh->positions[itime+0][i+2];
-    const Vec3fa a3 = mesh->positions[itime+0][i+3];
-    const Vec3fa b0 = mesh->positions[itime+1][i+0];
-    const Vec3fa b1 = mesh->positions[itime+1][i+1];
-    const Vec3fa b2 = mesh->positions[itime+1][i+2];
-    const Vec3fa b3 = mesh->positions[itime+1][i+3];
-    p00 = t0*a0 + t1*b0;
-    p01 = t0*a1 + t1*b1;
-    p02 = t0*a2 + t1*b2;
-    p03 = t0*a3 + t1*b3;
-  }
-
-  const float t0 = 1.0f - t, t1 = t;
-  const Vec3fa p10 = p00 * t0 + p01 * t1;
-  const Vec3fa p11 = p01 * t0 + p02 * t1;
-  const Vec3fa p12 = p02 * t0 + p03 * t1;
-  const Vec3fa p20 = p10 * t0 + p11 * t1;
-  const Vec3fa p21 = p11 * t0 + p12 * t1;
-  //const Vec3fa p30 = p20 * t0 + p21 * t1;
-  return Vec3fa(3.0f*(p21-p20));
-}
-
-inline Vec3fa derivHermite(const ISPCHairSet* mesh, const unsigned int primID, const float u, const float time)
-{
-  Vec3fa p0, p1, t0, t1;
-  const int i = mesh->hairs[primID].vertex;
-  
-  if (mesh->numTimeSteps == 1)
-  {
-    p0 = mesh->positions[0][i+0];
-    p1 = mesh->positions[0][i+1];
-    t0 = mesh->tangents[0][i+0];
-    t1 = mesh->tangents[0][i+1];
-  }
-  else
-  {
-    float f = mesh->numTimeSteps*time;
-    int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-    float time1 = f-itime;
-    float time0 = 1.0f-time1;
-    const Vec3fa ap0 = mesh->positions[itime+0][i+0];
-    const Vec3fa ap1 = mesh->positions[itime+0][i+1];
-    const Vec3fa at0 = mesh->tangents[itime+0][i+0];
-    const Vec3fa at1 = mesh->tangents[itime+0][i+1];
-    const Vec3fa bp0 = mesh->positions[itime+1][i+0];
-    const Vec3fa bp1 = mesh->positions[itime+1][i+1];
-    const Vec3fa bt0 = mesh->tangents[itime+1][i+0];
-    const Vec3fa bt1 = mesh->tangents[itime+1][i+1];
-    p0 = time0*ap0 + time1*bp0;
-    p1 = time0*ap1 + time1*bp1;
-    t0 = time0*at0 + time1*bt0;
-    t1 = time0*at1 + time1*bt1;
-  }
-  const Vec3fa p00 = p0;
-  const Vec3fa p01 = p0+(1.0f/3.0f)*t0;
-  const Vec3fa p02 = p1-(1.0f/3.0f)*t1;
-  const Vec3fa p03 = p1;
-    
-  const float u0 = 1.0f - u, u1 = u;
-  const Vec3fa p10 = p00 * u0 + p01 * u1;
-  const Vec3fa p11 = p01 * u0 + p02 * u1;
-  const Vec3fa p12 = p02 * u0 + p03 * u1;
-  const Vec3fa p20 = p10 * u0 + p11 * u1;
-  const Vec3fa p21 = p11 * u0 + p12 * u1;
-  //const Vec3fa p30 = p20 * u0 + p21 * u1;
-  return Vec3fa(3.0f*(p21-p20));
-}
-
-inline Vec3fa derivBSpline(const ISPCHairSet* mesh, const unsigned int primID, const float t, const float time)
-{
-  Vec3fa p00, p01, p02, p03;
-  const int i = mesh->hairs[primID].vertex;
-  
-  if (mesh->numTimeSteps == 1)
-  {
-    p00 = mesh->positions[0][i+0];
-    p01 = mesh->positions[0][i+1];
-    p02 = mesh->positions[0][i+2];
-    p03 = mesh->positions[0][i+3];
-  }
-  else
-  {
-    float f = mesh->numTimeSteps*time;
-    int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-    float t1 = f-itime;
-    float t0 = 1.0f-t1;
-    const Vec3fa a0 = mesh->positions[itime+0][i+0];
-    const Vec3fa a1 = mesh->positions[itime+0][i+1];
-    const Vec3fa a2 = mesh->positions[itime+0][i+2];
-    const Vec3fa a3 = mesh->positions[itime+0][i+3];
-    const Vec3fa b0 = mesh->positions[itime+1][i+0];
-    const Vec3fa b1 = mesh->positions[itime+1][i+1];
-    const Vec3fa b2 = mesh->positions[itime+1][i+2];
-    const Vec3fa b3 = mesh->positions[itime+1][i+3];
-    p00 = t0*a0 + t1*b0;
-    p01 = t0*a1 + t1*b1;
-    p02 = t0*a2 + t1*b2;
-    p03 = t0*a3 + t1*b3;
-  }
-
-  const float t0 = 1.0f - t, t1 = t;
-  const float n0 = -0.5f*t1*t1;
-  const float n1 = -0.5f*t0*t0 - 2.0f*(t0*t1);
-  const float n2 =  0.5f*t1*t1 + 2.0f*(t1*t0);
-  const float n3 =  0.5f*t0*t0;
-  return Vec3fa(n0*p00 + n1*p01 + n2*p02 + n3*p03);
-}
-
-void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometry* geometry, int& materialID)
+void
+postIntersectGeometry(const Ray& ray,
+                      DifferentialGeometry& dg,
+                      ISPCGeometry* geometry,
+                      int& materialID)
 {
   if (geometry->type == TRIANGLE_MESH)
   {
@@ -1171,7 +1047,7 @@ void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometr
       else
       {
         ISPCTriangle* tri = &mesh->triangles[dg.primID];
-        float f = mesh->numTimeSteps*ray.time();
+        float f = mesh->numTimeSteps* 0.0;
         int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
         float t1 = f-itime;
         float t0 = 1.0f-t1;
@@ -1187,159 +1063,6 @@ void postIntersectGeometry(const Ray& ray, DifferentialGeometry& dg, ISPCGeometr
         const float u = ray.u, v = ray.v, w = 1.0f-ray.u-ray.v;
         dg.Ns = w*n0 + u*n1 + v*n2;
       }
-    }
-  }
-  else if (geometry->type == QUAD_MESH)
-  {
-    ISPCQuadMesh* mesh = (ISPCQuadMesh*) geometry;
-    materialID = mesh->geom.materialID;
-    if (mesh->texcoords)
-    {
-      ISPCQuad* quad = &mesh->quads[dg.primID];
-      const Vec2f st0 = mesh->texcoords[quad->v0];
-      const Vec2f st1 = mesh->texcoords[quad->v1];
-      const Vec2f st2 = mesh->texcoords[quad->v2];
-      const Vec2f st3 = mesh->texcoords[quad->v3];
-      if (ray.u+ray.v < 1.0f) {
-        const float u = ray.u, v = ray.v; const float w = 1.0f-u-v;
-        const Vec2f st = w*st0 + u*st1 + v*st3;
-        dg.u = st.x;
-        dg.v = st.y;
-      } else {
-        const float u = 1.0f-ray.u, v = 1.0f-ray.v; const float w = 1.0f-u-v;
-        const Vec2f st = w*st2 + u*st3 + v*st1;
-        dg.u = st.x;
-        dg.v = st.y;
-      }
-    }
-    if (mesh->normals)
-    {
-      if (mesh->numTimeSteps == 1)
-      {
-        ISPCQuad* quad = &mesh->quads[dg.primID];
-        const Vec3fa n0 = Vec3fa(mesh->normals[0][quad->v0]);
-        const Vec3fa n1 = Vec3fa(mesh->normals[0][quad->v1]);
-        const Vec3fa n2 = Vec3fa(mesh->normals[0][quad->v2]);
-        const Vec3fa n3 = Vec3fa(mesh->normals[0][quad->v3]);
-        if (ray.u+ray.v < 1.0f) {
-          const float u = ray.u, v = ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n0 + u*n1 + v*n3;
-        } else {
-          const float u = 1.0f-ray.u, v = 1.0f-ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n2 + u*n3 + v*n1;
-        }
-      }
-      else
-      {
-        ISPCQuad* quad = &mesh->quads[dg.primID];
-        float f = mesh->numTimeSteps*ray.time();
-        int itime = clamp((int)floor(f),0,(int)mesh->numTimeSteps-2);
-        float t1 = f-itime;
-        float t0 = 1.0f-t1;
-        const Vec3fa a0 = Vec3fa(mesh->normals[itime+0][quad->v0]);
-        const Vec3fa a1 = Vec3fa(mesh->normals[itime+0][quad->v1]);
-        const Vec3fa a2 = Vec3fa(mesh->normals[itime+0][quad->v2]);
-        const Vec3fa a3 = Vec3fa(mesh->normals[itime+0][quad->v3]);
-        const Vec3fa b0 = Vec3fa(mesh->normals[itime+1][quad->v0]);
-        const Vec3fa b1 = Vec3fa(mesh->normals[itime+1][quad->v1]);
-        const Vec3fa b2 = Vec3fa(mesh->normals[itime+1][quad->v2]);
-        const Vec3fa b3 = Vec3fa(mesh->normals[itime+1][quad->v3]);
-        const Vec3fa n0 = t0*a0 + t1*b0;
-        const Vec3fa n1 = t0*a1 + t1*b1;
-        const Vec3fa n2 = t0*a2 + t1*b2;
-        const Vec3fa n3 = t0*a3 + t1*b3;
-        if (ray.u+ray.v < 1.0f) {
-          const float u = ray.u, v = ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n0 + u*n1 + v*n3;
-        } else {
-          const float u = 1.0f-ray.u, v = 1.0f-ray.v; const float w = 1.0f-u-v;
-          dg.Ns = w*n2 + u*n3 + v*n1;
-        }
-      }
-    }
-  }
-  else if (geometry->type == SUBDIV_MESH)
-  {
-    ISPCSubdivMesh* mesh = (ISPCSubdivMesh*) geometry;
-    materialID = mesh->geom.materialID;
-
-    if (g_use_smooth_normals)
-    {
-      Vec3fa dPdu,dPdv;
-      rtcInterpolate1(mesh->geom.geometry,dg.primID,dg.u,dg.v,RTC_BUFFER_TYPE_VERTEX,0,nullptr,&dPdu.x,&dPdv.x,3);
-      dg.Ns = normalize(cross(dPdv,dPdu));
-    }
-    
-    const Vec2f st = getTextureCoordinatesSubdivMesh(mesh,dg.primID,ray.u,ray.v);
-    dg.u = st.x;
-    dg.v = st.y;
-  }
-  else if (geometry->type == GRID_MESH)
-  {
-    ISPCGridMesh* mesh = (ISPCGridMesh*) geometry;
-    materialID = mesh->geom.materialID;
-  }
-  else if (geometry->type == CURVES)
-  {
-    ISPCHairSet* mesh = (ISPCHairSet*) geometry;
-    materialID = mesh->geom.materialID;
-    
-    if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE)
-    {
-      dg.Tx = normalize(dg.Ng);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = normalize(cross(dg.Ty,dg.Tx));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE)
-    {
-      Vec3fa dp = derivBezier(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(Vec3fa(dp));
-      dg.Ty = normalize(cross(Vec3fa(dp),dg.Ng));
-      dg.Ng = dg.Ns = normalize(dg.Ng);
-      dg.eps = 1024.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE)
-    {
-      Vec3fa dp = derivBezier(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(dp);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = dg.Ns = normalize(cross(dg.Ty,dg.Tx));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE)
-    {
-      Vec3fa dp = derivBSpline(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(Vec3fa(dp));
-      dg.Ty = normalize(cross(Vec3fa(dp),dg.Ng));
-      dg.Ng = dg.Ns = normalize(dg.Ng);
-      dg.eps = 1024.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE)
-    {
-      Vec3fa dp = derivBSpline(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(dp);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = dg.Ns = normalize(cross(dg.Ty,dg.Tx));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_ROUND_HERMITE_CURVE)
-    {
-      Vec3fa dp = derivHermite(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(Vec3fa(dp));
-      dg.Ty = normalize(cross(Vec3fa(dp),dg.Ng));
-      dg.Ng = dg.Ns = normalize(dg.Ng);
-      dg.eps = 1024.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
-    }
-    else if (mesh->type == RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE)
-    {
-      Vec3fa dp = derivHermite(mesh,dg.primID,ray.u,ray.time());
-      if (reduce_max(abs(dp)) < 1E-6f) dp = Vec3fa(1,1,1);
-      dg.Tx = normalize(dp);
-      dg.Ty = normalize(cross(neg(ray.dir),dg.Tx));
-      dg.Ng = dg.Ns = normalize(cross(dg.Ty,dg.Tx));
     }
   }
   else if (geometry->type == GROUP) {
@@ -1369,7 +1092,9 @@ AffineSpace3fa calculate_interpolated_space (ISPCInstance* instance, float gtime
 
 typedef ISPCInstance* ISPCInstancePtr;
 
-inline int postIntersect(const Ray& ray, DifferentialGeometry& dg)
+inline int
+postIntersect(const Ray& ray,
+              DifferentialGeometry& dg)
 {
   dg.eps = 32.0f*1.19209e-07f*max(max(abs(dg.P.x),abs(dg.P.y)),max(abs(dg.P.z),ray.tfar));
 
@@ -1395,8 +1120,7 @@ inline int postIntersect(const Ray& ray, DifferentialGeometry& dg)
       ISPCInstance* instance = (ISPCInstancePtr) g_ispc_scene->geometries[instID];
 
       /* convert normals */
-      //AffineSpace3fa space = (1.0f-ray.time())*AffineSpace3fa(instance->space0) + ray.time()*AffineSpace3fa(instance->space1);
-      AffineSpace3fa space = calculate_interpolated_space(instance,ray.time());
+      AffineSpace3fa space = calculate_interpolated_space(instance, 0.0);
       dg.Ng = xfmVector(space,dg.Ng);
       dg.Ns = xfmVector(space,dg.Ns);
     }
@@ -1412,17 +1136,18 @@ void intersectionFilterReject(const RTCFilterFunctionNArguments* args)
   if (!valid) return;
 }
 
-void intersectionFilterOBJ(const RTCFilterFunctionNArguments* args)
+void
+intersectionFilterOBJ(const RTCFilterFunctionNArguments* args)
 {
   int* valid_i = args->valid;
   struct RTCRayHitN* _ray = (struct RTCRayHitN*)args->ray;
   struct RTCHitN* hit = args->hit;
   const unsigned int N = args->N;
-  
+
   assert(N == 1);
   bool valid = *((int*) valid_i);
   if (!valid) return;
-  
+
   const unsigned int rayID = 0;
   Ray *ray = (Ray*)_ray;
 
@@ -1458,7 +1183,7 @@ void intersectionFilterOBJ(const RTCFilterFunctionNArguments* args)
     ray->tfar   = tfar;
     // ray->instID = dg.instID;
     // ray->geomID = dg.geomID;
-    // ray->primID = dg.primID;    
+    // ray->primID = dg.primID;
     // ray->u      = dg.u;
     // ray->v      = dg.v;
     // ray->Ng     = Ng;
@@ -1472,13 +1197,13 @@ void occlusionFilterOpaque(const RTCFilterFunctionNArguments* args)
   IntersectContext* context = (IntersectContext*) args->context;
   Vec3fa* transparency = (Vec3fa*) context->userRayExt;
   if (!transparency) return;
-  
+
   int* valid_i = args->valid;
-  
+
   assert(args->N == 1);
   bool valid = *((int*) valid_i);
   if (!valid) return;
-   
+
   *transparency = Vec3fa(0.0f);
 }
 
@@ -1487,16 +1212,16 @@ void occlusionFilterOBJ(const RTCFilterFunctionNArguments* args)
   IntersectContext* context = (IntersectContext*) args->context;
   Vec3fa* transparency = (Vec3fa*) context->userRayExt;
   if (!transparency) return;
-  
+
   int* valid_i = args->valid;
   struct RTCRayHitN* _ray = (struct RTCRayHitN*)args->ray;
   struct RTCHitN* hit = args->hit;
   const unsigned int N = args->N;
-  
+
   assert(N == 1);
   bool valid = *((int*) valid_i);
   if (!valid) return;
-  
+
   const unsigned int rayID = 0;
   Ray *ray = (Ray*)_ray;
 
@@ -1540,17 +1265,17 @@ void occlusionFilterHair(const RTCFilterFunctionNArguments* args)
   IntersectContext* context = (IntersectContext*) args->context;
   Vec3fa* transparency = (Vec3fa*) context->userRayExt;
   if (!transparency) return;
-  
+
   int* valid_i = args->valid;
   struct RTCHitN* hit = args->hit;
   const unsigned int N = args->N;
-  
+
   assert(N == 1);
   bool valid = *((int*) valid_i);
   if (!valid) return;
-  
+
   const unsigned int rayID = 0;
-  
+
   unsigned int hit_geomID = RTCHitN_geomID(hit,N,rayID);
   Vec3fa Kt = Vec3fa(0.0f);
   unsigned int geomID = hit_geomID;
@@ -1573,7 +1298,11 @@ void occlusionFilterHair(const RTCFilterFunctionNArguments* args)
     valid_i[0] = 0;
 }
 
-Vec3fa renderPixelFunction(float x, float y, RandomSampler& sampler, const ISPCCamera& camera, RayStats& stats)
+Vec3fa
+renderPixelFunction(float x, float y,
+                    RandomSampler& sampler,
+                    const ISPCCamera& camera,
+                    RayStats& stats)
 {
   /* radiance accumulator and weight */
   Vec3fa L = Vec3fa(0.0f);
@@ -1583,10 +1312,11 @@ Vec3fa renderPixelFunction(float x, float y, RandomSampler& sampler, const ISPCC
 
   /* initialize ray */
   Ray ray(Vec3fa(camera.xfm.p),
-                     Vec3fa(normalize(x*camera.xfm.l.vx + y*camera.xfm.l.vy + camera.xfm.l.vz)),0.0f,inf,time);
+          Vec3fa(normalize(x * camera.xfm.l.vx + y * camera.xfm.l.vy + camera.xfm.l.vz)),
+          0.0f, inf, time);
 
   DifferentialGeometry dg;
- 
+
   /* iterative path tracer loop */
   for (int i=0; i<g_max_path_length; i++)
   {
@@ -1611,7 +1341,7 @@ Vec3fa renderPixelFunction(float x, float y, RandomSampler& sampler, const ISPCC
       for (unsigned int i=0; i<g_ispc_scene->numLights; i++)
       {
         const Light* l = g_ispc_scene->lights[i];
-        Light_EvalRes le = l->eval(l,dg,ray.dir);
+        Light_EvalRes le = l->eval(l, dg, ray.dir);
         L = L + Lw*le.value;
       }
 
@@ -1651,7 +1381,7 @@ Vec3fa renderPixelFunction(float x, float y, RandomSampler& sampler, const ISPCC
 
     /* iterate over lights */
     context.context.flags = g_iflags_incoherent;
-    for (unsigned int i=0; i<g_ispc_scene->numLights; i++)
+    for (unsigned int i = 0; i < g_ispc_scene->numLights; i++)
     {
       const Light* l = g_ispc_scene->lights[i];
       Light_SampleRes ls = l->sample(l,dg,RandomSampler_get2D(sampler));
@@ -1666,25 +1396,43 @@ Vec3fa renderPixelFunction(float x, float y, RandomSampler& sampler, const ISPCC
         L = L + Lw*ls.weight*transparency*Material__eval(material_array,materialID,numMaterials,brdf,wo,dg,ls.dir);
     }
 
-    if (wi1.pdf <= 1E-4f /* 0.0f */) break;
+    if (wi1.pdf <= 1E-4f /* 0.0f */)
+      break;
     Lw = Lw*c/wi1.pdf;
 
     /* setup secondary ray */
-    float sign = dot(wi1.v,dg.Ng) < 0.0f ? -1.0f : 1.0f;
+    float sign = dot(wi1.v, dg.Ng) < 0.0f ? -1.0f : 1.0f;
     dg.P = dg.P + sign*dg.eps*dg.Ng;
-    init_Ray(ray, dg.P,normalize(wi1.v),dg.eps,inf,time);
+
+
+    Vec3fa dir = normalize(wi1.v);
+    Vec3fa org = dg.P;
+    float tnear = dg.eps;
+    float tfar = inf;
+
+    ray = Ray(org,
+              dir,
+              tnear,
+              tfar,
+              time,
+              -1,
+              RTC_INVALID_GEOMETRY_ID,
+              RTC_INVALID_GEOMETRY_ID,
+              RTC_INVALID_GEOMETRY_ID);
   }
   return L;
 }
 
 /* task that renders a single screen tile */
-Vec3fa renderPixelStandard(float x, float y, const ISPCCamera& camera, RayStats& stats)
+Vec3fa
+renderPixelStandard(float x, float y,
+                    const ISPCCamera& camera, RayStats& stats)
 {
   RandomSampler sampler;
 
   Vec3fa L = Vec3fa(0.0f);
 
-  for (int i=0; i<g_spp; i++)
+  for (int i = 0; i < g_spp; i++)
   {
     RandomSampler_init(sampler, (int)x, (int)y, g_accu_count*g_spp+i);
 
@@ -1795,7 +1543,7 @@ void updateEdgeLevels(ISPCScene* scene_in, const Vec3fa& cam_pos)
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       updateEdgeLevelBufferTask((int)i,threadIndex,mesh,cam_pos);
-  }); 
+  });
 #else
     updateEdgeLevelBuffer(mesh,cam_pos,0,mesh->numFaces);
 #endif
@@ -1871,7 +1619,7 @@ extern "C" void device_render (int* pixels,
     const int threadIndex = (int)TaskScheduler::threadIndex();
     for (size_t i=range.begin(); i<range.end(); i++)
       renderTileTask((int)i,threadIndex,pixels,width,height,time,camera,numTilesX,numTilesY);
-  }); 
+  });
   //rtcDebug();
 } // device_render
 

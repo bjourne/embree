@@ -39,7 +39,7 @@ IF (WIN32)
   )
 
 ELSE (WIN32)
-  
+
   FIND_PACKAGE(PkgConfig REQUIRED)
   PKG_SEARCH_MODULE(GLFW QUIET glfw3)
   IF (NOT GLFW_FOUND)
@@ -58,31 +58,9 @@ INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR} ${GLFW_INCLUDE_DIRS})
 
 ADD_SUBDIRECTORY(common)
 
-ADD_SUBDIRECTORY(verify)
-ADD_SUBDIRECTORY(triangle_geometry)
-ADD_SUBDIRECTORY(dynamic_scene)
-ADD_SUBDIRECTORY(user_geometry)
 ADD_SUBDIRECTORY(viewer)
-ADD_SUBDIRECTORY(instanced_geometry)
-ADD_SUBDIRECTORY(intersection_filter)
 ADD_SUBDIRECTORY(pathtracer)
-ADD_SUBDIRECTORY(hair_geometry)
-ADD_SUBDIRECTORY(subdivision_geometry)
-ADD_SUBDIRECTORY(displacement_geometry)
-ADD_SUBDIRECTORY(grid_geometry)
-ADD_SUBDIRECTORY(bvh_builder)
-ADD_SUBDIRECTORY(lazy_geometry)
-ADD_SUBDIRECTORY(bvh_access)
-ADD_SUBDIRECTORY(motion_blur_geometry)
-ADD_SUBDIRECTORY(interpolation)
-ADD_SUBDIRECTORY(convert)
-ADD_SUBDIRECTORY(curve_geometry)
-ADD_SUBDIRECTORY(point_geometry)
-ADD_SUBDIRECTORY(buildbench)
 
 IF (EMBREE_RAY_PACKETS)
   ADD_SUBDIRECTORY(viewer_stream)
-  ADD_SUBDIRECTORY(viewer_anim)
 ENDIF()
-
-

@@ -79,9 +79,10 @@ Light_SampleRes PointLight_sample(const Light* super,
   return res;
 }
 
-Light_EvalRes PointLight_eval(const Light* super,
-                              const DifferentialGeometry& dg,
-                              const Vec3fa& dir)
+Light_EvalRes
+PointLight_eval(const Light* super,
+                const DifferentialGeometry& dg,
+                const Vec3fa& dir)
 {
   const PointLight* self = (PointLight*)super;
   Light_EvalRes res;

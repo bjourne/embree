@@ -14,6 +14,7 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
+#include "../geometry/triangle.h"
 #include "bvh_statistics.h"
 #include "../../common/algorithms/parallel_reduce.h"
 
@@ -25,7 +26,7 @@ namespace embree
     double A = max(0.0f,bvh->getLinearBounds().expectedHalfArea());
     stat = statistics(bvh->root,A,BBox1f(0.0f,1.0f));
   }
-  
+
   template<int N>
   std::string BVHNStatistics<N>::str()
   {
@@ -40,17 +41,15 @@ namespace embree
     stream << "#bytes/prim = " << std::setw(6) << std::setprecision(2) << double(totalBytes)/double(bvh->numPrimitives) << std::endl;
     if (stat.statAlignedNodes.numNodes    ) stream << "  alignedNodes     : "  << stat.statAlignedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statUnalignedNodes.numNodes  ) stream << "  unalignedNodes   : "  << stat.statUnalignedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
-    if (stat.statAlignedNodesMB.numNodes  ) stream << "  alignedNodesMB   : "  << stat.statAlignedNodesMB.toString(bvh,totalSAH,totalBytes) << std::endl;
-    if (stat.statAlignedNodesMB4D.numNodes) stream << "  alignedNodesMB4D : "  << stat.statAlignedNodesMB4D.toString(bvh,totalSAH,totalBytes) << std::endl;
-    if (stat.statUnalignedNodesMB.numNodes) stream << "  unalignedNodesMB : "  << stat.statUnalignedNodesMB.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (stat.statQuantizedNodes.numNodes  ) stream << "  quantizedNodes   : "  << stat.statQuantizedNodes.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (true)                               stream << "  leaves           : "  << stat.statLeaf.toString(bvh,totalSAH,totalBytes) << std::endl;
     if (true)                               stream << "    histogram      : "  << stat.statLeaf.histToString() << std::endl;
     return stream.str();
   }
-  
+
   template<int N>
-  typename BVHNStatistics<N>::Statistics BVHNStatistics<N>::statistics(NodeRef node, const double A, const BBox1f t0t1)
+  typename BVHNStatistics<N>::Statistics
+  BVHNStatistics<N>::statistics(NodeRef node, const double A, const BBox1f t0t1)
   {
     Statistics s;
     assert(t0t1.size() > 0.0f);
@@ -61,7 +60,7 @@ namespace embree
       s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
           if (n->child(i) == BVH::emptyNode) return Statistics();
           const double Ai = max(0.0f,halfArea(n->extend(i)));
-          Statistics s = statistics(n->child(i),Ai,t0t1); 
+          Statistics s = statistics(n->child(i),Ai,t0t1);
           s.statAlignedNodes.numChildren++;
           return s;
         }, Statistics::add);
@@ -75,70 +74,12 @@ namespace embree
       s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
           if (n->child(i) == BVH::emptyNode) return Statistics();
           const double Ai = max(0.0f,halfArea(n->extent(i)));
-          Statistics s = statistics(n->child(i),Ai,t0t1); 
+          Statistics s = statistics(n->child(i),Ai,t0t1);
           s.statUnalignedNodes.numChildren++;
           return s;
         }, Statistics::add);
       s.statUnalignedNodes.numNodes++;
       s.statUnalignedNodes.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isAlignedNodeMB())
-    {
-      AlignedNodeMB* n = node.alignedNodeMB();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const double Ai = max(0.0f,n->expectedHalfArea(i,t0t1));
-          Statistics s = statistics(n->child(i),Ai,t0t1);
-          s.statAlignedNodesMB.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statAlignedNodesMB.numNodes++;
-      s.statAlignedNodesMB.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isAlignedNodeMB4D())
-    {
-      AlignedNodeMB4D* n = node.alignedNodeMB4D();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const BBox1f t0t1i = intersect(t0t1,n->timeRange(i));
-          assert(!t0t1i.empty());
-          const double Ai = n->AlignedNodeMB::expectedHalfArea(i,t0t1i);
-          Statistics s =  statistics(n->child(i),Ai,t0t1i);
-          s.statAlignedNodesMB4D.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statAlignedNodesMB4D.numNodes++;
-      s.statAlignedNodesMB4D.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isUnalignedNodeMB())
-    {
-      UnalignedNodeMB* n = node.unalignedNodeMB();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const double Ai = max(0.0f,halfArea(n->extent0(i)));
-          Statistics s = statistics(n->child(i),Ai,t0t1); 
-          s.statUnalignedNodesMB.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statUnalignedNodesMB.numNodes++;
-      s.statUnalignedNodesMB.nodeSAH += dt*A;
-      s.depth++;
-    }
-    else if (node.isQuantizedNode())
-    {
-      QuantizedNode* n = node.quantizedNode();
-      s = s + parallel_reduce(0,N,Statistics(),[&] ( const int i ) {
-          if (n->child(i) == BVH::emptyNode) return Statistics();
-          const double Ai = max(0.0f,halfArea(n->extent(i)));
-          Statistics s = statistics(n->child(i),Ai,t0t1); 
-          s.statQuantizedNodes.numChildren++;
-          return s;
-        }, Statistics::add);
-      s.statQuantizedNodes.numNodes++;
-      s.statQuantizedNodes.nodeSAH += dt*A;
       s.depth++;
     }
     else if (node.isLeaf())
@@ -148,9 +89,9 @@ namespace embree
       {
         for (size_t i=0; i<num; i++)
         {
-          const size_t bytes = bvh->primTy->getBytes(tri);
-          s.statLeaf.numPrimsActive += bvh->primTy->sizeActive(tri);
-          s.statLeaf.numPrimsTotal += bvh->primTy->sizeTotal(tri);
+          const size_t bytes = sizeof(TriangleM<4>);
+          s.statLeaf.numPrimsActive += ((TriangleM<4>*)tri)->size();
+          s.statLeaf.numPrimsTotal += 4;
           s.statLeaf.numBytes += bytes;
           tri+=bytes;
         }
@@ -166,7 +107,7 @@ namespace embree
       throw std::runtime_error("not supported node type in bvh_statistics");
     }
     return s;
-  } 
+  }
 
 #if defined(__AVX__)
   template class BVHNStatistics<8>;

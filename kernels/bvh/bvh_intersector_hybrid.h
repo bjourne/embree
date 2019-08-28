@@ -23,7 +23,7 @@
 
 namespace embree
 {
-  namespace isa 
+  namespace isa
   {
     template<int K, bool robust>
     struct TravRayK;
@@ -36,13 +36,12 @@ namespace embree
       static const size_t Nx = types == BVH_AN1 ? vextend<N>::size : N;
 
       /* shortcuts for frequently used types */
-      typedef typename PrimitiveIntersectorK::Precalculations Precalculations;
       typedef typename PrimitiveIntersectorK::Primitive Primitive;
       typedef BVHN<N> BVH;
       typedef typename BVH::NodeRef NodeRef;
       typedef typename BVH::BaseNode BaseNode;
       typedef typename BVH::AlignedNode AlignedNode;
-      
+
       static const size_t stackSizeSingle = 1+(N-1)*BVH::maxDepth+3; // +3 due to 16-wide store
       static const size_t stackSizeChunk = 1+(N-1)*BVH::maxDepth;
 
@@ -53,9 +52,14 @@ namespace embree
       0;
 
     private:
-      static void intersect1(Accel::Intersectors* This, const BVH* bvh, NodeRef root, size_t k, Precalculations& pre,
-                             RayHitK<K>& ray, const TravRayK<K, robust>& tray, IntersectContext* context);
-      static bool occluded1(Accel::Intersectors* This, const BVH* bvh, NodeRef root, size_t k, Precalculations& pre,
+      static void
+      intersect1(Accel::Intersectors* This,
+                 const BVH* bvh,
+                 NodeRef root,
+                 size_t k,
+                 RayHitK<K>& ray, const TravRayK<K, robust>& tray, IntersectContext* context);
+      static bool
+      occluded1(Accel::Intersectors* This, const BVH* bvh, NodeRef root, size_t k,
                             RayK<K>& ray, const TravRayK<K, robust>& tray, IntersectContext* context);
 
     public:

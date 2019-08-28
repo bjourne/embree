@@ -20,12 +20,14 @@
 #include "../common/ray.h"
 #include "../common/hit.h"
 #include "../common/context.h"
+#include "../common/accelset.h"
 
 namespace embree
 {
   namespace isa
   {
-    __forceinline bool runIntersectionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
+    __forceinline bool
+    runIntersectionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
     {
       if (geometry->intersectionFilterN)
       {
@@ -35,7 +37,7 @@ namespace embree
         if (args->valid[0] == 0)
           return false;
       }
-            
+
       if (context->user->filter) {
         assert(context->scene->hasContextFilterFunction());
         context->user->filter(args);
@@ -43,12 +45,16 @@ namespace embree
         if (args->valid[0] == 0)
           return false;
       }
-      
+
       copyHitToRay(*(RayHit*)args->ray,*(Hit*)args->hit);
       return true;
     }
-    
-    __forceinline bool runIntersectionFilter1(const Geometry* const geometry, RayHit& ray, IntersectContext* context, Hit& hit)
+
+    __forceinline bool
+    runIntersectionFilter1(const Geometry* const geometry,
+                           RayHit& ray,
+                           IntersectContext* context,
+                           Hit& hit)
     {
       RTCFilterFunctionNArguments args;
       int mask = -1;
@@ -70,7 +76,7 @@ namespace embree
         assert(context->scene->hasGeometryFilterFunction());
         geometry->intersectionFilterN(filter_args);
       }
-      
+
       //if (args->valid[0] == 0)
       //  return;
 
@@ -80,8 +86,11 @@ namespace embree
       }
 #endif
     }
-    
-    __forceinline bool runOcclusionFilter1Helper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
+
+    __forceinline bool
+    runOcclusionFilter1Helper(RTCFilterFunctionNArguments* args,
+                              const Geometry* const geometry,
+                              IntersectContext* context)
     {
       if (geometry->occlusionFilterN)
       {
@@ -91,7 +100,7 @@ namespace embree
         if (args->valid[0] == 0)
           return false;
       }
-      
+
       if (context->user->filter) {
         assert(context->scene->hasContextFilterFunction());
         context->user->filter(args);
@@ -124,10 +133,10 @@ namespace embree
         assert(context->scene->hasGeometryFilterFunction());
         geometry->occlusionFilterN(filter_args);
       }
-      
+
       //if (args->valid[0] == 0)
       //  return false;
-      
+
       if (context->user->filter) {
         assert(context->scene->hasContextFilterFunction());
         context->user->filter(filter_args);
@@ -136,7 +145,10 @@ namespace embree
     }
 
     template<int K>
-      __forceinline vbool<K> runIntersectionFilterHelper(RTCFilterFunctionNArguments* args, const Geometry* const geometry, IntersectContext* context)
+      __forceinline vbool<K>
+    runIntersectionFilterHelper(RTCFilterFunctionNArguments* args,
+                                const Geometry* const geometry,
+                                IntersectContext* context)
     {
       vint<K>* mask = (vint<K>*) args->valid;
       if (geometry->intersectionFilterN)
@@ -155,13 +167,18 @@ namespace embree
 
       valid_o = *mask != vint<K>(zero);
       if (none(valid_o)) return valid_o;
-      
+
       copyHitToRay(valid_o,*(RayHitK<K>*)args->ray,*(HitK<K>*)args->hit);
       return valid_o;
     }
-    
+
     template<int K>
-    __forceinline vbool<K> runIntersectionFilter(const vbool<K>& valid, const Geometry* const geometry, RayHitK<K>& ray, IntersectContext* context, HitK<K>& hit)
+    __forceinline vbool<K>
+    runIntersectionFilter(const vbool<K>& valid,
+                          const Geometry* const geometry,
+                          RayHitK<K>& ray,
+                          IntersectContext* context,
+                          HitK<K>& hit)
     {
       RTCFilterFunctionNArguments args;
       vint<K> mask = valid.mask32();
@@ -185,7 +202,7 @@ namespace embree
       }
 
       vbool<K> valid_o = *mask != vint<K>(zero);
-      
+
       if (none(valid_o)) return valid_o;
 
       if (context->user->filter) {

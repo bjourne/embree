@@ -203,7 +203,13 @@ namespace embree
   template<typename T> __forceinline T       rcp_length( const Vec3<T>& a )                  { return rsqrt(dot(a,a)); }
   template<typename T> __forceinline Vec3<T> normalize( const Vec3<T>& a )                   { return a*rsqrt(dot(a,a)); }
   template<typename T> __forceinline T       distance ( const Vec3<T>& a, const Vec3<T>& b ) { return length(a-b); }
-  template<typename T> __forceinline Vec3<T> cross    ( const Vec3<T>& a, const Vec3<T>& b ) { return Vec3<T>(msub(a.y,b.z,a.z*b.y), msub(a.z,b.x,a.x*b.z), msub(a.x,b.y,a.y*b.x)); }
+  template<typename T> __forceinline
+  Vec3<T> cross(const Vec3<T>& a, const Vec3<T>& b)
+  {
+    return Vec3<T>(msub(a.y,b.z,a.z*b.y),
+                   msub(a.z,b.x,a.x*b.z),
+                   msub(a.x,b.y,a.y*b.x));
+  }
 
   template<typename T> __forceinline Vec3<T> stable_triangle_normal( const Vec3<T>& a, const Vec3<T>& b, const Vec3<T>& c )
   {
@@ -278,11 +284,17 @@ namespace embree
 namespace embree
 {
   template<typename Out, typename In>
-  __forceinline Vec3<Out> broadcast(const Vec3<In>& a, const size_t k) {
+  __forceinline Vec3<Out>
+  broadcast(const Vec3<In>& a, const size_t k)
+  {
     return Vec3<Out>(Out(a.x[k]), Out(a.y[k]), Out(a.z[k]));
   }
 
-  template<> __forceinline Vec3<float>::Vec3(const Vec3fa& a) { x = a.x; y = a.y; z = a.z; }
+  template<> __forceinline
+  Vec3<float>::Vec3(const Vec3fa& a)
+  {
+    x = a.x; y = a.y; z = a.z;
+  }
 
 #if defined(__AVX__)
   template<> __forceinline Vec3<vfloat4>::Vec3(const Vec3fa& a) {
@@ -336,8 +348,12 @@ namespace embree
   }
 
   template<int i0, int i1, int i2, int i3>
-  __forceinline Vec3<vfloat8> shuffle(const Vec3<vfloat8>& b) {
-    return Vec3<vfloat8>(shuffle<i0,i1,i2,i3>(b.x), shuffle<i0,i1,i2,i3>(b.y), shuffle<i0,i1,i2,i3>(b.z));
+  __forceinline Vec3<vfloat8>
+  shuffle(const Vec3<vfloat8>& b)
+  {
+    return Vec3<vfloat8>(shuffle<i0,i1,i2,i3>(b.x),
+                         shuffle<i0,i1,i2,i3>(b.y),
+                         shuffle<i0,i1,i2,i3>(b.z));
   }
 #endif
 

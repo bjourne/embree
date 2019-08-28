@@ -20,7 +20,6 @@
 #include "../common/isa.h"
 #include "../common/accel.h"
 #include "../common/scene.h"
-#include "../geometry/curve_intersector_virtual.h"
 
 namespace embree
 {
@@ -28,7 +27,12 @@ namespace embree
   class BVHFactory
   {
   public:
-    enum class BuildVariant     { STATIC, DYNAMIC, HIGH_QUALITY };
+    enum class BuildVariant
+    {
+      STATIC,
+      DYNAMIC,
+      HIGH_QUALITY
+    };
     enum class IntersectVariant { FAST, ROBUST };
   };
 }

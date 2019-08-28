@@ -23,7 +23,10 @@
 #define TILE_SIZE_Y 8
 
 /* vertex and triangle layout */
-struct Vertex   { float x,y,z,r;  }; // FIXME: rename to Vertex4f
+struct Vertex
+{
+  float x,y,z,r;
+}; // FIXME: rename to Vertex4f
 struct Triangle { int v0, v1, v2; };
 
 /* include embree API */
@@ -158,12 +161,17 @@ inline void RayStats_addShadowRay(RayStats& stats) {}
 
 extern "C" RayStats* g_stats;
 
+  // Weird float sizes...
 inline bool nativePacketSupported(RTCDevice device)
 {
-  if (sizeof(float) == 1*4) return true;
-  else if (sizeof(float) == 4*4) return rtcGetDeviceProperty(device,RTC_DEVICE_PROPERTY_NATIVE_RAY4_SUPPORTED);
-  else if (sizeof(float) == 8*4) return rtcGetDeviceProperty(device,RTC_DEVICE_PROPERTY_NATIVE_RAY8_SUPPORTED);
-  else if (sizeof(float) == 16*4) return rtcGetDeviceProperty(device,RTC_DEVICE_PROPERTY_NATIVE_RAY16_SUPPORTED);
+  if (sizeof(float) == 1*4)
+    return true;
+  else if (sizeof(float) == 4*4)
+    return rtcGetDeviceProperty(device,RTC_DEVICE_PROPERTY_NATIVE_RAY4_SUPPORTED);
+  else if (sizeof(float) == 8*4)
+    return rtcGetDeviceProperty(device,RTC_DEVICE_PROPERTY_NATIVE_RAY8_SUPPORTED);
+  else if (sizeof(float) == 16*4)
+    return rtcGetDeviceProperty(device,RTC_DEVICE_PROPERTY_NATIVE_RAY16_SUPPORTED);
   else return false;
 }
 

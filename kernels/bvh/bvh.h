@@ -21,7 +21,6 @@
 #include "../common/accel.h"
 #include "../common/device.h"
 #include "../common/scene.h"
-#include "../geometry/primitive.h"
 #include "../common/ray.h"
 
 namespace embree
@@ -49,38 +48,6 @@ namespace embree
     BVH_QN1 = BVH_FLAG_QUANTIZED_NODE
   };
 
-  /* BVH node reference with bounds */
-  template<typename NodeRef>
-  struct BVHNodeRecord
-  {
-    __forceinline BVHNodeRecord() {}
-    __forceinline BVHNodeRecord(NodeRef ref, const BBox3fa& bounds) : ref(ref), bounds(bounds) {}
-
-    NodeRef ref;
-    BBox3fa bounds;
-  };
-
-  template<typename NodeRef>
-  struct BVHNodeRecordMB
-  {
-    __forceinline BVHNodeRecordMB() {}
-    __forceinline BVHNodeRecordMB(NodeRef ref, const LBBox3fa& lbounds) : ref(ref), lbounds(lbounds) {}
-
-    NodeRef ref;
-    LBBox3fa lbounds;
-  };
-
-  template<typename NodeRef>
-  struct BVHNodeRecordMB4D
-  {
-    __forceinline BVHNodeRecordMB4D() {}
-    __forceinline BVHNodeRecordMB4D(NodeRef ref, const LBBox3fa& lbounds, const BBox1f& dt) : ref(ref), lbounds(lbounds), dt(dt) {}
-
-    NodeRef ref;
-    LBBox3fa lbounds;
-    BBox1f dt;
-  };
-
   /*! Multi BVH with N children. Each node stores the bounding box of
    * it's N children as well as N child references. */
   template<int N>
@@ -93,10 +60,7 @@ namespace embree
     struct NodeRef;
     struct BaseNode;
     struct AlignedNode;
-    struct AlignedNodeMB;
-    struct AlignedNodeMB4D;
     struct UnalignedNode;
-    struct UnalignedNodeMB;
     struct QuantizedNode;
 
     /*! Number of bytes the nodes and primitives are minimally aligned to.*/
@@ -108,7 +72,7 @@ namespace embree
 
     /*! Masks the bits that store the number of items per leaf. */
     static const size_t align_mask = byteAlignment-1;
-    static const size_t items_mask = byteAlignment-1;
+    static const size_t items_mask = byteAlignment - 1;
 
     /*! different supported node types */
     static const size_t tyAlignedNode = 0;
@@ -131,8 +95,8 @@ namespace embree
     static const size_t maxBuildDepthLeaf = maxBuildDepth+8;
     static const size_t maxDepth = 2*maxBuildDepthLeaf; // 2x because of two level builder
 
-    /*! Maximum number of primitive blocks in a leaf. */
-    static const size_t maxLeafBlocks = items_mask-tyLeaf;
+    /*! Maximum number of primitive blocks in a leaf. 15 - 8 = 7 */
+    static const size_t maxLeafBlocks = items_mask - tyLeaf;
 
   public:
 
@@ -302,17 +266,8 @@ namespace embree
       /*! checks if this is a node */
       __forceinline int isAlignedNode() const { return (ptr & (size_t)align_mask) == tyAlignedNode; }
 
-      /*! checks if this is a motion blur node */
-      __forceinline int isAlignedNodeMB() const { return (ptr & (size_t)align_mask) == tyAlignedNodeMB; }
-
-      /*! checks if this is a 4D motion blur node */
-      __forceinline int isAlignedNodeMB4D() const { return (ptr & (size_t)align_mask) == tyAlignedNodeMB4D; }
-
       /*! checks if this is a node with unaligned bounding boxes */
       __forceinline int isUnalignedNode() const { return (ptr & (size_t)align_mask) == tyUnalignedNode; }
-
-      /*! checks if this is a motion blur node with unaligned bounding boxes */
-      __forceinline int isUnalignedNodeMB() const { return (ptr & (size_t)align_mask) == tyUnalignedNodeMB; }
 
       /*! checks if this is a quantized node */
       __forceinline int isQuantizedNode() const { return (ptr & (size_t)align_mask) == tyQuantizedNode; }
@@ -333,32 +288,28 @@ namespace embree
       __forceinline       AlignedNode* alignedNode()       { assert(isAlignedNode()); return (      AlignedNode*)ptr; }
       __forceinline const AlignedNode* alignedNode() const { assert(isAlignedNode()); return (const AlignedNode*)ptr; }
 
-      /*! returns motion blur node pointer */
-      __forceinline       AlignedNodeMB* alignedNodeMB()       { assert(isAlignedNodeMB() || isAlignedNodeMB4D()); return (      AlignedNodeMB*)(ptr & ~(size_t)align_mask); }
-      __forceinline const AlignedNodeMB* alignedNodeMB() const { assert(isAlignedNodeMB() || isAlignedNodeMB4D()); return (const AlignedNodeMB*)(ptr & ~(size_t)align_mask); }
-
-      /*! returns 4D motion blur node pointer */
-      __forceinline       AlignedNodeMB4D* alignedNodeMB4D()       { assert(isAlignedNodeMB4D()); return (      AlignedNodeMB4D*)(ptr & ~(size_t)align_mask); }
-      __forceinline const AlignedNodeMB4D* alignedNodeMB4D() const { assert(isAlignedNodeMB4D()); return (const AlignedNodeMB4D*)(ptr & ~(size_t)align_mask); }
-
       /*! returns unaligned node pointer */
       __forceinline       UnalignedNode* unalignedNode()       { assert(isUnalignedNode()); return (      UnalignedNode*)(ptr & ~(size_t)align_mask); }
       __forceinline const UnalignedNode* unalignedNode() const { assert(isUnalignedNode()); return (const UnalignedNode*)(ptr & ~(size_t)align_mask); }
 
-      /*! returns unaligned motion blur node pointer */
-      __forceinline       UnalignedNodeMB* unalignedNodeMB()       { assert(isUnalignedNodeMB()); return (      UnalignedNodeMB*)(ptr & ~(size_t)align_mask); }
-      __forceinline const UnalignedNodeMB* unalignedNodeMB() const { assert(isUnalignedNodeMB()); return (const UnalignedNodeMB*)(ptr & ~(size_t)align_mask); }
-
       /*! returns quantized node pointer */
-      __forceinline       QuantizedNode* quantizedNode()       { assert(isQuantizedNode()); return (      QuantizedNode*)(ptr  & ~(size_t)align_mask ); }
-      __forceinline const QuantizedNode* quantizedNode() const { assert(isQuantizedNode()); return (const QuantizedNode*)(ptr  & ~(size_t)align_mask ); }
+    __forceinline       QuantizedNode* quantizedNode()
+    {
+      assert(isQuantizedNode());
+      return (      QuantizedNode*)(ptr  & ~(size_t)align_mask );
+    }
+    __forceinline const QuantizedNode* quantizedNode() const {
+      assert(isQuantizedNode());
+      return (const QuantizedNode*)(ptr  & ~(size_t)align_mask );
+    }
 
-      /*! returns leaf pointer */
-      __forceinline char* leaf(size_t& num) const {
-        assert(isLeaf());
-        num = (ptr & (size_t)items_mask)-tyLeaf;
-        return (char*)(ptr & ~(size_t)align_mask);
-      }
+    /*! returns leaf pointer */
+    __forceinline char* leaf(size_t& num) const
+    {
+      assert(isLeaf());
+      num = (ptr & (size_t)items_mask)-tyLeaf;
+      return (char*)(ptr & ~(size_t)align_mask);
+    }
 
       /*! clear all bit flags */
       __forceinline void clearFlags() {
@@ -372,11 +323,7 @@ namespace embree
       size_t ptr;
     };
 
-    typedef BVHNodeRecord<NodeRef>     NodeRecord;
-    typedef BVHNodeRecordMB<NodeRef>   NodeRecordMB;
-    typedef BVHNodeRecordMB4D<NodeRef> NodeRecordMB4D;
-
-    /*! BVHN Base Node */
+  /*! BVHN Base Node */
     struct BaseNode
     {
       /*! Clears the node. */
@@ -570,381 +517,11 @@ namespace embree
       vfloat<N> upper_z;           //!< Z dimension of upper bounds of all N children.
     };
 
-    /*! Motion Blur AlignedNode */
-    struct AlignedNodeMB : public BaseNode
-    {
-      using BaseNode::children;
-
-      struct Create
-      {
-        __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc) const
-        {
-          AlignedNodeMB* node = (AlignedNodeMB*) alloc.malloc0(sizeof(AlignedNodeMB),byteNodeAlignment); node->clear();
-          return BVHN::encodeNode(node);
-        }
-      };
-
-      struct Set
-      {
-        __forceinline void operator() (NodeRef node, size_t i, const NodeRecordMB4D& child) const {
-          node.alignedNodeMB()->set(i,child);
-        }
-      };
-
-      struct Create2
-      {
-        template<typename BuildRecord>
-        __forceinline NodeRef operator() (BuildRecord* children, const size_t num, const FastAllocator::CachedAllocator& alloc) const
-        {
-          AlignedNodeMB* node = (AlignedNodeMB*) alloc.malloc0(sizeof(AlignedNodeMB),byteNodeAlignment); node->clear();
-          return encodeNode(node);
-        }
-      };
-
-      struct Set2
-      { 
-        template<typename BuildRecord>
-        __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
-        {
-          AlignedNodeMB* node = ref.alignedNodeMB();
-          
-          LBBox3fa bounds = empty;
-          for (size_t i=0; i<num; i++) {
-            node->setRef(i,children[i].ref);
-            node->setBounds(i,children[i].lbounds);
-            bounds.extend(children[i].lbounds);
-          }
-          return NodeRecordMB(ref,bounds);
-        }
-      };
-
-      struct Set2TimeRange
-      {
-        __forceinline Set2TimeRange(BBox1f tbounds) : tbounds(tbounds) {}
-
-        template<typename BuildRecord>
-        __forceinline NodeRecordMB operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRecordMB* children, const size_t num) const
-        {
-          AlignedNodeMB* node = ref.alignedNodeMB();
-
-          LBBox3fa bounds = empty;
-          for (size_t i=0; i<num; i++) {
-            node->setRef(i, children[i].ref);
-            node->setBounds(i, children[i].lbounds, tbounds);
-            bounds.extend(children[i].lbounds);
-          }
-          return NodeRecordMB(ref,bounds);
-        }
-
-        BBox1f tbounds;
-      };
-
-      /*! Clears the node. */
-      __forceinline void clear()  {
-        lower_x = lower_y = lower_z = vfloat<N>(nan);
-        upper_x = upper_y = upper_z = vfloat<N>(nan);
-        lower_dx = lower_dy = lower_dz = vfloat<N>(nan); // initialize with NAN and update during refit
-        upper_dx = upper_dy = upper_dz = vfloat<N>(nan);
-        BaseNode::clear();
-      }
-
-      /*! Sets ID of child. */
-      __forceinline void setRef(size_t i, NodeRef ref) {
-        children[i] = ref;
-      }
-
-      /*! Sets bounding box of child. */
-      __forceinline void setBounds(size_t i, const BBox3fa& bounds0_i, const BBox3fa& bounds1_i)
-      {
-        /*! for empty bounds we have to avoid inf-inf=nan */
-        BBox3fa bounds0(min(bounds0_i.lower,Vec3fa(+FLT_MAX)),max(bounds0_i.upper,Vec3fa(-FLT_MAX)));
-        BBox3fa bounds1(min(bounds1_i.lower,Vec3fa(+FLT_MAX)),max(bounds1_i.upper,Vec3fa(-FLT_MAX)));
-        bounds0 = bounds0.enlarge_by(4.0f*float(ulp));
-        bounds1 = bounds1.enlarge_by(4.0f*float(ulp));
-        Vec3fa dlower = bounds1.lower-bounds0.lower;
-        Vec3fa dupper = bounds1.upper-bounds0.upper;
-        
-        lower_x[i] = bounds0.lower.x; lower_y[i] = bounds0.lower.y; lower_z[i] = bounds0.lower.z;
-        upper_x[i] = bounds0.upper.x; upper_y[i] = bounds0.upper.y; upper_z[i] = bounds0.upper.z;
-
-        lower_dx[i] = dlower.x; lower_dy[i] = dlower.y; lower_dz[i] = dlower.z;
-        upper_dx[i] = dupper.x; upper_dy[i] = dupper.y; upper_dz[i] = dupper.z;
-      }
-
-      /*! Sets bounding box of child. */
-      __forceinline void setBounds(size_t i, const LBBox3fa& bounds) {
-        setBounds(i, bounds.bounds0, bounds.bounds1);
-      }
-
-      /*! Sets bounding box of child. */
-      __forceinline void setBounds(size_t i, const LBBox3fa& bounds, const BBox1f& tbounds) {
-        setBounds(i, bounds.global(tbounds));
-      }
-
-      /*! Sets bounding box and ID of child. */
-      __forceinline void set(size_t i, NodeRef ref, const BBox3fa& bounds) {
-        lower_x[i] = bounds.lower.x; lower_y[i] = bounds.lower.y; lower_z[i] = bounds.lower.z;
-        upper_x[i] = bounds.upper.x; upper_y[i] = bounds.upper.y; upper_z[i] = bounds.upper.z;
-        children[i] = ref;
-      }
-
-      /*! Sets bounding box and ID of child. */
-      __forceinline void set(size_t i, const NodeRecordMB4D& child)
-      {
-        setRef(i, child.ref);
-        setBounds(i, child.lbounds, child.dt);
-      }
-
-      /*! tests if the node has valid bounds */
-      __forceinline bool hasBounds() const {
-        return lower_dx.i[0] != cast_f2i(float(nan));
-      }
-
-      /*! Return bounding box for time 0 */
-      __forceinline BBox3fa bounds0(size_t i) const {
-        return BBox3fa(Vec3fa(lower_x[i],lower_y[i],lower_z[i]),
-                       Vec3fa(upper_x[i],upper_y[i],upper_z[i]));
-      }
-
-      /*! Return bounding box for time 1 */
-      __forceinline BBox3fa bounds1(size_t i) const {
-        return BBox3fa(Vec3fa(lower_x[i]+lower_dx[i],lower_y[i]+lower_dy[i],lower_z[i]+lower_dz[i]),
-                       Vec3fa(upper_x[i]+upper_dx[i],upper_y[i]+upper_dy[i],upper_z[i]+upper_dz[i]));
-      }
-
-      /*! Returns bounds of node. */
-      __forceinline BBox3fa bounds() const {
-        return BBox3fa(Vec3fa(reduce_min(min(lower_x,lower_x+lower_dx)),
-                              reduce_min(min(lower_y,lower_y+lower_dy)),
-                              reduce_min(min(lower_z,lower_z+lower_dz))),
-                       Vec3fa(reduce_max(max(upper_x,upper_x+upper_dx)),
-                              reduce_max(max(upper_y,upper_y+upper_dy)),
-                              reduce_max(max(upper_z,upper_z+upper_dz))));
-      }
-
-      /*! Return bounding box of child i */
-      __forceinline BBox3fa bounds(size_t i) const {
-        return merge(bounds0(i),bounds1(i));
-      }
-
-      /*! Return linear bounding box of child i */
-      __forceinline LBBox3fa lbounds(size_t i) const {
-        return LBBox3fa(bounds0(i),bounds1(i));
-      }
-
-      /*! Return bounding box of child i at specified time */
-      __forceinline BBox3fa bounds(size_t i, float time) const {
-        return lerp(bounds0(i),bounds1(i),time);
-      }
-
-      /*! Returns the expected surface area when randomly sampling the time. */
-      __forceinline float expectedHalfArea(size_t i) const {
-        return lbounds(i).expectedHalfArea();
-      }
-
-      /*! Returns the expected surface area when randomly sampling the time. */
-      __forceinline float expectedHalfArea(size_t i, const BBox1f& t0t1) const {
-        return lbounds(i).expectedHalfArea(t0t1); 
-      }
-
-      /*! swap two children of the node */
-      __forceinline void swap(size_t i, size_t j)
-      {
-        assert(i<N && j<N);
-        std::swap(children[i],children[j]);
-
-        std::swap(lower_x[i],lower_x[j]);
-        std::swap(upper_x[i],upper_x[j]);
-        std::swap(lower_y[i],lower_y[j]);
-        std::swap(upper_y[i],upper_y[j]);
-        std::swap(lower_z[i],lower_z[j]);
-        std::swap(upper_z[i],upper_z[j]);
-
-        std::swap(lower_dx[i],lower_dx[j]);
-        std::swap(upper_dx[i],upper_dx[j]);
-        std::swap(lower_dy[i],lower_dy[j]);
-        std::swap(upper_dy[i],upper_dy[j]);
-        std::swap(lower_dz[i],lower_dz[j]);
-        std::swap(upper_dz[i],upper_dz[j]);
-      }
-
-      /*! Returns reference to specified child */
-      __forceinline       NodeRef& child(size_t i)       { assert(i<N); return children[i]; }
-      __forceinline const NodeRef& child(size_t i) const { assert(i<N); return children[i]; }
-
-      /*! stream output operator */
-      friend std::ostream& operator<<(std::ostream& cout, const AlignedNodeMB& n) 
-      {
-        cout << "AlignedNodeMB {" << std::endl;
-        for (size_t i=0; i<N; i++) 
-        {
-          const BBox3fa b0 = n.bounds0(i);
-          const BBox3fa b1 = n.bounds1(i);
-          cout << "  child" << i << " { " << std::endl;
-          cout << "    bounds0 = " << b0 << ", " << std::endl;
-          cout << "    bounds1 = " << b1 << ", " << std::endl;
-          cout << "  }";
-        }
-        cout << "}";
-        return cout;
-  }
-
-    public:
-      vfloat<N> lower_x;        //!< X dimension of lower bounds of all N children.
-      vfloat<N> upper_x;        //!< X dimension of upper bounds of all N children.
-      vfloat<N> lower_y;        //!< Y dimension of lower bounds of all N children.
-      vfloat<N> upper_y;        //!< Y dimension of upper bounds of all N children.
-      vfloat<N> lower_z;        //!< Z dimension of lower bounds of all N children.
-      vfloat<N> upper_z;        //!< Z dimension of upper bounds of all N children.
-
-      vfloat<N> lower_dx;        //!< X dimension of lower bounds of all N children.
-      vfloat<N> upper_dx;        //!< X dimension of upper bounds of all N children.
-      vfloat<N> lower_dy;        //!< Y dimension of lower bounds of all N children.
-      vfloat<N> upper_dy;        //!< Y dimension of upper bounds of all N children.
-      vfloat<N> lower_dz;        //!< Z dimension of lower bounds of all N children.
-      vfloat<N> upper_dz;        //!< Z dimension of upper bounds of all N children.
-    };
-
-    /*! Aligned 4D Motion Blur Node */
-    struct AlignedNodeMB4D : public AlignedNodeMB
-    {
-      using BaseNode::children;
-      using AlignedNodeMB::set;
-      using AlignedNodeMB::bounds;
-      using AlignedNodeMB::lower_x;
-      using AlignedNodeMB::lower_y;
-      using AlignedNodeMB::lower_z;
-      using AlignedNodeMB::upper_x;
-      using AlignedNodeMB::upper_y;
-      using AlignedNodeMB::upper_z;
-      using AlignedNodeMB::lower_dx;
-      using AlignedNodeMB::lower_dy;
-      using AlignedNodeMB::lower_dz;
-      using AlignedNodeMB::upper_dx;
-      using AlignedNodeMB::upper_dy;
-      using AlignedNodeMB::upper_dz;
-
-      struct Create
-      {
-        __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc, bool hasTimeSplits = true) const
-        {
-          if (hasTimeSplits)
-          {
-            AlignedNodeMB4D* node = (AlignedNodeMB4D*) alloc.malloc0(sizeof(AlignedNodeMB4D),byteNodeAlignment); node->clear();
-            return encodeNode(node);
-          }
-          else
-          {
-            AlignedNodeMB* node = (AlignedNodeMB*) alloc.malloc0(sizeof(AlignedNodeMB),byteNodeAlignment); node->clear();
-            return encodeNode(node);
-          }
-        }
-      };
-
-      struct Set
-      {
-        __forceinline void operator() (NodeRef ref, size_t i, const NodeRecordMB4D& child) const
-        {
-          if (likely(ref.isAlignedNodeMB())) {
-            ref.alignedNodeMB()->set(i, child);
-          } else {
-            ref.alignedNodeMB4D()->set(i, child);
-          }
-        }
-      };
-
-      /*! Clears the node. */
-      __forceinline void clear()  {
-        lower_t = vfloat<N>(pos_inf);
-        upper_t = vfloat<N>(neg_inf);
-        AlignedNodeMB::clear();
-      }
-
-      /*! Sets bounding box of child. */
-      __forceinline void setBounds(size_t i, const BBox3fa& bounds0_i, const BBox3fa& bounds1_i)
-      {
-        /*! for empty bounds we have to avoid inf-inf=nan */
-        BBox3fa bounds0(min(bounds0_i.lower,Vec3fa(+FLT_MAX)),max(bounds0_i.upper,Vec3fa(-FLT_MAX)));
-        BBox3fa bounds1(min(bounds1_i.lower,Vec3fa(+FLT_MAX)),max(bounds1_i.upper,Vec3fa(-FLT_MAX)));
-        bounds0 = bounds0.enlarge_by(4.0f*float(ulp));
-        bounds1 = bounds1.enlarge_by(4.0f*float(ulp));
-        Vec3fa dlower = bounds1.lower-bounds0.lower;
-        Vec3fa dupper = bounds1.upper-bounds0.upper;
-        
-        lower_x[i] = bounds0.lower.x; lower_y[i] = bounds0.lower.y; lower_z[i] = bounds0.lower.z;
-        upper_x[i] = bounds0.upper.x; upper_y[i] = bounds0.upper.y; upper_z[i] = bounds0.upper.z;
-
-        lower_dx[i] = dlower.x; lower_dy[i] = dlower.y; lower_dz[i] = dlower.z;
-        upper_dx[i] = dupper.x; upper_dy[i] = dupper.y; upper_dz[i] = dupper.z;
-      }
-
-      /*! Sets bounding box of child. */
-      __forceinline void setBounds(size_t i, const LBBox3fa& bounds) {
-        setBounds(i, bounds.bounds0, bounds.bounds1);
-      }
-
-      /*! Sets bounding box of child. */
-      __forceinline void setBounds(size_t i, const LBBox3fa& bounds, const BBox1f& tbounds)
-      {
-        setBounds(i, bounds.global(tbounds));
-        lower_t[i] = tbounds.lower;
-        upper_t[i] = tbounds.upper == 1.0f ? 1.0f+float(ulp) : tbounds.upper;
-      }
-
-      /*! Sets bounding box and ID of child. */
-      __forceinline void set(size_t i, NodeRef childID, const LBBox3fa& bounds, const BBox1f& tbounds) 
-      {
-        AlignedNodeMB::setRef(i,childID);
-        setBounds(i, bounds, tbounds);
-      }
-
-      /*! Sets bounding box and ID of child. */
-      __forceinline void set(size_t i, const NodeRecordMB4D& child) {
-        set(i, child.ref, child.lbounds, child.dt);
-      }
-
-      /*! Returns reference to specified child */
-      __forceinline       NodeRef& child(size_t i)       { assert(i<N); return children[i]; }
-      __forceinline const NodeRef& child(size_t i) const { assert(i<N); return children[i]; }
-
-      /*! Returns the expected surface area when randomly sampling the time. */
-      __forceinline float expectedHalfArea(size_t i) const {
-        return AlignedNodeMB::lbounds(i).expectedHalfArea(timeRange(i));
-      }
-
-      /*! returns time range for specified child */
-      __forceinline BBox1f timeRange(size_t i) const {
-        return BBox1f(lower_t[i],upper_t[i]);
-      }
-
-      /*! stream output operator */
-      friend std::ostream& operator<<(std::ostream& cout, const AlignedNodeMB4D& n) 
-      {
-        cout << "AlignedNodeMB4D {" << std::endl;
-        for (size_t i=0; i<N; i++) 
-        {
-          const BBox3fa b0 = n.bounds0(i);
-          const BBox3fa b1 = n.bounds1(i);
-          cout << "  child" << i << " { " << std::endl;
-          cout << "    bounds0 = " << lerp(b0,b1,n.lower_t[i]) << ", " << std::endl;
-          cout << "    bounds1 = " << lerp(b0,b1,n.upper_t[i]) << ", " << std::endl;
-          cout << "    time_bounds = " << n.lower_t[i] << ", " << n.upper_t[i] << std::endl;
-          cout << "  }";
-        }
-        cout << "}";
-        return cout;
-      }
-
-    public:
-      vfloat<N> lower_t;        //!< time dimension of lower bounds of all N children
-      vfloat<N> upper_t;        //!< time dimension of upper bounds of all N children
-    };
-
     /*! Node with unaligned bounds */
     struct UnalignedNode : public BaseNode
     {
       using BaseNode::children;
-      
+
       struct Create
       {
         __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc) const
@@ -1028,86 +605,6 @@ namespace embree
       AffineSpace3vf<N> naabb;   //!< non-axis aligned bounding boxes (bounds are [0,1] in specified space)
     };
 
-    struct UnalignedNodeMB : public BaseNode
-    {
-      using BaseNode::children;
-
-      struct Create
-      {
-        __forceinline NodeRef operator() (const FastAllocator::CachedAllocator& alloc) const
-        {
-          UnalignedNodeMB* node = (UnalignedNodeMB*) alloc.malloc0(sizeof(UnalignedNodeMB),byteNodeAlignment); node->clear();
-          return encodeNode(node);
-        }
-      };
-
-      struct Set
-      {
-        __forceinline void operator() (NodeRef node, size_t i, NodeRef child, const LinearSpace3fa& space, const LBBox3fa& lbounds, const BBox1f dt) const {
-          node.unalignedNodeMB()->setRef(i,child);
-          node.unalignedNodeMB()->setBounds(i,space,lbounds.global(dt));
-        }
-      };
-
-      /*! Clears the node. */
-      __forceinline void clear()
-      {
-        space0 = one;
-        //b0.lower = b0.upper = Vec3fa(nan);
-        b1.lower = b1.upper = Vec3fa(nan);
-        BaseNode::clear();
-      }
-
-      /*! Sets space and bounding boxes. */
-      __forceinline void setBounds(size_t i, const AffineSpace3fa& space, const LBBox3fa& lbounds) {
-        setBounds(i,space,lbounds.bounds0,lbounds.bounds1);
-      }
-
-      /*! Sets space and bounding boxes. */
-      __forceinline void setBounds(size_t i, const AffineSpace3fa& s0, const BBox3fa& a, const BBox3fa& c)
-      {
-        assert(i < N);
-
-        AffineSpace3fa space = s0;
-        space.p -= a.lower;
-        Vec3fa scale = 1.0f/max(Vec3fa(1E-19f),a.upper-a.lower);
-        space = AffineSpace3fa::scale(scale)*space;
-        BBox3fa a1((a.lower-a.lower)*scale,(a.upper-a.lower)*scale);
-        BBox3fa c1((c.lower-a.lower)*scale,(c.upper-a.lower)*scale);
-
-        space0.l.vx.x[i] = space.l.vx.x; space0.l.vx.y[i] = space.l.vx.y; space0.l.vx.z[i] = space.l.vx.z;
-        space0.l.vy.x[i] = space.l.vy.x; space0.l.vy.y[i] = space.l.vy.y; space0.l.vy.z[i] = space.l.vy.z;
-        space0.l.vz.x[i] = space.l.vz.x; space0.l.vz.y[i] = space.l.vz.y; space0.l.vz.z[i] = space.l.vz.z;
-        space0.p   .x[i] = space.p   .x; space0.p   .y[i] = space.p   .y; space0.p   .z[i] = space.p   .z;
-
-        /*b0.lower.x[i] = a1.lower.x; b0.lower.y[i] = a1.lower.y; b0.lower.z[i] = a1.lower.z;
-          b0.upper.x[i] = a1.upper.x; b0.upper.y[i] = a1.upper.y; b0.upper.z[i] = a1.upper.z;*/
-
-        b1.lower.x[i] = c1.lower.x; b1.lower.y[i] = c1.lower.y; b1.lower.z[i] = c1.lower.z;
-        b1.upper.x[i] = c1.upper.x; b1.upper.y[i] = c1.upper.y; b1.upper.z[i] = c1.upper.z;
-      }
-
-      /*! Sets ID of child. */
-      __forceinline void setRef(size_t i, const NodeRef& ref) {
-        assert(i < N);
-        children[i] = ref;
-      }
-
-      /*! Returns the extent of the bounds of the ith child */
-      __forceinline Vec3fa extent0(size_t i) const {
-        assert(i < N);
-        const Vec3fa vx(space0.l.vx.x[i],space0.l.vx.y[i],space0.l.vx.z[i]);
-        const Vec3fa vy(space0.l.vy.x[i],space0.l.vy.y[i],space0.l.vy.z[i]);
-        const Vec3fa vz(space0.l.vz.x[i],space0.l.vz.y[i],space0.l.vz.z[i]);
-        return rsqrt(vx*vx + vy*vy + vz*vz);
-      }
-
-    public:
-      AffineSpace3vf<N> space0;
-      //BBox3vf<N> b0; // these are the unit bounds
-      BBox3vf<N> b1;
-    };
-
     /*! BVHN Quantized Node */
     struct __aligned(8) QuantizedBaseNode
     {
@@ -1120,7 +617,7 @@ namespace embree
         for (size_t i=0; i<N; i++) lower_x[i] = lower_y[i] = lower_z[i] = MAX_QUAN;
         for (size_t i=0; i<N; i++) upper_x[i] = upper_y[i] = upper_z[i] = MIN_QUAN;
       }
-      
+
       /*! Returns bounds of specified child. */
       __forceinline BBox3fa bounds(size_t i) const
       {
@@ -1214,7 +711,7 @@ namespace embree
 #if defined(__AVX512F__)
       __forceinline vfloat16 dequantizeLowerUpperX(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_x),p)),scale.x,vfloat16(start.x)); }
       __forceinline vfloat16 dequantizeLowerUpperY(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_y),p)),scale.y,vfloat16(start.y)); }
-      __forceinline vfloat16 dequantizeLowerUpperZ(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_z),p)),scale.z,vfloat16(start.z)); }      
+      __forceinline vfloat16 dequantizeLowerUpperZ(const vint16 &p) const { return madd(vfloat16(permute(vint<16>::loadu(lower_z),p)),scale.z,vfloat16(start.z)); }
 #endif
 
       union {
@@ -1279,21 +776,21 @@ namespace embree
           }
           QuantizedNode *qnode = (QuantizedNode*) alloc.malloc0(sizeof(QuantizedNode), byteAlignment);
           qnode->init(node);
-          
+
           return (size_t)qnode | tyQuantizedNode;
         }
       };
 
-      struct Set2
-      {
-        template<typename BuildRecord>
-        __forceinline NodeRef operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRef* children, const size_t num) const
-        {
-          QuantizedNode* node = ref.quantizedNode();
-          for (size_t i=0; i<num; i++) node->setRef(i,children[i]);
-          return ref;
-        }
-      };
+      // struct Set2
+      // {
+      //   template<typename BuildRecord>
+      //   __forceinline NodeRef operator() (const BuildRecord& precord, const BuildRecord* crecords, NodeRef ref, NodeRef* children, const size_t num) const
+      //   {
+      //     QuantizedNode* node = ref.quantizedNode();
+      //     for (size_t i=0; i<num; i++) node->setRef(i,children[i]);
+      //     return ref;
+      //   }
+      // };
 
       __forceinline void init(AlignedNode& node)
       {
@@ -1302,68 +799,6 @@ namespace embree
       }
 
     };
-
-
-    /*! BVHN Quantized Node */
-    struct __aligned(8) QuantizedBaseNodeMB
-    {
-      QuantizedBaseNode node0;
-      QuantizedBaseNode node1;
-
-      /*! Clears the node. */
-      __forceinline void clear() {
-        node0.clear();
-        node1.clear();
-      }
-      
-      /*! Returns bounds of specified child. */
-      __forceinline BBox3fa bounds(size_t i) const
-      {
-        assert(i < N);
-        BBox3fa bounds0 = node0.bounds(i);
-        BBox3fa bounds1 = node1.bounds(i);
-        bounds0.extend(bounds1);
-        return bounds0;
-      }
-
-      /*! Returns extent of bounds of specified child. */
-      __forceinline Vec3fa extent(size_t i) const {
-        return bounds(i).size();
-      }
-
-      __forceinline vbool<N> validMask() const { return node0.validMask(); }
-
-      template<typename T>
-      __forceinline vfloat<N> dequantizeLowerX(const T t) const { return lerp(node0.dequantizeLowerX(),node1.dequantizeLowerX(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeUpperX(const T t) const { return lerp(node0.dequantizeUpperX(),node1.dequantizeUpperX(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeLowerY(const T t) const { return lerp(node0.dequantizeLowerY(),node1.dequantizeLowerY(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeUpperY(const T t) const { return lerp(node0.dequantizeUpperY(),node1.dequantizeUpperY(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeLowerZ(const T t) const { return lerp(node0.dequantizeLowerZ(),node1.dequantizeLowerZ(),t); }
-      template<typename T>
-      __forceinline vfloat<N> dequantizeUpperZ(const T t) const { return lerp(node0.dequantizeUpperZ(),node1.dequantizeUpperZ(),t); }
-
-
-      template<int M>
-        __forceinline vfloat<M> dequantizeLowerX(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeLowerX()[i]),vfloat<M>(node1.dequantizeLowerX()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeUpperX(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeUpperX()[i]),vfloat<M>(node1.dequantizeUpperX()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeLowerY(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeLowerY()[i]),vfloat<M>(node1.dequantizeLowerY()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeUpperY(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeUpperY()[i]),vfloat<M>(node1.dequantizeUpperY()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeLowerZ(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeLowerZ()[i]),vfloat<M>(node1.dequantizeLowerZ()[i]),t); }
-      template<int M>
-        __forceinline vfloat<M> dequantizeUpperZ(const size_t i, const vfloat<M> &t) const { return lerp(vfloat<M>(node0.dequantizeUpperZ()[i]),vfloat<M>(node1.dequantizeUpperZ()[i]),t); }
-
-
-
-    };
-
 
     /*! swap the children of two nodes */
     __forceinline static void swap(AlignedNode* a, size_t i, AlignedNode* b, size_t j)
@@ -1398,30 +833,10 @@ namespace embree
       }
     }
 
-    /*! compacts a node (moves empty children to the end) */
-    __forceinline static void compact(AlignedNodeMB* a)
-    {
-      /* find right most filled node */
-      ssize_t j=N;
-      for (j=j-1; j>=0; j--)
-        if (a->child(j) != emptyNode)
-          break;
-
-      /* replace empty nodes with filled nodes */
-      for (ssize_t i=0; i<j; i++) {
-        if (a->child(i) == emptyNode) {
-          a->swap(i,j);
-          for (j=j-1; j>i; j--)
-            if (a->child(j) != emptyNode)
-              break;
-        }
-      }
-    }
-
   public:
 
     /*! BVHN default constructor. */
-    BVHN (const PrimitiveType& primTy, Scene* scene);
+    BVHN (Scene* scene);
 
     /*! BVHN destruction */
     ~BVHN ();
@@ -1437,7 +852,9 @@ namespace embree
 
     /*! lays out num large nodes of the BVH */
     void layoutLargeNodes(size_t num);
-    NodeRef layoutLargeNodesRecursion(NodeRef& node, const FastAllocator::CachedAllocator& allocator);
+    NodeRef
+    layoutLargeNodesRecursion(NodeRef& node,
+                              const FastAllocator::CachedAllocator& allocator);
 
     /*! called by all builders before build starts */
     double preBuild(const std::string& builderName);
@@ -1449,8 +866,8 @@ namespace embree
     struct Allocator {
       BVHN* bvh;
       Allocator (BVHN* bvh) : bvh(bvh) {}
-      __forceinline void* operator() (size_t bytes) const { 
-        return bvh->alloc._threadLocal()->malloc(&bvh->alloc,bytes); 
+      __forceinline void* operator() (size_t bytes) const {
+        return bvh->alloc._threadLocal()->malloc(&bvh->alloc,bytes);
       }
     };
 
@@ -1471,38 +888,9 @@ namespace embree
       return NodeRef((size_t) node);
     }
 
-    static __forceinline unsigned int encodeQuantizedNode(size_t base, size_t node) {
-      assert(!((size_t)node & align_mask));
-      ssize_t node_offset = (ssize_t)node-(ssize_t)base;
-      assert(node_offset != 0);
-      assert((int64_t)node_offset >= -int64_t(0x80000000) && (int64_t)node_offset <= (int64_t)0x7fffffff);
-      return (unsigned int)node_offset | tyQuantizedNode;
-    }
-
-    static __forceinline int encodeQuantizedLeaf(size_t base, size_t node) {
-      ssize_t leaf_offset = (ssize_t)node-(ssize_t)base;
-      assert((int64_t)leaf_offset >= -int64_t(0x80000000) && (int64_t)leaf_offset <= (int64_t)0x7fffffff);
-      return (int)leaf_offset;
-    }
-
-    static __forceinline NodeRef encodeNode(AlignedNodeMB* node) {
-      assert(!((size_t)node & align_mask));
-      return NodeRef((size_t) node | tyAlignedNodeMB);
-    }
-
-    static __forceinline NodeRef encodeNode(AlignedNodeMB4D* node) {
-      assert(!((size_t)node & align_mask));
-      return NodeRef((size_t) node | tyAlignedNodeMB4D);
-    }
-
     /*! Encodes an unaligned node */
     static __forceinline NodeRef encodeNode(UnalignedNode* node) {
       return NodeRef((size_t) node | tyUnalignedNode);
-    }
-
-    /*! Encodes an unaligned motion blur node */
-    static __forceinline NodeRef encodeNode(UnalignedNodeMB* node) {
-      return NodeRef((size_t) node | tyUnalignedNodeMB);
     }
 
     /*! Encodes a leaf */
@@ -1517,10 +905,6 @@ namespace embree
       assert(!((size_t)ptr & align_mask));
       return NodeRef((size_t)ptr | (tyLeaf+ty));
     }
-
-    /*! bvh type information */
-  public:
-    const PrimitiveType* primTy;       //!< primitive type stored in the BVH
 
     /*! bvh data */
   public:
@@ -1537,15 +921,18 @@ namespace embree
     /*! data arrays for special builders */
   public:
     std::vector<BVHN*> objects;
-    vector_t<char,aligned_allocator<char,32>> subdiv_patches;
   };
 
   template<>
-  __forceinline void BVHN<4>::AlignedNode::bounds(BBox<vfloat4>& bounds0, BBox<vfloat4>& bounds1, BBox<vfloat4>& bounds2, BBox<vfloat4>& bounds3) const {
-    transpose(lower_x,lower_y,lower_z,vfloat4(zero),bounds0.lower,bounds1.lower,bounds2.lower,bounds3.lower);
-    transpose(upper_x,upper_y,upper_z,vfloat4(zero),bounds0.upper,bounds1.upper,bounds2.upper,bounds3.upper);
+  __forceinline void BVHN<4>::AlignedNode::bounds(BBox<vfloat4>& bounds0,
+                                                  BBox<vfloat4>& bounds1,
+                                                  BBox<vfloat4>& bounds2,
+                                                  BBox<vfloat4>& bounds3) const {
+    transpose(lower_x, lower_y, lower_z, vfloat4(zero),
+              bounds0.lower,bounds1.lower,bounds2.lower,bounds3.lower);
+    transpose(upper_x,upper_y,upper_z,vfloat4(zero),
+              bounds0.upper,bounds1.upper,bounds2.upper,bounds3.upper);
   }
-
   typedef BVHN<4> BVH4;
   typedef BVHN<8> BVH8;
 }
