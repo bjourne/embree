@@ -130,6 +130,7 @@ intersect1RayMTris(Vec3vf<M> o, Vec3vf<M> d,
     if (u >= 0 && v >= 0 && u + v <= 1 && tn0 < t && t <= tf0) {
       if (!any_hit) {
         new (&hit) MTHit<M>();
+        hit.valid = false;
         any_hit = true;
       }
       float nx, ny, nz;

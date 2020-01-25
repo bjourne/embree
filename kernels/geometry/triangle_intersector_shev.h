@@ -160,6 +160,7 @@ intersect1RayMTris(const Vec3vf<M>& o, const Vec3vf<M>& d,
                   &u, &v, &t, &nx, &ny, &nz)) {
       if (!any_hit) {
         new (&hit) MTHit<M>();
+        hit.valid = false;
         any_hit = true;
       }
       set(hit.valid, i);
